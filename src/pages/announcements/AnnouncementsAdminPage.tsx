@@ -20,12 +20,10 @@ import { AnnouncementApiService } from "src/shared/api/AnnouncementApiService"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
-import { hasPermission } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
 import classes from "./AnnouncementsAdminPage.module.scss"
-
-const ADMIN_ROLES = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"]
+import { hasAccess } from "src/pages/heatmap/lib/roles"
 
 type AnnouncementFormValues = {
     title: string
@@ -36,23 +34,21 @@ type AnnouncementFormValues = {
 
 export const AnnouncementsAdminPage: React.FC = () => {
     const { user } = useContext(UserContext)
-    const navigate = useNavigate()
     const intl = useIntl()
     const queryClient = useQueryClient()
+    const navigate = useNavigate()
 
     setDocumentTitleByLocale("pages.announcements.admin.title")
 
     useEffect(() => {
-        if (!hasPermission(user, ADMIN_ROLES)) {
+        if (!hasAccess(user)) {
             navigate("/unauthorized", { replace: true })
         }
     }, [user, navigate])
 
     const requiredMessage = { message: intl.formatMessage({ id: "pages.announcements.admin.required" }) }
-    const minMessage = (count: number) =>
-        intl.formatMessage({ id: "pages.user-list.min-letters" }, { count })
-    const maxMessage = (count: number) =>
-        intl.formatMessage({ id: "pages.user-list.max-letters" }, { count })
+    const minMessage = (count: number) => intl.formatMessage({ id: "pages.user-list.min-letters" }, { count })
+    const maxMessage = (count: number) => intl.formatMessage({ id: "pages.user-list.max-letters" }, { count })
 
     const validationSchema = useMemo(
         () =>
@@ -230,7 +226,10 @@ export const AnnouncementsAdminPage: React.FC = () => {
                             ]}
                             {...form.getInputProps("audience")}
                             onChange={(value) => {
-                                form.setFieldValue("audience", (value as AnnouncementAudience) || AnnouncementAudience.All)
+                                form.setFieldValue(
+                                    "audience",
+                                    (value as AnnouncementAudience) || AnnouncementAudience.All
+                                )
                                 if (value !== AnnouncementAudience.Program) {
                                     form.setFieldValue("programCode", null)
                                 }
