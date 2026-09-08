@@ -1,6 +1,6 @@
 import { Avatar, CloseButton, Combobox, Flex, InputBase, Loader, Text, useCombobox } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconUser } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import React, { ReactNode, useEffect, useState } from "react"

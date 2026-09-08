@@ -1,5 +1,5 @@
 import { Avatar, Tooltip } from "@mantine/core"
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { useIntl } from "react-intl"
 
 export const ApplicationAssigneeAvatar = ({ login, user }: { login?: string | null; user?: UserInfoDto }) => {

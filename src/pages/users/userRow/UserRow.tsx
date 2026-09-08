@@ -9,7 +9,7 @@ import { locales } from "src/pages/users/lib/locales"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import React, { useEffect, useState } from "react"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { NavigateFunction } from "react-router"
 import { IDBadge } from "src/shared/ui/badges/IDBadge"
 

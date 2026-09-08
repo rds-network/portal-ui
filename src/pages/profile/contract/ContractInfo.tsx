@@ -1,5 +1,5 @@
 import { Button, Flex, Text } from "@mantine/core"
-import { ContractDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { ContractDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconContract, IconPencil } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { useContext, useState } from "react"
@@ -62,7 +62,11 @@ export const ContractInfo = ({ contracts, userInfo }: ContractInfoProps) => {
                             value={<FormattedMessage id={`common.contract-type.${getLastContract(contracts).type}`} />}
                         />
                     </Flex>
-                    <Text className={classes.daysLeft} c={daysLeft < 0 ? "red" : undefined} fw={daysLeft < 0 ? 700 : 400}>
+                    <Text
+                        className={classes.daysLeft}
+                        c={daysLeft < 0 ? "red" : undefined}
+                        fw={daysLeft < 0 ? 700 : 400}
+                    >
                         {daysLeft < 0 ? (
                             <FormattedMessage id={locales.expired} />
                         ) : (
@@ -71,11 +75,7 @@ export const ContractInfo = ({ contracts, userInfo }: ContractInfoProps) => {
                     </Text>
                     {userInfo.id === currentUser?.id && (
                         <TooltipLocalized text={locales.prolongationInfo} position="bottom">
-                            <Button
-                                variant="light"
-                                onClick={() => navigate("/application")}
-                                disabled={daysLeft > 90}
-                            >
+                            <Button variant="light" onClick={() => navigate("/application")} disabled={daysLeft > 90}>
                                 <FormattedMessage id={locales.prolongation} />
                             </Button>
                         </TooltipLocalized>

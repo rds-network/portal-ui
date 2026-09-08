@@ -1,5 +1,5 @@
 import { Container, Flex, SimpleGrid, Skeleton } from "@mantine/core"
-import { ResidencePermitDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { ResidencePermitDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { useQuery } from "@tanstack/react-query"
 import { useContext, useEffect, useState } from "react"
 import { useIntl } from "react-intl"

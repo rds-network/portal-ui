@@ -1,5 +1,5 @@
 import { Badge, Box, Button, Drawer, Flex, ScrollArea, Text, Title } from "@mantine/core"
-import { AnnouncementDto } from "@russian-rs/portal-api-axios"
+import { AnnouncementDto } from "@rds-network/portal-api-axios"
 import { IconBell } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"

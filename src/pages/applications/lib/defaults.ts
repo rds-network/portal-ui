@@ -1,4 +1,4 @@
-import { ApplicationsFilter, PageRequest, PageResponse } from "@russian-rs/portal-api-axios"
+import { ApplicationsFilter, PageRequest, PageResponse } from "@rds-network/portal-api-axios"
 
 export const UNASSIGNED_ASSIGNEE = "__unassigned__"
 

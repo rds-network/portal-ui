@@ -1,6 +1,6 @@
 import { Badge, Button, Flex, Pagination, Text, Title } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
-import { PageRequest, ReportFilter } from "@russian-rs/portal-api-axios"
+import { PageRequest, ReportFilter } from "@rds-network/portal-api-axios"
 import {
     IconCalendarWeek,
     IconChevronRight,

@@ -3,7 +3,7 @@ import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import { GenderEnumDto, UserInfoDto, UserInfoUpdateRequest } from "@russian-rs/portal-api-axios"
+import { GenderEnumDto, UserInfoDto, UserInfoUpdateRequest } from "@rds-network/portal-api-axios"
 import {
     IconBrandTelegram,
     IconBuildings,

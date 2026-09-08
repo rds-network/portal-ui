@@ -1,4 +1,4 @@
-import { ApplicationDto, ApplicationPageResponse } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, ApplicationPageResponse } from "@rds-network/portal-api-axios"
 import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query"
 import { PrivateApplicationApiService } from "./PrivateApplicationApiService"
 

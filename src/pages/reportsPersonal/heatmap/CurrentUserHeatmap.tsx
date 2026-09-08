@@ -1,6 +1,6 @@
 import { Box, Flex, HoverCard, Loader, Text, Title } from "@mantine/core"
 import { IconCalendarWeek, IconClockHour4 } from "@tabler/icons-react"
-import { HeatMapItem, VolunteerHeatMapItem } from "@russian-rs/portal-api-axios"
+import { HeatMapItem, VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React from "react"

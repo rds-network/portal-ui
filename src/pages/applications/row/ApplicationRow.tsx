@@ -1,5 +1,5 @@
 import { Box, Card, Flex, Table, Text, Tooltip, UnstyledButton } from "@mantine/core"
-import { ApplicationDto, ContractDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, ContractDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconMessageCircle } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { MouseEvent, ReactNode } from "react"

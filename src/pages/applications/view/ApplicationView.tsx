@@ -1,6 +1,6 @@
 import { Blockquote, Button, Divider, Flex, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import { ApplicationDto, ContractDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, ContractDto } from "@rds-network/portal-api-axios"
 import {
     IconArrowRight,
     IconAt,

@@ -1,5 +1,5 @@
 import { ActionIcon, Avatar, Flex, Text } from "@mantine/core"
-import { NoteDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { NoteDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconTrashX } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
 import dayjs from "dayjs"

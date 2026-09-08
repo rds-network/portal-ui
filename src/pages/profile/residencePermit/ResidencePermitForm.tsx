@@ -13,7 +13,7 @@ import {
 } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
-import { ResidencePermitDto } from "@russian-rs/portal-api-axios"
+import { ResidencePermitDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconDeviceFloppy, IconEye, IconId, IconTrash } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { useState } from "react"
@@ -101,11 +101,7 @@ export const ResidencePermitForm = ({
                 <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     {/* Левая колонка */}
                     <Flex direction="column" gap="sm">
-                        <TextInput
-                            label={labels.nationality}
-                            withAsterisk
-                            {...form.getInputProps("nationality")}
-                        />
+                        <TextInput label={labels.nationality} withAsterisk {...form.getInputProps("nationality")} />
 
                         <TextInput
                             label={labels.regNo}
@@ -123,11 +119,7 @@ export const ResidencePermitForm = ({
                             {...form.getInputProps("validUntil")}
                         />
 
-                        <TextInput
-                            label={labels.purposeOfStay}
-                            withAsterisk
-                            {...form.getInputProps("purposeOfStay")}
-                        />
+                        <TextInput label={labels.purposeOfStay} withAsterisk {...form.getInputProps("purposeOfStay")} />
 
                         <Textarea label={labels.note} {...form.getInputProps("note")} />
                     </Flex>
@@ -156,11 +148,7 @@ export const ResidencePermitForm = ({
                             {...form.getInputProps("issuingAuthority")}
                         />
 
-                        <TextInput
-                            label={labels.stateOfBirth}
-                            withAsterisk
-                            {...form.getInputProps("stateOfBirth")}
-                        />
+                        <TextInput label={labels.stateOfBirth} withAsterisk {...form.getInputProps("stateOfBirth")} />
                     </Flex>
                 </SimpleGrid>
 

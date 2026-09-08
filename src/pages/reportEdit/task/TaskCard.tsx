@@ -13,7 +13,7 @@ import {
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { FormValidationResult } from "@mantine/form/lib/types"
-import { FileInfoDto, TaskDto } from "@russian-rs/portal-api-axios"
+import { FileInfoDto, TaskDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconChecklist, IconClock, IconLanguage, IconLink, IconTrashX } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { createRef, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"

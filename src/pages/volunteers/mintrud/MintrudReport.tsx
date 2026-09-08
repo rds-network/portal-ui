@@ -9,7 +9,7 @@ import { hasPermission } from "src/shared/user/roles"
 import { locales } from "../lib/locales"
 import { allowedRoles } from "../lib/roles"
 import { StatisticsApiService } from "src/shared/api/StatisticsApiService"
-import type { ProgramStatItem, Statistics } from "@russian-rs/portal-api-axios"
+import type { ProgramStatItem, Statistics } from "@rds-network/portal-api-axios"
 import classes from "./MintrudReport.module.scss"
 import { FinalUsersChart, VolunteersCharts } from "./MintrudCharts"
 import { IconListCheck } from "@tabler/icons-react"
@@ -90,7 +90,6 @@ export default function MintrudReport() {
 
     return (
         <Flex direction="column">
-
             <Flex className={classes.root} direction="column" gap={16}>
                 <Text className={classes.title}>
                     <FormattedMessage id={locales.titleMintrud} />

@@ -1,6 +1,6 @@
 import { ActionIcon, Alert, Anchor, Avatar, Badge, Button, Flex, Loader, Text, Textarea } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { ReportDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { ReportDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import {
     IconCalendar,
     IconCheck,

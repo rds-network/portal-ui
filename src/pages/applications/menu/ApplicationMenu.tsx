@@ -1,5 +1,5 @@
 import { ActionIcon, Menu } from "@mantine/core"
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto } from "@rds-network/portal-api-axios"
 import { IconDotsVertical, IconEye, IconMail } from "@tabler/icons-react"
 import { useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"

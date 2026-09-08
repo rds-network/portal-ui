@@ -1,6 +1,6 @@
 import { notifications } from "@mantine/notifications"
 import fontkit from "@pdf-lib/fontkit"
-import { ApplicationDto, GenderEnumDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, GenderEnumDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import { saveAs } from "file-saver"
 import { PDFDocument, rgb } from "pdf-lib"

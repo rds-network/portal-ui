@@ -1,6 +1,6 @@
 import { Anchor, Badge, Button, Flex, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { TaskDto } from "@russian-rs/portal-api-axios"
+import { TaskDto } from "@rds-network/portal-api-axios"
 import {
     IconArrowLeft,
     IconCircleCheck,

@@ -1,5 +1,5 @@
 import { Combobox, Flex, InputBase, Text, Tooltip, useCombobox } from "@mantine/core"
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto } from "@rds-network/portal-api-axios"
 import { ReactNode, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { DenyReasonModal } from "src/shared/ui/denyReasonModal/DenyReasonModal"

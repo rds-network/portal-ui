@@ -2,7 +2,7 @@ import { Button, Card, Flex, Select, Text, TextInput, Title } from "@mantine/cor
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
-import { AnnouncementAudience, AnnouncementCreateRequest } from "@russian-rs/portal-api-axios"
+import { AnnouncementAudience, AnnouncementCreateRequest } from "@rds-network/portal-api-axios"
 import { IconSend } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Highlight from "@tiptap/extension-highlight"
@@ -49,10 +49,8 @@ export const AnnouncementsAdminPage: React.FC = () => {
     }, [user, navigate])
 
     const requiredMessage = { message: intl.formatMessage({ id: "pages.announcements.admin.required" }) }
-    const minMessage = (count: number) =>
-        intl.formatMessage({ id: "pages.user-list.min-letters" }, { count })
-    const maxMessage = (count: number) =>
-        intl.formatMessage({ id: "pages.user-list.max-letters" }, { count })
+    const minMessage = (count: number) => intl.formatMessage({ id: "pages.user-list.min-letters" }, { count })
+    const maxMessage = (count: number) => intl.formatMessage({ id: "pages.user-list.max-letters" }, { count })
 
     const validationSchema = useMemo(
         () =>
@@ -230,7 +228,10 @@ export const AnnouncementsAdminPage: React.FC = () => {
                             ]}
                             {...form.getInputProps("audience")}
                             onChange={(value) => {
-                                form.setFieldValue("audience", (value as AnnouncementAudience) || AnnouncementAudience.All)
+                                form.setFieldValue(
+                                    "audience",
+                                    (value as AnnouncementAudience) || AnnouncementAudience.All
+                                )
                                 if (value !== AnnouncementAudience.Program) {
                                     form.setFieldValue("programCode", null)
                                 }

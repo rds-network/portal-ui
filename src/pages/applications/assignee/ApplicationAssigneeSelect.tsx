@@ -1,5 +1,5 @@
 import { Avatar, Flex, Select, Text } from "@mantine/core"
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto } from "@rds-network/portal-api-axios"
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { useIntl } from "react-intl"

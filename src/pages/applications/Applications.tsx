@@ -1,5 +1,5 @@
 import { Box, Button, Card, Switch, CloseButton, Flex, Input, Pagination, Skeleton, Table, Text } from "@mantine/core"
-import { ApplicationsFilter, PageRequest } from "@russian-rs/portal-api-axios"
+import { ApplicationsFilter, PageRequest } from "@rds-network/portal-api-axios"
 import { IconFilterOff, IconSearch, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import React, { useContext, useEffect, useState } from "react"

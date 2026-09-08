@@ -1,6 +1,6 @@
 import React from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import type { Statistics } from "@russian-rs/portal-api-axios"
+import type { Statistics } from "@rds-network/portal-api-axios"
 import {
     ResponsiveContainer,
     PieChart,

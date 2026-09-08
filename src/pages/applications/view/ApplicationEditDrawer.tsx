@@ -2,7 +2,7 @@ import { Button, Drawer, Flex, Radio, Select, TextInput, Tooltip } from "@mantin
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { ApplicationDto, GenderEnumDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, GenderEnumDto } from "@rds-network/portal-api-axios"
 import {
     IconAt,
     IconBrandTelegram,

@@ -13,7 +13,7 @@ import {
     Title,
 } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
-import { ContractDto, PageRequest } from "@russian-rs/portal-api-axios"
+import { ContractDto, PageRequest } from "@rds-network/portal-api-axios"
 import { IconFilterEdit, IconFilterOff, IconPencil, IconPlus, IconUfo } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
