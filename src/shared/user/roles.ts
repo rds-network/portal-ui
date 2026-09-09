@@ -1,4 +1,4 @@
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 
 export enum UserGroup {
     ADMIN = "ADMIN",

@@ -5,7 +5,6 @@ import {
     Loader,
     Radio,
     SegmentedControl,
-    Select,
     Text,
     Textarea,
     TextInput,
@@ -14,7 +13,7 @@ import {
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { ApplicationDto, GenderEnumDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, GenderEnumDto } from "@rds-network/portal-api-axios"
 import {
     IconAlertCircle,
     IconAt,
@@ -41,11 +40,9 @@ import { locales } from "src/pages/application/form/lib/locales"
 import { mapValuesToRequest } from "src/pages/application/form/lib/mapper"
 import { PublicApplicationApiService } from "src/shared/api/applications/PublicApplicationApiService"
 import { checkUserForApplication } from "src/shared/api/user/UserApiService"
-import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { CaptchaSolver } from "src/shared/ui/captcha/CaptchaSolver"
 import { CitySelect } from "src/shared/ui/citySelect/CitySelect"
-import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
 import classes from "./Form.module.scss"
 
@@ -58,20 +55,7 @@ export const Form = () => {
     const [location, setLocation] = useState("IN")
     const [residence, setResidence] = useState("REQUIRED")
     const [experience, setExperience] = useState(false)
-    const [selectedProgram, setSelectedProgram] = useState<string | null>(null)
-    const [selectedProject, setSelectedProject] = useState<string | null>(null)
     const [formError, setFormError] = useState<string | null>(null)
-    const { programs, visibleProjects } = useProgramProjectFilter(selectedProgram, selectedProject)
-
-    const programOptions = programs.map((program) => ({
-        value: program.code,
-        label: getLocalizedName(program, intl.locale),
-    }))
-    const projectOptions = visibleProjects.map((project) => ({
-        value: project.code,
-        label: getLocalizedName(project, intl.locale),
-    }))
-
     const fieldRequired = { message: intl.formatMessage({ id: locales.required }) }
     const selectCityList = { message: intl.formatMessage({ id: locales.selectCityList }) }
     const invalidSymbols = intl.formatMessage({ id: locales.invalidSymbols })
@@ -150,8 +134,6 @@ export const Form = () => {
                 ? z.boolean(agreementRequired).refine((v) => v, agreementRequired.message)
                 : z.boolean().optional(),
         occupation: z.string(fieldRequired).min(3, minMessage(3)).max(100, maxMessage(100)),
-        program: z.string(fieldRequired).min(1, fieldRequired.message),
-        project: z.string().optional(),
         experience: experience ? z.string().min(20, minMessage(20)).max(1000, maxMessage(1000)) : z.string().optional(),
         languages: z.string(fieldRequired).min(5, minMessage(5)).max(200, maxMessage(200)),
         skills: z.string(fieldRequired).min(20, minMessage(20)).max(500, maxMessage(500)),
@@ -190,34 +172,8 @@ export const Form = () => {
             if (currentUser.gender) {
                 form.setFieldValue("gender", currentUser.gender)
             }
-            if (currentUser.program?.code) {
-                setSelectedProgram(currentUser.program.code)
-                form.setFieldValue("program", currentUser.program.code)
-            }
-            if (currentUser.project?.code) {
-                setSelectedProject(currentUser.project.code)
-                form.setFieldValue("project", currentUser.project.code)
-            }
         }
     }, [currentUser])
-
-    const onProgramChange = (program: string | null) => {
-        setSelectedProgram(program)
-        form.setFieldValue("program", program ?? "")
-
-        const selectedProgramDto = programs.find((p) => p.code === program)
-        const selectedProjectAvailable =
-            selectedProject && (selectedProgramDto?.projectCodes ?? []).includes(selectedProject)
-        if (!selectedProjectAvailable) {
-            setSelectedProject(null)
-            form.setFieldValue("project", "")
-        }
-    }
-
-    const onProjectChange = (project: string | null) => {
-        setSelectedProject(project)
-        form.setFieldValue("project", project ?? "")
-    }
 
     const { isFetching, refetch } = useQuery({
         enabled: false,
@@ -268,7 +224,7 @@ export const Form = () => {
         <Flex className={classes.innerFlex}>
             <DateInput
                 label={<FormattedMessage id={locales.enterDate} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 valueFormat="DD MMMM YYYY"
                 maxDate={new Date()}
@@ -289,7 +245,7 @@ export const Form = () => {
             />
             <TextInput
                 label={<FormattedMessage id={locales.postalCode} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconMailPin size={16} />}
@@ -306,7 +262,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.address} />}
                 description={<FormattedMessage id={locales.addressDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconMap2 size={16} />}
@@ -317,7 +273,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.phone} />}
                 description={<FormattedMessage id={locales.phoneDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconPhone size={16} />}
@@ -331,35 +287,35 @@ export const Form = () => {
     const residenceArea = (
         <Flex className={classes.innerFlex} style={{ display: residence == "REQUIRED" ? "flex" : "none" }}>
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement1} />}
                 key={form.key("agreement1")}
                 {...form.getInputProps("agreement1")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement2} />}
                 key={form.key("agreement2")}
                 {...form.getInputProps("agreement2")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement3} />}
                 key={form.key("agreement3")}
                 {...form.getInputProps("agreement3")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement4} />}
                 key={form.key("agreement4")}
                 {...form.getInputProps("agreement4")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement5} />}
                 key={form.key("agreement5")}
                 {...form.getInputProps("agreement5")}
@@ -375,7 +331,7 @@ export const Form = () => {
             </Text>
             <TextInput
                 label={<FormattedMessage id={locales.email} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconAt size={16} />}
@@ -386,7 +342,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.name} />}
                 description={<FormattedMessage id={locales.nameDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconSignature size={16} />}
@@ -397,7 +353,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.patronymic} />}
                 description={<FormattedMessage id={locales.patronymicDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 key={form.key("patronymic")}
                 {...form.getInputProps("patronymic")}
@@ -405,7 +361,7 @@ export const Form = () => {
             />
             <DateInput
                 label={<FormattedMessage id={locales.birthDate} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 defaultLevel="decade"
@@ -420,7 +376,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.passport} />}
                 description={<FormattedMessage id={locales.passportDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconEPassport size={16} />}
@@ -430,7 +386,7 @@ export const Form = () => {
             />
             <TextInput
                 label={<FormattedMessage id={locales.citizenship} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconWorld size={16} />}
@@ -441,7 +397,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.telegram} />}
                 description={<FormattedMessage id={locales.telegramDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 leftSection={<IconBrandTelegram size={16} />}
                 key={form.key("telegram")}
@@ -450,7 +406,7 @@ export const Form = () => {
             />
             <SegmentedControl
                 fullWidth
-                radius={0}
+                radius="md"
                 value={location}
                 onChange={(v) => setLocation(v)}
                 data={[
@@ -465,7 +421,7 @@ export const Form = () => {
             {location == "IN" && addressArea}
             <SegmentedControl
                 fullWidth
-                radius={0}
+                radius="md"
                 value={residence}
                 onChange={(v) => setResidence(v)}
                 data={[
@@ -522,7 +478,7 @@ export const Form = () => {
             </Radio.Group>
             <TextInput
                 label={<FormattedMessage id={locales.occupation} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconBriefcase size={16} />}
@@ -530,36 +486,8 @@ export const Form = () => {
                 {...form.getInputProps("occupation")}
                 disabled={isFetching}
             />
-            <Select
-                label={<FormattedMessage id={locales.program} />}
-                description={<FormattedMessage id={locales.programDescription} />}
-                placeholder={intl.formatMessage({ id: locales.programPlaceholder })}
-                radius={0}
-                className={classes.input}
-                withAsterisk
-                searchable
-                data={programOptions}
-                value={selectedProgram}
-                error={form.errors.program}
-                onChange={onProgramChange}
-                disabled={isFetching}
-            />
-            <Select
-                label={<FormattedMessage id={locales.project} />}
-                description={<FormattedMessage id={locales.projectDescription} />}
-                placeholder={intl.formatMessage({ id: locales.projectPlaceholder })}
-                radius={0}
-                className={classes.input}
-                searchable
-                clearable
-                data={projectOptions}
-                value={selectedProject}
-                error={form.errors.project}
-                onChange={onProjectChange}
-                disabled={isFetching || !selectedProgram || projectOptions.length === 0}
-            />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.checkExperience} />}
                 onChange={(e) => setExperience(e.currentTarget.checked)}
                 disabled={isFetching}
@@ -567,7 +495,7 @@ export const Form = () => {
             {experience && (
                 <Textarea
                     label={<FormattedMessage id={locales.experience} />}
-                    radius={0}
+                    radius="md"
                     autosize
                     minRows={4}
                     withAsterisk
@@ -579,7 +507,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.languages} />}
                 description={<FormattedMessage id={locales.languagesDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconLanguageHiragana size={16} />}
@@ -590,7 +518,7 @@ export const Form = () => {
             <Textarea
                 label={<FormattedMessage id={locales.skills} />}
                 description={<FormattedMessage id={locales.skillsDescription} />}
-                radius={0}
+                radius="md"
                 autosize
                 minRows={2}
                 withAsterisk
@@ -600,7 +528,7 @@ export const Form = () => {
             />
             <Textarea
                 label={<FormattedMessage id={locales.goal} />}
-                radius={0}
+                radius="md"
                 autosize
                 minRows={4}
                 withAsterisk
@@ -610,7 +538,7 @@ export const Form = () => {
             />
             <Textarea
                 label={<FormattedMessage id={locales.bio} />}
-                radius={0}
+                radius="md"
                 autosize
                 minRows={4}
                 withAsterisk

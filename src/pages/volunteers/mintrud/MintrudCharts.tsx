@@ -1,6 +1,6 @@
 import React from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import type { Statistics } from "@russian-rs/portal-api-axios"
+import type { Statistics } from "@rds-network/portal-api-axios"
 import {
     ResponsiveContainer,
     PieChart,
@@ -16,13 +16,14 @@ import {
 } from "recharts"
 import { locales } from "../lib/locales"
 import { Text } from "@mantine/core"
+import { useReducedMotion } from "@mantine/hooks"
 import classes from "./MintrudReport.module.scss"
 
-const COLORS = ["#228be6", "#40c057", "#fab005", "#fa5252",
-    "#845ef7", "#12b886", "#e8590c", "#868e96", "#82c91e"]
+const COLORS = ["#238b81", "#538ca5", "#b99652", "#bb7380", "#8983b4", "#71b8a7", "#bc8d69", "#82969b", "#94ab70"]
 
 export function VolunteersCharts({ stats }: { stats?: Statistics }) {
     const intl = useIntl()
+    const reducedMotion = useReducedMotion()
     if (!stats) return null
 
     const ageData = [
@@ -77,18 +78,25 @@ export function VolunteersCharts({ stats }: { stats?: Statistics }) {
     if (allZero) return null
 
     return (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div style={{ height: 280 }}>
-                <Text className={classes.chartTitle} mt="lg" fw={600}>
+        <div className={classes.chartGrid}>
+            <div className={classes.chartCard}>
+                <Text className={classes.chartTitle}>
                     <FormattedMessage id={locales.ageStatsTitle} />
                 </Text>
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={ageData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" interval={0} tick={{ fontSize: 12 }} />
-                        <YAxis allowDecimals={false} />
-                        <Tooltip />
-                        <Bar dataKey="value">
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--portal-border)" />
+                        <XAxis dataKey="name" interval={0} tick={{ fontSize: 12, fill: "var(--portal-muted)" }} />
+                        <YAxis allowDecimals={false} width={32} tick={{ fontSize: 12, fill: "var(--portal-muted)" }} />
+                        <Tooltip
+                            contentStyle={{
+                                background: "var(--portal-solid)",
+                                border: "1px solid var(--portal-border)",
+                                borderRadius: 12,
+                                color: "var(--portal-ink)",
+                            }}
+                        />
+                        <Bar dataKey="value" isAnimationActive={!reducedMotion} radius={[5, 5, 0, 0]}>
                             {ageData.map((_, i) => (
                                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
                             ))}
@@ -97,53 +105,67 @@ export function VolunteersCharts({ stats }: { stats?: Statistics }) {
                 </ResponsiveContainer>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                <div style={{ height: 280 }}>
-                    <Text className={classes.chartTitle} mt="lg" fw={600}>
-                        <FormattedMessage id={locales.genderStatsTitle} />
-                    </Text>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={genderData}
-                                dataKey="value"
-                                nameKey="name"
-                                innerRadius={60}
-                                outerRadius={100}
-                                paddingAngle={2}
-                            >
-                                {genderData.map((_, i) => (
-                                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
-                <div style={{ height: 280 }}>
-                    <Text className={classes.chartTitle} mt="lg" fw={600}>
-                        <FormattedMessage id={locales.citizenshipStatsTitle} />
-                    </Text>
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={statusData}
-                                dataKey="value"
-                                nameKey="name"
-                                innerRadius={60}
-                                outerRadius={100}
-                                paddingAngle={2}
-                            >
-                                {statusData.map((_, i) => (
-                                    <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />
-                                ))}
-                            </Pie>
-                            <Tooltip />
-                            <Legend />
-                        </PieChart>
-                    </ResponsiveContainer>
-                </div>
+            <div className={classes.chartCard}>
+                <Text className={classes.chartTitle}>
+                    <FormattedMessage id={locales.genderStatsTitle} />
+                </Text>
+                <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                        <Pie
+                            data={genderData}
+                            dataKey="value"
+                            isAnimationActive={!reducedMotion}
+                            nameKey="name"
+                            innerRadius="48%"
+                            outerRadius="74%"
+                            paddingAngle={2}
+                        >
+                            {genderData.map((_, i) => (
+                                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            contentStyle={{
+                                background: "var(--portal-solid)",
+                                border: "1px solid var(--portal-border)",
+                                borderRadius: 12,
+                                color: "var(--portal-ink)",
+                            }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 12, lineHeight: "20px" }} />
+                    </PieChart>
+                </ResponsiveContainer>
+            </div>
+            <div className={classes.chartCard}>
+                <Text className={classes.chartTitle}>
+                    <FormattedMessage id={locales.citizenshipStatsTitle} />
+                </Text>
+                <ResponsiveContainer width="100%" height={280}>
+                    <PieChart>
+                        <Pie
+                            data={statusData}
+                            dataKey="value"
+                            isAnimationActive={!reducedMotion}
+                            nameKey="name"
+                            innerRadius="48%"
+                            outerRadius="74%"
+                            paddingAngle={2}
+                        >
+                            {statusData.map((_, i) => (
+                                <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip
+                            contentStyle={{
+                                background: "var(--portal-solid)",
+                                border: "1px solid var(--portal-border)",
+                                borderRadius: 12,
+                                color: "var(--portal-ink)",
+                            }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 12, lineHeight: "20px" }} />
+                    </PieChart>
+                </ResponsiveContainer>
             </div>
         </div>
     )
@@ -151,6 +173,7 @@ export function VolunteersCharts({ stats }: { stats?: Statistics }) {
 
 export function FinalUsersChart({ stats }: { stats?: Statistics }) {
     const intl = useIntl()
+    const reducedMotion = useReducedMotion()
     if (!stats) return null
 
     const data = [
@@ -175,15 +198,16 @@ export function FinalUsersChart({ stats }: { stats?: Statistics }) {
     if (data.every((d) => d.value === 0)) return null
 
     return (
-        <div style={{ height: 320 }}>
-            <ResponsiveContainer width="100%" height="100%">
+        <div className={classes.chartCard}>
+            <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                     <Pie
                         data={data}
                         dataKey="value"
+                        isAnimationActive={!reducedMotion}
                         nameKey="name"
-                        innerRadius={70}
-                        outerRadius={110}
+                        innerRadius="40%"
+                        outerRadius="62%"
                         label
                         paddingAngle={2}
                     >
@@ -191,8 +215,15 @@ export function FinalUsersChart({ stats }: { stats?: Statistics }) {
                             <Cell key={i} fill={COLORS[i % COLORS.length]} />
                         ))}
                     </Pie>
-                    <Tooltip />
-                    <Legend />
+                    <Tooltip
+                        contentStyle={{
+                            background: "var(--portal-solid)",
+                            border: "1px solid var(--portal-border)",
+                            borderRadius: 12,
+                            color: "var(--portal-ink)",
+                        }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12, lineHeight: "20px" }} />
                 </PieChart>
             </ResponsiveContainer>
         </div>
@@ -201,24 +232,36 @@ export function FinalUsersChart({ stats }: { stats?: Statistics }) {
 const CITY_BAR_HEIGHT = 28
 
 export function CityStatsChart({ data }: { data: { name: string; value: number }[] }) {
+    const reducedMotion = useReducedMotion()
     if (!data.length) return null
 
     return (
-        <div>
-            <Text className={classes.chartTitle} mt="lg" fw={600}>
+        <div className={classes.chartCard}>
+            <Text className={classes.chartTitle}>
                 <FormattedMessage id={locales.cityStatsTitle} values={{ count: data.length }} />
             </Text>
-            <div style={{ height: data.length * CITY_BAR_HEIGHT + 40 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" allowDecimals={false} />
-                        <YAxis type="category" dataKey="name" width={140} interval={0} tick={{ fontSize: 12 }} />
-                        <Tooltip />
-                        <Bar dataKey="value" fill={COLORS[0]} />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
+            <ResponsiveContainer width="100%" height={data.length * CITY_BAR_HEIGHT + 40}>
+                <BarChart data={data} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--portal-border)" />
+                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: "var(--portal-muted)" }} />
+                    <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={140}
+                        interval={0}
+                        tick={{ fontSize: 12, fill: "var(--portal-muted)" }}
+                    />
+                    <Tooltip
+                        contentStyle={{
+                            background: "var(--portal-solid)",
+                            border: "1px solid var(--portal-border)",
+                            borderRadius: 12,
+                            color: "var(--portal-ink)",
+                        }}
+                    />
+                    <Bar dataKey="value" fill={COLORS[0]} isAnimationActive={!reducedMotion} radius={[0, 5, 5, 0]} />
+                </BarChart>
+            </ResponsiveContainer>
         </div>
     )
 }

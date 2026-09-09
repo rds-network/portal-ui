@@ -4,7 +4,7 @@ import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { locales } from "./lib/locales"
 import { useState, useRef } from "react"
-import { ProgramDto } from "@russian-rs/portal-api-axios"
+import { ProgramDto } from "@rds-network/portal-api-axios"
 
 interface ProgramFilterProps {
     value: string | null

@@ -1,0 +1,11 @@
+.root {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}

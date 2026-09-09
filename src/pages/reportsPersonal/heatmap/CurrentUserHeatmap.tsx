@@ -1,5 +1,6 @@
-import { Box, Flex, HoverCard, Loader, Text } from "@mantine/core"
-import { HeatMapItem, VolunteerHeatMapItem } from "@russian-rs/portal-api-axios"
+import { Box, Flex, HoverCard, Loader, Text, Title } from "@mantine/core"
+import { IconCalendarWeek, IconClockHour4 } from "@tabler/icons-react"
+import { HeatMapItem, VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React from "react"
@@ -99,9 +100,18 @@ export const CurrentUserHeatmap = ({ className }: { className?: string }) => {
         return summary
     }
 
+    const now = dayjs()
+    const visibleYears = Object.entries(data).filter(([year]) => now.month() < 6 || Number(year) >= now.year())
+
     return (
-        <Flex direction="column" gap="xs" className={className}>
-            <Text size="sm">
+        <Flex direction="column" gap="xs" className={`${classes.root} ${className || ""}`}>
+            <Flex align="center" gap="sm" mb="sm">
+                <IconCalendarWeek size={20} color="var(--portal-accent)" />
+                <Title order={2} size="h4">
+                    <FormattedMessage id="design.activity" />
+                </Title>
+            </Flex>
+            <Text size="sm" c="dimmed">
                 <FormattedMessage id={locales.heatmapDescription} />
             </Text>
             <Flex gap="md" wrap="wrap" className={classes.legend}>
@@ -140,16 +150,43 @@ export const CurrentUserHeatmap = ({ className }: { className?: string }) => {
             </Flex>
 
             <Flex direction="column" rowGap="md">
-                {Object.entries(data).map(([year, heatmap]) => (
-                    <Flex direction="column">
-                        <Flex direction="row" align="center" columnGap="md">
+                {visibleYears.map(([year, heatmap]) => (
+                    <Flex direction="column" key={year} className={classes.year}>
+                        <Flex direction="row" align="center" justify="space-between" mb="sm">
                             <Text fw="bold" size="xl">
                                 {year}
                             </Text>
-                            <Text c="gray" size="sm">
+                            <Text c="dimmed" size="xs">
                                 {getSummaryText(heatmap)}
                             </Text>
                         </Flex>
+                        <div className={classes.summary}>
+                            <div>
+                                <Text className={classes.hours}>
+                                    {heatmap.totalWorked ?? 0}
+                                    <span>
+                                        <FormattedMessage id={locales.hours} />
+                                    </span>
+                                </Text>
+                                <Text size="xs" c="dimmed">
+                                    <FormattedMessage
+                                        id="design.hoursRequired"
+                                        values={{ hours: heatmap.totalRequired ?? 0 }}
+                                    />
+                                </Text>
+                            </div>
+                            <div
+                                className={classes.orbit}
+                                style={
+                                    {
+                                        "--progress": `${Math.min(100, Math.max(0, heatmap.totalRequired ? ((heatmap.totalWorked ?? 0) / heatmap.totalRequired) * 100 : 0))}%`,
+                                    } as React.CSSProperties
+                                }
+                                aria-hidden="true"
+                            >
+                                <IconClockHour4 size={26} stroke={1.5} />
+                            </div>
+                        </div>
                         <Flex gap={4} wrap="wrap" className={classes.weeksRow}>
                             {heatmap.weeks.map((weekItem) => (
                                 <HoverCard
@@ -162,7 +199,12 @@ export const CurrentUserHeatmap = ({ className }: { className?: string }) => {
                                     withinPortal
                                 >
                                     <HoverCard.Target>
-                                        <Box className={`${classes.weekSquare} ${classes[getSquareColor(weekItem)]}`}>
+                                        <Box
+                                            tabIndex={0}
+                                            aria-label={getSquareInfoLabel(weekItem)}
+                                            title={getSquareInfoLabel(weekItem)}
+                                            className={`${classes.weekSquare} ${classes[getSquareColor(weekItem)]}`}
+                                        >
                                             <Text size="xs" fw={500} className={classes.weekNumber}>
                                                 {weekItem.week}
                                             </Text>

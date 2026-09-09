@@ -8,9 +8,8 @@ import { UserContext } from "src/app/providers/UserContext"
 import { hasPermission } from "src/shared/user/roles"
 import { locales } from "../lib/locales"
 import { allowedRoles } from "../lib/roles"
-import CustomLoader from "src/shared/ui/loading/CustomLoader"
 import { StatisticsApiService } from "src/shared/api/StatisticsApiService"
-import type { CityStatistics, ProgramStatItem, Statistics } from "@russian-rs/portal-api-axios"
+import type { CityStatistics, ProgramStatItem, Statistics } from "@rds-network/portal-api-axios"
 import classes from "./MintrudReport.module.scss"
 import { FinalUsersChart, VolunteersCharts } from "./MintrudCharts"
 import CityStats from "./CityStats"
@@ -103,10 +102,8 @@ export default function MintrudReport() {
 
     return (
         <Flex direction="column">
-            <CustomLoader visible={isFetching} className={classes.loader} />
-
             <Flex className={classes.root} direction="column" gap={16}>
-                <Text className={classes.title} variant="gradient">
+                <Text className={classes.title}>
                     <FormattedMessage id={locales.titleMintrud} />
                 </Text>
 
@@ -129,7 +126,7 @@ export default function MintrudReport() {
                 </Group>
 
                 {/* Итоги */}
-                <Group mt="xs">
+                <div className={classes.totals}>
                     <Card withBorder radius="md" p="md">
                         <Text size="xs" c="dimmed">
                             <FormattedMessage id={locales.totalVolunteers} />
@@ -147,13 +144,13 @@ export default function MintrudReport() {
                             {fmtHours(totalHours)}
                         </Text>
                     </Card>
-                </Group>
+                </div>
 
                 {/* По программам */}
                 <Text mt="md" fw={600}>
                     <FormattedMessage id={locales.programStats} />
                 </Text>
-                <Table withColumnBorders striped highlightOnHover>
+                <Table className={classes.table} withColumnBorders striped highlightOnHover>
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th>

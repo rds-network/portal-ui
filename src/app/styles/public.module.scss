@@ -1,28 +1,32 @@
 .appShell {
     display: flex;
     position: fixed;
-    width: 100dvw;
-    height: 100dvh;
+    inset: 0;
 }
-
 .appShellMain {
     flex-grow: 1;
-    margin-top: calc(var(--mantine-spacing-md) * 3);
-    margin-bottom: calc(var(--mantine-spacing-md) * 2);
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        margin-bottom: calc(var(--mantine-spacing-md) * 2);
-    }
+    padding: 100px 24px 60px;
+    min-width: 0;
 }
-
 .appShellHeader {
-    border: none;
-    padding: var(--mantine-spacing-md);
-    height: calc(var(--mantine-spacing-md) * 3);
+    border: 0;
+    padding: 18px 32px;
+    height: 76px;
+    background: transparent;
 }
-
+.loginGroup {
+    position: relative;
+}
 .appShellMainScroll {
     height: 100%;
     width: 100%;
     justify-content: center;
+}
+@media (max-width: 36em) {
+    .appShellMain {
+        padding: 90px 14px 50px;
+    }
+    .appShellHeader {
+        padding: 18px;
+    }
 }

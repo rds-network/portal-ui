@@ -23,3 +23,13 @@
     padding: 12px;
     cursor: pointer;
 }
+
+.itemRead,
+.itemUnread {
+    border-radius: 16px;
+    padding: 16px;
+    overflow-wrap: anywhere;
+    :global(.mantine-Badge-root) {
+        flex-shrink: 0;
+    }
+}

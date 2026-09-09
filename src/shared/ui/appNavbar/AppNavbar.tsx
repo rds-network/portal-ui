@@ -1,4 +1,4 @@
-import { AppShell, Group, ScrollArea, Transition } from "@mantine/core"
+import { AppShell, Drawer, Group, ScrollArea } from "@mantine/core"
 import React, { useContext, useEffect, useMemo } from "react"
 import { NavbarContext } from "src/app/providers/NavbarProvider"
 import { UserContext } from "src/app/providers/UserContext"
@@ -7,9 +7,7 @@ import classes from "src/shared/ui/appNavbar/AppNavbar.module.scss"
 import { Content } from "src/shared/ui/appNavbar/Content"
 import { LogoutButton } from "src/shared/ui/appNavbar/logoutButton/LogoutButton"
 import { UserButton } from "src/shared/ui/appNavbar/userButton/UserButton"
-import { AnnouncementBell } from "src/shared/ui/announcements/AnnouncementBell"
-import { LocaleSwitcher } from "src/shared/ui/locale/LocaleSwitcher"
-import { ThemeSwitcher } from "src/shared/ui/theme/ThemeSwitcher"
+import { FormattedMessage } from "react-intl"
 import { hasPermission } from "src/shared/user/roles"
 import { LinksGroup } from "./links/NavbarLinksGroup"
 import { useLocation } from "react-router"
@@ -37,15 +35,9 @@ export const AppNavbar = React.memo(function AppNavbar() {
     const { menuOpened, setMenuOpened } = useContext(NavbarContext)
     const location = useLocation()
 
+    // Reset the mobile drawer after navigation or switching between mobile and desktop.
     useEffect(() => {
-        setMenuOpened(isDesktop)
-    }, [isDesktop])
-
-    // Close navbar on route change for mobile view
-    useEffect(() => {
-        if (!isDesktop) {
-            setMenuOpened(false)
-        }
+        setMenuOpened(false)
     }, [location.pathname, isDesktop, setMenuOpened])
 
     const items = useMemo(() => {
@@ -54,30 +46,40 @@ export const AppNavbar = React.memo(function AppNavbar() {
         ))
     }, [user])
 
-    return (
-        <Transition mounted={menuOpened} transition="scale-x" timingFunction="ease">
-            {(styles) => (
-                <AppShell.Navbar style={styles} className={classes.appShellNavbar}>
-                    <nav className={classes.navbar}>
-                        <div className={classes.header}>
-                            <UserButton />
-                            <AnnouncementBell />
-                        </div>
+    const navigation = (
+        <nav id="portal-navigation" className={classes.navbar}>
+            <div className={classes.header}>
+                <UserButton />
+            </div>
 
-                        <ScrollArea className={classes.links}>
-                            <div className={classes.linksInner}>{items}</div>
-                        </ScrollArea>
+            <ScrollArea className={classes.links}>
+                <div className={classes.linksInner}>{items}</div>
+            </ScrollArea>
 
-                        <Group className={classes.footer} justify="space-between">
-                            <LogoutButton />
-                            <Group justify="flex-end">
-                                <LocaleSwitcher />
-                                <ThemeSwitcher />
-                            </Group>
-                        </Group>
-                    </nav>
-                </AppShell.Navbar>
-            )}
-        </Transition>
+            <Group className={classes.footer} justify="space-between">
+                <LogoutButton />
+            </Group>
+        </nav>
     )
+
+    if (!isDesktop) {
+        return (
+            <Drawer
+                opened={menuOpened}
+                onClose={() => setMenuOpened(false)}
+                title={<FormattedMessage id="design.navigation" />}
+                size={310}
+                classNames={{
+                    body: classes.mobileBody,
+                    content: classes.mobileContent,
+                    header: classes.mobileHeader,
+                    close: classes.mobileClose,
+                }}
+            >
+                {navigation}
+            </Drawer>
+        )
+    }
+
+    return <AppShell.Navbar className={classes.appShellNavbar}>{navigation}</AppShell.Navbar>
 })

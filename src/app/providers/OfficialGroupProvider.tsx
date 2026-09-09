@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { OfficialGroupDto } from "@russian-rs/portal-api-axios"
+import { OfficialGroupDto } from "@rds-network/portal-api-axios"
 import { OfficialGroupApiService } from "src/shared/api/OfficialGroupApiService"
 
 const OfficialGroupContext = createContext<OfficialGroupDto[]>([])

@@ -13,7 +13,7 @@ import {
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { FormValidationResult } from "@mantine/form/lib/types"
-import { FileInfoDto, TaskDto } from "@russian-rs/portal-api-axios"
+import { FileInfoDto, TaskDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconChecklist, IconClock, IconLanguage, IconLink, IconTrashX } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { createRef, forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
@@ -152,17 +152,54 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
     }, [uploadedFiles, editMode])
 
     return (
-        <Flex direction="column" className={classes.taskCard} ref={cardRef} key={props.task.id} rowGap={10}>
-            <Flex>
-                <Badge size="lg" color="grape" radius="md" variant="light" leftSection={<IconChecklist size={16} />}>
+        <Flex direction="column" className={classes.taskCard} ref={cardRef} key={props.task.id} rowGap={20}>
+            <Flex className={classes.cardHeader}>
+                <Badge size="lg" color="ocean" radius="md" variant="light" leftSection={<IconChecklist size={16} />}>
                     <FormattedMessage id={locales.task} values={{ index: props.index + 1 }} />
                 </Badge>
                 {props.deletable && (
-                    <ActionIcon ml="auto" variant="light" color="red" onClick={() => props.onDelete(props.task.id)}>
+                    <ActionIcon
+                        aria-label={intl.formatMessage({ id: "design.taskDelete" })}
+                        ml="auto"
+                        size="lg"
+                        variant="subtle"
+                        color="red"
+                        onClick={() => props.onDelete(props.task.id)}
+                    >
                         <IconTrashX size={16} />
                     </ActionIcon>
                 )}
             </Flex>
+            <SimpleGrid cols={{ base: 1, sm: 2 }} className={classes.timeFields}>
+                <NumberInput
+                    min={1}
+                    max={12}
+                    mt="auto"
+                    withAsterisk
+                    suffix={intl.formatMessage({ id: locales.timeSpentSuffix })}
+                    name="timeSpent"
+                    key={form.key("timeSpent")}
+                    {...form.getInputProps("timeSpent")}
+                    label={<FormattedMessage id={locales.timeSpent} />}
+                    description={<FormattedMessage id={locales.timeSpentDescription} />}
+                    leftSection={<IconClock size={18} />}
+                    inputWrapperOrder={["label", "description", "error", "input"]}
+                />
+                <DateInput
+                    mt="auto"
+                    name="date"
+                    withAsterisk
+                    valueFormat="DD MMM YYYY"
+                    key={form.key("date")}
+                    {...form.getInputProps("date")}
+                    label={<FormattedMessage id={locales.taskDate} />}
+                    description={<FormattedMessage id={locales.taskDateDescription} />}
+                    minDate={dayjs(new Date()).subtract(1, "month").toDate()}
+                    maxDate={new Date()}
+                    leftSection={<IconCalendar size={18} />}
+                    inputWrapperOrder={["label", "description", "error", "input"]}
+                />
+            </SimpleGrid>
             <TextInput
                 name="name"
                 withAsterisk
@@ -173,7 +210,7 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
             <Textarea
                 autosize
                 minRows={3}
-                maxRows={3}
+                maxRows={10}
                 withAsterisk
                 name="description"
                 key={form.key("description")}
@@ -205,36 +242,6 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
                 description={<FormattedMessage id={locales.resultDescription} />}
                 leftSection={<IconLink size={18} />}
             />
-            <SimpleGrid cols={2}>
-                <NumberInput
-                    min={1}
-                    max={12}
-                    mt="auto"
-                    withAsterisk
-                    suffix={intl.formatMessage({ id: locales.timeSpentSuffix })}
-                    name="timeSpent"
-                    key={form.key("timeSpent")}
-                    {...form.getInputProps("timeSpent")}
-                    label={<FormattedMessage id={locales.timeSpent} />}
-                    description={<FormattedMessage id={locales.timeSpentDescription} />}
-                    leftSection={<IconClock size={18} />}
-                    inputWrapperOrder={["label", "description", "error", "input"]}
-                />
-                <DateInput
-                    mt="auto"
-                    name="date"
-                    withAsterisk
-                    valueFormat="DD MMM YYYY"
-                    key={form.key("date")}
-                    {...form.getInputProps("date")}
-                    label={<FormattedMessage id={locales.taskDate} />}
-                    description={<FormattedMessage id={locales.taskDateDescription} />}
-                    minDate={dayjs(new Date()).subtract(1, "month").toDate()}
-                    maxDate={new Date()}
-                    leftSection={<IconCalendar size={18} />}
-                    inputWrapperOrder={["label", "description", "error", "input"]}
-                />
-            </SimpleGrid>
             <UserSearch
                 form={form}
                 path="customer"

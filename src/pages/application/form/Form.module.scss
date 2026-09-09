@@ -1,27 +1,21 @@
+@use "../../../app/styles/surfaces" as s;
+
 .root {
-    width: 60%;
-    padding: 2rem;
+    @include s.page;
+    max-width: 900px;
+    margin-inline: auto;
     flex-direction: column;
-    row-gap: 1rem;
-    margin-bottom: 3rem;
+    gap: 24px;
 
-    @media (max-width: $mantine-breakpoint-lg) {
-        width: 100%;
-    }
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        margin-top: 1rem;
-        padding: 1rem;
+    & {
+        @include s.glass;
+        padding: var(--portal-page-padding);
+        margin-block: var(--portal-page-top-gap) var(--portal-page-padding);
     }
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        font-size: large;
-    }
+    @include s.title;
 }
 
 .input {
@@ -50,7 +44,7 @@
 }
 
 .button {
-    border-radius: 0;
+    border-radius: var(--mantine-radius-md);
     width: 20rem;
 
     @media (max-width: $mantine-breakpoint-xs) {

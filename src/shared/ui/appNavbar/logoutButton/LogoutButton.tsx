@@ -13,7 +13,7 @@ export const LogoutButton = () => {
             <UnstyledButton className={classes.container} onClick={() => navigate("/logout")}>
                 <Group justify="space-between">
                     <Box className={classes.button}>
-                        <ThemeIcon variant="light" size="lg" color="red" radius={0}>
+                        <ThemeIcon variant="light" size="lg" color="red" radius="md">
                             <IconLogout width={18} height={18} />
                         </ThemeIcon>
                         <Box ml="md">

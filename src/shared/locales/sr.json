@@ -1,4 +1,22 @@
 {
+    "design": {
+        "loading": "Učitavanje…",
+        "portal": "Portal volontera",
+        "navigation": "Navigacija",
+        "workspace": "Vaš radni prostor",
+        "reportsSubtitle": "Svaki zadatak je deo nečeg većeg.",
+        "activity": "Vaša aktivnost",
+        "hoursRequired": "od {hours} č ove godine",
+        "reportHistory": "Istorija izveštaja",
+        "reportWeek": "Nedelja {week}",
+        "reportSummary": "Vaš izveštaj",
+        "tasksCount": "{count, plural, one {# zadatak} few {# zadatka} other {# zadataka}}",
+        "draftHint": "Nacrt se automatski čuva u ovom pregledaču.",
+        "editHint": "Izmene će biti sačuvane kada pošaljete izveštaj.",
+        "backToReports": "Nazad na moje izveštaje",
+        "taskDelete": "Obriši zadatak",
+        "reportGuide": "Kako napisati izveštaj"
+    },
     "common": {
         "filters": "Filteri",
         "reset-filters": "Resetujte filtere",
@@ -467,6 +485,7 @@
             "title": "Svi volonteri",
             "total": "Ukupno: {total}",
             "search": "Pretraga",
+            "add-user": "Dodaj korisnika",
             "new-user": "Novi volonter",
             "first-name": "Ime",
             "last-name": "Prezime",
@@ -616,6 +635,14 @@
             }
         },
         "applications": {
+            "assignee": "Odgovorna osoba",
+            "unassigned": "Nije dodeljeno",
+            "notesCount": "Komentari: {count}",
+            "unassignedApplications": "Nedodeljene",
+            "allAssignees": "Sve odgovorne osobe",
+            "clearAssigneeFilter": "Poništi filter odgovorne osobe",
+            "noEmployees": "Nema zaposlenih",
+            "clearAssignee": "Ukloni dodelu",
             "title": "Prijave za članstvo",
             "empty": "Nijedna prijava nije pronađena",
             "total": "Ukupno: {count}",
@@ -632,10 +659,13 @@
             "status-short": "Status",
             "contractStart": "Ugovor (početak)",
             "contract-start-short": "Ugovor",
+            "program-project-required": "Pre završetka izaberite program i projekat u prijavi",
             "contract-required": "Da biste završili, morate navesti datume ugovora",
             "showCompleted": "Prikaži završene",
-            "add-note": "Dodaj zapis",
+            "add-note": "Dodaj komentar",
+            "delete-comment": "Obriši komentar",
             "menu": {
+                "actions": "Radnje za prijavu",
                 "view": "Pogledaj",
                 "contact": "Kontaktiraj"
             },
@@ -683,7 +713,7 @@
                     "title": "Razlog odbijanja",
                     "description": "Molimo navedite razlog odbijanja"
                 },
-                "notes": "Zapisi",
+                "notes": "Komentari",
                 "program": "Program",
                 "project": "Projekat"
             },

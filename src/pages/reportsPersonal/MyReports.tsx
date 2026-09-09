@@ -1,12 +1,20 @@
-import { Badge, Button, Flex, Pagination, Text } from "@mantine/core"
+import { Badge, Button, Flex, Pagination, Text, Title } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
-import { PageRequest, ReportFilter } from "@russian-rs/portal-api-axios"
-import { IconChevronRight, IconClockCheck, IconFilterOff, IconListCheck, IconPlus, IconUfo } from "@tabler/icons-react"
+import { PageRequest, ReportFilter } from "@rds-network/portal-api-axios"
+import {
+    IconCalendarWeek,
+    IconChevronRight,
+    IconClockCheck,
+    IconFilterOff,
+    IconListCheck,
+    IconPlus,
+    IconUfo,
+} from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useNavigate, useSearchParams } from "react-router"
+import { Link, useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUserHeatmap"
 import { defaultFilter, defaultPage, defaultPageResponse, locales } from "src/pages/reportsPersonal/lib/constants"
@@ -16,8 +24,6 @@ import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { getReportStatusColor } from "src/shared/report/status"
 import { getSpentTimeFromReport } from "src/shared/report/timeSpent"
-import CustomLoader from "src/shared/ui/loading/CustomLoader"
-import { PropertyBox } from "src/shared/ui/propertyBox/PropertyBox"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { ReportStatusSelect } from "src/shared/ui/select/ReportStatusSelect"
 import { WeekPicker } from "src/shared/ui/weekPicker/WeekPicker"
@@ -53,7 +59,7 @@ export const MyReports = () => {
 
         if (savedState && isFromReport && savedState !== currentSearch) {
             localStorage.removeItem("myReportsListState")
-            window.history.replaceState(null, "", "/my-reports" + savedState)
+            window.history.replaceState(null, "", "/reports/personal" + savedState)
             window.location.reload()
         } else if (!isFromReport) {
             localStorage.removeItem("myReportsListState")
@@ -186,35 +192,32 @@ export const MyReports = () => {
         updateUrlParams(resetFilter, 0)
     }
 
-    const rows = response.content.map((report) => (
-        <Flex
+    const rows = response.content.map((report, index) => (
+        <Link
             key={report.id}
             className={classes.report}
-            onClick={() => {
-                localStorage.setItem("myReportsListState", window.location.search)
-                navigate(`/report/${report.id}`)
-            }}
+            style={{ animationDelay: `${index * 45}ms` }}
+            to={`/report/${report.id}`}
+            onClick={() => localStorage.setItem("myReportsListState", window.location.search)}
         >
-            <Flex className={classes.reportLeft}>
-                <TextPropertyBox
-                    name={locales.reportCreated}
-                    value={dayjs(report.createTime).format("DD MMM YYYY")}
-                    className={classes.date}
-                />
-                <PropertyBox
-                    name={locales.reportStatus}
-                    value={
-                        <Badge color={getReportStatusColor(report.status)} radius="md" variant="light">
-                            <FormattedMessage id={`common.report-status.${report.status}`} />
-                        </Badge>
-                    }
-                />
-            </Flex>
-            <Flex className={classes.reportRight}>
-                <TextPropertyBox name={locales.reportWeek} value={report.week} />
+            <div className={classes.weekIcon}>
+                <IconCalendarWeek size={23} stroke={1.5} />
+            </div>
+            <div className={classes.reportHeading}>
+                <Text fw={550}>
+                    <FormattedMessage id="design.reportWeek" values={{ week: report.week }} />
+                </Text>
+                <Text size="xs" c="dimmed">
+                    {dayjs(report.createTime).format("DD MMM YYYY")}
+                </Text>
+            </div>
+            <Badge color={getReportStatusColor(report.status)} radius="md" variant="light" className={classes.status}>
+                <FormattedMessage id={`common.report-status.${report.status}`} />
+            </Badge>
+            <div className={classes.reportDetails}>
                 <TextPropertyBox
                     name={locales.reportTaskCount}
-                    value={report.tasks.length}
+                    value={String(report.tasks.length)}
                     icon={<IconListCheck size={16} />}
                 />
                 <TextPropertyBox
@@ -222,25 +225,32 @@ export const MyReports = () => {
                     value={getSpentTimeFromReport(report, intl)}
                     icon={<IconClockCheck size={16} />}
                 />
-            </Flex>
-            <IconChevronRight className={classes.arrow} />
-        </Flex>
+            </div>
+            <IconChevronRight className={classes.arrow} size={18} />
+        </Link>
     ))
 
     return (
         <Flex direction="column" style={{ height: "100%" }}>
-            <CustomLoader visible={isFetching} className={classes.loader} />
-            <Flex className={classes.root}>
-                <Flex ref={listStartRef} />
+            <Flex className={classes.root} ref={listStartRef}>
                 <Flex className={classes.header} align="center">
-                    <Text className={classes.title}>
-                        <FormattedMessage id={locales.documentTitle} />
-                    </Text>
-                    <Flex direction="row" gap={8} wrap="wrap" align="flex-end">
+                    <div>
+                        <Text className={classes.eyebrow}>
+                            <FormattedMessage id="design.workspace" />
+                        </Text>
+                        <Title order={1} className={classes.title}>
+                            <FormattedMessage id={locales.documentTitle} />
+                        </Title>
+                        <Text className={classes.subtitle}>
+                            <FormattedMessage id="design.reportsSubtitle" />
+                        </Text>
+                    </div>
+                    <Flex className={classes.headerActions} direction="row" gap={8} wrap="wrap" align="flex-end">
                         <Button
                             className={classes.newReportButton}
-                            variant="light"
-                            size="sm"
+                            color="ocean.7"
+                            variant="filled"
+                            size="md"
                             leftSection={<IconPlus size={16} />}
                             onClick={() => navigate("/report/create")}
                         >
@@ -253,6 +263,14 @@ export const MyReports = () => {
                 </Flex>
                 <Flex className={classes.content}>
                     <Flex className={classes.reports}>
+                        <Flex justify="space-between" align="center" className={classes.sectionHeader}>
+                            <Title order={2} size="h4">
+                                <FormattedMessage id="design.reportHistory" />
+                            </Title>
+                            <Badge variant="light" color="ocean">
+                                {response.page.totalElements}
+                            </Badge>
+                        </Flex>
                         <Flex className={classes.filterArea}>
                             <Flex direction="row" gap={8} wrap="wrap" align="flex-end">
                                 <WeekPicker
@@ -268,6 +286,7 @@ export const MyReports = () => {
                                 />
                                 {activeFiltersCount > 0 && (
                                     <Button
+                                        className={classes.resetFilters}
                                         variant="transparent"
                                         size="sm"
                                         leftSection={<IconFilterOff size={16} />}

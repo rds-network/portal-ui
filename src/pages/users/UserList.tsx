@@ -10,9 +10,10 @@ import {
     Paper,
     Table,
     Text,
+    Title,
 } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
-import { ContractDto, PageRequest } from "@russian-rs/portal-api-axios"
+import { ContractDto, PageRequest } from "@rds-network/portal-api-axios"
 import { IconFilterEdit, IconFilterOff, IconPencil, IconPlus, IconUfo } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -26,7 +27,6 @@ import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
-import CustomLoader from "src/shared/ui/loading/CustomLoader"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
 import { notifications } from "@mantine/notifications"
 import { useIntl } from "react-intl"
@@ -75,7 +75,7 @@ export const UserList = () => {
             setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
         }
 
-        const pageNumber = programChanged ? 0 : (pageRequest.pageNumber || 0)
+        const pageNumber = programChanged ? 0 : pageRequest.pageNumber || 0
         updateUrlParams(debouncedSearch, newProgram, nextProject, pageNumber)
     }
 
@@ -85,13 +85,11 @@ export const UserList = () => {
 
         if (newProject && newProject !== NO_PROJECT_CODE) {
             const project =
-                visibleProjects.find((p) => p.code === newProject) ??
-                projects.find((p) => p.code === newProject)
+                visibleProjects.find((p) => p.code === newProject) ?? projects.find((p) => p.code === newProject)
 
             if (project) {
                 const owningProgramCode =
-                    project.programCode ??
-                    programs.find((pr) => (pr.projectCodes ?? []).includes(project.code))?.code
+                    project.programCode ?? programs.find((pr) => (pr.projectCodes ?? []).includes(project.code))?.code
 
                 if (owningProgramCode) {
                     nextProgram = owningProgramCode.toUpperCase()
@@ -106,7 +104,7 @@ export const UserList = () => {
             setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
         }
 
-        const pageNumber = projectChanged ? 0 : (pageRequest.pageNumber || 0)
+        const pageNumber = projectChanged ? 0 : pageRequest.pageNumber || 0
         updateUrlParams(debouncedSearch, nextProgram, newProject, pageNumber)
     }
 
@@ -381,17 +379,12 @@ export const UserList = () => {
                 }}
             >
                 <Flex align="center" columnGap={12}>
-                    <Avatar
-                        size={44}
-                        src={user.avatar?.link}
-                        name={user.fullName}
-                        className={classes.avatar}
-                    />
-                    <Flex direction="column" style={{ flex: 1 }}>
-                        <Text fw={500} truncate="end">
+                    <Avatar size={44} src={user.avatar?.link} name={user.fullName} className={classes.avatar} />
+                    <Flex direction="column" style={{ flex: 1, minWidth: 0 }}>
+                        <Text fw={500} style={{ overflowWrap: "anywhere" }}>
                             {user.fullName}
                         </Text>
-                        <Text size="sm" c="dimmed" truncate="end">
+                        <Text size="sm" c="dimmed" truncate="end" title={user.email}>
                             {user.email}
                         </Text>
                     </Flex>
@@ -472,9 +465,11 @@ export const UserList = () => {
     const selectedUser = selectedUserId ? content.find((u) => u.id === selectedUserId) : null
 
     return (
-        <Flex direction="column">
-            <CustomLoader visible={isFetching} className={classes.loader} />
-            <Flex className={classes.root}>
+        <Flex className={classes.root}>
+            <Flex direction="column" gap={24} miw={0}>
+                <Title order={1} className={classes.title}>
+                    <FormattedMessage id={locales.title} />
+                </Title>
                 {isMobile ? (
                     <Flex direction="column">
                         <Button

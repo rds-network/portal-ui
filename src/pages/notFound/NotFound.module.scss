@@ -1,7 +1,10 @@
 .root {
     padding: 1rem;
     flex-direction: column;
-    height: $app-shell-height;
+    min-height: calc(100dvh - 34px);
+    padding: 40px 20px;
+    background: radial-gradient(ellipse at center, var(--portal-surface), transparent 70%);
+    animation: portal-enter 400ms ease both;
     justify-content: center;
     align-items: center;
     row-gap: 1rem;
@@ -9,7 +12,7 @@
 
 .image {
     opacity: 0.3;
-    color: #0c8599;
+    color: var(--portal-accent);
     width: 36rem;
 
     @media (max-width: $mantine-breakpoint-sm) {
@@ -19,14 +22,15 @@
 
 .title {
     font-weight: bolder;
-    font-size: x-large;
-    color: #0c8599;
+    font-size: clamp(26px, 3vw, 40px);
+    letter-spacing: -0.04em;
+    color: var(--portal-accent);
 }
 
 .description {
     text-align: center;
-    font-size: small;
-    color: #0c8599;
+    font-size: 15px;
+    color: var(--portal-accent);
     width: 36rem;
 
     @media (max-width: $mantine-breakpoint-sm) {

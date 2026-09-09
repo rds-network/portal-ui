@@ -1,4 +1,22 @@
 {
+    "design": {
+        "loading": "Загрузка…",
+        "portal": "Портал волонтёра",
+        "navigation": "Навигация",
+        "workspace": "Личное пространство",
+        "reportsSubtitle": "Каждая задача — часть большого дела.",
+        "activity": "Ваша активность",
+        "hoursRequired": "из {hours} ч за год",
+        "reportHistory": "История отчётов",
+        "reportWeek": "Неделя {week}",
+        "reportSummary": "Ваш отчёт",
+        "tasksCount": "{count, plural, one {# задача} few {# задачи} many {# задач} other {# задачи}}",
+        "draftHint": "Черновик автоматически сохраняется в этом браузере.",
+        "editHint": "Изменения будут сохранены после отправки отчёта.",
+        "backToReports": "К моим отчётам",
+        "taskDelete": "Удалить задачу",
+        "reportGuide": "Как заполнить отчёт"
+    },
     "common": {
         "filters": "Фильтры",
         "reset-filters": "Сбросить фильтры",
@@ -467,6 +485,7 @@
             "title": "Все волонтеры",
             "total": "Всего: {total}",
             "search": "Поиск",
+            "add-user": "Добавить пользователя",
             "new-user": "Новый пользователь",
             "first-name": "Имя",
             "last-name": "Фамилия",
@@ -616,6 +635,14 @@
             }
         },
         "applications": {
+            "assignee": "Ответственный",
+            "unassigned": "Не назначен",
+            "notesCount": "Комментарии: {count}",
+            "unassignedApplications": "Не назначенные",
+            "allAssignees": "Все ответственные",
+            "clearAssigneeFilter": "Сбросить фильтр по ответственному",
+            "noEmployees": "Сотрудники не найдены",
+            "clearAssignee": "Снять назначение",
             "title": "Заявки на вступление",
             "empty": "Заявок не найдено",
             "total": "Всего: {count}",
@@ -632,10 +659,13 @@
             "status-short": "Статус",
             "contractStart": "Договор (начало)",
             "contract-start-short": "Договор",
+            "program-project-required": "Для завершения укажите программу и проект в анкете заявки",
             "contract-required": "Для завершения необходимо указать даты контракта",
             "showCompleted": "Показать завершенные",
-            "add-note": "Добавить заметку",
+            "add-note": "Добавить комментарий",
+            "delete-comment": "Удалить комментарий",
             "menu": {
+                "actions": "Действия с заявкой",
                 "view": "Посмотреть",
                 "contact": "Написать"
             },
@@ -683,7 +713,7 @@
                     "title": "Причина отказа",
                     "description": "Пожалуйста, укажите причину отказа"
                 },
-                "notes": "Заметки",
+                "notes": "Комментарии",
                 "program": "Программа",
                 "project": "Проект"
             },

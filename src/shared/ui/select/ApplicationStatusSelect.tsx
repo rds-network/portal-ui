@@ -1,7 +1,7 @@
 import { Combobox, Flex, InputBase, Text, Tooltip, useCombobox } from "@mantine/core"
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
-import { ReactNode, useEffect, useState } from "react"
-import { FormattedMessage } from "react-intl"
+import { ApplicationDto } from "@rds-network/portal-api-axios"
+import { ReactNode, useState } from "react"
+import { FormattedMessage, useIntl } from "react-intl"
 import { DenyReasonModal } from "src/shared/ui/denyReasonModal/DenyReasonModal"
 import { PauseReasonModal } from "src/shared/ui/pauseReasonModal/PauseReasonModal"
 import { ApplicationStatus, getApplicationStatusColor, getApplicationStatusIcon } from "src/shared/user/applications"
@@ -18,11 +18,12 @@ interface ApplicationStatusSelectProps {
 }
 
 export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => {
+    const intl = useIntl()
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     })
 
-    const [value, setValue] = useState<string>(props.application.status || ApplicationStatus.CREATED)
+    const value = props.application.status || ApplicationStatus.CREATED
     const [pauseOpened, setPauseOpened] = useState(false)
     const [denyModalOpened, setDenyModalOpened] = useState(false)
     const [pendingStatus, setPendingStatus] = useState<string | null>(null)
@@ -33,22 +34,9 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
         }
     }
 
-    const handleStatusChange = (newStatus: string) => {
-        if (newStatus === ApplicationStatus.DENY) {
-            setPendingStatus(newStatus)
-            setDenyModalOpened(true)
-            combobox.closeDropdown()
-        } else {
-            onChange(newStatus)
-            setValue(newStatus)
-            combobox.closeDropdown()
-        }
-    }
-
     const handlePauseConfirm = (reason: string) => {
         if (pendingStatus) {
             onChange(pendingStatus, reason)
-            setValue(pendingStatus)
             setPendingStatus(null)
         }
     }
@@ -56,7 +44,6 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
     const handleDenyConfirm = (reason: string) => {
         if (pendingStatus) {
             onChange(pendingStatus, reason)
-            setValue(pendingStatus)
             setPendingStatus(null)
         }
     }
@@ -64,21 +51,24 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
     const handlePauseCancel = () => {
         setPauseOpened(false)
         setPendingStatus(null)
-        // Возвращаем предыдущее значение статуса
-        setValue(props.application.status || ApplicationStatus.CREATED)
     }
 
     const handleDenyCancel = () => {
         setDenyModalOpened(false)
         setPendingStatus(null)
-        // Возвращаем предыдущее значение статуса
-        setValue(props.application.status || ApplicationStatus.CREATED)
     }
 
     const options = Object.values(ApplicationStatus).map((status) => {
         const tooltip = getTooltip(status, props.application)
         return (
-            <Tooltip label={tooltip} key={status} hidden={tooltip == undefined}>
+            <Tooltip
+                label={tooltip}
+                key={status}
+                hidden={tooltip == undefined}
+                multiline
+                w={360}
+                maw="calc(100vw - 32px)"
+            >
                 <Combobox.Option value={status} disabled={isDisabled(status, props.application)}>
                     <Flex align="center" justify="start" columnGap="xs">
                         <Flex>{getApplicationStatusIcon(status, 16, getApplicationStatusColor(status))}</Flex>
@@ -88,10 +78,6 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
             </Tooltip>
         )
     })
-
-    useEffect(() => {
-        setValue(props.application.status || ApplicationStatus.CREATED)
-    }, [props.application.status])
 
     return (
         <Flex direction="column">
@@ -103,6 +89,7 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
             <Combobox
                 store={combobox}
                 onOptionSubmit={(val) => {
+                    if (isDisabled(val as ApplicationStatus, props.application)) return
                     if (val === ApplicationStatus.PAUSED) {
                         setPendingStatus(val)
                         setPauseOpened(true)
@@ -115,7 +102,6 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
                         combobox.closeDropdown()
                         return
                     }
-                    setValue(val)
                     combobox.closeDropdown()
                     onChange(val)
                 }}
@@ -137,7 +123,11 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
                         rightSectionPointerEvents={value === null ? "none" : "all"}
                         rightSection={<Combobox.Chevron />}
                     >
-                        <Text size="sm">
+                        <Text
+                            size="sm"
+                            truncate="end"
+                            title={intl.formatMessage({ id: `common.application-status.${value}` })}
+                        >
                             <FormattedMessage id={`common.application-status.${value}`} />
                         </Text>
                     </InputBase>
@@ -185,7 +175,7 @@ const isDisabled = (status: ApplicationStatus, application: ApplicationDto): boo
 
     switch (status) {
         case ApplicationStatus.DONE:
-            return application.contract == null
+            return !application.contract || !application.program?.trim() || !application.project?.trim()
         default:
             return false
     }
@@ -194,11 +184,21 @@ const isDisabled = (status: ApplicationStatus, application: ApplicationDto): boo
 const getTooltip = (status: ApplicationStatus, application: ApplicationDto): ReactNode => {
     switch (status) {
         case ApplicationStatus.DONE:
-            if (!application.contract) {
-                return <FormattedMessage id={locales.contractRequired} />
-            } else {
-                return undefined
-            }
+            if (application.contract && application.program?.trim() && application.project?.trim()) return undefined
+            return (
+                <Flex direction="column" gap={4}>
+                    {!application.contract && (
+                        <Text component="div" size="sm" c="inherit">
+                            <FormattedMessage id={locales.contractRequired} />
+                        </Text>
+                    )}
+                    {(!application.program?.trim() || !application.project?.trim()) && (
+                        <Text component="div" size="sm" c="inherit">
+                            <FormattedMessage id={locales.programProjectRequired} />
+                        </Text>
+                    )}
+                </Flex>
+            )
         default:
             return undefined
     }

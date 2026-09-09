@@ -1,29 +1,24 @@
 .footerContainer {
-    left: 0;
-    bottom: 0;
-    width: 100vw;
-    z-index: 200;
     position: fixed;
-    align-content: center;
-    height: calc(var(--mantine-spacing-md) * 3);
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-    border-top: 1px solid var(--mantine-color-default-border);
-    padding: calc(var(--mantine-spacing-md) / 2) var(--mantine-spacing-md);
-
-    @mixin dark {
-        background-color: var(--mantine-color-dark-filled);
-    }
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        height: calc(var(--mantine-spacing-md) * 2);
-        padding: calc(var(--mantine-spacing-md) / 3) var(--mantine-spacing-md);
+    inset: auto 0 0;
+    height: 34px;
+    padding: 7px 30px;
+    z-index: 200;
+    background: transparent;
+    :global(.mantine-Text-root) {
+        font-size: 12px;
     }
 }
-
 .footerContent {
     justify-content: end;
-
-    @media (max-width: $mantine-breakpoint-xs) {
+    gap: 14px;
+}
+@media (max-width: 36em) {
+    .footerContainer {
+        padding: 7px 12px;
+    }
+    .footerContent {
         justify-content: center;
+        gap: 10px;
     }
 }

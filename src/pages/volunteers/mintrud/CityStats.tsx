@@ -1,8 +1,9 @@
 import { Table, Text } from "@mantine/core"
 import { FormattedMessage, useIntl } from "react-intl"
-import type { CityStatistics, CityStatItem } from "@russian-rs/portal-api-axios"
+import type { CityStatistics, CityStatItem } from "@rds-network/portal-api-axios"
 import { Locale } from "src/shared/constants/Locales"
 import { locales } from "../lib/locales"
+import classes from "./MintrudReport.module.scss"
 import { CityStatsChart } from "./MintrudCharts"
 
 const TOP_CITIES = 10
@@ -32,7 +33,7 @@ export default function CityStats({ data }: { data?: CityStatistics }) {
                 <FormattedMessage id={locales.cityStats} />
             </Text>
 
-            <Table withColumnBorders striped highlightOnHover>
+            <Table className={classes.table} withColumnBorders striped highlightOnHover>
                 <Table.Thead>
                     <Table.Tr>
                         <Table.Th>

@@ -1,19 +1,12 @@
+@use "../../../app/styles/surfaces" as s;
+
 $table-width: 100%;
 
 .root {
-    padding: 1rem 1rem 2rem 2rem;
+    width: 100%;
+    min-width: 0;
     flex-direction: column;
-    row-gap: 1rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-    overflow-x: auto;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: 0.5rem;
-    }
-
-    @media (max-width: 1439px) and (min-width: 1024px) {
-        padding: 1rem 0.5rem 2rem 1rem;
-    }
+    gap: 24px;
 }
 
 .loader {
@@ -22,22 +15,57 @@ $table-width: 100%;
 }
 
 .title {
-    font-size: x-large;
-    font-weight: bolder;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        font-size: large;
-        text-align: center;
-    }
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--portal-ink);
 }
 
 .chartTitle {
-    font-size: small;
-    font-weight: bolder;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 600;
     text-align: center;
+    min-height: 42px;
+}
 
-    @media (max-width: $mantine-breakpoint-md) {
-        font-size: x-small;
-        text-align: center;
+.chartGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 20px;
+}
+
+.chartCard {
+    @include s.glass;
+    min-width: 0;
+    padding: 20px 12px;
+    color: var(--portal-muted);
+}
+
+.table {
+    table-layout: fixed;
+    th:first-child {
+        width: 50%;
     }
+    th,
+    td {
+        overflow-wrap: anywhere;
+    }
+    @media (max-width: 36em) {
+        th:first-child {
+            width: 44%;
+        }
+        th,
+        td {
+            padding-inline: 10px;
+            font-size: 12px;
+        }
+    }
+}
+
+.totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    max-width: 640px;
 }

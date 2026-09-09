@@ -1,5 +1,5 @@
 import { Avatar, Flex, ScrollArea, Text } from "@mantine/core"
-import { TaskDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { TaskDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconClock, IconLink, IconLanguage } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import React from "react"

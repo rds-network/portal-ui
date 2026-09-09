@@ -1,21 +1,22 @@
-import { Box, Button, Card, Checkbox, CloseButton, Flex, Input, Pagination, Skeleton, Table, Text } from "@mantine/core"
-import { ApplicationsFilter, PageRequest } from "@russian-rs/portal-api-axios"
-import { IconFilterOff, IconUfo } from "@tabler/icons-react"
+import { Box, Button, Card, Switch, CloseButton, Flex, Input, Pagination, Skeleton, Table, Text } from "@mantine/core"
+import { ApplicationsFilter, PageRequest } from "@rds-network/portal-api-axios"
+import { IconFilterOff, IconSearch, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import React, { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
+import { ApplicationAssigneeFilter } from "src/pages/applications/assignee/ApplicationAssigneeFilter"
 import { allowedRoles } from "src/pages/applications/lib/roles"
+import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { ApplicationRow } from "src/pages/applications/row/ApplicationRow"
 import { CreateUser } from "src/pages/users/createUser/CreateUser"
 import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
-import { useDesktop, useScreenSize } from "src/shared/hooks/useDesktop"
+import { useScreenSize } from "src/shared/hooks/useDesktop"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
-import CustomLoader from "src/shared/ui/loading/CustomLoader"
 import { hasPermission } from "src/shared/user/roles"
 import classes from "./Applications.module.scss"
-import { defaultFilter, defaultPage, defaultPageResponse } from "./lib/defaults"
+import { defaultPage, defaultPageResponse, UNASSIGNED_ASSIGNEE } from "./lib/defaults"
 import { locales } from "./lib/locales"
 
 const SkeletonCard = () => (
@@ -52,102 +53,64 @@ export const Applications = () => {
     const [searchParams, setSearchParams] = useSearchParams()
     const intl = useIntl()
 
-    // Инициализация состояния из URL параметров
-    const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
-    const [debouncedSearch, setDebouncedSearch] = useState(searchQuery)
-
-    const isDesktop = useDesktop()
+    const debouncedSearch = searchParams.get("search") || ""
+    const [searchQuery, setSearchQuery] = useState(debouncedSearch)
     const { shouldShowTable, isLargeDesktop, isMobile } = useScreenSize()
-
-    const [pageRequest, setPageRequest] = useState<PageRequest>({
+    const requestedPage = Number(searchParams.get("page") || "1")
+    const pageRequest: PageRequest = {
         ...defaultPage,
-        pageNumber: Math.max(0, parseInt(searchParams.get("page") || "1") - 1),
+        pageNumber: Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage - 1 : 0,
         pageSize: isMobile ? 10 : 25,
-    })
-    const [filter, setFilter] = useState<ApplicationsFilter>({
-        ...defaultFilter,
-        showCompleted: searchParams.get("showCompleted") === "true",
-    })
-
-    // Ref для скролла к началу списка
-    const listStartRef = React.useRef<HTMLDivElement>(null)
-
-    // Функция для синхронизации состояния с URL параметрами
-    const syncStateFromUrl = () => {
-        const urlSearch = searchParams.get("search") || ""
-        const urlShowCompleted = searchParams.get("showCompleted") === "true"
-        const urlPageFromUser = parseInt(searchParams.get("page") || "1")
-        const urlPage = urlPageFromUser > 0 ? urlPageFromUser - 1 : 0
-
-        setSearchQuery(urlSearch)
-        setDebouncedSearch(urlSearch)
-        setFilter({ ...filter, showCompleted: urlShowCompleted })
-        setPageRequest({ ...pageRequest, pageNumber: urlPage })
     }
+    const filter: ApplicationsFilter = {
+        showCompleted: searchParams.get("showCompleted") === "true",
+        assignee: searchParams.get("unassigned") === "true" ? undefined : searchParams.get("assignee") || undefined,
+        unassigned: searchParams.get("unassigned") === "true" || undefined,
+    }
+    const listStartRef = React.useRef<HTMLDivElement>(null)
+    const previousIsMobile = React.useRef(isMobile)
 
-    // Эффект для обработки навигации назад/вперед браузера
-    useEffect(() => {
-        const handlePopState = () => {
-            syncStateFromUrl()
-        }
-
-        window.addEventListener("popstate", handlePopState)
-        return () => window.removeEventListener("popstate", handlePopState)
-    }, [searchParams])
-
-    // Функция для обновления URL параметров
-    const updateUrlParams = (newSearch: string, newShowCompleted: boolean, newPage: number = 0) => {
+    // URL is the source of truth for filters and pagination, including back/forward navigation.
+    const updateUrlParams = (newSearch: string, newFilter: ApplicationsFilter, newPage = 0) => {
         const params = new URLSearchParams()
-
-        if (newSearch.trim()) {
-            params.set("search", newSearch.trim())
-        }
-
-        if (newShowCompleted) {
-            params.set("showCompleted", "true")
-        }
-
-        if (newPage > 0) {
-            const userPageNumber = newPage + 1
-            params.set("page", userPageNumber.toString())
-        }
-
+        if (newSearch.trim()) params.set("search", newSearch.trim())
+        if (newFilter.showCompleted) params.set("showCompleted", "true")
+        if (newFilter.unassigned) params.set("unassigned", "true")
+        else if (newFilter.assignee) params.set("assignee", newFilter.assignee)
+        if (newPage > 0) params.set("page", (newPage + 1).toString())
         setSearchParams(params)
     }
 
-    // Debounce search input by 500ms
     useEffect(() => {
-        const handler = setTimeout(() => {
-            setPageRequest({ ...pageRequest, pageNumber: 0 })
-            setDebouncedSearch(searchQuery.trim())
-        }, 500)
-        return () => clearTimeout(handler)
-    }, [searchQuery])
-
-    // Эффект для обновления URL при изменении debouncedSearch
-    useEffect(() => {
-        updateUrlParams(debouncedSearch, filter.showCompleted, pageRequest.pageNumber || 0)
+        setSearchQuery(debouncedSearch)
     }, [debouncedSearch])
 
-    // Эффект для обновления URL при изменении фильтра
     useEffect(() => {
-        updateUrlParams(debouncedSearch, filter.showCompleted, 0)
-        setPageRequest({ ...pageRequest, pageNumber: 0 })
-    }, [filter.showCompleted])
+        if (searchQuery.trim() === debouncedSearch) return
+        const handler = setTimeout(() => {
+            setSearchParams((previous) => {
+                const params = new URLSearchParams(previous)
+                if (searchQuery.trim()) params.set("search", searchQuery.trim())
+                else params.delete("search")
+                params.delete("page")
+                return params
+            })
+        }, 500)
+        return () => clearTimeout(handler)
+    }, [searchQuery, debouncedSearch, setSearchParams])
 
-    // Эффект для обновления URL при изменении страницы
     useEffect(() => {
-        const pageNumber = pageRequest.pageNumber || 0
-        updateUrlParams(debouncedSearch, filter.showCompleted, pageNumber)
-    }, [pageRequest.pageNumber])
-
-    // Эффект для обновления размера страницы при изменении типа устройства
-    useEffect(() => {
-        const newPageSize = isMobile ? 10 : 25
-        if (pageRequest.pageSize !== newPageSize) {
-            setPageRequest({ ...pageRequest, pageSize: newPageSize, pageNumber: 0 })
-        }
-    }, [isMobile])
+        if (previousIsMobile.current === isMobile) return
+        previousIsMobile.current = isMobile
+        setSearchParams(
+            (previous) => {
+                const params = new URLSearchParams(previous)
+                params.delete("page")
+                return params
+            },
+            { replace: true }
+        )
+    }, [isMobile, setSearchParams])
 
     // Эффект для скролла при смене страницы в мобильной версии
     useEffect(() => {
@@ -183,69 +146,90 @@ export const Applications = () => {
         let count = 0
         if (debouncedSearch.trim()) count += 1
         if (filter.showCompleted) count += 1
+        if (filter.assignee || filter.unassigned) count += 1
         return count
-    }, [debouncedSearch, filter.showCompleted])
+    }, [debouncedSearch, filter.showCompleted, filter.assignee, filter.unassigned])
 
     const resetFilters = () => {
         setSearchQuery("")
-        setDebouncedSearch("")
-        setFilter(defaultFilter)
-        setPageRequest({ ...pageRequest, pageNumber: 0 })
-        updateUrlParams("", false, 0)
+        updateUrlParams("", { showCompleted: false })
     }
 
-    const rows = content.map((application) => <ApplicationRow key={application.id} applicationDto={application} />)
+    const { data: assigneeUsers = {} } = resolveUsers(content.map((application) => application.assignee))
+
+    const rows = content.map((application) => (
+        <ApplicationRow
+            key={application.id}
+            applicationDto={application}
+            assigneeUser={assigneeUsers[application.assignee || ""]}
+        />
+    ))
 
     return (
-        <Flex direction="column">
-            <CustomLoader visible={isFetching} className={classes.loader} />
-            <Flex className={classes.root}>
+        <Flex className={classes.root}>
+            <Flex direction="column" gap={24} miw={0}>
                 <Text className={classes.title} variant="gradient">
                     <FormattedMessage id={locales.title} />
                 </Text>
                 <div ref={listStartRef} />
-                <Flex direction="column" gap={8}>
-                    <Flex columnGap="8" className={classes.controls} wrap="wrap">
-                        <Flex align="center" columnGap="8" className={classes.searchGroup}>
-                            <Input
-                                placeholder={intl.formatMessage({ id: locales.search })}
-                                value={searchQuery}
-                                onChange={(event) => setSearchQuery(event.currentTarget.value)}
-                                rightSectionPointerEvents="all"
-                                size={!isDesktop ? "md" : "sm"}
-                                rightSection={
-                                    <CloseButton
-                                        aria-label="Clear input"
-                                        onClick={() => setSearchQuery("")}
-                                        style={{ display: searchQuery ? undefined : "none" }}
-                                    />
-                                }
-                                className={classes.searchInput}
-                            />
-                            <CreateUser />
-                        </Flex>
-                        <Checkbox
-                            variant="outline"
-                            labelPosition={isMobile ? "right" : "left"}
+                <Box className={classes.filterPanel}>
+                    <div className={classes.controls}>
+                        <Input
+                            aria-label={intl.formatMessage({ id: locales.search })}
+                            placeholder={intl.formatMessage({ id: locales.search })}
+                            leftSection={<IconSearch size={18} aria-hidden="true" />}
+                            leftSectionPointerEvents="none"
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                            rightSectionPointerEvents="all"
+                            size="sm"
+                            radius="md"
+                            rightSection={
+                                <CloseButton
+                                    aria-label="Clear input"
+                                    onClick={() => setSearchQuery("")}
+                                    style={{ display: searchQuery ? undefined : "none" }}
+                                />
+                            }
+                            className={classes.searchInput}
+                        />
+                        <ApplicationAssigneeFilter
+                            value={filter.unassigned ? UNASSIGNED_ASSIGNEE : filter.assignee || null}
+                            onChange={(assignee) =>
+                                updateUrlParams(debouncedSearch, {
+                                    ...filter,
+                                    assignee: assignee === UNASSIGNED_ASSIGNEE ? undefined : assignee || undefined,
+                                    unassigned: assignee === UNASSIGNED_ASSIGNEE || undefined,
+                                })
+                            }
+                            size="sm"
+                            className={classes.assigneeFilter}
+                        />
+                        <CreateUser withLabel size="sm" className={classes.addUserButton} />
+                    </div>
+                    <Flex className={classes.secondaryControls}>
+                        <Switch
                             label={<FormattedMessage id={locales.showCompleted} />}
                             checked={filter.showCompleted}
-                            onChange={() => setFilter({ ...filter, showCompleted: !filter.showCompleted })}
-                            size={isMobile ? "md" : "sm"}
+                            onChange={() =>
+                                updateUrlParams(debouncedSearch, { ...filter, showCompleted: !filter.showCompleted })
+                            }
+                            size="sm"
+                            className={classes.completedSwitch}
                         />
-                        {activeFiltersCount > 0 && (
-                            <Button
-                                variant="transparent"
-                                size={isMobile ? "md" : "sm"}
-                                leftSection={<IconFilterOff size={16} />}
-                                onClick={resetFilters}
-                            >
-                                <Text size="sm">
-                                    <FormattedMessage id={locales.resetFilters} />
-                                </Text>
-                            </Button>
-                        )}
+                        <Button
+                            variant="subtle"
+                            size="compact-sm"
+                            radius="md"
+                            leftSection={<IconFilterOff size={16} aria-hidden="true" />}
+                            onClick={resetFilters}
+                            disabled={activeFiltersCount === 0 && !searchQuery}
+                            className={classes.resetButton}
+                        >
+                            <FormattedMessage id={locales.resetFilters} />
+                        </Button>
                     </Flex>
-                </Flex>
+                </Box>
                 {shouldShowTable ? (
                     <Table stickyHeader highlightOnHover className={classes.table}>
                         <Table.Thead>
@@ -283,7 +267,12 @@ export const Applications = () => {
                             </>
                         ) : (
                             content.map((application) => (
-                                <ApplicationRow key={application.id} applicationDto={application} isMobile={true} />
+                                <ApplicationRow
+                                    key={application.id}
+                                    applicationDto={application}
+                                    assigneeUser={assigneeUsers[application.assignee || ""]}
+                                    isMobile={true}
+                                />
                             ))
                         )}
                     </Flex>
@@ -306,7 +295,7 @@ export const Applications = () => {
                         disabled={isFetching}
                         onChange={(newPage) => {
                             const pageNumber = newPage - 1
-                            setPageRequest({ ...pageRequest, pageNumber })
+                            updateUrlParams(debouncedSearch, filter, pageNumber)
                         }}
                         siblings={isMobile ? 0 : 1}
                     />

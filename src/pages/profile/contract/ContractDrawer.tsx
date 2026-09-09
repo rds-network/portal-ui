@@ -2,7 +2,7 @@ import { ActionIcon, Button, Drawer, Flex, Group } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { ContractDto, ContractTypeEnum } from "@russian-rs/portal-api-axios"
+import { ContractDto, ContractTypeEnum } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconDeviceFloppy, IconPlus, IconTrash } from "@tabler/icons-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -151,7 +151,7 @@ export const ContractDrawer = ({ opened, onClose, onSuccess, userId, contracts }
                                 style={{
                                     position: "relative",
                                     padding: "16px",
-                                    border: "1px solid var(--mantine-color-gray-3)",
+                                    border: "1px solid var(--portal-border)",
                                     borderRadius: "var(--mantine-radius-sm)",
                                 }}
                             >
@@ -223,7 +223,7 @@ export const ContractDrawer = ({ opened, onClose, onSuccess, userId, contracts }
                             justify="center"
                             style={{
                                 padding: "32px",
-                                border: "1px dashed var(--mantine-color-gray-3)",
+                                border: "1px dashed var(--portal-border)",
                                 borderRadius: "var(--mantine-radius-sm)",
                             }}
                         >
