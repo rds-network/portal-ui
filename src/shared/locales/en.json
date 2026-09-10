@@ -834,6 +834,13 @@
             },
             "total": "Total",
             "empty": "No data for the selected year",
+            "cities": {
+                "city-stats": "Statistics by settlement",
+                "city": "Settlement",
+                "city-other": "Other settlements",
+                "by-cities": "By settlement",
+                "without-city": "No settlement specified"
+            },
             "statGroups": {
                 "SOCIJALNA_ZASTITA": "Social protection",
                 "MEDIJI_I_KOMUNIKACIJE": "Media and communications",
@@ -844,7 +851,8 @@
             "charts": {
                 "age": "Age distribution",
                 "gender": "Gender distribution",
-                "citizenship": "Citizenship status"
+                "citizenship": "Citizenship status",
+                "cities": "Top {count} settlements"
             }
         }
     },

@@ -229,3 +229,39 @@ export function FinalUsersChart({ stats }: { stats?: Statistics }) {
         </div>
     )
 }
+const CITY_BAR_HEIGHT = 28
+
+export function CityStatsChart({ data }: { data: { name: string; value: number }[] }) {
+    const reducedMotion = useReducedMotion()
+    if (!data.length) return null
+
+    return (
+        <div className={classes.chartCard}>
+            <Text className={classes.chartTitle}>
+                <FormattedMessage id={locales.cityStatsTitle} values={{ count: data.length }} />
+            </Text>
+            <ResponsiveContainer width="100%" height={data.length * CITY_BAR_HEIGHT + 40}>
+                <BarChart data={data} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--portal-border)" />
+                    <XAxis type="number" allowDecimals={false} tick={{ fontSize: 12, fill: "var(--portal-muted)" }} />
+                    <YAxis
+                        type="category"
+                        dataKey="name"
+                        width={140}
+                        interval={0}
+                        tick={{ fontSize: 12, fill: "var(--portal-muted)" }}
+                    />
+                    <Tooltip
+                        contentStyle={{
+                            background: "var(--portal-solid)",
+                            border: "1px solid var(--portal-border)",
+                            borderRadius: 12,
+                            color: "var(--portal-ink)",
+                        }}
+                    />
+                    <Bar dataKey="value" fill={COLORS[0]} isAnimationActive={!reducedMotion} radius={[0, 5, 5, 0]} />
+                </BarChart>
+            </ResponsiveContainer>
+        </div>
+    )
+}
