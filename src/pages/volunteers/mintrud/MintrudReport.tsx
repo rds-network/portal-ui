@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState, useEffect } from "react"
-import { Flex, Text, Table, NumberInput, Card, Group, Button } from "@mantine/core"
+import { Flex, Text, Table, Select, Card, Group, Button } from "@mantine/core"
 import { useIntl, FormattedMessage } from "react-intl"
 import { useQuery } from "@tanstack/react-query"
 import { useSearchParams, useNavigate } from "react-router"
@@ -100,6 +100,11 @@ export default function MintrudReport() {
 
     const otherDisplayValue = (stats?.finalUsersStatistics?.totalCount ?? 0) - totalNonOther
 
+    // Select, а не NumberInput: числовое поле отдаёт промежуточное значение ввода («999») в onChange
+    // до blur, и запросы уходят с ним; clampBehavior="strict" это лечит, но обрезает год с первой
+    // же набранной цифры, поэтому набрать «2024» становится нельзя
+    const yearOptions = Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => String(currentYear - i))
+
     return (
         <Flex direction="column">
             <Flex className={classes.root} direction="column" gap={16}>
@@ -112,14 +117,11 @@ export default function MintrudReport() {
                     <Text size="sm" c="dimmed">
                         <FormattedMessage id={locales.yearLabel} />
                     </Text>
-                    <NumberInput
-                        value={year}
-                        onChange={(v) => setYear(Number(v) || year)}
-                        min={MIN_YEAR}
-                        max={currentYear}
-                        step={1}
-                        allowDecimal={false}
-                        allowNegative={false}
+                    <Select
+                        value={String(year)}
+                        onChange={(v) => v && setYear(Number(v))}
+                        data={yearOptions}
+                        allowDeselect={false}
                         w={120}
                         disabled={isFetching}
                     />
