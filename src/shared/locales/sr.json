@@ -271,7 +271,15 @@
             "buttons": {
                 "edit": "Uredi",
                 "editTooltip": "Ova funkcionalnost je u razvoju, za uređivanje pogledajte podršku",
-                "save": "Sačuvaj"
+                "save": "Sačuvaj",
+                "idCard": "ID kartica volontera"
+            },
+            "idCard": {
+                "title": "ID kartica volontera",
+                "orgSubtitle": "Udruženje građana",
+                "orgName": "RUSKA DIJASPORA U SRBIJI",
+                "cardType": "Volonterska legitimacija",
+                "program": "Program"
             },
             "updateError": "Došlo je do greške",
             "profileUpdated": "Profil je uspešno izmenjen",

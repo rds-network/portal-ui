@@ -1,4 +1,4 @@
-import { Badge, Button, Container, Drawer, Flex, Select, Text, TextInput, Tooltip } from "@mantine/core"
+import { Badge, Button, Container, Drawer, Flex, Modal, Select, Text, TextInput, Tooltip } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
@@ -14,6 +14,7 @@ import {
     IconInfoCircle,
     IconMail,
     IconMapPin,
+    IconIdBadge,
     IconPencil,
     IconPhone,
 } from "@tabler/icons-react"
@@ -40,6 +41,7 @@ import { ProgramSelectInline } from "../select/ProgramSelect"
 import { ProjectSelectInline } from "../select/ProjectSelect"
 import classes from "./ProfileInfo.module.scss"
 import { IDBadge } from "src/shared/ui/badges/IDBadge"
+import { VolunteerIDCard } from "src/pages/profile/idCard/VolunteerIDCard"
 
 interface ProfileInfoProps {
     userInfo: UserInfoDto | undefined
@@ -50,6 +52,7 @@ interface ProfileInfoProps {
 export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: ProfileInfoProps) => {
     const { user: currentUser, setUser } = useContext(UserContext)
     const [opened, { open, close }] = useDisclosure(false)
+    const [idCardOpened, { open: openIDCard, close: closeIDCard }] = useDisclosure(false)
     const intl = useIntl()
     const locale = intl.locale as Locale
 
@@ -421,6 +424,15 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     className={classes.propertyBox}
                 />
             )}
+            <Button
+                onClick={openIDCard}
+                className={classes.button}
+                variant="light"
+                color="teal"
+                rightSection={<IconIdBadge size={14} />}
+            >
+                <FormattedMessage id={"pages.profile.buttons.idCard"} />
+            </Button>
             {(userInfo?.id === currentUser?.id ||
                 hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])) && (
                 <Button
@@ -432,6 +444,15 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     <FormattedMessage id={"pages.profile.buttons.edit"} />
                 </Button>
             )}
+            <Modal
+                opened={idCardOpened}
+                onClose={closeIDCard}
+                title={<FormattedMessage id="pages.profile.idCard.title" />}
+                centered
+                size="auto"
+            >
+                <VolunteerIDCard userInfo={userInfo} />
+            </Modal>
             <Drawer opened={opened} onClose={close} title={<FormattedMessage id="pages.profile.documentTitle" />}>
                 <form
                     onSubmit={(e) => {

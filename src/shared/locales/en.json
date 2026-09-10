@@ -271,7 +271,15 @@
             "buttons": {
                 "edit": "Edit",
                 "editTooltip": "This functionality is under development, please contact support for editing",
-                "save": "Save"
+                "save": "Save",
+                "idCard": "Volunteer ID Card"
+            },
+            "idCard": {
+                "title": "Volunteer ID Card",
+                "orgSubtitle": "Civic Association",
+                "orgName": "RUSSIAN DIASPORA IN SERBIA",
+                "cardType": "Volunteer Certificate",
+                "program": "Program"
             },
             "updateError": "Error when updating profile",
             "profileUpdated": "Profile updated successfully",
