@@ -1,4 +1,4 @@
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
 
@@ -43,16 +43,8 @@ export const mapValuesToRequest = (values: Record<string, any>, currentState: Ap
     if (values["occupation"]) {
         request.occupation = values["occupation"]
     }
-    if (values["program"]) {
-        request.program = values["program"]
-    } else {
-        delete request.program
-    }
-    if (values["project"]) {
-        request.project = values["project"]
-    } else {
-        delete request.project
-    }
+    delete request.program
+    delete request.project
     if (values["experience"]) {
         request.experience = values["experience"]
     }

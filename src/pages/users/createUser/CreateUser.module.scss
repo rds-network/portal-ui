@@ -13,3 +13,13 @@
 .contractUntil {
     flex: 1;
 }
+
+.fieldRow {
+    gap: 16px;
+    > div {
+        min-width: 0;
+    }
+    @media (max-width: 36em) {
+        flex-direction: column;
+    }
+}

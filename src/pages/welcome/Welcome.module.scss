@@ -1,84 +1,81 @@
+@use "../../app/styles/surfaces" as s;
 .rootFlex {
     width: 100%;
-    height: calc(100dvh - var(--mantine-spacing-md) * 6);
-    padding-top: var(--mantine-spacing-xl);
-    padding-bottom: var(--mantine-spacing-md);
+    min-height: 70vh;
+    animation: portal-enter 500ms ease both;
 }
-
 .contentFlex {
     width: 100%;
+    :global(.mantine-Container-root) {
+        max-width: 1200px;
+        width: 100%;
+    }
 }
-
 .title {
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-    font-size: rem(42px);
-    line-height: 1.2;
-    font-weight: 900;
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        font-size: rem(28px);
-    }
+    font-size: clamp(36px, 4.4vw, 64px);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.055em;
+    color: var(--portal-ink);
 }
-
 .highlight {
-    position: relative;
-    background-color: var(--mantine-color-blue-light);
-    padding: 0.5rem 2rem;
+    padding: 0;
+    background: transparent;
+    max-width: 650px;
 }
-
-.list {
-    padding-right: rem(64px);
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        font-size: rem(14px);
-        padding-right: 0;
-    }
-}
-
 .description {
-    padding: rem(12px) rem(48px) rem(12px) rem(32px);
-    font-size: var(--mantine-h4-font-size);
+    font-size: 18px;
+    line-height: 1.65;
+    margin: 24px 0 32px;
+    max-width: 560px;
 }
-
+.list {
+    font-size: 15px;
+    line-height: 1.7;
+    max-width: 640px;
+    padding: 28px;
+    @include s.glass;
+}
 .controlGroup {
-    padding-top: rem(24px);
-    padding-left: rem(32px);
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        padding-left: 0;
+    margin-top: 28px;
+    gap: 12px;
+}
+.control {
+    min-height: 48px;
+    padding-inline: 24px;
+}
+.artwork {
+    align-self: center;
+    position: relative;
+    margin-left: 60px;
+    min-width: 280px;
+    padding: 36px;
+    border-radius: 38% 62% 60% 40% / 47% 39% 61% 53%;
+    background: linear-gradient(135deg, #a9daca55, #8fb8eb88);
+    box-shadow:
+        inset 0 0 0 1px #ffffff55,
+        0 40px 100px #487f9120;
+}
+.image {
+    width: 360px;
+}
+.iconCheck {
+    width: 12px;
+    height: 12px;
+}
+.login {
+    color: inherit;
+}
+@media (max-width: 64em) {
+    .artwork {
+        display: none;
     }
 }
-
-.control {
-    @media (max-width: $mantine-breakpoint-md) {
+@media (max-width: 36em) {
+    .list {
+        padding: 20px;
+    }
+    .control {
         flex: 1;
     }
-}
-
-.image {
-    width: rem(400px);
-
-    @media (max-width: $mantine-breakpoint-md) {
-        display: none;
-    }
-}
-
-.iconCheck {
-    width: rem(12);
-    height: rem(12);
-}
-
-.dots {
-    position: absolute;
-    color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
-
-    margin-top: rem(100px);
-
-    @media (max-width: $mantine-breakpoint-xl) {
-        display: none;
-    }
-}
-
-.login {
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
 }

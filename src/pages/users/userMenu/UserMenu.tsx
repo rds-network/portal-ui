@@ -1,5 +1,5 @@
 import { Loader, Menu } from "@mantine/core"
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 import {
     IconCheckupList,
     IconDotsVertical,

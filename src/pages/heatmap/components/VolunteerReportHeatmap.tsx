@@ -1,5 +1,5 @@
 import { Box, Flex, Group, Text } from "@mantine/core"
-import { VolunteerHeatMapItem } from "@russian-rs/portal-api-axios"
+import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import React, { useMemo } from "react"
 import { FormattedMessage } from "react-intl"

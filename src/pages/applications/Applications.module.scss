@@ -1,18 +1,11 @@
+@use "../../app/styles/surfaces" as s;
+
 $table-width: 100%;
 
 .root {
-    padding: 1rem 1rem 2rem 2rem;
+    @include s.page;
     flex-direction: column;
-    row-gap: 1rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: 0.5rem;
-    }
-
-    @media (max-width: 1439px) and (min-width: 1024px) {
-        padding: 1rem 0.5rem 2rem 1rem;
-    }
+    gap: 24px;
 }
 
 .loader {
@@ -21,13 +14,7 @@ $table-width: 100%;
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        font-size: x-large;
-        text-align: center;
-    }
+    @include s.title;
 }
 
 .table {
@@ -66,8 +53,8 @@ $table-width: 100%;
     th:nth-child(5),
     td:nth-child(5) {
         // Меню и заметки
-        width: 80px;
-        min-width: 80px;
+        width: 120px;
+        min-width: 120px;
     }
 
     // Адаптация для экранов 1024-1439px
@@ -113,8 +100,8 @@ $table-width: 100%;
         th:nth-child(5),
         td:nth-child(5) {
             // Меню и заметки
-            width: 80px;
-            min-width: 80px;
+            width: 120px;
+            min-width: 120px;
         }
     }
 
@@ -161,44 +148,85 @@ $table-width: 100%;
         th:nth-child(5),
         td:nth-child(5) {
             // Меню и заметки
-            width: 80px;
-            min-width: 80px;
+            width: 120px;
+            min-width: 120px;
         }
     }
 }
 
-.controls {
-    align-items: center;
-    column-gap: 8px;
+.filterPanel {
+    padding: 10px 12px;
+    border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+    border-radius: var(--mantine-radius-md);
+    background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
 
-    @media (max-width: $mantine-breakpoint-md) {
-        flex-direction: column;
-        align-items: flex-start;
-        row-gap: 0.75rem;
-        column-gap: 0;
+    @media (max-width: $mantine-breakpoint-sm) {
+        padding: 10px;
+    }
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+        padding: 18px;
+    }
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: minmax(240px, 1.3fr) minmax(200px, 1fr) auto;
+    gap: 8px;
+    align-items: center;
+
+    @media (max-width: 1200px) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     @media (max-width: $mantine-breakpoint-sm) {
-        row-gap: 1rem;
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
-.searchGroup {
-    @media (max-width: $mantine-breakpoint-md) {
-        flex: 1;
+.searchInput,
+.assigneeFilter {
+    width: 100%;
+    min-width: 0;
+}
+
+.addUserButton {
+    @media (max-width: 1200px) {
+        grid-column: 1 / -1;
+        justify-self: end;
+    }
+
+    @media (max-width: $mantine-breakpoint-sm) {
         width: 100%;
     }
 }
 
-.searchInput {
-    flex: 1;
-    min-width: 280px;
-    max-width: 500px;
+.secondaryControls {
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+}
 
-    @media (max-width: $mantine-breakpoint-md) {
-        width: 100%;
-        min-width: auto;
-        max-width: none;
+.completedSwitch {
+    label,
+    input {
+        cursor: pointer;
+    }
+}
+
+.resetButton {
+    margin-left: auto;
+
+    &:disabled {
+        background: transparent;
     }
 }
 
@@ -227,6 +255,16 @@ $table-width: 100%;
 
     @media (max-width: $mantine-breakpoint-xs) {
         column-gap: 0.5rem;
+    }
+
+    & {
+        background: var(--portal-solid);
+        border-color: var(--portal-border);
+        box-shadow: 0 -4px 20px #173b4308;
+        border-radius: 0;
+        padding: 16px;
+        flex-wrap: wrap;
+        row-gap: 12px;
     }
 }
 

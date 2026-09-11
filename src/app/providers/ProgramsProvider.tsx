@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ProgramDto, ProgramsApi } from "@russian-rs/portal-api-axios"
+import { ProgramDto, ProgramsApi } from "@rds-network/portal-api-axios"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 
 export const ProgramsContext = createContext<ProgramDto[]>([])

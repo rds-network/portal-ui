@@ -1,36 +1,55 @@
 .control {
-    font-weight: 500;
-    display: block;
+    font-weight: 450;
     width: 100%;
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-    color: var(--mantine-color-text);
-    font-size: var(--mantine-font-size-sm);
-
+    padding: 12px 8px;
+    margin-top: 5px;
+    color: #dbe8f3;
+    font-size: 14px;
+    border-radius: 12px;
+    transition: background 180ms ease;
     &:hover {
-        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
-        color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+        background: #ffffff0b;
+        color: white;
+    }
+    :global(.mantine-ThemeIcon-root) {
+        color: #a4cfe8;
+        background: #ffffff0a;
     }
 }
-
 .link {
-    font-weight: 500;
     display: block;
+    padding: 11px 12px 11px 18px;
+    margin: 3px 0 3px 16px;
+    border-radius: 11px;
+    color: #bdcfdf;
     text-decoration: none;
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-    padding-left: var(--mantine-spacing-md);
-    margin-left: var(--mantine-spacing-xl);
-    font-size: var(--mantine-font-size-sm);
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
-    border-left: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.45;
+    transition:
+        background 180ms ease,
+        color 180ms ease,
+        transform 180ms ease;
     &:hover {
-        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
-        color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+        background: #ffffff0b;
+        color: white;
+        transform: translateX(2px);
+    }
+    &[aria-current="page"] {
+        color: #eef8ff;
+        background: linear-gradient(110deg, #397fac77, #3c928322);
+        box-shadow:
+            inset 3px 0 #97d1f0,
+            inset 0 0 0 1px #97d1f020;
     }
 }
-
+.control[aria-current="page"] {
+    background: #ffffff12;
+    color: #b4ddf4;
+}
 .chevron {
     transition: transform 200ms ease;
-    width: 1rem;
-    height: 1rem;
+    width: 14px;
+    height: 14px;
+    opacity: 0.6;
 }

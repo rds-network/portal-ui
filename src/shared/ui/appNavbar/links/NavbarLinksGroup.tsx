@@ -6,9 +6,12 @@ import { UserContext } from "src/app/providers/UserContext"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 import classes from "src/shared/ui/appNavbar/links/NavbarLinksGroup.module.scss"
 import { hasPermission } from "src/shared/user/roles"
-import { Link } from "react-router"
+import { Link, useLocation } from "react-router"
 
 export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, roles }: ItemGroupProps) {
+    const location = useLocation()
+    const isActive = (path?: string) =>
+        location.pathname === path || (path === "/reports/personal" && location.pathname === "/")
     const hasChildren = Array.isArray(items)
     const { user } = useContext(UserContext)
     const [opened, setOpened] = useState(initiallyOpened || false)
@@ -23,7 +26,13 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, ro
                     <FormattedMessage id={item.label} />
                 </Anchor>
             ) : (
-                <Anchor component={Link} className={classes.link} to={item.link} key={item.label}>
+                <Anchor
+                    component={Link}
+                    className={classes.link}
+                    aria-current={isActive(item.link) ? "page" : undefined}
+                    to={item.link}
+                    key={item.label}
+                >
                     <FormattedMessage id={item.label} />
                 </Anchor>
             )
@@ -53,7 +62,12 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, ro
     return (
         <>
             {hasChildren || !link ? (
-                <UnstyledButton onClick={() => setOpened((o) => !o)} className={classes.control} component="button">
+                <UnstyledButton
+                    aria-expanded={opened}
+                    onClick={() => setOpened((o) => !o)}
+                    className={classes.control}
+                    component="button"
+                >
                     {controlContent}
                 </UnstyledButton>
             ) : isExternal ? (
@@ -67,7 +81,12 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, ro
                     {controlContent}
                 </UnstyledButton>
             ) : (
-                <UnstyledButton className={classes.control} component={Link} to={link}>
+                <UnstyledButton
+                    className={classes.control}
+                    component={Link}
+                    aria-current={isActive(link) ? "page" : undefined}
+                    to={link}
+                >
                     {controlContent}
                 </UnstyledButton>
             )}

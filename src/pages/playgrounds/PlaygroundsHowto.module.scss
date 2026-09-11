@@ -1,17 +1,14 @@
-.root {
-    padding: 1rem 2rem;
-    flex-direction: column;
-    row-gap: 1rem;
-    width: 48rem;
+@use "../../app/styles/surfaces" as s;
 
-    @media (max-width: $mantine-breakpoint-md) {
-        width: 100%;
-    }
+.root {
+    @include s.page;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1100px;
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
+    @include s.title;
 }
 
 .description {

@@ -4,7 +4,7 @@ import { useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
-import { ProgramDto } from "@russian-rs/portal-api-axios"
+import { ProgramDto } from "@rds-network/portal-api-axios"
 
 export function ProgramSelectInline({
     value,

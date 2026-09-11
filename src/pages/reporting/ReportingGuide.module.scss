@@ -1,28 +1,25 @@
-.root {
-    padding: 1rem 2rem;
-    flex-direction: column;
-    row-gap: 1rem;
-    width: 64rem;
+@use "../../app/styles/surfaces" as s;
 
-    @media (max-width: $mantine-breakpoint-md) {
-        width: 100%;
+.root {
+    @include s.page;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 960px;
+    line-height: 1.75;
+    img {
+        max-width: 100%;
+        border-radius: 16px;
     }
 
-    img {
-        max-width: 600px;
-        width: 100%;
-        height: auto;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin: 1rem 0;
-
-        @media (max-width: $mantine-breakpoint-md) {
-            max-width: 100%;
-        }
+    & {
+        @include s.glass;
+        @include s.prose;
+        width: calc(100% - 2 * var(--portal-page-padding));
+        padding: var(--portal-page-padding);
+        margin: var(--portal-page-top-gap) var(--portal-page-padding) var(--portal-page-padding);
     }
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
+    @include s.title;
 }

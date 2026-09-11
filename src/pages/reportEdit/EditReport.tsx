@@ -1,12 +1,19 @@
-import { Button, Flex, Text } from "@mantine/core"
+import { Anchor, Badge, Button, Flex, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { TaskDto } from "@russian-rs/portal-api-axios"
-import { IconChevronRight, IconDeviceFloppy, IconPlus } from "@tabler/icons-react"
+import { TaskDto } from "@rds-network/portal-api-axios"
+import {
+    IconArrowLeft,
+    IconCircleCheck,
+    IconChevronRight,
+    IconNotes,
+    IconDeviceFloppy,
+    IconPlus,
+} from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useLocation, useNavigate, useParams } from "react-router"
+import { Link, useLocation, useNavigate, useParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import classes from "src/pages/reportEdit/EditReport.module.scss"
 import { defaultTask } from "src/pages/reportEdit/lib/defaults"
@@ -32,7 +39,8 @@ export const EditReport = () => {
     const { user: currentUser } = useContext(UserContext)
     const editMode = useMemo(() => location.pathname.includes("edit"), [location])
 
-    const { tasks, setTasks, saveDraft, clearDraft } = useReportDraft(editMode)
+    const { tasks, setTasks, clearDraft } = useReportDraft(editMode)
+    const taskAddedRef = useRef(false)
     const taskRefs = useRef<{ [key: string]: React.RefObject<TaskCardInterface> }>({})
 
     const navigate = useNavigate()
@@ -51,11 +59,13 @@ export const EditReport = () => {
     })
 
     const handleTaskChange = (id: string, updatedTask: TaskDto) => {
-        saveDraft(tasks.map((task) => (task.id === id ? updatedTask : task)))
+        // Keep the rendered task collection in sync with the draft before adding or removing cards.
+        setTasks((current) => current.map((task) => (task.id === id ? updatedTask : task)))
     }
 
     const handleTaskAdd = () => {
         const task: TaskDto = { ...defaultTask, id: uuid() }
+        taskAddedRef.current = true
         setTasks([...tasks, task])
         taskRefs.current[task.id] = React.createRef()
     }
@@ -70,7 +80,7 @@ export const EditReport = () => {
     }
 
     const scrollToCard = (index: number) => {
-        if (index <= 0 && index >= tasks.length) {
+        if (index < 0 || index >= tasks.length) {
             return
         }
         const cardId = tasks[index].id
@@ -79,10 +89,11 @@ export const EditReport = () => {
     }
 
     useEffect(() => {
-        if (tasks.length > 1) {
+        if (taskAddedRef.current) {
+            taskAddedRef.current = false
             scrollToCard(tasks.length - 1)
         }
-    }, [tasks])
+    }, [tasks.length])
 
     useEffect(() => {
         if (editMode) {
@@ -159,65 +170,95 @@ export const EditReport = () => {
 
     return (
         <Flex direction="column" className={classes.root}>
-            <Text className={classes.title}>
-                <FormattedMessage id={editMode ? locales.titleEdit : locales.title} />
-            </Text>
-            <Text className={classes.description}>
-                <FormattedMessage id={locales.description} />
-            </Text>
-            <Flex direction="column" className={classes.taskContainer} rowGap={24}>
-                {tasks
-                    .sort((t1, t2) => {
-                        return dayjs(t1.date).diff(t2.date)
-                    })
-                    .map((task, index) => {
-                        if (!taskRefs.current[task.id]) {
-                            taskRefs.current[task.id] = React.createRef()
-                        }
-                        return (
-                            <TaskCard
-                                key={task.id}
-                                ref={taskRefs.current[task.id]}
-                                task={task}
-                                index={index}
-                                deletable={tasks.length > 1}
-                                editMode={editMode}
-                                onChange={handleTaskChange}
-                                onDelete={handleTaskDelete}
-                            />
-                        )
-                    })}
-            </Flex>
-            <Flex mt="md" className={classes.taskContainer}>
-                <Button
-                    className={classes.buttonAddTask}
-                    variant="transparent"
-                    rightSection={<IconPlus size={20} />}
-                    onClick={handleTaskAdd}
-                >
-                    <FormattedMessage id={locales.addButton} />
-                </Button>
-                <Button
-                    ml="auto"
-                    rightSection={editMode ? <IconDeviceFloppy size={18} /> : <IconChevronRight size={18} />}
-                    onClick={onSend}
-                    loading={isSending}
-                    disabled={isSending}
-                >
-                    <FormattedMessage id={editMode ? locales.saveButton : locales.sendButton} />
-                </Button>
-                <ConfirmActionModal
-                    opened={confirmModalOpened}
-                    onClose={() => {
-                        setConfirmModalOpened(false)
-                    }}
-                    onConfirm={sendReport}
-                    title={<FormattedMessage id={locales.confirmTitle} />}
-                    description={<FormattedMessage id={locales.confirmDescription} />}
-                    confirmButtonText={<FormattedMessage id={editMode ? locales.saveButton : locales.sendButton} />}
-                    cancelButtonText={<FormattedMessage id={locales.fillUpButton} />}
-                />
-            </Flex>
+            <Anchor component={Link} to="/reports/personal" className={classes.backLink}>
+                <IconArrowLeft size={16} />
+                <FormattedMessage id="design.backToReports" />
+            </Anchor>
+            <div className={classes.header}>
+                <Title order={1} className={classes.title}>
+                    <FormattedMessage id={editMode ? locales.titleEdit : locales.title} />
+                </Title>
+            </div>
+            <div className={classes.workspace}>
+                <div className={classes.taskContainer}>
+                    <Flex direction="column" rowGap={24}>
+                        {tasks
+                            .sort((t1, t2) => {
+                                return dayjs(t1.date).diff(t2.date)
+                            })
+                            .map((task, index) => {
+                                if (!taskRefs.current[task.id]) {
+                                    taskRefs.current[task.id] = React.createRef()
+                                }
+                                return (
+                                    <TaskCard
+                                        key={task.id}
+                                        ref={taskRefs.current[task.id]}
+                                        task={task}
+                                        index={index}
+                                        deletable={tasks.length > 1}
+                                        editMode={editMode}
+                                        onChange={handleTaskChange}
+                                        onDelete={handleTaskDelete}
+                                    />
+                                )
+                            })}
+                    </Flex>
+
+                    <Button
+                        className={classes.buttonAddTask}
+                        variant="light"
+                        rightSection={<IconPlus size={20} />}
+                        onClick={handleTaskAdd}
+                    >
+                        <FormattedMessage id={locales.addButton} />
+                    </Button>
+                </div>
+                <aside className={classes.summary}>
+                    <div className={classes.summaryHeading}>
+                        <IconNotes size={22} />
+                        <Title order={2} size="h4">
+                            <FormattedMessage id="design.reportSummary" />
+                        </Title>
+                    </div>
+                    <Badge variant="light" size="lg" mt="md">
+                        <FormattedMessage id="design.tasksCount" values={{ count: tasks.length }} />
+                    </Badge>
+                    <Text className={classes.description}>
+                        <FormattedMessage id={locales.description} />
+                    </Text>
+                    <div className={classes.draftHint}>
+                        <IconCircleCheck size={18} />
+                        <Text size="xs">
+                            <FormattedMessage id={editMode ? "design.editHint" : "design.draftHint"} />
+                        </Text>
+                    </div>
+                    <Button
+                        fullWidth
+                        size="md"
+                        rightSection={editMode ? <IconDeviceFloppy size={18} /> : <IconChevronRight size={18} />}
+                        onClick={onSend}
+                        loading={isSending}
+                        disabled={isSending}
+                    >
+                        <FormattedMessage id={editMode ? locales.saveButton : locales.sendButton} />
+                    </Button>
+                    <Anchor component={Link} to="/reporting-guide" className={classes.guideLink}>
+                        <FormattedMessage id="design.reportGuide" />
+                    </Anchor>
+                </aside>
+            </div>
+            <ConfirmActionModal
+                opened={confirmModalOpened}
+                onClose={() => {
+                    setConfirmModalOpened(false)
+                }}
+                onConfirm={sendReport}
+                title={<FormattedMessage id={locales.confirmTitle} />}
+                description={<FormattedMessage id={locales.confirmDescription} />}
+                confirmButtonText={<FormattedMessage id={editMode ? locales.saveButton : locales.sendButton} />}
+                cancelButtonText={<FormattedMessage id={locales.fillUpButton} />}
+            />
         </Flex>
     )
 }

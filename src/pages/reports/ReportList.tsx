@@ -1,5 +1,5 @@
 import { Avatar, Button, Collapse, Flex, Pagination, Table, Text } from "@mantine/core"
-import { PageRequest, ReportDto, ReportFilter, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { PageRequest, ReportDto, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconClock, IconFile, IconFilterEdit, IconFilterOff, IconListCheck, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -12,7 +12,6 @@ import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { getSpentTimeFromReport } from "src/shared/report/timeSpent"
-import CustomLoader from "src/shared/ui/loading/CustomLoader"
 import { ReportStatusSelect } from "src/shared/ui/select/ReportStatusSelect"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
 import { Badge, useComputedColorScheme } from "@mantine/core"
@@ -157,13 +156,11 @@ export const ReportList = () => {
 
         if (newProject && newProject !== NO_PROJECT_CODE) {
             const project =
-                visibleProjects.find((p) => p.code === newProject) ??
-                projects.find((p) => p.code === newProject)
+                visibleProjects.find((p) => p.code === newProject) ?? projects.find((p) => p.code === newProject)
 
             if (project) {
                 const owningProgramCode =
-                    project.programCode ??
-                    programs.find((pr) => (pr.projectCodes ?? []).includes(project.code))?.code
+                    project.programCode ?? programs.find((pr) => (pr.projectCodes ?? []).includes(project.code))?.code
 
                 if (owningProgramCode) {
                     nextProgram = owningProgramCode.toUpperCase()
@@ -178,12 +175,7 @@ export const ReportList = () => {
             setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
             updateUrlParams(filter, nextProgram, newProject, 0)
         } else {
-            updateUrlParams(
-                filter,
-                nextProgram,
-                newProject,
-                pageRequest.pageNumber || 0
-            )
+            updateUrlParams(filter, nextProgram, newProject, pageRequest.pageNumber || 0)
         }
     }
 
@@ -580,9 +572,8 @@ export const ReportList = () => {
     })
 
     return (
-        <Flex direction="column">
-            <CustomLoader visible={isFetchingReports} className={classes.loader} />
-            <Flex className={classes.root}>
+        <Flex className={classes.root}>
+            <Flex direction="column" gap={24} miw={0}>
                 <Text className={classes.title}>
                     <FormattedMessage id={locales.title} />
                 </Text>
@@ -640,12 +631,7 @@ export const ReportList = () => {
                                                     setSelectedProject(null)
                                                     setPageRequest({ ...pageRequest, pageNumber: 0 })
 
-                                                    updateUrlParams(
-                                                        filter,
-                                                        newProgram,
-                                                        null,
-                                                        0
-                                                    )
+                                                    updateUrlParams(filter, newProgram, null, 0)
                                                 } else {
                                                     updateUrlParams(
                                                         filter,
@@ -724,12 +710,7 @@ export const ReportList = () => {
                                             setSelectedProject(null)
                                             setPageRequest({ ...pageRequest, pageNumber: 0 })
 
-                                            updateUrlParams(
-                                                filter,
-                                                newProgram,
-                                                null,
-                                                0
-                                            )
+                                            updateUrlParams(filter, newProgram, null, 0)
                                         } else {
                                             updateUrlParams(
                                                 filter,

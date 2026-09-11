@@ -9,7 +9,7 @@ import { locales } from "src/pages/users/lib/locales"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import React, { useEffect, useState } from "react"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { NavigateFunction } from "react-router"
 import { IDBadge } from "src/shared/ui/badges/IDBadge"
 
@@ -112,13 +112,8 @@ export const UserRow = ({
         >
             <Table.Td>
                 <Flex columnGap={16} align="center" className={classes.columnName}>
-                    <Avatar
-                        size={36}
-                        src={user.avatar?.link}
-                        name={user.fullName}
-                        className={classes.avatar}
-                    />
-                    <Flex direction="column">
+                    <Avatar size={36} src={user.avatar?.link} name={user.fullName} className={classes.avatar} />
+                    <Flex direction="column" miw={0}>
                         <Text truncate="end">{user.fullName}</Text>
                         <Text size="sm" c="dimmed" truncate="end">
                             {user.email}

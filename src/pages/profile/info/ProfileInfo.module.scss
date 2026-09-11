@@ -1,13 +1,24 @@
+@use "../../../app/styles/surfaces" as s;
+
 .infoContainer {
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
     border-radius: var(--mantine-radius-lg);
     padding: 1rem;
     box-shadow: 0 0 0.5rem 0.5rem light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
 }
 
 .userName {
     margin-top: var(--mantine-spacing-md);
-    font-size: 2rem;
+    font-size: clamp(26px, 2.5vw, 32px);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
     font-weight: bold;
 }
 

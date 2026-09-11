@@ -1,4 +1,4 @@
-import { UserApi, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserApi, UserInfoDto } from "@rds-network/portal-api-axios"
 import { useQuery } from "@tanstack/react-query"
 import { AxiosResponse } from "axios"
 import { RequestHttp } from "src/shared/http/RequestHttp"
@@ -14,10 +14,13 @@ export const resolveUsers = (logins: (string | null | undefined)[]) => {
         queryKey: ["resolveUsers", filtered],
         queryFn: () =>
             UserApiService.resolveUsers(filtered).then((r) =>
-                r.data.reduce((acc, item) => {
-                    acc[item.username] = item
-                    return acc
-                }, {} as Record<string, UserInfoDto>)
+                r.data.reduce(
+                    (acc, item) => {
+                        acc[item.username] = item
+                        return acc
+                    },
+                    {} as Record<string, UserInfoDto>
+                )
             ),
         staleTime: 10 * 60 * 1000,
         refetchOnWindowFocus: false,

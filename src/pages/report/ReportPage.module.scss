@@ -1,17 +1,14 @@
-.root {
-    width: 100%;
-    padding: var(--mantine-spacing-xl);
-    flex-direction: column;
-    row-gap: 1rem;
+@use "../../app/styles/surfaces" as s;
 
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: var(--mantine-spacing-md);
-    }
+.root {
+    @include s.page;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1200px;
 }
 
 .title {
-    font-size: x-large;
-    font-weight: bolder;
+    @include s.title;
 }
 
 .autoAlert {
@@ -19,6 +16,10 @@
     padding: 0.5rem;
 
     @media (max-width: $mantine-breakpoint-md) {
+        width: 100%;
+    }
+
+    & {
         width: 100%;
     }
 }
@@ -32,6 +33,13 @@
     @media (max-width: $mantine-breakpoint-md) {
         width: 100%;
     }
+
+    & {
+        @include s.glass;
+        width: 100%;
+        padding: 24px;
+        gap: 24px;
+    }
 }
 
 .notes {
@@ -43,19 +51,30 @@
     @media (max-width: $mantine-breakpoint-md) {
         width: 100%;
     }
+
+    & {
+        @include s.glass;
+        width: 100%;
+        padding: 24px;
+        gap: 24px;
+    }
 }
 
 .tasks {
     flex-direction: column;
     row-gap: 1rem;
     margin-top: 1rem;
+
+    gap: 24px;
+    width: 100%;
 }
 
 .editButton {
     cursor: pointer;
 
-    transition: box-shadow 0.2s ease,
-    transform 0.2s ease;
+    transition:
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
 
     &:hover {
         box-shadow: 0 0 0.2rem 0.1rem light-dark(var(--mantine-color-blue-2), var(--mantine-color-blue-9));
@@ -69,6 +88,10 @@
     @media (max-width: $mantine-breakpoint-md) {
         width: 100%;
     }
+
+    & {
+        width: 100%;
+    }
 }
 
 .acceptRejectSection {
@@ -79,6 +102,10 @@
     @media (max-width: $mantine-breakpoint-md) {
         width: 100%;
     }
+
+    & {
+        width: 100%;
+    }
 }
 
 .deleteReportSection {
@@ -86,6 +113,10 @@
     justify-content: center;
 
     @media (max-width: $mantine-breakpoint-md) {
+        width: 100%;
+    }
+
+    & {
         width: 100%;
     }
 }

@@ -1,19 +1,11 @@
+@use "../../app/styles/surfaces" as s;
+
 $table-width: 100%;
 
 .root {
-    padding: 1rem 1rem 2rem 2rem;
+    @include s.page;
     flex-direction: column;
-    row-gap: 1rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: 0.5rem;
-        row-gap: 0.5rem;
-    }
-
-    @media (max-width: 1439px) and (min-width: 1024px) {
-        padding: 1rem 0.5rem 2rem 1rem;
-    }
+    gap: 24px;
 }
 
 .table {
@@ -35,6 +27,7 @@ $table-width: 100%;
 }
 
 .avatar {
+    flex-shrink: 0;
     &:hover {
         cursor: pointer;
     }
@@ -64,6 +57,16 @@ $table-width: 100%;
     @media (max-width: $mantine-breakpoint-xs) {
         column-gap: 0.5rem;
     }
+
+    & {
+        background: var(--portal-solid);
+        border-color: var(--portal-border);
+        box-shadow: 0 -4px 20px #173b4308;
+        border-radius: 0;
+        padding: 16px;
+        flex-wrap: wrap;
+        row-gap: 12px;
+    }
 }
 
 .emptyState {
@@ -87,6 +90,14 @@ $table-width: 100%;
         width: 100%;
         padding: 0;
     }
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+        padding: 18px;
+    }
 }
 
 .mobileList {
@@ -99,9 +110,17 @@ $table-width: 100%;
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
     border-radius: 0.5rem;
     box-shadow: 0 0 0.3rem 0.1rem light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
 }
 
 .menuWrapper {
+    flex-shrink: 0;
     border-radius: 4px;
     padding: 2px;
     transition: background-color 0.15s ease;
@@ -117,4 +136,8 @@ $table-width: 100%;
 
 .deactivatedCard {
     background-color: light-dark(rgba(255, 182, 193, 0.2), rgba(139, 69, 85, 0.3));
+}
+
+.title {
+    @include s.title;
 }

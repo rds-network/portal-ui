@@ -1,6 +1,6 @@
 import { Text } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { ErrorResponse } from "@russian-rs/portal-api-axios"
+import { ErrorResponse } from "@rds-network/portal-api-axios"
 import Axios, { AxiosError } from "axios"
 import { FormattedMessage } from "react-intl"
 import { history } from "src/shared/constants/History"

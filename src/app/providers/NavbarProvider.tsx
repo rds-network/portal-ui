@@ -14,7 +14,7 @@ const defaultContextValue: NavbarContextType = {
 export const NavbarContext = createContext<NavbarContextType>(defaultContextValue)
 
 export const NavbarContextProvider = ({ children }: { children?: ReactNode }) => {
-    const [opened, setOpened] = useState(true)
+    const [opened, setOpened] = useState(false)
 
     const value = useMemo(() => {
         const v: NavbarContextType = {

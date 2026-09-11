@@ -1,4 +1,4 @@
-import { PageRequest, PageResponse, ReportFilter } from "@russian-rs/portal-api-axios"
+import { PageRequest, PageResponse, ReportFilter } from "@rds-network/portal-api-axios"
 
 export const locales = {
     documentTitle: "pages.my-reports.title",

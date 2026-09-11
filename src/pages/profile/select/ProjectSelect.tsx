@@ -4,7 +4,7 @@ import { useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useProjects } from "src/app/providers/ProjectsProvider"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
-import { ProjectDto } from "@russian-rs/portal-api-axios"
+import { ProjectDto } from "@rds-network/portal-api-axios"
 
 export function ProjectSelectInline({
     value,

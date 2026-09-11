@@ -3,6 +3,7 @@ export const locales = {
     total: "pages.user-list.total",
     search: "pages.user-list.search",
     newUser: "pages.user-list.new-user",
+    addUser: "pages.user-list.add-user",
     firstName: "pages.user-list.first-name",
     lastName: "pages.user-list.last-name",
     contractInfo: "pages.user-list.contract-info",

@@ -1,5 +1,5 @@
 import fontkit from "@pdf-lib/fontkit"
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto } from "@rds-network/portal-api-axios"
 import { saveAs } from "file-saver"
 import type { Rotation } from "pdf-lib"
 import { PDFDocument, PDFFont, degrees, rgb } from "pdf-lib"

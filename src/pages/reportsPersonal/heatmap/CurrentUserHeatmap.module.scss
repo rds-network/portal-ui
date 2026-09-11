@@ -1,97 +1,129 @@
+@use "../../../app/styles/surfaces" as s;
+.root {
+    @include s.glass;
+    padding: 24px;
+}
 .legend {
-    margin: 4px 0 6px 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 16px;
+    gap: 8px 12px;
+    margin: 10px 0 16px;
 }
-
 .legendSquare {
-    width: 14px;
-    height: 14px;
+    flex-shrink: 0;
+    width: 9px;
+    height: 9px;
     border-radius: 3px;
 }
-
+.year {
+    border-top: 1px solid var(--portal-border);
+    padding-top: 18px;
+}
+.summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 0 22px;
+}
+.hours {
+    font-size: 42px;
+    font-weight: 550;
+    line-height: 1.3;
+    letter-spacing: -0.06em;
+    span {
+        font-size: 16px;
+        margin-left: 6px;
+        color: var(--portal-muted);
+        letter-spacing: 0;
+    }
+}
+.orbit {
+    width: 68px;
+    height: 68px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    position: relative;
+    color: var(--portal-accent);
+    background: conic-gradient(var(--portal-accent) var(--progress), var(--portal-subtle) 0);
+    &::before {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        background: var(--portal-solid);
+        border-radius: 50%;
+    }
+    svg {
+        position: relative;
+    }
+}
 .weeksRow {
     width: 100%;
-    /* чтоб квадраты не прилипали к краям на узких контейнерах */
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 1fr));
+    gap: 5px;
 }
-
 .weekSquare {
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    min-width: 0;
+    aspect-ratio: 1;
+    border-radius: 7px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
-
-    &:hover {
-        transform: scale(1.08);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    cursor: default;
+    transition:
+        transform 160ms ease,
+        box-shadow 160ms ease;
+    &:hover,
+    &:focus-visible {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px #183b4325;
     }
 }
-
 .weekNumber {
     color: white;
+    font-size: 12px;
 }
-
 .noReports {
-    background-color: var(--mantine-color-red-6);
+    background: #ad5860;
 }
-
 .partialReports {
-    background-color: var(--mantine-color-blue-2);
+    background: #a7d8ce;
+    .weekNumber {
+        color: #193e3a;
+    }
 }
-
 .fullReports {
-    background-color: var(--mantine-color-blue-5);
+    background: #3a9485;
 }
-
 .overtimeReports {
-    background-color: var(--mantine-color-blue-9);
+    background: #25566a;
 }
-
 .na {
-    background-color: var(--mantine-color-gray-6);
-    border: 1px solid var(--mantine-color-gray-5);
+    background: light-dark(#dfe7e8, #3a515a);
+    .weekNumber {
+        color: var(--portal-muted);
+    }
 }
-
 .waiting {
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
-    border: 1px solid var(--mantine-color-gray-5);
-}
-
-
-.waiting .weekNumber {
-    color: light-dark(var(--mantine-color-dark-6), var(--mantine-color-white));
-}
-
-/* На планшетах — чуть меньше квадраты */
-@media (max-width: $mantine-breakpoint-md) {
-    .weekSquare {
-        width: 20px;
-        height: 20px;
-        border-radius: 3px;
+    background: var(--portal-solid);
+    border: 1px dashed var(--portal-accent);
+    .weekNumber {
+        color: var(--portal-accent);
     }
 }
-
-/* На мобилках — ещё компактнее, но по-прежнему читабельные */
-@media (max-width: $mantine-breakpoint-sm) {
-    .weekSquare {
-        width: 18px;
-        height: 18px;
-        border-radius: 3px;
-        font-size: 0.65rem;
+@media (min-width: 36em) and (max-width: 80em) {
+    .weeksRow {
+        grid-template-columns: repeat(18, minmax(0, 1fr));
+    }
+    .summary {
+        justify-content: start;
+        gap: 30px;
     }
 }
-
-.alert {
-    padding: 0.5rem 1rem;
-}
-
-.alertTitle {
-    font-weight: normal;
+@media (max-width: 36em) {
+    .root {
+        padding: 20px;
+    }
 }

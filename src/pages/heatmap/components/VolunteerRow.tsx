@@ -1,5 +1,5 @@
 import { Avatar, Badge, Box, Button, Checkbox, Flex, HoverCard, Text } from "@mantine/core"
-import { VolunteerHeatMapItem } from "@russian-rs/portal-api-axios"
+import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
 import { IconCheckupList, IconMessage2Exclamation, IconUser } from "@tabler/icons-react"
 import dayjs, { Dayjs } from "dayjs"
 import React, { useMemo, useState } from "react"

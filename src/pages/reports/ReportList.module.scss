@@ -1,15 +1,11 @@
+@use "../../app/styles/surfaces" as s;
+
 $table-min-width: 58rem;
 
 .root {
-    padding: 1rem 1rem 2rem 2rem;
+    @include s.page;
     flex-direction: column;
-    row-gap: 1rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: 0.5rem;
-        row-gap: 0.5rem;
-    }
+    gap: 24px;
 }
 
 .loader {
@@ -18,8 +14,7 @@ $table-min-width: 58rem;
 }
 
 .title {
-    font-size: x-large;
-    font-weight: bold;
+    @include s.title;
 }
 
 .filters {
@@ -31,6 +26,14 @@ $table-min-width: 58rem;
         flex-direction: column;
         align-items: stretch;
         row-gap: 0.5rem;
+    }
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+        padding: 18px;
     }
 }
 
@@ -115,6 +118,16 @@ $table-min-width: 58rem;
     @media (max-width: $mantine-breakpoint-xs) {
         column-gap: 0.5rem;
     }
+
+    & {
+        background: var(--portal-solid);
+        border-color: var(--portal-border);
+        box-shadow: 0 -4px 20px #173b4308;
+        border-radius: 0;
+        padding: 16px;
+        flex-wrap: wrap;
+        row-gap: 12px;
+    }
 }
 
 .emptyState {
@@ -148,6 +161,13 @@ $table-min-width: 58rem;
     @media (min-width: 1024px) and (max-width: 1439px) {
         padding: 1rem;
         row-gap: 0.75rem;
+    }
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
     }
 }
 

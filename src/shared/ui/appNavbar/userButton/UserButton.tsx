@@ -10,10 +10,10 @@ export function UserButton() {
     return (
         <UnstyledButton className={classes.user} component="a" href={`/profile/${user?.username}`}>
             <Flex justify="center" align="center" columnGap={12}>
-                <Avatar src={user?.avatar?.link} radius="md" size={48} color="initials" name={user?.fullName} />
+                <Avatar src={user?.avatar?.link} radius="md" size={40} color="initials" name={user?.fullName} />
 
-                <div style={{ flex: 1 }}>
-                    <Text fw={500} truncate="end">
+                <div style={{ flex: 1, minWidth: 0 }}>
+                    <Text size="sm" fw={500} truncate="end">
                         {user?.fullName}
                     </Text>
 

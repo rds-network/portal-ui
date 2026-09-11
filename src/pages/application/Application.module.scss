@@ -1,7 +1,8 @@
-.root {
-    width: 60%;
+@use "../../app/styles/surfaces" as s;
 
-    @media (max-width: $mantine-breakpoint-lg) {
-        width: 100%;
-    }
+.root {
+    @include s.page;
+    max-width: 960px;
+    margin-inline: auto;
+    overflow-wrap: anywhere;
 }

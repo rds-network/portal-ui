@@ -1,10 +1,8 @@
-.root {
-    column-gap: 2rem;
-    padding: var(--mantine-spacing-xl);
+@use "../../app/styles/surfaces" as s;
 
-    @media (max-width: $mantine-breakpoint-sm) {
-        padding: var(--mantine-spacing-sm);
-    }
+.root {
+    @include s.page;
+    gap: 24px;
 }
 
 .loader {
@@ -12,11 +10,7 @@
 }
 
 .upperSpace {
-    height: 4rem;
-
-    @media (max-width: $mantine-breakpoint-sm) {
-        height: 3rem;
-    }
+    height: 32px;
 }
 
 .header {

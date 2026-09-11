@@ -29,7 +29,7 @@ export const LocaleSwitcher = () => {
                     variant="light"
                     color={getButtonColor(Locale.RU)}
                     size="lg"
-                    radius={0}
+                    radius="md"
                     aria-label="Russian language"
                     onClick={() => setLocale(Locale.RU)}
                 >
@@ -39,7 +39,7 @@ export const LocaleSwitcher = () => {
                     variant="light"
                     color={getButtonColor(Locale.EN)}
                     size="lg"
-                    radius={0}
+                    radius="md"
                     aria-label="English language"
                     onClick={() => setLocale(Locale.EN)}
                 >
@@ -49,7 +49,7 @@ export const LocaleSwitcher = () => {
                     variant="light"
                     color={getButtonColor(Locale.SR)}
                     size="lg"
-                    radius={0}
+                    radius="md"
                     aria-label="Serbian language"
                     onClick={() => setLocale(Locale.SR)}
                 >

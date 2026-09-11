@@ -1,7 +1,7 @@
 import { CloseButton, Combobox, Flex, Input, InputBase, Text, useCombobox } from "@mantine/core"
 import { IconAlignBoxLeftTop } from "@tabler/icons-react"
 import React, { useEffect, useState } from "react"
-import { FormattedMessage } from "react-intl"
+import { FormattedMessage, useIntl } from "react-intl"
 import { ReportStatus } from "src/shared/report/status"
 
 interface ReportStatusSelectProps {
@@ -11,6 +11,7 @@ interface ReportStatusSelectProps {
 }
 
 export const ReportStatusSelect = (props: ReportStatusSelectProps) => {
+    const intl = useIntl()
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     })
@@ -47,6 +48,7 @@ export const ReportStatusSelect = (props: ReportStatusSelectProps) => {
             >
                 <Combobox.Target>
                     <InputBase
+                        aria-label={intl.formatMessage({ id: "common.report-status-select.label" })}
                         component="button"
                         type="button"
                         pointer

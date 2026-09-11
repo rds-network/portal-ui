@@ -1,4 +1,22 @@
 {
+    "design": {
+        "loading": "Loading…",
+        "portal": "Volunteer portal",
+        "navigation": "Navigation",
+        "workspace": "Your workspace",
+        "reportsSubtitle": "Every task is part of something bigger.",
+        "activity": "Your activity",
+        "hoursRequired": "of {hours} h this year",
+        "reportHistory": "Report history",
+        "reportWeek": "Week {week}",
+        "reportSummary": "Your report",
+        "tasksCount": "{count, plural, one {# task} other {# tasks}}",
+        "draftHint": "Your draft is saved automatically in this browser.",
+        "editHint": "Changes will be saved when you submit the report.",
+        "backToReports": "Back to my reports",
+        "taskDelete": "Delete task",
+        "reportGuide": "How to write a report"
+    },
     "common": {
         "filters": "Filters",
         "reset-filters": "Reset filters",
@@ -467,6 +485,7 @@
             "title": "All volunteers",
             "total": "Total: {total}",
             "search": "Search",
+            "add-user": "Add user",
             "new-user": "New user",
             "first-name": "First name",
             "last-name": "Last name",
@@ -616,6 +635,14 @@
             }
         },
         "applications": {
+            "assignee": "Assignee",
+            "unassigned": "Unassigned",
+            "notesCount": "Comments: {count}",
+            "unassignedApplications": "Unassigned",
+            "allAssignees": "All assignees",
+            "clearAssigneeFilter": "Clear assignee filter",
+            "noEmployees": "No employees found",
+            "clearAssignee": "Clear assignment",
             "title": "Applications for Admission",
             "empty": "No applications found",
             "total": "Total: {count}",
@@ -632,10 +659,13 @@
             "status-short": "Status",
             "contractStart": "Contract (start)",
             "contract-start-short": "Contract",
+            "program-project-required": "Select a program and project in the application form before completing it",
             "contract-required": "Contract dates must be specified to complete",
             "showCompleted": "Show completed",
-            "add-note": "Add note",
+            "add-note": "Add comment",
+            "delete-comment": "Delete comment",
             "menu": {
+                "actions": "Application actions",
                 "view": "View",
                 "contact": "Contact"
             },
@@ -683,7 +713,7 @@
                     "title": "Reason for refusal",
                     "description": "Please specify the reason for refusal"
                 },
-                "notes": "Notes",
+                "notes": "Comments",
                 "program": "Program",
                 "project": "Project"
             },
@@ -804,6 +834,13 @@
             },
             "total": "Total",
             "empty": "No data for the selected year",
+            "cities": {
+                "city-stats": "Statistics by settlement",
+                "city": "Settlement",
+                "city-other": "Other settlements",
+                "by-cities": "By settlement",
+                "without-city": "No settlement specified"
+            },
             "statGroups": {
                 "SOCIJALNA_ZASTITA": "Social protection",
                 "MEDIJI_I_KOMUNIKACIJE": "Media and communications",
@@ -814,7 +851,8 @@
             "charts": {
                 "age": "Age distribution",
                 "gender": "Gender distribution",
-                "citizenship": "Citizenship status"
+                "citizenship": "Citizenship status",
+                "cities": "Top {count} settlements"
             }
         }
     },

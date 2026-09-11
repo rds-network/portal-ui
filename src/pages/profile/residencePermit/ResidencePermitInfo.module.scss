@@ -1,3 +1,5 @@
+@use "../../../app/styles/surfaces" as s;
+
 .root {
     display: flex;
     flex-direction: column;
@@ -6,6 +8,13 @@
     background-color: var(--mantine-color-body);
     border-radius: var(--mantine-radius-lg);
     border: 1px solid var(--mantine-color-gray-3);
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
 }
 
 .title {
