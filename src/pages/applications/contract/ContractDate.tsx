@@ -77,7 +77,13 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
     const onUpdate = () => {
         if (!form.validate().hasErrors) {
             if (onChange) {
-                onChange(contract)
+                const formValues = form.getValues()
+                onChange({
+                    id: contract.id,
+                    startDate: dayjs(formValues.contractFrom).format(DEFAULT_DATE_FORMAT),
+                    endDate: dayjs(formValues.contractUntil).format(DEFAULT_DATE_FORMAT),
+                    type: formValues.contractType as ContractTypeEnum,
+                })
                 close()
             }
         }
