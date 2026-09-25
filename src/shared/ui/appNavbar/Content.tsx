@@ -1,7 +1,12 @@
-import { IconAdjustments, IconFileAnalytics, IconLifebuoy, IconUsers } from "@tabler/icons-react"
+import { IconAdjustments, IconChecklist, IconFileAnalytics, IconLifebuoy, IconUsers } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
 export const Content: ItemGroupProps[] = [
+    {
+        label: "navbar.reports.tasks",
+        icon: IconChecklist,
+        link: "/tasks",
+    },
     {
         label: "navbar.reports.reporting",
         icon: IconFileAnalytics,

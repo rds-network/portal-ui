@@ -1,0 +1,53 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.page;
+    max-width: 1180px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    background: #fffbeb;
+    border: 1px solid #f3e8c8;
+    border-radius: 16px;
+    padding: 16px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 650;
+    line-height: 1.35;
+}
+
+.body {
+    color: var(--mantine-color-dimmed);
+    font-size: 13px;
+    line-height: 1.45;
+    flex: 1;
+}
+
+.assignee {
+    font-size: 13px;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}

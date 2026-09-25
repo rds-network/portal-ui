@@ -19,6 +19,7 @@ const VolunteerReports = lazy(() => import("src/pages/volunteers/reports/Volunte
 const VolunteerHeatmapPage = lazy(() => import("src/pages/heatmap/VolunteerHeatmapPage"))
 const SupportPage = lazy(() => import("src/pages/support/SupportPage"))
 const AnnouncementsAdminPage = lazy(() => import("src/pages/announcements/AnnouncementsAdminPage"))
+const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -96,6 +97,10 @@ export const routes: RouteProps[] = [
     {
         path: "/announcements/admin",
         element: <AnnouncementsAdminPage />,
+    },
+    {
+        path: "/tasks",
+        element: <WorkTasksPage />,
     },
     {
         path: "/",

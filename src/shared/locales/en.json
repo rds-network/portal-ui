@@ -197,6 +197,32 @@
                 "emptyProgram": "Select a program for the broadcast"
             }
         },
+        "tasks": {
+            "title": "Tasks",
+            "description": "Assign work to volunteers. When the assignee marks the task in a report, the card moves to review; after the report is accepted it is done.",
+            "create": "Assign a task",
+            "submit": "Assign",
+            "created": "Task assigned",
+            "required": "Write what needs to be done",
+            "empty": "No tasks yet",
+            "take": "Start",
+            "to-report": "Add to report",
+            "open": "Open tasks",
+            "add": "Add to report",
+            "fields": {
+                "title": "Task",
+                "body": "Details",
+                "assignee": "Assignee",
+                "due": "Due date"
+            },
+            "status": {
+                "TODO": "To do",
+                "DOING": "In progress",
+                "REVIEW": "Review",
+                "REDO": "Rework",
+                "DONE": "Done"
+            }
+        },
         "welcome": {
             "title": "Volunteer portal",
             "documentTitle": "Volunteer portal",
@@ -875,7 +901,8 @@
             "cleaning": "Report for \"Clean City\"",
             "reporting-guide": "Reporting Guidelines",
             "heat-map": "Heat Map",
-            "announcements": "Broadcast notifications"
+            "announcements": "Broadcast notifications",
+            "tasks": "Tasks"
         },
         "volunteers": {
             "volunteers": "Volunteers",

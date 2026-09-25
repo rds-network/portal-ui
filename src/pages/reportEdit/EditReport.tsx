@@ -19,6 +19,7 @@ import classes from "src/pages/reportEdit/EditReport.module.scss"
 import { defaultTask } from "src/pages/reportEdit/lib/defaults"
 import { TaskCard, TaskCardInterface } from "src/pages/reportEdit/task/TaskCard"
 import { ReportApiService } from "src/shared/api/ReportApiService"
+import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { setDocumentTitleByLocale, setDocumentTitleByString } from "src/shared/hooks/useDocumentTitle"
 import { useReportDraft } from "src/shared/hooks/useReportDraft"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
@@ -101,6 +102,44 @@ export const EditReport = () => {
         }
     }, [report, editMode])
 
+    useEffect(() => {
+        if (editMode) return
+        const taskName = new URLSearchParams(location.search).get("task")?.trim()
+        if (!taskName) return
+        setTasks((current) => {
+            if (current.some((task) => (task.name || "").trim() === taskName)) return current
+            const blank = current.length === 1 && !(current[0].name || "").trim()
+            if (blank) return [{ ...current[0], name: taskName }]
+            return [...current, { ...defaultTask, id: uuid(), name: taskName }]
+        })
+    }, [editMode, location.search, setTasks])
+
+    const { data: myAssignments = [] } = useQuery({
+        queryKey: ["work-assignments"],
+        enabled: !editMode,
+        queryFn: () => WorkAssignmentApiService.list(),
+    })
+
+    const openAssignments = useMemo(
+        () =>
+            myAssignments.filter(
+                (item) =>
+                    item.status !== "DONE" &&
+                    (!item.assignee || item.assignee === currentUser?.username) &&
+                    !tasks.some((task) => (task.name || "").trim() === item.title.trim())
+            ),
+        [myAssignments, currentUser?.username, tasks]
+    )
+
+    const addAssignment = (title: string) => {
+        setTasks((current) => {
+            if (current.some((task) => (task.name || "").trim() === title.trim())) return current
+            const blank = current.length === 1 && !(current[0].name || "").trim()
+            if (blank) return [{ ...current[0], name: title }]
+            return [...current, { ...defaultTask, id: uuid(), name: title }]
+        })
+    }
+
     if (editMode) {
         if (!id) {
             navigate("/not-found")
@@ -182,6 +221,23 @@ export const EditReport = () => {
             <div className={classes.workspace}>
                 <div className={classes.taskContainer}>
                     <Flex direction="column" rowGap={24}>
+                        {!editMode && openAssignments.length > 0 && (
+                            <Flex wrap="wrap" gap={8} align="center">
+                                <Text size="sm" c="dimmed">
+                                    <FormattedMessage id="pages.tasks.open" />
+                                </Text>
+                                {openAssignments.map((item) => (
+                                    <Button
+                                        key={item.id}
+                                        size="xs"
+                                        variant="light"
+                                        onClick={() => addAssignment(item.title)}
+                                    >
+                                        <FormattedMessage id="pages.tasks.add" />: {item.title}
+                                    </Button>
+                                ))}
+                            </Flex>
+                        )}
                         {tasks
                             .sort((t1, t2) => {
                                 return dayjs(t1.date).diff(t2.date)

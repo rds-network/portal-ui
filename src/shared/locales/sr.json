@@ -197,6 +197,32 @@
                 "emptyProgram": "Izaberite program za slanje"
             }
         },
+        "tasks": {
+            "title": "Zadaci",
+            "description": "Dodeljivanje zadataka volonterima. Kad izvršilac unese zadatak u izveštaj, kartica ide na proveru, a posle prihvatanja izveštaja — u „Urađeno“.",
+            "create": "Dodeli zadatak",
+            "submit": "Dodeli",
+            "created": "Zadatak je dodeljen",
+            "required": "Napišite šta treba uraditi",
+            "empty": "Još nema zadataka",
+            "take": "Preuzmi",
+            "to-report": "Unesi u izveštaj",
+            "open": "Otvoreni zadaci",
+            "add": "Dodaj u izveštaj",
+            "fields": {
+                "title": "Zadatak",
+                "body": "Opis",
+                "assignee": "Izvršilac",
+                "due": "Rok"
+            },
+            "status": {
+                "TODO": "Uraditi",
+                "DOING": "U radu",
+                "REVIEW": "Provera",
+                "REDO": "Dorada",
+                "DONE": "Urađeno"
+            }
+        },
         "welcome": {
             "title": "Portal volontera",
             "documentTitle": "Portal volontera",
@@ -875,7 +901,8 @@
             "cleaning": "Izveštaj \"Čisti grad\"",
             "reporting-guide": "Vodič za predaju izveštaja",
             "heat-map": "Toplotna karta",
-            "announcements": "Slanje obaveštenja"
+            "announcements": "Slanje obaveštenja",
+            "tasks": "Zadaci"
         },
         "volunteers": {
             "volunteers": "Volonteri",
