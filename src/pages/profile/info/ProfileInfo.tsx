@@ -484,7 +484,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     <FormattedMessage id={"pages.profile.buttons.edit"} />
                 </Button>
             )}
-            {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER]) &&
+            {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO]) &&
                 userInfo?.username && (
                     <>
                         <Button
