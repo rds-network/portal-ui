@@ -18,8 +18,8 @@
 }
 .link {
     display: block;
-    padding: 11px 12px 11px 18px;
-    margin: 3px 0 3px 16px;
+    padding: 10px 12px;
+    margin: 2px 0;
     border-radius: 11px;
     color: #bdcfdf;
     text-decoration: none;
@@ -28,24 +28,23 @@
     line-height: 1.45;
     transition:
         background 180ms ease,
-        color 180ms ease,
-        transform 180ms ease;
+        color 180ms ease;
     &:hover {
         background: #ffffff0b;
         color: white;
-        transform: translateX(2px);
     }
     &[aria-current="page"] {
         color: #eef8ff;
-        background: linear-gradient(110deg, #397fac77, #3c928322);
-        box-shadow:
-            inset 3px 0 #97d1f0,
-            inset 0 0 0 1px #97d1f020;
+        background: #ffffff14;
     }
 }
 .control[aria-current="page"] {
     background: #ffffff12;
     color: #b4ddf4;
+}
+.children {
+    margin: 0;
+    padding: 0 0 4px;
 }
 .chevron {
     transition: transform 200ms ease;

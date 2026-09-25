@@ -3,7 +3,7 @@ import { IconX } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import parse from "html-react-parser"
 import React, { useEffect, useRef } from "react"
-import { useIntl } from "react-intl"
+import { FormattedMessage, useIntl } from "react-intl"
 import { AnnouncementApiService, AnnouncementExtraApi } from "src/shared/api/AnnouncementApiService"
 import { sanitizeHtml } from "src/shared/utils/sanitizeHtml"
 import classes from "./AnnouncementBanner.module.scss"
@@ -42,14 +42,19 @@ export const AnnouncementBanner: React.FC = () => {
                 <Text size="sm" component="div" className={classes.body}>
                     {parse(sanitizeHtml(banner.body))}
                 </Text>
+                <Text size="xs" className={classes.hint}>
+                    <FormattedMessage id="common.announcements.dismissHint" />
+                </Text>
             </div>
             <ActionIcon
-                variant="subtle"
+                className={classes.close}
+                variant="filled"
                 color="yellow"
+                size="lg"
                 aria-label={intl.formatMessage({ id: "common.announcements.dismiss" })}
                 onClick={() => dismiss(banner.id)}
             >
-                <IconX size={16} />
+                <IconX size={18} />
             </ActionIcon>
         </div>
     )

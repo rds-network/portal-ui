@@ -7,18 +7,24 @@ import React, { useContext, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { UserContext } from "src/app/providers/UserContext"
 import { OrgLinkApiService, OrgLinkDto, OrgLinkWriteRequest } from "src/shared/api/OrgLinkApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./ResourcesPage.module.scss"
 
-const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO]
+const SUPERVISORS = [UserGroup.ADMIN, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
 
 export const ResourcesPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const intl = useIntl()
     const queryClient = useQueryClient()
-    const isManager = hasPermission(user, MANAGERS)
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
+    const isManager = !!curatorMe?.curator || hasPermission(user, SUPERVISORS)
     const [open, setOpen] = useState(false)
     const [edit, setEdit] = useState<OrgLinkDto | null>(null)
 

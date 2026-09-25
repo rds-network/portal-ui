@@ -7,8 +7,8 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
-    padding: 10px 32px;
+    gap: 16px;
+    padding: 12px 32px;
     background: #fef3c7;
     border-bottom: 1px solid #fcd34d;
     color: #78350f;
@@ -18,6 +18,18 @@
     p {
         margin: 4px 0 0;
     }
+}
+
+.hint {
+    margin-top: 8px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.close {
+    flex-shrink: 0;
+    background: #f59e0b !important;
+    color: #78350f !important;
 }
 
 @media (max-width: 64em) {

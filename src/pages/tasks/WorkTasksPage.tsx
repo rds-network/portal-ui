@@ -10,6 +10,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { WorkAssignmentApiService, WorkAssignmentDto, WorkAssignmentPatchRequest, WorkAssignmentStatus } from "src/shared/api/WorkAssignmentApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { NO_PROGRAM_CODE } from "src/shared/constants/Shared"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -18,7 +19,7 @@ import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./WorkTasksPage.module.scss"
 
-const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]
+const SUPERVISORS = [UserGroup.ADMIN, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
 const LANES: WorkAssignmentStatus[] = ["TODO", "DOING", "REVIEW", "REDO", "DONE"]
 
 const STATUS_COLOR: Record<string, string> = {
@@ -34,7 +35,12 @@ export const WorkTasksPage: React.FC = () => {
     const intl = useIntl()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
-    const isManager = hasPermission(user, MANAGERS)
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
+    const isManager = !!curatorMe?.curator || hasPermission(user, SUPERVISORS)
     const [assignee, setAssignee] = useState<string | null>(null)
     const [program, setProgram] = useState<string | null>(null)
     const [createOpen, setCreateOpen] = useState(false)

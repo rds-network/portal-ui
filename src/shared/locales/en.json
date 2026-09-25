@@ -118,7 +118,8 @@
             "loading": "Loading…",
             "empty": "No notifications",
             "new": "New",
-            "dismiss": "Dismiss"
+            "dismiss": "Dismiss",
+            "dismissHint": "To continue, close this notice with the X in the top-right corner"
         },
         "ticket-modal": {
             "modalTitle": "Create Ticket",
@@ -932,7 +933,7 @@
         },
         "resources": {
             "title": "Our resources",
-            "description": "Links to sites, offices, file banks and courses. An admin can add a new card.",
+            "description": "Links to sites, offices, file banks and courses. Curators can add and remove cards.",
             "add": "Add a link",
             "edit": "Edit",
             "save": "Save",

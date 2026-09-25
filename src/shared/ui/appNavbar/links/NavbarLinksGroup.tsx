@@ -151,7 +151,11 @@ export function LinksGroup({
                     {controlContent}
                 </UnstyledButton>
             )}
-            {hasChildren ? <Collapse in={opened}>{children}</Collapse> : null}
+            {hasChildren ? (
+                <Collapse in={opened}>
+                    <div className={classes.children}>{children}</div>
+                </Collapse>
+            ) : null}
         </>
     )
 }

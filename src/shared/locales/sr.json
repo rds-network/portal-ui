@@ -118,7 +118,8 @@
             "loading": "Učitavanje…",
             "empty": "Nema obaveštenja",
             "new": "Novo",
-            "dismiss": "Zatvori"
+            "dismiss": "Zatvori",
+            "dismissHint": "Da nastavite, zatvorite obaveštenje krstićem u gornjem desnom uglu"
         },
         "ticket-modal": {
             "modalTitle": "Kreirati tiket",
@@ -932,7 +933,7 @@
         },
         "resources": {
             "title": "Naši resursi",
-            "description": "Linkovi ka sajtovima, kancelarijama, bankama fajlova i kursevima. Admin može da doda novu karticu.",
+            "description": "Linkovi ka sajtovima, kancelarijama, bankama fajlova i kursevima. Kustosi mogu da dodaju i uklone kartice.",
             "add": "Dodaj link",
             "edit": "Izmeni",
             "save": "Sačuvaj",
