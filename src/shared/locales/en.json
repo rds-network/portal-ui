@@ -212,6 +212,7 @@
             "fields": {
                 "title": "Task",
                 "body": "Details",
+                "program": "Program",
                 "assignee": "Assignee",
                 "due": "Due date"
             },
@@ -447,6 +448,8 @@
         },
         "report-list": {
             "title": "All reports",
+            "title-week": "Reports for the week",
+            "back-heatmap": "Back to heatmap",
             "volunteer": "Volunteer",
             "creation-date": "Creation date",
             "weeks": "Reporting weeks",

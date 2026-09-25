@@ -3,6 +3,8 @@ import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import React, { useMemo } from "react"
 import { FormattedMessage } from "react-intl"
+import { useNavigate } from "react-router"
+import { heatmapReportsPath, rememberHeatmapReturn } from "../lib/openWeekReports"
 import { locales } from "../lib/locales"
 import classes from "./VolunteerReportHeatmap.module.scss"
 import { VolunteerRow, WeekInfo } from "./VolunteerRow"
@@ -22,6 +24,20 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
     selectedVolunteers,
     totalVolunteers,
 }) => {
+    const navigate = useNavigate()
+
+    const openWeekForAll = (weekNumber: number, weekDate: dayjs.Dayjs) => {
+        const meta = volunteers[0]?.weeks.find((item) => item.week === weekNumber)
+        const from = meta?.weekStart
+            ? dayjs(meta.weekStart).format("YYYY-MM-DD")
+            : weekDate.format("YYYY-MM-DD")
+        const to = meta?.weekEnd
+            ? dayjs(meta.weekEnd).format("YYYY-MM-DD")
+            : weekDate.add(6, "day").format("YYYY-MM-DD")
+        rememberHeatmapReturn()
+        navigate(heatmapReportsPath({ dateFrom: from, dateTo: to }))
+    }
+
     if (volunteers.length === 0) {
         return (
             <Box p="xl" ta="center">
@@ -76,27 +92,9 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                                     key={w.date.toString()}
                                     className={classes.weekHeader}
                                     style={{ cursor: "pointer" }}
-                                    title="Все отчёты недели"
-                                    onClick={() => {
-                                        const meta = volunteers[0]?.weeks.find((item) => item.week === w.weekNumber)
-                                        const from = meta?.weekStart
-                                            ? dayjs(meta.weekStart).format("YYYY-MM-DD")
-                                            : w.date.format("YYYY-MM-DD")
-                                        const to = meta?.weekEnd
-                                            ? dayjs(meta.weekEnd).format("YYYY-MM-DD")
-                                            : w.date.add(6, "day").format("YYYY-MM-DD")
-                                        window.location.assign(`/reports?dateFrom=${from}&dateTo=${to}`)
-                                    }}
-                                    onDoubleClick={() => {
-                                        const meta = volunteers[0]?.weeks.find((item) => item.week === w.weekNumber)
-                                        const from = meta?.weekStart
-                                            ? dayjs(meta.weekStart).format("YYYY-MM-DD")
-                                            : w.date.format("YYYY-MM-DD")
-                                        const to = meta?.weekEnd
-                                            ? dayjs(meta.weekEnd).format("YYYY-MM-DD")
-                                            : w.date.add(6, "day").format("YYYY-MM-DD")
-                                        window.location.assign(`/reports?dateFrom=${from}&dateTo=${to}`)
-                                    }}
+                                    title="Отчёты недели"
+                                    onClick={() => openWeekForAll(w.weekNumber, w.date)}
+                                    onDoubleClick={() => openWeekForAll(w.weekNumber, w.date)}
                                 >
                                     <Text size="xs" c="dimmed">
                                         {w.weekNumber}

@@ -1,5 +1,7 @@
 export const locales = {
     title: "pages.report-list.title",
+    titleWeek: "pages.report-list.title-week",
+    backHeatmap: "pages.report-list.back-heatmap",
     volunteer: "pages.report-list.volunteer",
     creationDate: "pages.report-list.creation-date",
     weeks: "pages.report-list.weeks",

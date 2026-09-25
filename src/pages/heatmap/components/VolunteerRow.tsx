@@ -4,6 +4,8 @@ import { IconCheckupList, IconMessage2Exclamation, IconUser } from "@tabler/icon
 import dayjs, { Dayjs } from "dayjs"
 import React, { useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { useNavigate } from "react-router"
+import { heatmapReportsPath, rememberHeatmapReturn } from "src/pages/heatmap/lib/openWeekReports"
 import { getTicketBody } from "src/pages/heatmap/lib/ticket"
 import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
 import TicketModal from "src/shared/ui/ticketModal/TicketModal"
@@ -34,6 +36,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
     startDate,
 }) => {
     const intl = useIntl()
+    const navigate = useNavigate()
     const [ticketDrawerOpen, setTicketDrawerOpen] = useState(false)
 
     // Map weekNumber -> weekInfo
@@ -138,9 +141,14 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
             ? dayjs(weekData.weekEnd).format("YYYY-MM-DD")
             : info?.date.add(6, "day").format("YYYY-MM-DD")
         if (!from || !to) return
-        const url = `/reports?login=${encodeURIComponent(volunteer.volunteerInfo.username)}&dateFrom=${from}&dateTo=${to}`
+        const url = heatmapReportsPath({
+            login: volunteer.volunteerInfo.username,
+            dateFrom: from,
+            dateTo: to,
+        })
+        rememberHeatmapReturn()
         if (newTab) window.open(url, "_blank")
-        else window.location.assign(url)
+        else navigate(url)
     }
 
     const ticketBodyHtml = useMemo(() => {
@@ -227,12 +235,15 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                             <Button
                                                 variant="outline"
                                                 leftSection={<IconCheckupList size={16} />}
-                                                onClick={() =>
+                                                onClick={() => {
+                                                    rememberHeatmapReturn()
                                                     window.open(
-                                                        `/reports?login=${volunteer.volunteerInfo.username}`,
+                                                        heatmapReportsPath({
+                                                            login: volunteer.volunteerInfo.username,
+                                                        }),
                                                         "_blank"
                                                     )
-                                                }
+                                                }}
                                             >
                                                 <FormattedMessage id={locales.reports} />
                                             </Button>

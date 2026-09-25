@@ -13,6 +13,8 @@ import { WorkAssignmentApiService, WorkAssignmentDto } from "src/shared/api/Work
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
+import { NO_PROGRAM_CODE } from "src/shared/constants/Shared"
+import { ProgramFilter } from "src/shared/ui/filter"
 import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import classes from "./WorkTasksPage.module.scss"
 
@@ -33,6 +35,8 @@ export const WorkTasksPage: React.FC = () => {
     const queryClient = useQueryClient()
     const isManager = hasPermission(user, MANAGERS)
     const [assignee, setAssignee] = useState<string | null>(null)
+    const [program, setProgram] = useState<string | null>(null)
+    const assigneeProgram = program === NO_PROGRAM_CODE ? "" : program
 
     setDocumentTitleByLocale("pages.tasks.title")
 
@@ -70,6 +74,7 @@ export const WorkTasksPage: React.FC = () => {
             )
             form.reset()
             setAssignee(null)
+            setProgram(null)
             queryClient.invalidateQueries({ queryKey: ["work-assignments"] })
         },
     })
@@ -123,8 +128,18 @@ export const WorkTasksPage: React.FC = () => {
                                 minRows={3}
                                 {...form.getInputProps("body")}
                             />
+                            <ProgramFilter
+                                label={<FormattedMessage id="pages.tasks.fields.program" />}
+                                value={program}
+                                onChange={(next) => {
+                                    setProgram(next)
+                                    setAssignee(null)
+                                }}
+                            />
                             <UserSearch
+                                key={program ?? "all"}
                                 label={<FormattedMessage id="pages.tasks.fields.assignee" />}
+                                program={assigneeProgram}
                                 onUserChange={(picked) => setAssignee(picked?.username ?? null)}
                             />
                             <DateInput

@@ -17,6 +17,19 @@ $table-min-width: 58rem;
     @include s.title;
 }
 
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    color: var(--portal-muted);
+    font-size: 13px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
 .filters {
     width: 100%;
     align-items: end;

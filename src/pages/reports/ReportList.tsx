@@ -1,6 +1,6 @@
-import { Avatar, Button, Collapse, Flex, Pagination, Table, Text } from "@mantine/core"
+import { Anchor, Avatar, Button, Collapse, Flex, Pagination, Table, Text } from "@mantine/core"
 import { PageRequest, ReportDto, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
-import { IconClock, IconFile, IconFilterEdit, IconFilterOff, IconListCheck, IconUfo } from "@tabler/icons-react"
+import { IconArrowLeft, IconClock, IconFile, IconFilterEdit, IconFilterOff, IconListCheck, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
@@ -28,15 +28,16 @@ import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { defaultFilter, defaultPage, defaultPageResponse, defaultUser } from "./lib/defaults"
 import { locales } from "./lib/locales"
 import { allowedRoles } from "./lib/roles"
+import { heatmapReturnPath } from "src/pages/heatmap/lib/openWeekReports"
 import { WeekDigest } from "./WeekDigest"
 import { getTaskDisplayDescription, getTaskDisplayName } from "src/shared/taskTranslation/lib/taskTranslation"
 import { getSpentTime } from "src/shared/report/timeSpent"
 import classes from "./ReportList.module.scss"
 
 export const ReportList = () => {
-    setDocumentTitleByLocale(locales.title)
-
     const [searchParams, setSearchParams] = useSearchParams()
+    const fromHeatmap = searchParams.get("from") === "heatmap"
+    setDocumentTitleByLocale(fromHeatmap ? locales.titleWeek : locales.title)
     const loginParam = searchParams.get("login")
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
@@ -149,6 +150,10 @@ export const ReportList = () => {
         if (newPage > 0) {
             const userPageNumber = newPage + 1
             params.set("page", userPageNumber.toString())
+        }
+
+        if (searchParams.get("from") === "heatmap") {
+            params.set("from", "heatmap")
         }
 
         setSearchParams(params)
@@ -640,8 +645,19 @@ export const ReportList = () => {
     return (
         <Flex className={classes.root}>
             <Flex direction="column" gap={24} miw={0}>
+                {fromHeatmap && (
+                    <Anchor
+                        component="button"
+                        type="button"
+                        className={classes.backLink}
+                        onClick={() => navigate(heatmapReturnPath())}
+                    >
+                        <IconArrowLeft size={16} />
+                        <FormattedMessage id={locales.backHeatmap} />
+                    </Anchor>
+                )}
                 <Text className={classes.title}>
-                    <FormattedMessage id={locales.title} />
+                    <FormattedMessage id={fromHeatmap ? locales.titleWeek : locales.title} />
                 </Text>
                 <div ref={listStartRef} />
                 {isMobile ? (

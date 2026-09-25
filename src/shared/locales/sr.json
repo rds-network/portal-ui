@@ -212,6 +212,7 @@
             "fields": {
                 "title": "Zadatak",
                 "body": "Opis",
+                "program": "Program",
                 "assignee": "Izvršilac",
                 "due": "Rok"
             },
@@ -447,6 +448,8 @@
         },
         "report-list": {
             "title": "Svi izveštaji",
+            "title-week": "Izveštaji za nedelju",
+            "back-heatmap": "Nazad na toplotnu kartu",
             "volunteer": "Volonter",
             "creation-date": "Datum popunjavanja",
             "weeks": "Izveštajne nedelje",

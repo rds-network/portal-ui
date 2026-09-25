@@ -16,6 +16,7 @@ interface UserSearchProps {
     className?: string
     onUserChange?: (user: UserInfoDto | null) => void
     initialSearch?: string
+    program?: string | null
 }
 
 export const UserSearch = ({
@@ -26,6 +27,7 @@ export const UserSearch = ({
     className,
     onUserChange,
     initialSearch,
+    program,
 }: UserSearchProps) => {
     const intl = useIntl()
 
@@ -54,14 +56,19 @@ export const UserSearch = ({
         }
     }, [selectedUser])
 
+    const searchFilter = program == null ? undefined : { program }
+
     const { data: users = [], isFetching } = useQuery({
-        queryKey: ["searchUsers", debouncedSearch],
-        queryFn: () => UserApiService.searchUsers(debouncedSearch, {}).then((response) => response.data.content),
+        queryKey: ["searchUsers", debouncedSearch, program],
+        queryFn: () =>
+            UserApiService.searchUsers(debouncedSearch, { pageNumber: 0, pageSize: 50 }, searchFilter).then(
+                (response) => response.data.content
+            ),
     })
 
     useEffect(() => {
         if (initialSearch) {
-            UserApiService.searchUsers(initialSearch, {}).then((response) => {
+            UserApiService.searchUsers(initialSearch, { pageNumber: 0, pageSize: 20 }, searchFilter).then((response) => {
                 const result = response.data.content
                 if (result.length == 1) {
                     setSelectedUser(result[0])
