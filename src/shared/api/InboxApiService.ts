@@ -28,12 +28,22 @@ export type InboxThreadDetailDto = {
     messages: InboxMessageDto[]
 }
 
+export type OverdueWeekDto = {
+    weekStart: string
+    hoursWorked: number
+    hoursRequired: number
+}
+
 export type ReportOverdueDto = {
     username: string
     fullName: string
     program?: string | null
     weeksMissed: number
     hoursShort?: number
+    hoursWorked?: number
+    hoursRequired?: number
+    contractEnd?: string | null
+    recentWeeks?: OverdueWeekDto[]
     level: string
     lastReportWeek?: string | null
     subject?: string | null

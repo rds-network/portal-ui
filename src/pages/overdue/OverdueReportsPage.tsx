@@ -6,13 +6,22 @@ import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { InboxApiService, ReportOverdueDto } from "src/shared/api/InboxApiService"
+import { InboxApiService, OverdueWeekDto, ReportOverdueDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
+import { formatContractEnd } from "src/shared/utils/latestContractEnd"
 import classes from "./OverdueReportsPage.module.scss"
 
 const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]
+
+const weekTone = (week: OverdueWeekDto) => {
+    if (!week.hoursRequired) return "na"
+    if (week.hoursWorked === 0) return "noReports"
+    if (week.hoursWorked < week.hoursRequired) return "partialReports"
+    if (week.hoursWorked > week.hoursRequired) return "overtimeReports"
+    return "fullReports"
+}
 
 export const OverdueReportsPage: React.FC = () => {
     const { user } = useContext(UserContext)
@@ -152,6 +161,9 @@ export const OverdueReportsPage: React.FC = () => {
                                     <FormattedMessage id="pages.overdue.person" />
                                 </Table.Th>
                                 <Table.Th>
+                                    <FormattedMessage id="pages.overdue.heatmap" />
+                                </Table.Th>
+                                <Table.Th>
                                     <FormattedMessage id="pages.overdue.program" />
                                 </Table.Th>
                                 <Table.Th>
@@ -190,12 +202,34 @@ export const OverdueReportsPage: React.FC = () => {
                                         <Text fw={600}>{item.fullName}</Text>
                                         <Text size="xs" c="dimmed">
                                             {item.username}
+                                            {formatContractEnd(item.contractEnd) && (
+                                                <>
+                                                    {" · "}
+                                                    <FormattedMessage
+                                                        id="pages.overdue.contract"
+                                                        values={{ date: formatContractEnd(item.contractEnd) }}
+                                                    />
+                                                </>
+                                            )}
                                         </Text>
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <div className={classes.weekSquares} title={item.fullName}>
+                                            {(item.recentWeeks ?? []).map((week) => (
+                                                <span
+                                                    key={week.weekStart}
+                                                    className={`${classes.weekSquare} ${classes[weekTone(week)]}`}
+                                                    title={`${dayjs(week.weekStart).format("DD.MM.YYYY")}: ${week.hoursWorked}/${week.hoursRequired}`}
+                                                />
+                                            ))}
+                                        </div>
                                     </Table.Td>
                                     <Table.Td>{item.program || "—"}</Table.Td>
                                     <Table.Td>
                                         <Badge color={(item.hoursShort ?? 0) >= 20 ? "red" : "gray"}>
-                                            {item.hoursShort ?? 0}
+                                            {item.hoursRequired
+                                                ? `${item.hoursWorked ?? 0}/${item.hoursRequired}`
+                                                : item.hoursShort ?? 0}
                                         </Badge>
                                     </Table.Td>
                                     <Table.Td>

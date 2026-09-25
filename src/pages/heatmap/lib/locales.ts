@@ -37,6 +37,7 @@ export const locales = {
     tooltipNoReports: "pages.heat-map.tooltip.no-reports",
     tooltipReports: "pages.heat-map.tooltip.reports",
     tooltipWeek: "pages.heat-map.tooltip.week",
+    contractUntil: "pages.heat-map.contract-until",
     profile: "pages.heat-map.profile",
     reports: "pages.heat-map.reports",
     ticket: "pages.heat-map.ticket",

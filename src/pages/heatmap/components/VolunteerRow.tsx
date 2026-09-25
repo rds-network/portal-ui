@@ -10,6 +10,7 @@ import { getTicketBody } from "src/pages/heatmap/lib/ticket"
 import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
 import TicketModal from "src/shared/ui/ticketModal/TicketModal"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import { formatContractEnd, latestContractEnd } from "src/shared/utils/latestContractEnd"
 import { locales } from "../lib/locales"
 import classes from "./VolunteerReportHeatmap.module.scss"
 
@@ -48,7 +49,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         return map
     }, [volunteer.weeks])
 
-    const getProgramDescription = (): string => {
+    const programDescription = (() => {
         const program = volunteer.volunteerInfo.program
             ? getLocalizedName(volunteer.volunteerInfo.program, intl.locale)
             : null
@@ -62,7 +63,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         }
         if (program) return program
         return ""
-    }
+    })()
 
     const getVolunteerStatusColor = () => {
         if (volunteer.totalRequired == 0) return "gray"
@@ -79,6 +80,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
 
     const statusColor = getVolunteerStatusColor()
     const statusText = getVolunteerStatusText()
+    const contractUntil = formatContractEnd(latestContractEnd(volunteer.volunteerInfo.contracts))
 
     const getSquareColor = (weekNumber: number) => {
         const weekData = weekByNumber.get(weekNumber)
@@ -199,7 +201,16 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                             {volunteer.volunteerInfo.fullName}
                                         </Text>
                                         <Text size="xs" c="dimmed">
-                                            {getProgramDescription()}
+                                            {programDescription}
+                                            {contractUntil && (
+                                                <>
+                                                    {programDescription ? " • " : ""}
+                                                    <FormattedMessage
+                                                        id={locales.contractUntil}
+                                                        values={{ date: contractUntil }}
+                                                    />
+                                                </>
+                                            )}
                                         </Text>
                                     </div>
                                 </HoverCard.Target>
