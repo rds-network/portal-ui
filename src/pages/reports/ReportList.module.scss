@@ -63,14 +63,14 @@
     appearance: none;
     width: 100%;
     margin: 0;
-    padding: 14px 16px;
+    padding: 16px 20px;
     text-align: left;
     font: inherit;
     color: inherit;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 16px;
     border: 1px solid light-dark(#e5e7eb, var(--portal-border));
-    background: light-dark(#f8fafc, var(--portal-surface));
+    background: light-dark(#fff, var(--portal-surface));
     box-shadow: none;
     transition: background 0.15s ease, border-color 0.15s ease;
 
@@ -80,31 +80,27 @@
     }
 }
 
-.cardTitle {
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.4;
+.cardTop {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 12px;
 }
 
-.cardHours {
-    margin-top: 2px;
-    font-size: 12px;
-    font-weight: 600;
-    color: light-dark(#0f766e, #5eead4);
-}
-
-.cardMeta {
-    margin-top: 2px;
-    font-size: 12px;
-    line-height: 1.45;
-    color: light-dark(#6b7280, var(--portal-muted));
+.cardHeader {
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
 }
 
 .taskPreview {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    margin-top: 8px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid light-dark(#e5e7eb, var(--portal-border));
 }
 
 .taskLine {

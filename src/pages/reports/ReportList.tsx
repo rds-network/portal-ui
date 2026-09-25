@@ -1,6 +1,6 @@
-import { Anchor, Badge, Button, Collapse, Flex, Pagination, Text } from "@mantine/core"
+import { Anchor, Avatar, Badge, Button, Collapse, Flex, Pagination, Text } from "@mantine/core"
 import { PageRequest, ReportDto, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
-import { IconArrowLeft, IconFilterEdit, IconFilterOff, IconUfo } from "@tabler/icons-react"
+import { IconArrowLeft, IconCalendar, IconClock, IconFilterEdit, IconFilterOff, IconUfo, IconUserStar } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
@@ -20,8 +20,10 @@ import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilte
 import { ProgramFilter, ProjectFilter } from "src/shared/ui/filter"
 import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { WeekPicker } from "src/shared/ui/weekPicker/WeekPicker"
-import { hasPermission } from "src/shared/user/roles"
+import { getReportStatusColor } from "src/shared/report/status"
+import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { defaultFilter, defaultPage, defaultPageResponse, defaultUser } from "./lib/defaults"
 import { locales } from "./lib/locales"
 import { allowedRoles } from "./lib/roles"
@@ -36,35 +38,78 @@ const getReportFilesCount = (report: ReportDto): number =>
 const ReportCard = ({
     report,
     creator,
+    moderator,
     programName,
     projectName,
+    currentUser,
     intl,
     onOpen,
 }: {
     report: ReportDto
     creator: UserInfoDto
+    moderator?: UserInfoDto | null
     programName: string
     projectName: string
+    currentUser: UserInfoDto | null
     intl: IntlShape
     onOpen: () => void
 }) => {
-    const createTime = dayjs(report.createTime).format("DD.MM.YYYY HH:mm")
+    const createTime = dayjs(report.createTime).format("DD MMM YYYY - HH:mm")
     const timeSpent = getSpentTimeFromReport(report, intl)
     const filesCount = getReportFilesCount(report)
     const weekLabel = intl.formatMessage({ id: locales.weekShort }, { week: report.week })
-    const statusLabel = intl.formatMessage({ id: `common.report-status.${report.status}` })
     const tasksLabel = intl.formatMessage({ id: locales.taskCount }, { count: report.tasks?.length || 0 })
     const filesLabel =
         filesCount > 0 ? intl.formatMessage({ id: locales.filesCount }, { count: filesCount }) : null
-    const meta = [createTime, programName, projectName, tasksLabel, filesLabel].filter(Boolean).join(" · ")
+    const showModerator = hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && !!report.moderator && !!moderator
 
     return (
         <button type="button" className={classes.reportCard} onClick={onOpen}>
-            <Text className={classes.cardTitle}>
-                {creator.fullName} · {weekLabel} · {statusLabel}
-            </Text>
-            <Text className={classes.cardHours}>{timeSpent}</Text>
-            <Text className={classes.cardMeta}>{meta}</Text>
+            <Flex className={classes.cardTop}>
+                <Badge color={getReportStatusColor(report.status)} radius="md" variant="light">
+                    <FormattedMessage id={`common.report-status.${report.status}`} />
+                </Badge>
+                <Text size="sm" c="dimmed">
+                    {weekLabel}
+                </Text>
+                <Text size="sm" c="dimmed">
+                    {tasksLabel}
+                    {filesLabel ? ` · ${filesLabel}` : ""}
+                </Text>
+            </Flex>
+            <Flex className={classes.cardHeader}>
+                <TextPropertyBox
+                    name={locales.volunteer}
+                    value={creator.fullName}
+                    icon={
+                        <Avatar
+                            src={creator.avatar?.link}
+                            name={creator.fullName}
+                            color="initials"
+                            size={20}
+                        />
+                    }
+                />
+                <TextPropertyBox
+                    name={locales.creationDate}
+                    value={createTime}
+                    icon={<IconCalendar size={16} />}
+                />
+                <TextPropertyBox
+                    name={locales.timeSpent}
+                    value={timeSpent}
+                    icon={<IconClock size={16} />}
+                />
+                <TextPropertyBox name={locales.program} value={programName} />
+                <TextPropertyBox name={locales.project} value={projectName} />
+                {showModerator && (
+                    <TextPropertyBox
+                        name={locales.moderatorShort}
+                        value={moderator.fullName}
+                        icon={<IconUserStar size={16} />}
+                    />
+                )}
+            </Flex>
             <div className={classes.taskPreview}>
                 {(report.tasks || []).map((task, i) => {
                     const name = getTaskDisplayName(task, false) || "—"
@@ -286,6 +331,7 @@ export const ReportList = () => {
         const set = new Set<string>()
         for (const r of reports) {
             if (r.user) set.add(r.user)
+            if (r.moderator) set.add(r.moderator)
         }
         return Array.from(set).sort()
     }, [reports])
@@ -385,6 +431,7 @@ export const ReportList = () => {
                 key={report.id}
                 report={report}
                 creator={creator}
+                moderator={report.moderator ? users[report.moderator] || defaultUser(report.moderator) : null}
                 programName={
                     program
                         ? getLocalizedName(program, intl.locale)
@@ -395,6 +442,7 @@ export const ReportList = () => {
                         ? getLocalizedName(project, intl.locale)
                         : intl.formatMessage({ id: locales.noProject })
                 }
+                currentUser={user}
                 intl={intl}
                 onOpen={() => {
                     localStorage.setItem("reportListState", window.location.search)

@@ -24,4 +24,5 @@ export const locales = {
     noProject: "pages.user-list.no-project",
     digestTitle: "pages.report-list.digest-title",
     weekShort: "pages.report-list.week-short",
+    moderatorShort: "pages.report.moderator-short",
 }
