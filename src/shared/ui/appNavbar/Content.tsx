@@ -1,4 +1,4 @@
-import { IconAdjustments, IconBell, IconChecklist, IconFileAnalytics, IconHistory, IconLifebuoy, IconLink, IconUsers } from "@tabler/icons-react"
+import { IconAdjustments, IconBell, IconChecklist, IconClipboardCheck, IconFileAnalytics, IconHistory, IconLifebuoy, IconLink, IconUsers } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
 export const Content: ItemGroupProps[] = [
@@ -19,9 +19,16 @@ export const Content: ItemGroupProps[] = [
         showUnread: true,
     },
     {
+        label: "navbar.reports.review",
+        icon: IconClipboardCheck,
+        link: "/reports/review",
+        showIfCurator: true,
+        curatorInbox: true,
+        roles: ["ADMIN", "ADMIN_VOLUNTEER", "MAIN_VOLUNTEER"],
+    },
+    {
         label: "navbar.reports.reporting",
         icon: IconFileAnalytics,
-        initiallyOpened: true,
         items: [
             {
                 label: "navbar.reports.my-reports",
@@ -38,9 +45,8 @@ export const Content: ItemGroupProps[] = [
         ],
     },
     {
-        label: "navbar.volunteers.volunteers",
+        label: "navbar.admin",
         icon: IconUsers,
-        initiallyOpened: true,
         showIfCurator: true,
         items: [
             {
@@ -57,11 +63,6 @@ export const Content: ItemGroupProps[] = [
                 label: "navbar.reports.overdue",
                 link: "/reports/overdue",
                 roles: ["ADMIN_VOLUNTEER"],
-            },
-            {
-                label: "navbar.reports.review",
-                link: "/reports/review",
-                curatorInbox: true,
             },
             {
                 label: "navbar.volunteers.applications",

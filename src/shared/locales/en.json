@@ -485,7 +485,7 @@
             "task-date": "Date",
             "task-date-description": "When the task was completed",
             "task-customer": "Customer",
-            "task-customer-description": "Required. Only a program curator. They get a notice and can accept the report.",
+            "task-customer-description": "Choose your curator. They get a notice and can accept the report.",
             "customer-required": "Specify the task customer",
             "required": "Required",
             "min-letters": "Minimum {count} letters",
@@ -1091,6 +1091,7 @@
             "overdue": "Missing reports",
             "review": "For review"
         },
+        "admin": "Administration",
         "volunteers": {
             "volunteers": "Volunteers",
             "all-volunteers": "All volunteers",

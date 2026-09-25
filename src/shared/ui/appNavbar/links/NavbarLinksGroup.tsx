@@ -12,7 +12,17 @@ import { CustomerReportApiService } from "src/shared/api/CustomerReportApiServic
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 
-export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, roles, showUnread }: ItemGroupProps) {
+export function LinksGroup({
+    icon: Icon,
+    label,
+    initiallyOpened,
+    items,
+    link,
+    roles,
+    showUnread,
+    showIfCurator,
+    curatorInbox,
+}: ItemGroupProps) {
     const location = useLocation()
     const isActive = (path?: string) =>
         location.pathname === path || (path === "/reports/personal" && location.pathname === "/")
@@ -26,7 +36,10 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, ro
         enabled: !!showUnread,
         refetchInterval: 60_000,
     })
-    const needsCuratorInbox = (hasChildren ? items : [])?.some((item) => item.curatorInbox || item.showIfCurator)
+    const needsCuratorInbox =
+        !!curatorInbox ||
+        !!showIfCurator ||
+        (hasChildren ? items : [])?.some((item) => item.curatorInbox || item.showIfCurator)
     const { data: curatorMe } = useQuery({
         queryKey: ["program-curators", "me"],
         queryFn: () => ProgramCuratorApiService.me(),
@@ -88,6 +101,11 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, ro
                 {showUnread && unread > 0 && (
                     <Badge size="xs" color="blue" ml={8}>
                         {unread > 99 ? "99+" : unread}
+                    </Badge>
+                )}
+                {curatorInbox && pendingReports > 0 && (
+                    <Badge size="xs" color="blue" ml={8}>
+                        {pendingReports > 99 ? "99+" : pendingReports}
                     </Badge>
                 )}
             </Box>

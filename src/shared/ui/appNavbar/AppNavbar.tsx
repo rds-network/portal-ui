@@ -32,6 +32,7 @@ export interface ItemGroupProps {
     roles?: string[]
     showUnread?: boolean
     showIfCurator?: boolean
+    curatorInbox?: boolean
 }
 
 export const AppNavbar = React.memo(function AppNavbar() {

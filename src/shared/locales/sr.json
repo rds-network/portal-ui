@@ -485,7 +485,7 @@
             "task-date": "Datum",
             "task-date-description": "Kada je zadatak završen",
             "task-customer": "Kupac",
-            "task-customer-description": "Obavezno polje. Samo kustos programa. On dobija obaveštenje i može da prihvati izveštaj.",
+            "task-customer-description": "Navedite svog kustosa. On dobija obaveštenje i može da prihvati izveštaj.",
             "customer-required": "Navedite naručioca zadatka",
             "required": "Obavezno",
             "min-letters": "Najmanje {count} znakova",
@@ -1091,6 +1091,7 @@
             "overdue": "Nedostavljeni izveštaji",
             "review": "Na prijemu"
         },
+        "admin": "Administracija",
         "volunteers": {
             "volunteers": "Volonteri",
             "all-volunteers": "Svi volonteri",
