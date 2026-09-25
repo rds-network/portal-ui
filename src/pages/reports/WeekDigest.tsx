@@ -1,23 +1,21 @@
 import { Badge, Flex, Table, Text } from "@mantine/core"
-import { ReportDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { ProgramDto, ReportDto, TaskDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import React, { useMemo } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { getTaskDisplayName } from "src/shared/taskTranslation/lib/taskTranslation"
 import { locales } from "./lib/locales"
 
-type Named = { code?: string; nameRu?: string; nameEn?: string; nameSr?: string }
-
 interface Props {
     reports: ReportDto[]
-    programs: Named[]
+    programs: ProgramDto[]
     users: Record<string, UserInfoDto>
     dateFrom: string
     dateTo: string
 }
 
 const minutesOf = (report: ReportDto) =>
-    (report.tasks || []).reduce((sum, task) => sum + (task.timeSpent || 0), 0)
+    (report.tasks || []).reduce((sum: number, task: TaskDto) => sum + (task.timeSpent || 0), 0)
 
 export const WeekDigest: React.FC<Props> = ({ reports, programs, users, dateFrom, dateTo }) => {
     const intl = useIntl()
@@ -33,9 +31,9 @@ export const WeekDigest: React.FC<Props> = ({ reports, programs, users, dateFrom
             minutes += mins
             const programCode = report.program || ""
             const programName = programs.find((p) => p.code === programCode)
-            const programLabel = programName ? getLocalizedName(programName as never, intl.locale) : programCode || "—"
+            const programLabel = programName ? getLocalizedName(programName, intl.locale) : programCode || "—"
             const taskNames = (report.tasks || [])
-                .map((t) => getTaskDisplayName(t, false))
+                .map((t: TaskDto) => getTaskDisplayName(t, false))
                 .filter(Boolean)
                 .slice(0, 3)
 
@@ -90,7 +88,7 @@ export const WeekDigest: React.FC<Props> = ({ reports, programs, users, dateFrom
             <Flex gap={8} wrap="wrap">
                 {digest.programs.map((p) => {
                     const named = programs.find((x) => x.code === p.code)
-                    const label = named ? getLocalizedName(named as never, intl.locale) : p.code || "—"
+                    const label = named ? getLocalizedName(named, intl.locale) : p.code || "—"
                     return (
                         <Badge key={p.code || "none"} variant="light" size="lg">
                             {label}: {hours(p.minutes)} · {p.people.size} чел.
