@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Checkbox, Flex, Loader, Modal, Table, Text, Title } from "@mantine/core"
+import { Badge, Button, Card, Checkbox, Flex, Group, Loader, Modal, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -15,7 +15,11 @@ import classes from "./OverdueReportsPage.module.scss"
 
 const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]
 
+const thisMonday = () => dayjs().startOf("isoWeek").format("YYYY-MM-DD")
+
 const weekTone = (week: OverdueWeekDto) => {
+    const current = week.weekStart === thisMonday()
+    if (current && week.hoursWorked === 0) return "waiting"
     if (!week.hoursRequired) return "na"
     if (week.hoursWorked === 0) return "noReports"
     if (week.hoursWorked < week.hoursRequired) return "partialReports"
@@ -98,6 +102,8 @@ export const OverdueReportsPage: React.FC = () => {
         setExcluded(new Set())
     }
 
+    const axisWeeks = items[0]?.recentWeeks ?? []
+
     const samples = useMemo(
         () => (preview?.samples ?? items.slice(0, 5)).filter((item) => !excluded.has(item.username)),
         [preview?.samples, items, excluded]
@@ -137,6 +143,16 @@ export const OverdueReportsPage: React.FC = () => {
                         <FormattedMessage id="pages.overdue.skipHint" />
                     </Text>
                 )}
+                <Flex justify="center" mb="md">
+                    <Group gap="xs">
+                        <Legend color="noReports" label="pages.heat-map.no-reports" />
+                        <Legend color="partialReports" label="pages.heat-map.partial-reports" />
+                        <Legend color="fullReports" label="pages.heat-map.full-reports" />
+                        <Legend color="overtimeReports" label="pages.heat-map.overtime-reports" />
+                        <Legend color="na" label="pages.heat-map.na" />
+                        <Legend color="waiting" label="pages.heat-map.pending" />
+                    </Group>
+                </Flex>
                 {(isLoading || isFetching) && items.length === 0 ? (
                     <Flex align="center" gap="sm" py="lg">
                         <Loader size="sm" />
@@ -149,49 +165,36 @@ export const OverdueReportsPage: React.FC = () => {
                         <FormattedMessage id="pages.overdue.empty" />
                     </Text>
                 ) : (
-                    <Table highlightOnHover>
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th w={70}>
-                                    <Checkbox
-                                        checked={allIncluded}
-                                        indeterminate={someExcluded}
-                                        onChange={toggleAll}
-                                        label={<FormattedMessage id="pages.overdue.skip" />}
-                                        styles={{ label: { fontSize: 12 } }}
-                                    />
-                                </Table.Th>
-                                <Table.Th>
-                                    <FormattedMessage id="pages.overdue.person" />
-                                </Table.Th>
-                                <Table.Th>
-                                    <FormattedMessage id="pages.overdue.heatmap" />
-                                </Table.Th>
-                                <Table.Th>
-                                    <FormattedMessage id="pages.overdue.program" />
-                                </Table.Th>
-                                <Table.Th>
-                                    <FormattedMessage id="pages.overdue.hours" />
-                                </Table.Th>
-                                <Table.Th>
-                                    <FormattedMessage id="pages.overdue.weeks" />
-                                </Table.Th>
-                                <Table.Th>
-                                    <FormattedMessage id="pages.overdue.last" />
-                                </Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>
-                            {items.map((item) => (
-                                <Table.Tr
-                                    key={item.username}
-                                    style={{
-                                        cursor: "pointer",
-                                        opacity: excluded.has(item.username) ? 0.45 : 1,
-                                    }}
-                                    onClick={() => openHeatmap(item.username)}
-                                >
-                                    <Table.Td
+                    <div>
+                        <Flex align="center" gap="sm" mb="sm">
+                            <Checkbox
+                                checked={allIncluded}
+                                indeterminate={someExcluded}
+                                onChange={toggleAll}
+                                label={<FormattedMessage id="pages.overdue.skip" />}
+                            />
+                        </Flex>
+                        {axisWeeks.length > 0 && (
+                            <div className={classes.weekHeader}>
+                                {axisWeeks.map((week, index) => (
+                                    <span key={week.weekStart} className={classes.weekNum}>
+                                        {index + 1}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+                        {items.map((item) => (
+                            <div
+                                key={item.username}
+                                className={classes.row}
+                                style={{
+                                    cursor: "pointer",
+                                    opacity: excluded.has(item.username) ? 0.45 : 1,
+                                }}
+                                onClick={() => openHeatmap(item.username)}
+                            >
+                                <Flex align="flex-start" gap="sm" mb={8} wrap="wrap">
+                                    <div
                                         onClick={(event) => {
                                             event.stopPropagation()
                                         }}
@@ -201,8 +204,8 @@ export const OverdueReportsPage: React.FC = () => {
                                             onChange={() => toggleExclude(item.username)}
                                             aria-label={item.fullName}
                                         />
-                                    </Table.Td>
-                                    <Table.Td>
+                                    </div>
+                                    <div style={{ minWidth: 180, flex: "1 1 180px" }}>
                                         <Text fw={600}>{item.fullName}</Text>
                                         {(item.warningCount ?? 0) > 0 && (
                                             <Text size="xs" c={(item.warningCount ?? 0) >= 3 ? "red" : "orange"}>
@@ -213,7 +216,7 @@ export const OverdueReportsPage: React.FC = () => {
                                             </Text>
                                         )}
                                         <Text size="xs" c="dimmed">
-                                            {item.username}
+                                            {item.program || item.username}
                                             {formatContractEnd(item.contractEnd) && (
                                                 <>
                                                     {" · "}
@@ -224,27 +227,13 @@ export const OverdueReportsPage: React.FC = () => {
                                                 </>
                                             )}
                                         </Text>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        <div className={classes.weekSquares} title={item.fullName}>
-                                            {(item.recentWeeks ?? []).map((week) => (
-                                                <span
-                                                    key={week.weekStart}
-                                                    className={`${classes.weekSquare} ${classes[weekTone(week)]}`}
-                                                    title={`${dayjs(week.weekStart).format("DD.MM.YYYY")}: ${week.hoursWorked}/${week.hoursRequired}`}
-                                                />
-                                            ))}
-                                        </div>
-                                    </Table.Td>
-                                    <Table.Td>{item.program || "—"}</Table.Td>
-                                    <Table.Td>
+                                    </div>
+                                    <Flex gap={6} wrap="wrap">
                                         <Badge color={(item.hoursShort ?? 0) >= 20 ? "red" : "gray"}>
                                             {item.hoursRequired
                                                 ? `${item.hoursWorked ?? 0}/${item.hoursRequired}`
                                                 : item.hoursShort ?? 0}
                                         </Badge>
-                                    </Table.Td>
-                                    <Table.Td>
                                         <Badge
                                             color={
                                                 item.weeksMissed >= 3
@@ -260,14 +249,25 @@ export const OverdueReportsPage: React.FC = () => {
                                                 <FormattedMessage id="pages.overdue.snapshot" />
                                             )}
                                         </Badge>
-                                    </Table.Td>
-                                    <Table.Td>
-                                        {item.lastReportWeek ? dayjs(item.lastReportWeek).format("DD.MM.YYYY") : "—"}
-                                    </Table.Td>
-                                </Table.Tr>
-                            ))}
-                        </Table.Tbody>
-                    </Table>
+                                        <Text size="xs" c="dimmed">
+                                            {item.lastReportWeek
+                                                ? dayjs(item.lastReportWeek).format("DD.MM.YYYY")
+                                                : "—"}
+                                        </Text>
+                                    </Flex>
+                                </Flex>
+                                <div className={classes.weekSquares}>
+                                    {(item.recentWeeks ?? []).map((week) => (
+                                        <span
+                                            key={week.weekStart}
+                                            className={`${classes.weekSquare} ${classes[weekTone(week)]}`}
+                                            title={`${dayjs(week.weekStart).format("DD.MM.YYYY")}: ${week.hoursWorked}/${week.hoursRequired}`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </Card>
 
@@ -324,5 +324,14 @@ export const OverdueReportsPage: React.FC = () => {
         </Flex>
     )
 }
+
+const Legend: React.FC<{ color: keyof typeof classes; label: string }> = ({ color, label }) => (
+    <Flex align="center" gap={6}>
+        <span className={`${classes.legendSquare} ${classes[color]}`} />
+        <Text size="xs">
+            <FormattedMessage id={label} />
+        </Text>
+    </Flex>
+)
 
 export default OverdueReportsPage

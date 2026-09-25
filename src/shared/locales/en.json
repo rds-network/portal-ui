@@ -245,7 +245,7 @@
         },
         "overdue": {
             "title": "Missing reports",
-            "description": "Snapshot of the last 5 weeks only. Overtime or no hour shortfall is left out. Then +1 / +2 / +3 weeks without a report.",
+            "description": "Hours snapshot is the last 5 weeks. The map for each person shows every week of the year. Overtime or no hour shortfall is left out. Then +1 / +2 / +3 weeks without a report.",
             "total": "In the list: {count}",
             "notify": "Send notices now",
             "sent": "Sent: {count}",
@@ -253,7 +253,7 @@
             "person": "Volunteer",
             "program": "Program",
             "hours": "Hours in 5 weeks",
-            "heatmap": "5 weeks",
+            "heatmap": "Map",
             "contract": "contract until {date}",
             "weeks": "Weeks without a report",
             "snapshot": "snapshot",

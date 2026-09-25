@@ -2,20 +2,37 @@
 
 .root {
     @include s.page;
-    max-width: 1280px;
+    max-width: 1400px;
 }
 
+.row {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+}
+
+.weekHeader,
 .weekSquares {
-    display: flex;
-    gap: 3px;
-    align-items: center;
+    display: grid;
+    gap: 2px;
+    grid-template-columns: repeat(auto-fill, minmax(20px, 1fr));
+    justify-items: center;
+}
+
+.weekHeader {
+    margin-bottom: 0.35rem;
+}
+
+.weekNum {
+    font-size: 0.7rem;
+    color: var(--mantine-color-dimmed);
+    text-align: center;
+    line-height: 1;
 }
 
 .weekSquare {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 3px;
-    flex: 0 0 16px;
 }
 
 .noReports {
@@ -37,4 +54,15 @@
 .na {
     background-color: var(--mantine-color-gray-6);
     border: 1px solid var(--mantine-color-gray-5);
+}
+
+.waiting {
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+    border: 1px solid var(--mantine-color-gray-5);
+}
+
+.legendSquare {
+    width: 16px;
+    height: 16px;
+    border-radius: 2px;
 }
