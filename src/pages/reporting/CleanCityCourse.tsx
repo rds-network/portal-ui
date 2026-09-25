@@ -85,19 +85,19 @@ export const CleanCityCourse: React.FC = () => {
                 id: "2",
                 title: intl.formatMessage({ id: "pages.reporting.course.m2.title" }),
                 summary: intl.formatMessage({ id: "pages.reporting.course.m2.summary" }),
-                markdown: "clean-city-howto",
+                markdown: "clean-city-reporting",
                 extra: (
-                    <Flex direction="column" gap={8}>
-                        <Text>
+                    <Flex direction="column" gap="sm" className={classes.docs}>
+                        <Text fw={650}>
                             <FormattedMessage id="pages.reporting.course.m2.docs" />
                         </Text>
-                        <Anchor href="https://ekomapa.rs/docs/clean-city-volunteer.html" target="_blank">
+                        <Anchor href="https://ekomapa.rs/docs/clean-city-volunteer.html" target="_blank" className={classes.doc}>
                             ekomapa.rs/docs/clean-city-volunteer.html
                         </Anchor>
-                        <Anchor href="https://ekomapa.rs/docs/portal-user.html" target="_blank">
+                        <Anchor href="https://ekomapa.rs/docs/portal-user.html" target="_blank" className={classes.doc}>
                             ekomapa.rs/docs/portal-user.html
                         </Anchor>
-                        <Anchor href="https://ekomapa.rs/docs/portal-curator.html" target="_blank">
+                        <Anchor href="https://ekomapa.rs/docs/portal-curator.html" target="_blank" className={classes.doc}>
                             ekomapa.rs/docs/portal-curator.html
                         </Anchor>
                     </Flex>
@@ -119,8 +119,9 @@ export const CleanCityCourse: React.FC = () => {
                         options: [
                             { value: "attach", label: intl.formatMessage({ id: "pages.reporting.course.m2.a2a" }) },
                             { value: "cloud", label: intl.formatMessage({ id: "pages.reporting.course.m2.a2b" }) },
+                            { value: "eko", label: intl.formatMessage({ id: "pages.reporting.course.m2.a2c" }) },
                         ],
-                        answer: "cloud",
+                        answer: "eko",
                     },
                 ],
             },
@@ -240,8 +241,8 @@ export const CleanCityCourse: React.FC = () => {
                                 </Text>
                             </Accordion.Control>
                             <Accordion.Panel>
-                                {module.markdown && <LocalizedMarkdown id={module.markdown} className={classes.md} />}
                                 {module.extra && <div className={classes.extra}>{module.extra}</div>}
+                                {module.markdown && <LocalizedMarkdown id={module.markdown} className={classes.md} />}
                                 <Flex direction="column" gap="md" mt="lg">
                                     {module.questions.map((item) => (
                                         <Radio.Group

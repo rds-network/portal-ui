@@ -15,7 +15,7 @@ export const LocalizedMarkdown = ({ id, className }: LocalizedMarkdownProps) => 
         import(`src/shared/locales/markdown/${locale}/${id}.md`).then((file) => {
             setMarkdownContent(file.markdown)
         })
-    }, [])
+    }, [locale, id])
 
     const highlightIfStartsWith = (children: React.ReactNode, markers: string[]): React.ReactNode => {
         const childArray = React.Children.toArray(children)

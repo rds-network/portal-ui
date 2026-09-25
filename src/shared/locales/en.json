@@ -529,7 +529,7 @@
             "show-tasks": "What was done"
         },
         "heat-map": {
-            "description": "Monitoring volunteer activity and reporting",
+            "description": "Only volunteers with a current regular contract. Associated members and expired contracts are not listed.",
             "filters": "Filters",
             "search": "Search by name or email",
             "program": "Program",
@@ -823,7 +823,7 @@
         },
         "reporting": {
             "title": "Submitting reports",
-            "description": "Pick a program. Clean City has an intro course; other programs use the shared report guide.",
+            "description": "Pick a program. Clean City uses the current Ekomapa + portal course. The old cloud-folder guide is gone.",
             "program": "Program",
             "cleanCity": "Clean City (Urbanism)",
             "course": {
@@ -850,15 +850,16 @@
                 },
                 "m2": {
                     "title": "Submitting reports",
-                    "summary": "Portal, Ekomapa, cloud, and before/after photos.",
+                    "summary": "Ekomapa, portal, and cloud. Photos stay on Ekomapa; the portal report gets the point text.",
                     "docs": "Detailed guides in the same style as Ekomapa:",
                     "q1": "Which photos are required?",
                     "a1a": "After only",
                     "a1b": "Before and after from the same spot",
                     "a1c": "Bags only",
-                    "q2": "Where do photos go?",
+                    "q2": "Where do ordinary cleanup photos go?",
                     "a2a": "Attach files to the portal report",
-                    "a2b": "Upload to the cloud, put the link in the report"
+                    "a2b": "Cloud folders, one per location",
+                    "a2c": "Ekomapa; the portal report gets the point text"
                 },
                 "m3": {
                     "title": "Program projects",

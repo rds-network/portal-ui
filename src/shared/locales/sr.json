@@ -529,7 +529,7 @@
             "show-tasks": "Šta je urađeno"
         },
         "heat-map": {
-            "description": "Monitoring aktivnosti volontera i njihovog izveštavanja",
+            "description": "Samo volonteri sa važećim redovnim ugovorom. Asocirani i istekli ugovori nisu na karti.",
             "filters": "Filteri",
             "search": "Pretraga po imenu ili emailu",
             "program": "Program",
@@ -823,7 +823,7 @@
         },
         "reporting": {
             "title": "Predaja izveštaja",
-            "description": "Izaberite program. Za „Čisti grad“ je uvodni kurs, za ostale — opšte uputstvo za izveštaj.",
+            "description": "Izaberite program. Za „Čisti grad“ je aktuelni kurs: Ekomapa, portal i oblak. Staro uputstvo sa folderima na oblaku više se ne koristi.",
             "program": "Program",
             "cleanCity": "Čisti grad (Urbanizam)",
             "course": {
@@ -850,15 +850,16 @@
                 },
                 "m2": {
                     "title": "Predaja izveštaja",
-                    "summary": "Portal, Ekomapa, oblak i fotografije pre/posle.",
+                    "summary": "Ekomapa, portal i oblak. Fotografije su na Ekomapi, na portal ide tekst tačke.",
                     "docs": "Detaljna uputstva u istom stilu kao na Ekomapi:",
                     "q1": "Koje fotografije su obavezne?",
                     "a1a": "Samo posle",
                     "a1b": "Pre i posle iz iste tačke",
                     "a1c": "Samo kese",
-                    "q2": "Gde se stavljaju fotografije?",
+                    "q2": "Gde se stavljaju fotografije običnog čišćenja?",
                     "a2a": "Priložiti fajlove uz izveštaj na portalu",
-                    "a2b": "Na oblak, u izveštaj — link"
+                    "a2b": "Folderi na oblaku, po jedna lokacija",
+                    "a2c": "Na Ekomapu, u izveštaj na portalu — tekst tačke"
                 },
                 "m3": {
                     "title": "Projekti programa",

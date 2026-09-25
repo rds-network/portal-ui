@@ -13,6 +13,17 @@
     margin-top: 16px;
 }
 
+.docs {
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+}
+
+.doc {
+    font-weight: 600;
+}
+
 .md {
     @include s.prose;
 
