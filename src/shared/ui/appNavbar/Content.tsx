@@ -1,4 +1,4 @@
-import { IconAdjustments, IconBell, IconChecklist, IconFileAnalytics, IconLifebuoy, IconLink, IconUsers } from "@tabler/icons-react"
+import { IconAdjustments, IconBell, IconChecklist, IconFileAnalytics, IconHistory, IconLifebuoy, IconLink, IconUsers } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
 export const Content: ItemGroupProps[] = [
@@ -73,7 +73,13 @@ export const Content: ItemGroupProps[] = [
                 roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"],
             },
         ],
-        roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO", "INTERVIEWER"],
+        roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO", "INTERVIEWER", "ADMIN"],
+    },
+    {
+        label: "navbar.activity",
+        icon: IconHistory,
+        link: "/activity",
+        roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"],
     },
     {
         label: "navbar.account-settings",

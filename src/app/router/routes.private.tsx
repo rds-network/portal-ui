@@ -23,6 +23,7 @@ const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
 const MessagesPage = lazy(() => import("src/pages/inbox/MessagesPage"))
 const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPage"))
 const ResourcesPage = lazy(() => import("src/pages/resources/ResourcesPage"))
+const ActivityPage = lazy(() => import("src/pages/activity/ActivityPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -116,6 +117,10 @@ export const routes: RouteProps[] = [
     {
         path: "/resources",
         element: <ResourcesPage />,
+    },
+    {
+        path: "/activity",
+        element: <ActivityPage />,
     },
     {
         path: "/",

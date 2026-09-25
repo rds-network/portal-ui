@@ -9,6 +9,7 @@ export type InboxThreadDto = {
     unread: boolean
     lastBody?: string | null
     counterpart?: string | null
+    heatmapUser?: string | null
 }
 
 export type InboxMessageDto = {
@@ -23,6 +24,7 @@ export type InboxThreadDetailDto = {
     subject: string
     kind: string
     createdBy?: string | null
+    heatmapUser?: string | null
     messages: InboxMessageDto[]
 }
 
@@ -34,6 +36,14 @@ export type ReportOverdueDto = {
     hoursShort?: number
     level: string
     lastReportWeek?: string | null
+    subject?: string | null
+    body?: string | null
+}
+
+export type OverduePreviewDto = {
+    count: number
+    templates: { level: string; subject: string; body: string }[]
+    samples: ReportOverdueDto[]
 }
 
 const alive = (status: number) => status === 200 || status === 201 || status === 404 || status >= 500
@@ -71,6 +81,12 @@ export const InboxApiService = {
         const response = await RequestHttp.get<ReportOverdueDto[]>("/report-overdue", { validateStatus: alive })
         if (response.status !== 200) return []
         return response.data ?? []
+    },
+
+    async overduePreview(): Promise<OverduePreviewDto> {
+        const response = await RequestHttp.get<OverduePreviewDto>("/report-overdue/preview", { validateStatus: alive })
+        if (response.status !== 200) return { count: 0, templates: [], samples: [] }
+        return response.data ?? { count: 0, templates: [], samples: [] }
     },
 
     async createPersonalAnnouncement(payload: { title: string; body: string; username: string }) {

@@ -214,6 +214,8 @@
             "save": "Sačuvaj",
             "open": "Otvoreni zadaci",
             "add": "Dodaj u izveštaj",
+            "archive": "Arhiviraj",
+            "delete": "Obriši",
             "fields": {
                 "title": "Zadatak",
                 "body": "Opis",
@@ -253,7 +255,32 @@
             "hours": "Manjak, h",
             "weeks": "Nedelja bez izveštaja",
             "snapshot": "presek",
-            "last": "Poslednji prihvaćen"
+            "last": "Poslednji prihvaćen",
+            "loading": "Učitava se lista nedostavljenih izveštaja…",
+            "previewTitle": "Tekst obaveštenja",
+            "previewHint": "Ovako će videti volonteri. U slanju je {count} osoba.",
+            "samples": "Primeri pisama",
+            "notifyConfirm": "Pošalji svima sa liste",
+            "openHeatmap": "Toplotna karta"
+        },
+        "activity": {
+            "title": "Hronika",
+            "description": "Ko se sa koje IP adrese prijavio i šta je radio. Klik na akciju otvara stranicu, klik na nalog — profil. Kolone se sortiraju.",
+            "loading": "Učitava se hronika…",
+            "time": "Vreme",
+            "who": "Ko",
+            "what": "Šta je uradio"
+        },
+        "mup": {
+            "title": "Pismo MUP-u Srbije",
+            "open": "Obaveštenje MUP-u",
+            "hint": "Nacrt na srpskom. Pismo ide na upravazastrance@mup.gov.rs i čuva se u raspravama portala.",
+            "to": "Kome",
+            "subject": "Predmet",
+            "body": "Tekst",
+            "send": "Sačini i pošalji",
+            "sent": "Pismo MUP-u je poslato i sačuvano",
+            "history": "Sačuvane pošiljke"
         },
         "welcome": {
             "title": "Portal volontera",
@@ -1017,6 +1044,7 @@
             "mintrud-report": "izveštaj o volontiranju"
         },
         "account-settings": "Podešavanja naloga",
+        "activity": "Hronika",
         "resources": "Naši resursi",
         "support": "Kontaktirajte podršku"
     },

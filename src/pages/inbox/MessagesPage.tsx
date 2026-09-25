@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useState } from "react"
 import { FormattedMessage } from "react-intl"
+import { useNavigate } from "react-router"
 import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { UserContext } from "src/app/providers/UserContext"
@@ -10,6 +11,7 @@ import classes from "./MessagesPage.module.scss"
 
 export const MessagesPage: React.FC = () => {
     const { user } = useContext(UserContext)
+    const navigate = useNavigate()
     const queryClient = useQueryClient()
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [reply, setReply] = useState("")
@@ -39,6 +41,12 @@ export const MessagesPage: React.FC = () => {
     const openThread = (item: InboxThreadDto) => {
         setSelectedId(item.id)
         setReply("")
+    }
+
+    const heatmapUser = (item?: { kind: string; heatmapUser?: string | null; counterpart?: string | null } | null) => {
+        if (!item) return null
+        if (!item.kind.startsWith("OVERDUE") && item.kind !== "TASK") return null
+        return item.heatmapUser || item.counterpart || user?.username || null
     }
 
     return (
@@ -87,7 +95,21 @@ export const MessagesPage: React.FC = () => {
                     </Text>
                 ) : (
                     <>
-                        <Title order={3}>{thread.subject}</Title>
+                        <Flex justify="space-between" align="center" gap="sm" wrap="wrap">
+                            <Title order={3}>{thread.subject}</Title>
+                            {heatmapUser(thread) && (
+                                <Button
+                                    variant="light"
+                                    onClick={() =>
+                                        navigate(
+                                            `/volunteers/heatmap?search=${encodeURIComponent(heatmapUser(thread)!)}`
+                                        )
+                                    }
+                                >
+                                    <FormattedMessage id="pages.overdue.openHeatmap" />
+                                </Button>
+                            )}
+                        </Flex>
                         <ScrollArea className={classes.messages} mt="md">
                             <Flex direction="column" gap="sm">
                                 {thread.messages.map((message) => {

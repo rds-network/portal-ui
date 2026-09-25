@@ -97,7 +97,27 @@ export const WorkTasksPage: React.FC = () => {
     const { mutate: patch, isPending: isPatching } = useMutation({
         mutationFn: ({ id, payload }: { id: string; payload: WorkAssignmentPatchRequest }) =>
             WorkAssignmentApiService.patch(id, payload),
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ["work-assignments"] }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["work-assignments"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
+        },
+    })
+
+    const { mutate: archiveCard, isPending: isArchiving } = useMutation({
+        mutationFn: (id: string) => WorkAssignmentApiService.archive(id),
+        onSuccess: () => {
+            setEdit(null)
+            queryClient.invalidateQueries({ queryKey: ["work-assignments"] })
+        },
+    })
+
+    const { mutate: deleteCard, isPending: isDeleting } = useMutation({
+        mutationFn: (id: string) => WorkAssignmentApiService.remove(id),
+        onSuccess: () => {
+            setEdit(null)
+            queryClient.invalidateQueries({ queryKey: ["work-assignments"] })
+        },
     })
 
     const onCreate = form.onSubmit((values) => {
@@ -321,9 +341,28 @@ export const WorkTasksPage: React.FC = () => {
                                 {...editForm.getInputProps("dueDate")}
                             />
                             {isManager && (
-                                <Button type="submit" loading={isPatching}>
-                                    <FormattedMessage id="pages.tasks.save" />
-                                </Button>
+                                <Flex gap="sm" wrap="wrap">
+                                    <Button type="submit" loading={isPatching}>
+                                        <FormattedMessage id="pages.tasks.save" />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="light"
+                                        loading={isArchiving}
+                                        onClick={() => archiveCard(edit.id)}
+                                    >
+                                        <FormattedMessage id="pages.tasks.archive" />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        color="red"
+                                        variant="subtle"
+                                        loading={isDeleting}
+                                        onClick={() => deleteCard(edit.id)}
+                                    >
+                                        <FormattedMessage id="pages.tasks.delete" />
+                                    </Button>
+                                </Flex>
                             )}
                         </Flex>
                     </form>

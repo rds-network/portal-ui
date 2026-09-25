@@ -1,12 +1,12 @@
-import { Badge, Button, Card, Flex, Table, Text, Title } from "@mantine/core"
+import { Badge, Button, Card, Flex, Loader, Modal, Table, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useContext, useEffect } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { InboxApiService } from "src/shared/api/InboxApiService"
+import { InboxApiService, ReportOverdueDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
@@ -18,6 +18,8 @@ export const OverdueReportsPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
     const queryClient = useQueryClient()
+    const [previewOpen, setPreviewOpen] = useState(false)
+    const [letter, setLetter] = useState<ReportOverdueDto | null>(null)
 
     setDocumentTitleByLocale("pages.overdue.title")
 
@@ -27,9 +29,15 @@ export const OverdueReportsPage: React.FC = () => {
         }
     }, [user, navigate])
 
-    const { data: items = [], isFetching } = useQuery({
+    const { data: items = [], isFetching, isLoading } = useQuery({
         queryKey: ["report-overdue"],
         queryFn: () => InboxApiService.overdue(),
+    })
+
+    const { data: preview } = useQuery({
+        queryKey: ["report-overdue-preview"],
+        queryFn: () => InboxApiService.overduePreview(),
+        enabled: previewOpen,
     })
 
     const { mutate: notify, isPending } = useMutation({
@@ -43,10 +51,16 @@ export const OverdueReportsPage: React.FC = () => {
                     null
                 )
             )
+            setPreviewOpen(false)
             queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
             queryClient.invalidateQueries({ queryKey: ["inbox"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
         },
     })
+
+    const openHeatmap = (username: string) => {
+        navigate(`/volunteers/heatmap?search=${encodeURIComponent(username)}`)
+    }
 
     return (
         <Flex className={classes.root} direction="column" gap="lg">
@@ -63,16 +77,23 @@ export const OverdueReportsPage: React.FC = () => {
                     <Text>
                         <FormattedMessage id="pages.overdue.total" values={{ count: items.length }} />
                     </Text>
-                    <Button onClick={() => notify()} loading={isPending}>
+                    <Button onClick={() => setPreviewOpen(true)} disabled={isLoading}>
                         <FormattedMessage id="pages.overdue.notify" />
                     </Button>
                 </Flex>
-                {items.length === 0 && !isFetching ? (
+                {(isLoading || isFetching) && items.length === 0 ? (
+                    <Flex align="center" gap="sm" py="lg">
+                        <Loader size="sm" />
+                        <Text c="dimmed">
+                            <FormattedMessage id="pages.overdue.loading" />
+                        </Text>
+                    </Flex>
+                ) : items.length === 0 ? (
                     <Text c="dimmed">
                         <FormattedMessage id="pages.overdue.empty" />
                     </Text>
                 ) : (
-                    <Table>
+                    <Table highlightOnHover>
                         <Table.Thead>
                             <Table.Tr>
                                 <Table.Th>
@@ -94,7 +115,11 @@ export const OverdueReportsPage: React.FC = () => {
                         </Table.Thead>
                         <Table.Tbody>
                             {items.map((item) => (
-                                <Table.Tr key={item.username}>
+                                <Table.Tr
+                                    key={item.username}
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => openHeatmap(item.username)}
+                                >
                                     <Table.Td>
                                         <Text fw={600}>{item.fullName}</Text>
                                         <Text size="xs" c="dimmed">
@@ -133,6 +158,57 @@ export const OverdueReportsPage: React.FC = () => {
                     </Table>
                 )}
             </Card>
+
+            <Modal
+                opened={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                title={<FormattedMessage id="pages.overdue.previewTitle" />}
+                size="lg"
+                centered
+            >
+                <Text size="sm" c="dimmed" mb="md">
+                    <FormattedMessage id="pages.overdue.previewHint" values={{ count: items.length }} />
+                </Text>
+                {(preview?.templates ?? []).map((item) => (
+                    <Card key={item.level} withBorder p="sm" mb="sm" radius="md">
+                        <Text fw={650}>{item.subject}</Text>
+                        <Text size="sm" style={{ whiteSpace: "pre-wrap" }} mt={6}>
+                            {item.body}
+                        </Text>
+                    </Card>
+                ))}
+                <Text fw={650} mt="md" mb={6}>
+                    <FormattedMessage id="pages.overdue.samples" />
+                </Text>
+                {(preview?.samples ?? items.slice(0, 5)).map((item) => (
+                    <Button
+                        key={item.username}
+                        variant="subtle"
+                        justify="flex-start"
+                        fullWidth
+                        onClick={() => setLetter(item)}
+                    >
+                        {item.fullName}
+                    </Button>
+                ))}
+                <Button mt="md" fullWidth loading={isPending} onClick={() => notify()}>
+                    <FormattedMessage id="pages.overdue.notifyConfirm" />
+                </Button>
+            </Modal>
+
+            <Modal
+                opened={!!letter}
+                onClose={() => setLetter(null)}
+                title={letter?.subject || letter?.fullName}
+                centered
+            >
+                <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+                    {letter?.body}
+                </Text>
+                <Button mt="md" variant="light" onClick={() => letter && openHeatmap(letter.username)}>
+                    <FormattedMessage id="pages.overdue.openHeatmap" />
+                </Button>
+            </Modal>
         </Flex>
     )
 }

@@ -6,24 +6,38 @@ import dayjs from "dayjs"
 import parse from "html-react-parser"
 import React, { useRef, useState } from "react"
 import { FormattedMessage } from "react-intl"
+import { useNavigate } from "react-router"
 import { AnnouncementApiService } from "src/shared/api/AnnouncementApiService"
+import { InboxApiService } from "src/shared/api/InboxApiService"
 import { sanitizeHtml } from "src/shared/utils/sanitizeHtml"
 import classes from "./AnnouncementBell.module.scss"
 
 export const AnnouncementBell: React.FC = () => {
     const [opened, setOpened] = useState(false)
+    const navigate = useNavigate()
     const queryClient = useQueryClient()
     const markingIdsRef = useRef(new Set<string>())
 
-    const { data: unreadCount = 0 } = useQuery({
+    const { data: announcementUnread = 0 } = useQuery({
         queryKey: ["announcements", "unread-count"],
         queryFn: () => AnnouncementApiService.getUnreadAnnouncementsCount().then((r) => r.data.count),
-        refetchInterval: 60_000,
+        refetchInterval: 30_000,
     })
+    const { data: inboxUnread = 0 } = useQuery({
+        queryKey: ["inbox-unread"],
+        queryFn: () => InboxApiService.unreadCount(),
+        refetchInterval: 30_000,
+    })
+    const unreadCount = announcementUnread + inboxUnread
 
     const { data: announcements = [], isFetching } = useQuery({
         queryKey: ["announcements", "list"],
         queryFn: () => AnnouncementApiService.getAnnouncements().then((r) => r.data),
+        enabled: opened,
+    })
+    const { data: inbox = [] } = useQuery({
+        queryKey: ["inbox"],
+        queryFn: () => InboxApiService.list(),
         enabled: opened,
     })
 
@@ -103,6 +117,41 @@ export const AnnouncementBell: React.FC = () => {
             >
                 <ScrollArea h="calc(100vh - 120px)">
                     <Flex direction="column" gap="md">
+                        {inbox.slice(0, 8).map((item) => (
+                            <Flex
+                                key={item.id}
+                                direction="column"
+                                gap={6}
+                                className={item.unread ? classes.itemUnread : classes.itemRead}
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+                                    setOpened(false)
+                                    const login = item.heatmapUser || item.counterpart
+                                    if (login && (item.kind.startsWith("OVERDUE") || item.kind === "TASK")) {
+                                        navigate(`/volunteers/heatmap?search=${encodeURIComponent(login)}`)
+                                        return
+                                    }
+                                    navigate("/messages")
+                                }}
+                            >
+                                <Flex justify="space-between" align="center" gap="sm">
+                                    <Text fw={600}>{item.subject}</Text>
+                                    {item.unread && (
+                                        <Badge size="xs" color="blue">
+                                            <FormattedMessage id="common.announcements.new" />
+                                        </Badge>
+                                    )}
+                                </Flex>
+                                <Text size="xs" c="dimmed">
+                                    {dayjs(item.createTime).format("DD.MM.YYYY HH:mm")}
+                                </Text>
+                                {item.lastBody && (
+                                    <Text size="sm" lineClamp={3}>
+                                        {item.lastBody}
+                                    </Text>
+                                )}
+                            </Flex>
+                        ))}
                         {isFetching && (
                             <Text c="dimmed" size="sm">
                                 <FormattedMessage id="common.announcements.loading" />

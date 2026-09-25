@@ -56,4 +56,13 @@ export const WorkAssignmentApiService = {
         if (response.status === 404) throw new Error("API задач ещё не на сервере")
         return response.data
     },
+
+    async archive(id: string): Promise<WorkAssignmentDto> {
+        const response = await RequestHttp.post<WorkAssignmentDto>(`/work-assignments/${id}/archive`)
+        return response.data
+    },
+
+    async remove(id: string): Promise<void> {
+        await RequestHttp.delete(`/work-assignments/${id}`)
+    },
 }

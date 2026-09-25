@@ -34,6 +34,7 @@ export const InboxNotifyModal: React.FC<Props> = ({ opened, close, recipients })
                 )
             )
             queryClient.invalidateQueries({ queryKey: ["inbox"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
             setBody("")
             close()
         },

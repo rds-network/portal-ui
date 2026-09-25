@@ -24,6 +24,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import { UserContext } from "src/app/providers/UserContext"
 import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
+import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { CitiesApiService } from "src/shared/api/CitiesApiService"
 import { UserApiService } from "src/shared/api/user/UserApiService"
@@ -50,6 +51,7 @@ interface ProfileInfoProps {
 export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: ProfileInfoProps) => {
     const { user: currentUser, setUser } = useContext(UserContext)
     const [opened, { open, close }] = useDisclosure(false)
+    const [mupOpened, { open: openMup, close: closeMup }] = useDisclosure(false)
     const intl = useIntl()
     const locale = intl.locale as Locale
 
@@ -432,6 +434,20 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     <FormattedMessage id={"pages.profile.buttons.edit"} />
                 </Button>
             )}
+            {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER]) &&
+                userInfo?.username && (
+                    <>
+                        <Button
+                            onClick={openMup}
+                            className={classes.button}
+                            variant="outline"
+                            rightSection={<IconMail size={14} />}
+                        >
+                            <FormattedMessage id="pages.mup.open" />
+                        </Button>
+                        <MupLetterModal opened={mupOpened} close={closeMup} username={userInfo.username} />
+                    </>
+                )}
             <Drawer opened={opened} onClose={close} title={<FormattedMessage id="pages.profile.documentTitle" />}>
                 <form
                     onSubmit={(e) => {

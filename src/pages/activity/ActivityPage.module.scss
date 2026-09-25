@@ -1,0 +1,6 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.page;
+    max-width: 1200px;
+}

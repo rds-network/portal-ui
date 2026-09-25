@@ -214,6 +214,8 @@
             "save": "Save",
             "open": "Open tasks",
             "add": "Add to report",
+            "archive": "Archive",
+            "delete": "Delete",
             "fields": {
                 "title": "Task",
                 "body": "Details",
@@ -253,7 +255,32 @@
             "hours": "Hours short",
             "weeks": "Weeks without a report",
             "snapshot": "snapshot",
-            "last": "Last accepted"
+            "last": "Last accepted",
+            "loading": "Loading the missing-reports list…",
+            "previewTitle": "Notification text",
+            "previewHint": "This is what volunteers will see. {count} people in this send.",
+            "samples": "Sample letters",
+            "notifyConfirm": "Send to everyone on the list",
+            "openHeatmap": "Heat map"
+        },
+        "activity": {
+            "title": "Chronicle",
+            "description": "Who signed in from which IP and what they did. Click an action to open the page, a login to open the profile. Columns are sortable.",
+            "loading": "Loading chronicle…",
+            "time": "Time",
+            "who": "Who",
+            "what": "What they did"
+        },
+        "mup": {
+            "title": "Letter to Serbian MUP",
+            "open": "Notify MUP",
+            "hint": "Serbian draft. It goes to upravazastrance@mup.gov.rs and is saved with other portal mailings.",
+            "to": "To",
+            "subject": "Subject",
+            "body": "Text",
+            "send": "Prepare and send",
+            "sent": "MUP letter sent and saved",
+            "history": "Saved mailings"
         },
         "welcome": {
             "title": "Volunteer portal",
@@ -1017,6 +1044,7 @@
             "mintrud-report": "Mintrud report"
         },
         "account-settings": "Account settings",
+        "activity": "Chronicle",
         "resources": "Our resources",
         "support": "Contact support"
     },

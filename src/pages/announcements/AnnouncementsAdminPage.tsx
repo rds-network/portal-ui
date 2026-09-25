@@ -175,6 +175,8 @@ export const AnnouncementsAdminPage: React.FC = () => {
                     setPerson(null)
                     editor?.commands.clearContent()
                     queryClient.invalidateQueries({ queryKey: ["announcements"] })
+                    queryClient.invalidateQueries({ queryKey: ["inbox"] })
+                    queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
                 },
             }
         )
