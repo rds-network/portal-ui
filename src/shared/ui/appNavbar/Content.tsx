@@ -1,4 +1,4 @@
-import { IconAdjustments, IconBell, IconChecklist, IconFileAnalytics, IconLifebuoy, IconUsers } from "@tabler/icons-react"
+import { IconAdjustments, IconBell, IconChecklist, IconFileAnalytics, IconLifebuoy, IconLink, IconUsers } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
 export const Content: ItemGroupProps[] = [
@@ -25,11 +25,6 @@ export const Content: ItemGroupProps[] = [
             {
                 label: "navbar.reports.new-report",
                 link: "/report/create",
-            },
-            {
-                label: "navbar.reports.cleaning",
-                link: "/cleaning-how-to",
-                roles: ["ADMIN_VOLUNTEER", "ADMIN", "MAIN_VOLUNTEER"],
             },
             {
                 label: "navbar.reports.reporting-guide",
@@ -84,6 +79,11 @@ export const Content: ItemGroupProps[] = [
         label: "navbar.account-settings",
         icon: IconAdjustments,
         link: "https://id.russian.rs/if/user/#/settings",
+    },
+    {
+        label: "navbar.resources",
+        icon: IconLink,
+        link: "/resources",
     },
     {
         label: "navbar.support",

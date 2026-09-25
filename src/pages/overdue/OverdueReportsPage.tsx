@@ -82,6 +82,9 @@ export const OverdueReportsPage: React.FC = () => {
                                     <FormattedMessage id="pages.overdue.program" />
                                 </Table.Th>
                                 <Table.Th>
+                                    <FormattedMessage id="pages.overdue.hours" />
+                                </Table.Th>
+                                <Table.Th>
                                     <FormattedMessage id="pages.overdue.weeks" />
                                 </Table.Th>
                                 <Table.Th>
@@ -100,8 +103,25 @@ export const OverdueReportsPage: React.FC = () => {
                                     </Table.Td>
                                     <Table.Td>{item.program || "—"}</Table.Td>
                                     <Table.Td>
-                                        <Badge color={item.weeksMissed >= 3 ? "red" : "orange"}>
-                                            {item.weeksMissed}
+                                        <Badge color={(item.hoursShort ?? 0) >= 20 ? "red" : "gray"}>
+                                            {item.hoursShort ?? 0}
+                                        </Badge>
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <Badge
+                                            color={
+                                                item.weeksMissed >= 3
+                                                    ? "red"
+                                                    : item.weeksMissed >= 1
+                                                      ? "orange"
+                                                      : "gray"
+                                            }
+                                        >
+                                            {item.weeksMissed > 0 ? (
+                                                `+${item.weeksMissed}`
+                                            ) : (
+                                                <FormattedMessage id="pages.overdue.snapshot" />
+                                            )}
                                         </Badge>
                                     </Table.Td>
                                     <Table.Td>

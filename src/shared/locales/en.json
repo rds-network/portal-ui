@@ -243,14 +243,16 @@
         },
         "overdue": {
             "title": "Missing reports",
-            "description": "Volunteers without an accepted report for 2 weeks or more. After 3 weeks they get a warning about account block and contract termination.",
+            "description": "First a snapshot: more than 20 hours short. Then missed weeks count as +1, +2; at +3 they get a block warning.",
             "total": "In the list: {count}",
             "notify": "Send notices now",
             "sent": "Sent: {count}",
             "empty": "Everyone is up to date",
             "person": "Volunteer",
             "program": "Program",
+            "hours": "Hours short",
             "weeks": "Weeks without a report",
+            "snapshot": "snapshot",
             "last": "Last accepted"
         },
         "welcome": {
@@ -793,7 +795,75 @@
             "title": "Clean City (main program)"
         },
         "reporting": {
-            "title": "Reporting Guidelines"
+            "title": "Submitting reports",
+            "description": "Pick a program. Clean City has an intro course; other programs use the shared report guide.",
+            "program": "Program",
+            "cleanCity": "Clean City (Urbanism)",
+            "course": {
+                "kicker": "Volunteer intro · up to 3 hours",
+                "title": "Clean City program",
+                "intro": "Four modules: rules, reporting via the portal and Ekomapa, program projects, and other opportunities. Each module ends with a short quiz.",
+                "name": "First and last name",
+                "how": "Modules unlock in order. To continue, answer every quiz question correctly.",
+                "check": "Check answers",
+                "retry": "There is a mistake. Read the module again and retake the quiz.",
+                "finished": "{name}, you finished the course. You can submit reports and join projects.",
+                "friend": "friend",
+                "yes": "Yes",
+                "no": "No",
+                "contacts": "Who to contact",
+                "contactLead": "Clean City team lead — Anton Tokranov, Telegram:",
+                "contactEkomapa": "Ekomapa issues — program chat, mention Leonid",
+                "m1": {
+                    "title": "General rules",
+                    "summary": "Who the volunteer is, safety, the 10-hour norm, and six steps.",
+                    "q1": "Minimum hours per week?",
+                    "q2": "Are gloves and closed shoes required?",
+                    "q3": "May you clean a commercial building lot?"
+                },
+                "m2": {
+                    "title": "Submitting reports",
+                    "summary": "Portal, Ekomapa, cloud, and before/after photos.",
+                    "docs": "Detailed guides in the same style as Ekomapa:",
+                    "q1": "Which photos are required?",
+                    "a1a": "After only",
+                    "a1b": "Before and after from the same spot",
+                    "a1c": "Bags only",
+                    "q2": "Where do photos go?",
+                    "a2a": "Attach files to the portal report",
+                    "a2b": "Upload to the cloud, put the link in the report"
+                },
+                "m3": {
+                    "title": "Program projects",
+                    "summary": "Eco course, Ekomapa PRO, greening, recycling, subbotniks.",
+                    "q1": "Is the program only cleanups?",
+                    "a1a": "Cleanups only",
+                    "a1b": "Cleanups and extra projects"
+                },
+                "m4": {
+                    "title": "Opportunities for volunteers",
+                    "summary": "Courses, guides, and other Diaspora projects.",
+                    "q1": "edu.russian.rs courses for Diaspora members are:",
+                    "a1a": "Paid",
+                    "a1b": "Free"
+                }
+            }
+        },
+        "resources": {
+            "title": "Our resources",
+            "description": "Links to sites, offices, file banks and courses. An admin can add a new card.",
+            "add": "Add a link",
+            "edit": "Edit",
+            "save": "Save",
+            "saved": "Link saved",
+            "empty": "No links yet",
+            "required": "Enter a title",
+            "badUrl": "The link must start with http:// or https://",
+            "fields": {
+                "title": "Title",
+                "url": "Link",
+                "description": "Description"
+            }
         },
         "support": {
             "title": "Contact support",
@@ -932,7 +1002,7 @@
             "all": "All reports",
             "summary": "Summary",
             "cleaning": "Report for \"Clean City\"",
-            "reporting-guide": "Reporting Guidelines",
+            "reporting-guide": "Submitting reports",
             "heat-map": "Heat Map",
             "announcements": "Broadcast notifications",
             "tasks": "Tasks",
@@ -947,6 +1017,7 @@
             "mintrud-report": "Mintrud report"
         },
         "account-settings": "Account settings",
+        "resources": "Our resources",
         "support": "Contact support"
     },
     "error-boundary": {

@@ -243,14 +243,16 @@
         },
         "overdue": {
             "title": "Nedostavljeni izveštaji",
-            "description": "Volonteri bez prihvaćenog izveštaja 2 nedelje ili duže. Posle 3 nedelje ide upozorenje o blokadi naloga i raskidu ugovora.",
+            "description": "Prvo trenutni presek: manjak veći od 20 sati. Zatim se broje propuštene nedelje: +1, +2; na +3 ide upozorenje o blokadi.",
             "total": "Na listi: {count}",
             "notify": "Pošalji obaveštenja",
             "sent": "Poslato: {count}",
             "empty": "Svi su uredni",
             "person": "Volonter",
             "program": "Program",
+            "hours": "Manjak, h",
             "weeks": "Nedelja bez izveštaja",
+            "snapshot": "presek",
             "last": "Poslednji prihvaćen"
         },
         "welcome": {
@@ -793,7 +795,75 @@
             "title": "Čisti grad (glavni program)"
         },
         "reporting": {
-            "title": "Vodič za predaju izveštaja"
+            "title": "Predaja izveštaja",
+            "description": "Izaberite program. Za „Čisti grad“ je uvodni kurs, za ostale — opšte uputstvo za izveštaj.",
+            "program": "Program",
+            "cleanCity": "Čisti grad (Urbanizam)",
+            "course": {
+                "kicker": "Uvodni kurs volontera · do 3 sata",
+                "title": "Program „Čisti grad“",
+                "intro": "Četiri modula: pravila, predaja izveštaja preko portala i Ekomape, projekti programa i druge mogućnosti. Posle svakog modula je kratak test.",
+                "name": "Ime i prezime",
+                "how": "Moduli se otvaraju redom. Da biste nastavili, tačno odgovorite na sva pitanja testa.",
+                "check": "Proveri odgovore",
+                "retry": "Ima greška. Pročitajte modul ponovo i uradite test ispočetka.",
+                "finished": "{name}, kurs je završen. Možete predavati izveštaje i priključiti se projektima.",
+                "friend": "kolega",
+                "yes": "Da",
+                "no": "Ne",
+                "contacts": "Kome se obratiti",
+                "contactLead": "Timlid programa „Čisti grad“ — Anton Tokranov, Telegram:",
+                "contactEkomapa": "Greške Ekomape — chat programa, označite Leonida",
+                "m1": {
+                    "title": "Opšti zahtevi",
+                    "summary": "Ko je volonter, bezbednost, norma 10 sati i šest koraka.",
+                    "q1": "Koliko sati nedeljno najmanje?",
+                    "q2": "Da li su potrebne rukavice i zatvorena obuća?",
+                    "q3": "Da li sme da se čisti prostor komercijalnog objekta?"
+                },
+                "m2": {
+                    "title": "Predaja izveštaja",
+                    "summary": "Portal, Ekomapa, oblak i fotografije pre/posle.",
+                    "docs": "Detaljna uputstva u istom stilu kao na Ekomapi:",
+                    "q1": "Koje fotografije su obavezne?",
+                    "a1a": "Samo posle",
+                    "a1b": "Pre i posle iz iste tačke",
+                    "a1c": "Samo kese",
+                    "q2": "Gde se stavljaju fotografije?",
+                    "a2a": "Priložiti fajlove uz izveštaj na portalu",
+                    "a2b": "Na oblak, u izveštaj — link"
+                },
+                "m3": {
+                    "title": "Projekti programa",
+                    "summary": "Eko-kurs, Ekomapa PRO, pošumljavanje, reciklaža, subotnici.",
+                    "q1": "Da li je program samo čišćenje?",
+                    "a1a": "Samo čišćenje",
+                    "a1b": "Čišćenje i posebni projekti"
+                },
+                "m4": {
+                    "title": "Mogućnosti za volontere",
+                    "summary": "Kursevi, vodiči i prelazak na druge projekte.",
+                    "q1": "Kursevi na edu.russian.rs za članove Dijaspore su:",
+                    "a1a": "Plaćeni",
+                    "a1b": "Besplatni"
+                }
+            }
+        },
+        "resources": {
+            "title": "Naši resursi",
+            "description": "Linkovi ka sajtovima, kancelarijama, bankama fajlova i kursevima. Admin može da doda novu karticu.",
+            "add": "Dodaj link",
+            "edit": "Izmeni",
+            "save": "Sačuvaj",
+            "saved": "Link je sačuvan",
+            "empty": "Još nema linkova",
+            "required": "Unesite naziv",
+            "badUrl": "Link mora da počinje sa http:// ili https://",
+            "fields": {
+                "title": "Naziv",
+                "url": "Link",
+                "description": "Opis"
+            }
         },
         "support": {
             "title": "Kontakt podrške",
@@ -932,7 +1002,7 @@
             "all": "Svi izveštaji",
             "summary": "Rezime",
             "cleaning": "Izveštaj \"Čisti grad\"",
-            "reporting-guide": "Vodič za predaju izveštaja",
+            "reporting-guide": "Predaja izveštaja",
             "heat-map": "Toplotna karta",
             "announcements": "Slanje obaveštenja",
             "tasks": "Zadaci",
@@ -947,6 +1017,7 @@
             "mintrud-report": "izveštaj o volontiranju"
         },
         "account-settings": "Podešavanja naloga",
+        "resources": "Naši resursi",
         "support": "Kontaktirajte podršku"
     },
     "error-boundary": {

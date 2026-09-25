@@ -1,0 +1,27 @@
+@use "../../app/styles/surfaces" as s;
+
+.course {
+    width: 100%;
+}
+
+.done {
+    background: #ecfdf5;
+    border-color: #059669;
+}
+
+.extra {
+    margin-top: 16px;
+}
+
+.md {
+    @include s.prose;
+
+    :global(img) {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto 1rem;
+        border-radius: 12px;
+    }
+}

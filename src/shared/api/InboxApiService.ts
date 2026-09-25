@@ -31,6 +31,7 @@ export type ReportOverdueDto = {
     fullName: string
     program?: string | null
     weeksMissed: number
+    hoursShort?: number
     level: string
     lastReportWeek?: string | null
 }
