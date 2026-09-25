@@ -8,6 +8,11 @@ export const Content: ItemGroupProps[] = [
         link: "/tasks",
     },
     {
+        label: "navbar.resources",
+        icon: IconLink,
+        link: "/resources",
+    },
+    {
         label: "navbar.reports.messages",
         icon: IconBell,
         link: "/messages",
@@ -95,11 +100,6 @@ export const Content: ItemGroupProps[] = [
         label: "navbar.account-settings",
         icon: IconAdjustments,
         link: "https://id.russian.rs/if/user/#/settings",
-    },
-    {
-        label: "navbar.resources",
-        icon: IconLink,
-        link: "/resources",
     },
     {
         label: "navbar.support",

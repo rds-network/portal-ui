@@ -242,7 +242,13 @@
             "sent": "Obaveštenje je poslato",
             "notify": "Pošalji obaveštenje",
             "subject": "Tema",
-            "body": "Tekst"
+            "body": "Tekst",
+            "lastSeen": "bio je {time}",
+            "lastSeenNever": "još se nije prijavio",
+            "receivedAt": "primljeno {time}",
+            "notReceived": "nije primljeno",
+            "ack": "Primljeno",
+            "ackBlock": "Ima {count} obaveštenja bez potvrde. Kliknite Primljeno, inače je ostali portal zaključan."
         },
         "overdue": {
             "title": "Nedostavljeni izveštaji",

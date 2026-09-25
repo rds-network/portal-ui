@@ -242,7 +242,13 @@
             "sent": "Notification sent",
             "notify": "Send notification",
             "subject": "Subject",
-            "body": "Message"
+            "body": "Message",
+            "lastSeen": "last seen {time}",
+            "lastSeenNever": "has not signed in yet",
+            "receivedAt": "received {time}",
+            "notReceived": "not received",
+            "ack": "Received",
+            "ackBlock": "{count} notices still need confirmation. Tap Received, or the rest of the portal stays locked."
         },
         "overdue": {
             "title": "Missing reports",

@@ -1,4 +1,4 @@
-import { Badge, Button, Flex, ScrollArea, Text, Textarea, Title } from "@mantine/core"
+import { Alert, Badge, Button, Flex, ScrollArea, Text, Textarea, Title } from "@mantine/core"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useState } from "react"
@@ -9,6 +9,8 @@ import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useScreenSize } from "src/shared/hooks/useDesktop"
 import { UserContext } from "src/app/providers/UserContext"
 import classes from "./MessagesPage.module.scss"
+
+const formatSeen = (value?: string | null) => (value ? dayjs(value).format("DD.MM HH:mm") : null)
 
 export const MessagesPage: React.FC = () => {
     const { user } = useContext(UserContext)
@@ -26,6 +28,10 @@ export const MessagesPage: React.FC = () => {
         queryKey: ["inbox"],
         queryFn: () => InboxApiService.list(),
     })
+    const { data: pendingAck = 0 } = useQuery({
+        queryKey: ["inbox-pending-ack"],
+        queryFn: () => InboxApiService.pendingAckCount(),
+    })
 
     const { data: thread } = useQuery({
         queryKey: ["inbox", selectedId],
@@ -33,13 +39,23 @@ export const MessagesPage: React.FC = () => {
         enabled: !!selectedId,
     })
 
+    const refreshInbox = () => {
+        queryClient.invalidateQueries({ queryKey: ["inbox"] })
+        queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
+        queryClient.invalidateQueries({ queryKey: ["inbox-pending-ack"] })
+    }
+
     const { mutate: sendReply, isPending } = useMutation({
         mutationFn: () => InboxApiService.reply(selectedId!, reply.trim()),
         onSuccess: () => {
             setReply("")
-            queryClient.invalidateQueries({ queryKey: ["inbox"] })
-            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
+            refreshInbox()
         },
+    })
+
+    const { mutate: ack, isPending: acking } = useMutation({
+        mutationFn: () => InboxApiService.ack(selectedId!),
+        onSuccess: refreshInbox,
     })
 
     const openThread = (item: InboxThreadDto) => {
@@ -60,6 +76,11 @@ export const MessagesPage: React.FC = () => {
                 <Title order={2} mb="md">
                     <FormattedMessage id="pages.messages.title" />
                 </Title>
+                {pendingAck > 0 && (
+                    <Alert color="orange" mb="md">
+                        <FormattedMessage id="pages.messages.ackBlock" values={{ count: pendingAck }} />
+                    </Alert>
+                )}
                 {threads.length === 0 && (
                     <Text c="dimmed">
                         <FormattedMessage id="pages.messages.empty" />
@@ -83,7 +104,28 @@ export const MessagesPage: React.FC = () => {
                             )}
                         </Flex>
                         <Text size="xs" c="dimmed">
-                            {item.counterpart || item.createdBy || "портал"} · {dayjs(item.createTime).format("DD.MM HH:mm")}
+                            {item.recipient || item.counterpart || item.createdBy || "портал"} ·{" "}
+                            {dayjs(item.createTime).format("DD.MM HH:mm")}
+                        </Text>
+                        <Text size="xs" c={item.recipientLastSeen ? "dimmed" : "orange"} mt={2}>
+                            {item.recipientLastSeen ? (
+                                <FormattedMessage
+                                    id="pages.messages.lastSeen"
+                                    values={{ time: formatSeen(item.recipientLastSeen) }}
+                                />
+                            ) : (
+                                <FormattedMessage id="pages.messages.lastSeenNever" />
+                            )}
+                        </Text>
+                        <Text size="xs" c={item.receivedAt ? "teal" : "red"} mt={2}>
+                            {item.receivedAt ? (
+                                <FormattedMessage
+                                    id="pages.messages.receivedAt"
+                                    values={{ time: formatSeen(item.receivedAt) }}
+                                />
+                            ) : (
+                                <FormattedMessage id="pages.messages.notReceived" />
+                            )}
                         </Text>
                         {item.lastBody && (
                             <Text size="sm" c="dimmed" lineClamp={2} mt={4}>
@@ -138,6 +180,30 @@ export const MessagesPage: React.FC = () => {
                                 )}
                             </Flex>
                         </Flex>
+                        <Text size="sm" c="dimmed" mt={6}>
+                            {thread.recipientLastSeen ? (
+                                <FormattedMessage
+                                    id="pages.messages.lastSeen"
+                                    values={{ time: formatSeen(thread.recipientLastSeen) }}
+                                />
+                            ) : (
+                                <FormattedMessage id="pages.messages.lastSeenNever" />
+                            )}
+                            {" · "}
+                            {thread.receivedAt ? (
+                                <FormattedMessage
+                                    id="pages.messages.receivedAt"
+                                    values={{ time: formatSeen(thread.receivedAt) }}
+                                />
+                            ) : (
+                                <FormattedMessage id="pages.messages.notReceived" />
+                            )}
+                        </Text>
+                        {thread.needsAck && (
+                            <Button mt="sm" color="orange" loading={acking} onClick={() => ack()}>
+                                <FormattedMessage id="pages.messages.ack" />
+                            </Button>
+                        )}
                         <ScrollArea className={classes.messages} mt="md">
                             <Flex direction="column" gap="sm">
                                 {thread.messages.map((message) => {

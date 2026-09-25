@@ -11,6 +11,11 @@ export type InboxThreadDto = {
     counterpart?: string | null
     heatmapUser?: string | null
     reportId?: string | null
+    recipient?: string | null
+    recipientLastSeen?: string | null
+    receivedAt?: string | null
+    ackRequired?: boolean
+    needsAck?: boolean
 }
 
 export type InboxMessageDto = {
@@ -27,6 +32,11 @@ export type InboxThreadDetailDto = {
     createdBy?: string | null
     heatmapUser?: string | null
     reportId?: string | null
+    recipient?: string | null
+    recipientLastSeen?: string | null
+    receivedAt?: string | null
+    ackRequired?: boolean
+    needsAck?: boolean
     messages: InboxMessageDto[]
 }
 
@@ -90,6 +100,17 @@ export const InboxApiService = {
         const response = await RequestHttp.get<{ count: number }>("/inbox/unread-count", { validateStatus: alive })
         if (response.status !== 200) return 0
         return response.data?.count ?? 0
+    },
+
+    async pendingAckCount(): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/inbox/pending-ack", { validateStatus: alive })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
+    },
+
+    async ack(id: string): Promise<InboxThreadDetailDto> {
+        const response = await RequestHttp.post<InboxThreadDetailDto>(`/inbox/${id}/ack`)
+        return response.data
     },
 
     async get(id: string): Promise<InboxThreadDetailDto | null> {
