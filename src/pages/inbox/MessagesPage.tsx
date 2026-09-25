@@ -107,8 +107,13 @@ export const MessagesPage: React.FC = () => {
                                 )}
                             </Flex>
                             <Text size="xs" c="dimmed">
-                                {item.recipient || item.counterpart || item.createdBy || "портал"} ·{" "}
-                                {dayjs(item.createTime).format("DD.MM HH:mm")}
+                                {item.recipientName ||
+                                    item.counterpartName ||
+                                    item.recipient ||
+                                    item.counterpart ||
+                                    item.createdBy ||
+                                    "портал"}{" "}
+                                · {dayjs(item.createTime).format("DD.MM HH:mm")}
                             </Text>
                             <Text size="xs" c={item.recipientLastSeen ? "dimmed" : "orange"} mt={2}>
                                 {item.recipientLastSeen ? (
@@ -217,7 +222,8 @@ export const MessagesPage: React.FC = () => {
                                     return (
                                         <div key={message.id} className={mine ? classes.mine : classes.theirs}>
                                             <Text size="xs" c="dimmed">
-                                                {message.author || "портал"} · {dayjs(message.createTime).format("DD.MM HH:mm")}
+                                                {message.authorName || message.author || "портал"} ·{" "}
+                                                {dayjs(message.createTime).format("DD.MM HH:mm")}
                                             </Text>
                                             <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
                                                 {message.body}

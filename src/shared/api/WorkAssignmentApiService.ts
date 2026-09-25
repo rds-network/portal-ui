@@ -10,8 +10,11 @@ export type WorkAssignmentDto = {
     body?: string | null
     assignee?: string | null
     assigneeName?: string | null
+    customer?: string | null
+    customerName?: string | null
     status: WorkAssignmentStatus | string
     dueDate?: string | null
+    startedAt?: string | null
     reportId?: string | null
 }
 
@@ -19,6 +22,7 @@ export type WorkAssignmentCreateRequest = {
     title: string
     body?: string | null
     assignee?: string | null
+    customer?: string | null
     dueDate?: string | null
 }
 
@@ -26,6 +30,7 @@ export type WorkAssignmentPatchRequest = {
     title?: string | null
     body?: string | null
     assignee?: string | null
+    customer?: string | null
     status?: string | null
     dueDate?: string | null
 }

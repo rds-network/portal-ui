@@ -1,29 +1,40 @@
 .control {
     font-weight: 450;
     width: 100%;
-    padding: 12px 8px;
-    margin-top: 5px;
+    padding: 10px 8px;
+    margin-top: 2px;
     color: #dbe8f3;
     font-size: 14px;
     border-radius: 12px;
     transition: background 180ms ease;
+    overflow: hidden;
     &:hover {
         background: #ffffff0b;
         color: white;
+        :global(.mantine-ThemeIcon-root) {
+            background: #ffffff10;
+        }
     }
     :global(.mantine-ThemeIcon-root) {
         color: #a4cfe8;
-        background: #ffffff0a;
+        background: transparent;
+        flex-shrink: 0;
     }
+}
+.controlLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .link {
     display: block;
-    padding: 10px 12px;
-    margin: 2px 0;
+    padding: 8px 12px 8px 46px;
+    margin: 1px 0;
     border-radius: 11px;
     color: #bdcfdf;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
     line-height: 1.45;
     transition:
@@ -41,14 +52,29 @@
 .control[aria-current="page"] {
     background: #ffffff12;
     color: #b4ddf4;
+    :global(.mantine-ThemeIcon-root) {
+        background: #ffffff14;
+        color: #c5e6f8;
+    }
 }
 .children {
     margin: 0;
-    padding: 0 0 4px;
+    padding: 0 0 2px;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    position: relative;
+    &::before,
+    &::after {
+        display: none !important;
+        content: none !important;
+    }
 }
 .chevron {
     transition: transform 200ms ease;
     width: 14px;
     height: 14px;
     opacity: 0.6;
+    flex-shrink: 0;
+    margin-left: 6px;
 }

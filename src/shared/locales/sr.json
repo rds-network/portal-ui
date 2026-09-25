@@ -210,7 +210,7 @@
         },
         "tasks": {
             "title": "Zadaci",
-            "description": "Dodeljivanje zadataka volonterima. Kad izvršilac unese zadatak u izveštaj, kartica ide na proveru, a posle prihvatanja izveštaja — u „Urađeno“.",
+            "description": "Izvršilac vodi karticu do „Provere“. Naručilac može da vrati na doradu ili da prihvati. Rok počinje da teče od prvog pomeranja.",
             "create": "Dodeli zadatak",
             "submit": "Dodeli",
             "created": "Zadatak je dodeljen",
@@ -229,8 +229,13 @@
                 "body": "Opis",
                 "program": "Program",
                 "assignee": "Izvršilac",
-                "due": "Rok"
+                "customer": "Naručilac",
+                "due": "Rok",
+                "dueHint": "Odbrojavanje počinje pri prvom pomeranju kartice"
             },
+            "markReady": "Gotovo — na proveru",
+            "markRedo": "Dorada",
+            "markDone": "Urađeno",
             "status": {
                 "TODO": "Uraditi",
                 "DOING": "U radu",

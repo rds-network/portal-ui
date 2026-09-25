@@ -90,12 +90,12 @@ export function LinksGroup({
         })
 
     const controlContent = (
-        <Group justify="space-between" gap={0}>
-            <Box style={{ display: "flex", alignItems: "center" }}>
-                <ThemeIcon variant="light" size={30}>
+        <Group justify="space-between" gap={0} wrap="nowrap" style={{ width: "100%" }}>
+            <Box style={{ display: "flex", alignItems: "center", minWidth: 0, flex: 1 }}>
+                <ThemeIcon variant="transparent" size={30} radius="md">
                     <Icon style={{ width: rem(18), height: rem(18) }} />
                 </ThemeIcon>
-                <Box ml="md">
+                <Box ml="md" className={classes.controlLabel}>
                     <FormattedMessage id={label} />
                 </Box>
                 {showUnread && unread > 0 && (

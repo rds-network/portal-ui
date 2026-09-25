@@ -210,7 +210,7 @@
         },
         "tasks": {
             "title": "Tasks",
-            "description": "Assign work to volunteers. When the assignee marks the task in a report, the card moves to review; after the report is accepted it is done.",
+            "description": "The assignee moves the card to Review. The customer can send it back for rework or mark it done. The due timer starts on the first move.",
             "create": "Assign a task",
             "submit": "Assign",
             "created": "Task assigned",
@@ -229,8 +229,13 @@
                 "body": "Details",
                 "program": "Program",
                 "assignee": "Assignee",
-                "due": "Due date"
+                "customer": "Customer",
+                "due": "Due date",
+                "dueHint": "The countdown starts when the card is moved for the first time"
             },
+            "markReady": "Ready — send to review",
+            "markRedo": "Rework",
+            "markDone": "Done",
             "status": {
                 "TODO": "To do",
                 "DOING": "In progress",

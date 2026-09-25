@@ -9,7 +9,12 @@ import React, { useContext, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { WorkAssignmentApiService, WorkAssignmentDto, WorkAssignmentPatchRequest, WorkAssignmentStatus } from "src/shared/api/WorkAssignmentApiService"
+import {
+    WorkAssignmentApiService,
+    WorkAssignmentDto,
+    WorkAssignmentPatchRequest,
+    WorkAssignmentStatus,
+} from "src/shared/api/WorkAssignmentApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { NO_PROGRAM_CODE } from "src/shared/constants/Shared"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -21,6 +26,8 @@ import classes from "./WorkTasksPage.module.scss"
 
 const SUPERVISORS = [UserGroup.ADMIN, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
 const LANES: WorkAssignmentStatus[] = ["TODO", "DOING", "REVIEW", "REDO", "DONE"]
+const ASSIGNEE_LANES: WorkAssignmentStatus[] = ["TODO", "DOING", "REVIEW"]
+const CUSTOMER_LANES: WorkAssignmentStatus[] = ["TODO", "DOING", "REDO", "DONE"]
 
 const STATUS_COLOR: Record<string, string> = {
     TODO: "gray",
@@ -42,10 +49,12 @@ export const WorkTasksPage: React.FC = () => {
     })
     const isManager = !!curatorMe?.curator || hasPermission(user, SUPERVISORS)
     const [assignee, setAssignee] = useState<string | null>(null)
+    const [customer, setCustomer] = useState<string | null>(null)
     const [program, setProgram] = useState<string | null>(null)
     const [createOpen, setCreateOpen] = useState(false)
     const [edit, setEdit] = useState<WorkAssignmentDto | null>(null)
     const [editAssignee, setEditAssignee] = useState<string | null>(null)
+    const [editCustomer, setEditCustomer] = useState<string | null>(null)
     const assigneeProgram = program === NO_PROGRAM_CODE ? "" : program
 
     setDocumentTitleByLocale("pages.tasks.title")
@@ -76,7 +85,9 @@ export const WorkTasksPage: React.FC = () => {
 
     const visible = useMemo(() => {
         if (isManager) return assignments
-        return assignments.filter((item) => item.assignee === user?.username)
+        return assignments.filter(
+            (item) => item.assignee === user?.username || item.customer === user?.username
+        )
     }, [assignments, isManager, user?.username])
 
     const { mutate: create, isPending } = useMutation({
@@ -92,6 +103,7 @@ export const WorkTasksPage: React.FC = () => {
             )
             form.reset()
             setAssignee(null)
+            setCustomer(null)
             setProgram(null)
             setCreateOpen(false)
             queryClient.invalidateQueries({ queryKey: ["work-assignments"] })
@@ -103,7 +115,8 @@ export const WorkTasksPage: React.FC = () => {
     const { mutate: patch, isPending: isPatching } = useMutation({
         mutationFn: ({ id, payload }: { id: string; payload: WorkAssignmentPatchRequest }) =>
             WorkAssignmentApiService.patch(id, payload),
-        onSuccess: () => {
+        onSuccess: (updated) => {
+            if (edit?.id === updated.id) setEdit(updated)
             queryClient.invalidateQueries({ queryKey: ["work-assignments"] })
             queryClient.invalidateQueries({ queryKey: ["inbox"] })
             queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
@@ -131,6 +144,7 @@ export const WorkTasksPage: React.FC = () => {
             title: values.title.trim(),
             body: values.body.trim() || null,
             assignee,
+            customer: customer || user?.username || null,
             dueDate: values.dueDate ? dayjs(values.dueDate).format("YYYY-MM-DD") : null,
         })
     })
@@ -138,6 +152,7 @@ export const WorkTasksPage: React.FC = () => {
     const openEdit = (item: WorkAssignmentDto) => {
         setEdit(item)
         setEditAssignee(item.assignee ?? null)
+        setEditCustomer(item.customer ?? null)
         editForm.setValues({
             title: item.title,
             body: item.body ?? "",
@@ -153,6 +168,7 @@ export const WorkTasksPage: React.FC = () => {
                 title: values.title.trim(),
                 body: values.body.trim() || null,
                 assignee: editAssignee,
+                customer: editCustomer,
                 dueDate: values.dueDate ? dayjs(values.dueDate).format("YYYY-MM-DD") : null,
             },
         })
@@ -166,14 +182,31 @@ export const WorkTasksPage: React.FC = () => {
         navigate(`/report/create?task=${encodeURIComponent(item.title)}`)
     }
 
-    const canDragTo = (status: string) => isManager || status === "TODO" || status === "DOING"
+    const roleOf = (item: WorkAssignmentDto) => {
+        const isAssignee = item.assignee === user?.username
+        const isCustomer = item.customer === user?.username
+        return { isAssignee, isCustomer, manager: isManager }
+    }
+
+    const canDragTo = (item: WorkAssignmentDto, status: string) => {
+        const { isAssignee, isCustomer, manager } = roleOf(item)
+        if (manager) return true
+        if (isAssignee) return ASSIGNEE_LANES.includes(status as WorkAssignmentStatus)
+        if (isCustomer) return CUSTOMER_LANES.includes(status as WorkAssignmentStatus)
+        return false
+    }
 
     const onDrop = (status: string, event: React.DragEvent) => {
         event.preventDefault()
         const id = event.dataTransfer.getData("text/plain")
         const card = visible.find((item) => item.id === id)
-        if (!card || card.status === status || !canDragTo(status)) return
+        if (!card || card.status === status || !canDragTo(card, status)) return
         patch({ id, payload: { status } })
+    }
+
+    const setStatus = (item: WorkAssignmentDto, status: WorkAssignmentStatus) => {
+        if (item.status === status) return
+        patch({ id: item.id, payload: { status } })
     }
 
     return (
@@ -235,15 +268,21 @@ export const WorkTasksPage: React.FC = () => {
                                     >
                                         <div className={classes.meta}>
                                             {item.dueDate && (
-                                                <Badge variant="outline" color="gray">
+                                                <Badge variant="outline" color={item.startedAt ? "blue" : "gray"}>
                                                     {dayjs(item.dueDate).format("DD.MM")}
+                                                    {!item.startedAt ? " · ждёт" : ""}
                                                 </Badge>
                                             )}
                                         </div>
                                         <div className={classes.title}>{item.title}</div>
                                         {item.body && <div className={classes.body}>{item.body}</div>}
                                         <Text className={classes.assignee} c="dimmed">
+                                            <FormattedMessage id="pages.tasks.fields.assignee" />:{" "}
                                             {item.assigneeName || item.assignee || "—"}
+                                        </Text>
+                                        <Text className={classes.assignee} c="dimmed">
+                                            <FormattedMessage id="pages.tasks.fields.customer" />:{" "}
+                                            {item.customerName || item.customer || "—"}
                                         </Text>
                                         {item.status !== "DONE" && item.assignee === user?.username && (
                                             <div className={classes.actions}>
@@ -298,8 +337,15 @@ export const WorkTasksPage: React.FC = () => {
                             program={assigneeProgram}
                             onUserChange={(picked) => setAssignee(picked?.username ?? null)}
                         />
+                        <UserSearch
+                            key={`customer-${program ?? "all"}`}
+                            label={<FormattedMessage id="pages.tasks.fields.customer" />}
+                            initialSearch={user?.fullName || user?.username || ""}
+                            onUserChange={(picked) => setCustomer(picked?.username ?? null)}
+                        />
                         <DateInput
                             label={<FormattedMessage id="pages.tasks.fields.due" />}
+                            description={<FormattedMessage id="pages.tasks.fields.dueHint" />}
                             valueFormat="DD.MM.YYYY"
                             clearable
                             {...form.getInputProps("dueDate")}
@@ -332,20 +378,73 @@ export const WorkTasksPage: React.FC = () => {
                                 {...editForm.getInputProps("body")}
                             />
                             {isManager && (
-                                <UserSearch
-                                    key={edit.id}
-                                    label={<FormattedMessage id="pages.tasks.fields.assignee" />}
-                                    initialSearch={edit.assigneeName || edit.assignee || ""}
-                                    onUserChange={(picked) => setEditAssignee(picked?.username ?? null)}
-                                />
+                                <>
+                                    <UserSearch
+                                        key={`${edit.id}-assignee`}
+                                        label={<FormattedMessage id="pages.tasks.fields.assignee" />}
+                                        initialSearch={edit.assigneeName || edit.assignee || ""}
+                                        onUserChange={(picked) => setEditAssignee(picked?.username ?? null)}
+                                    />
+                                    <UserSearch
+                                        key={`${edit.id}-customer`}
+                                        label={<FormattedMessage id="pages.tasks.fields.customer" />}
+                                        initialSearch={edit.customerName || edit.customer || ""}
+                                        onUserChange={(picked) => setEditCustomer(picked?.username ?? null)}
+                                    />
+                                </>
+                            )}
+                            {!isManager && (
+                                <>
+                                    <Text size="sm">
+                                        <FormattedMessage id="pages.tasks.fields.assignee" />:{" "}
+                                        {edit.assigneeName || edit.assignee || "—"}
+                                    </Text>
+                                    <Text size="sm">
+                                        <FormattedMessage id="pages.tasks.fields.customer" />:{" "}
+                                        {edit.customerName || edit.customer || "—"}
+                                    </Text>
+                                </>
                             )}
                             <DateInput
                                 label={<FormattedMessage id="pages.tasks.fields.due" />}
+                                description={<FormattedMessage id="pages.tasks.fields.dueHint" />}
                                 valueFormat="DD.MM.YYYY"
                                 clearable
                                 disabled={!isManager}
                                 {...editForm.getInputProps("dueDate")}
                             />
+                            <Flex gap="sm" wrap="wrap">
+                                {edit.assignee === user?.username && edit.status !== "DONE" && (
+                                    <Button
+                                        type="button"
+                                        loading={isPatching}
+                                        onClick={() => setStatus(edit, "REVIEW")}
+                                    >
+                                        <FormattedMessage id="pages.tasks.markReady" />
+                                    </Button>
+                                )}
+                                {edit.customer === user?.username && (
+                                    <>
+                                        <Button
+                                            type="button"
+                                            color="orange"
+                                            variant="light"
+                                            loading={isPatching}
+                                            onClick={() => setStatus(edit, "REDO")}
+                                        >
+                                            <FormattedMessage id="pages.tasks.markRedo" />
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            color="teal"
+                                            loading={isPatching}
+                                            onClick={() => setStatus(edit, "DONE")}
+                                        >
+                                            <FormattedMessage id="pages.tasks.markDone" />
+                                        </Button>
+                                    </>
+                                )}
+                            </Flex>
                             {isManager && (
                                 <Flex gap="sm" wrap="wrap">
                                     <Button type="submit" loading={isPatching}>

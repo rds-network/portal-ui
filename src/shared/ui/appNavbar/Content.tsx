@@ -29,6 +29,7 @@ export const Content: ItemGroupProps[] = [
     {
         label: "navbar.reports.reporting",
         icon: IconFileAnalytics,
+        initiallyOpened: true,
         items: [
             {
                 label: "navbar.reports.my-reports",
@@ -48,6 +49,7 @@ export const Content: ItemGroupProps[] = [
         label: "navbar.admin",
         icon: IconUsers,
         showIfCurator: true,
+        initiallyOpened: true,
         items: [
             {
                 label: "navbar.reports.all",

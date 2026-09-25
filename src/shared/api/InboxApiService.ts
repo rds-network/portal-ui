@@ -9,9 +9,11 @@ export type InboxThreadDto = {
     unread: boolean
     lastBody?: string | null
     counterpart?: string | null
+    counterpartName?: string | null
     heatmapUser?: string | null
     reportId?: string | null
     recipient?: string | null
+    recipientName?: string | null
     recipientLastSeen?: string | null
     receivedAt?: string | null
     ackRequired?: boolean
@@ -21,6 +23,7 @@ export type InboxThreadDto = {
 export type InboxMessageDto = {
     id: string
     author?: string | null
+    authorName?: string | null
     body: string
     createTime: string
 }
@@ -30,9 +33,11 @@ export type InboxThreadDetailDto = {
     subject: string
     kind: string
     createdBy?: string | null
+    createdByName?: string | null
     heatmapUser?: string | null
     reportId?: string | null
     recipient?: string | null
+    recipientName?: string | null
     recipientLastSeen?: string | null
     receivedAt?: string | null
     ackRequired?: boolean
