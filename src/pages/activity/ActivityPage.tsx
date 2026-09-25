@@ -10,7 +10,7 @@ import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./ActivityPage.module.scss"
 
-const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO]
+const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_SSO]
 
 export const ActivityPage: React.FC = () => {
     const { user } = useContext(UserContext)

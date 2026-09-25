@@ -9,6 +9,8 @@ import { LogoutButton } from "src/shared/ui/appNavbar/logoutButton/LogoutButton"
 import { UserButton } from "src/shared/ui/appNavbar/userButton/UserButton"
 import { FormattedMessage } from "react-intl"
 import { hasPermission } from "src/shared/user/roles"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { useQuery } from "@tanstack/react-query"
 import { LinksGroup } from "./links/NavbarLinksGroup"
 import { useLocation } from "react-router"
 
@@ -28,6 +30,7 @@ export interface ItemGroupProps {
     link?: string
     roles?: string[]
     showUnread?: boolean
+    showIfCurator?: boolean
 }
 
 export const AppNavbar = React.memo(function AppNavbar() {
@@ -42,11 +45,16 @@ export const AppNavbar = React.memo(function AppNavbar() {
         setMenuOpened(false)
     }, [location.pathname, isDesktop, setMenuOpened])
 
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
     const items = useMemo(() => {
-        return Content.filter((item) => hasPermission(user, item.roles)).map((item) => (
-            <LinksGroup {...item} key={item.label} />
-        ))
-    }, [user])
+        return Content.filter(
+            (item) => hasPermission(user, item.roles) || (item.showIfCurator && curatorMe?.curator)
+        ).map((item) => <LinksGroup {...item} key={item.label} />)
+    }, [user, curatorMe?.curator])
 
     const navigation = (
         <nav id="portal-navigation" className={classes.navbar}>

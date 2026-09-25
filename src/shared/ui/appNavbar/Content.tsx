@@ -28,11 +28,6 @@ export const Content: ItemGroupProps[] = [
                 link: "/reports/personal",
             },
             {
-                label: "navbar.reports.review",
-                link: "/reports/review",
-                curatorInbox: true,
-            },
-            {
                 label: "navbar.reports.new-report",
                 link: "/report/create",
             },
@@ -40,6 +35,14 @@ export const Content: ItemGroupProps[] = [
                 label: "navbar.reports.reporting-guide",
                 link: "/reporting-guide",
             },
+        ],
+    },
+    {
+        label: "navbar.volunteers.volunteers",
+        icon: IconUsers,
+        initiallyOpened: true,
+        showIfCurator: true,
+        items: [
             {
                 label: "navbar.reports.all",
                 link: "/reports",
@@ -55,17 +58,10 @@ export const Content: ItemGroupProps[] = [
                 link: "/reports/overdue",
                 roles: ["ADMIN_VOLUNTEER"],
             },
-        ],
-    },
-    {
-        label: "navbar.volunteers.volunteers",
-        icon: IconUsers,
-        initiallyOpened: true,
-        items: [
             {
-                label: "navbar.volunteers.all-volunteers",
-                link: "/volunteers",
-                roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO"],
+                label: "navbar.reports.review",
+                link: "/reports/review",
+                curatorInbox: true,
             },
             {
                 label: "navbar.volunteers.applications",
@@ -73,14 +69,19 @@ export const Content: ItemGroupProps[] = [
                 roles: ["ADMIN_VOLUNTEER", "INTERVIEWER"],
             },
             {
-                label: "navbar.volunteers.statistics",
-                link: "/volunteers/reports",
-                roles: ["ADMIN_VOLUNTEER"],
+                label: "navbar.volunteers.all-volunteers",
+                link: "/volunteers",
+                roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO"],
             },
             {
                 label: "navbar.volunteers.curators",
                 link: "/curators",
                 roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
+            },
+            {
+                label: "navbar.volunteers.statistics",
+                link: "/volunteers/reports",
+                roles: ["ADMIN_VOLUNTEER"],
             },
             {
                 label: "navbar.reports.announcements",
@@ -94,7 +95,7 @@ export const Content: ItemGroupProps[] = [
         label: "navbar.activity",
         icon: IconHistory,
         link: "/activity",
-        roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"],
+        roles: ["ADMIN", "ADMIN_SSO"],
     },
     {
         label: "navbar.account-settings",
