@@ -26,6 +26,7 @@ export interface ItemGroupProps {
     items?: ItemProps[]
     link?: string
     roles?: string[]
+    showUnread?: boolean
 }
 
 export const AppNavbar = React.memo(function AppNavbar() {

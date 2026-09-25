@@ -20,6 +20,8 @@ const VolunteerHeatmapPage = lazy(() => import("src/pages/heatmap/VolunteerHeatm
 const SupportPage = lazy(() => import("src/pages/support/SupportPage"))
 const AnnouncementsAdminPage = lazy(() => import("src/pages/announcements/AnnouncementsAdminPage"))
 const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
+const MessagesPage = lazy(() => import("src/pages/inbox/MessagesPage"))
+const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -101,6 +103,14 @@ export const routes: RouteProps[] = [
     {
         path: "/tasks",
         element: <WorkTasksPage />,
+    },
+    {
+        path: "/messages",
+        element: <MessagesPage />,
+    },
+    {
+        path: "/reports/overdue",
+        element: <OverdueReportsPage />,
     },
     {
         path: "/",

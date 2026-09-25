@@ -15,6 +15,7 @@ interface Props {
     onVolunteerSelect: (id: number) => void
     selectedVolunteers: Set<number>
     totalVolunteers: number
+    onNotifyVolunteer?: (username: string, name: string) => void
 }
 
 export const VolunteerReportHeatmap: React.FC<Props> = ({
@@ -23,6 +24,7 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
     onVolunteerSelect,
     selectedVolunteers,
     totalVolunteers,
+    onNotifyVolunteer,
 }) => {
     const navigate = useNavigate()
 
@@ -113,6 +115,7 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                             year={year}
                             isSelected={selectedVolunteers.has(v.volunteerInfo.id)}
                             onVolunteerSelect={onVolunteerSelect}
+                            onNotifyVolunteer={onNotifyVolunteer}
                             startDate={startDate}
                         />
                     ))}

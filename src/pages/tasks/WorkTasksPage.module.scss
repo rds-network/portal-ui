@@ -2,7 +2,32 @@
 
 .root {
     @include s.page;
-    max-width: 1180px;
+    max-width: 1480px;
+}
+
+.board {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    gap: 12px;
+    align-items: start;
+    overflow-x: auto;
+}
+
+.lane {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 10px;
+    min-height: 280px;
+}
+
+.laneHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 650;
+    font-size: 13px;
+    margin-bottom: 10px;
 }
 
 .grid {
@@ -15,11 +40,13 @@
     background: #fffbeb;
     border: 1px solid #f3e8c8;
     border-radius: 16px;
-    padding: 16px;
-    min-height: 180px;
+    padding: 12px;
+    min-height: 120px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    cursor: grab;
+    margin-bottom: 10px;
 }
 
 .meta {

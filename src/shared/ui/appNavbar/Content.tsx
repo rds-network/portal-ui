@@ -1,4 +1,4 @@
-import { IconAdjustments, IconChecklist, IconFileAnalytics, IconLifebuoy, IconUsers } from "@tabler/icons-react"
+import { IconAdjustments, IconBell, IconChecklist, IconFileAnalytics, IconLifebuoy, IconUsers } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
 export const Content: ItemGroupProps[] = [
@@ -6,6 +6,12 @@ export const Content: ItemGroupProps[] = [
         label: "navbar.reports.tasks",
         icon: IconChecklist,
         link: "/tasks",
+    },
+    {
+        label: "navbar.reports.messages",
+        icon: IconBell,
+        link: "/messages",
+        showUnread: true,
     },
     {
         label: "navbar.reports.reporting",
@@ -37,6 +43,11 @@ export const Content: ItemGroupProps[] = [
             {
                 label: "navbar.reports.heat-map",
                 link: "/volunteers/heatmap",
+                roles: ["ADMIN_VOLUNTEER"],
+            },
+            {
+                label: "navbar.reports.overdue",
+                link: "/reports/overdue",
                 roles: ["ADMIN_VOLUNTEER"],
             },
         ],

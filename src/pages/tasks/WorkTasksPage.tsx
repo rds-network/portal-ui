@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Flex, Text, Textarea, TextInput, Title } from "@mantine/core"
+import { Badge, Button, Card, Flex, Modal, Text, Textarea, TextInput, Title } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
@@ -9,16 +9,17 @@ import React, { useContext, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { WorkAssignmentApiService, WorkAssignmentDto } from "src/shared/api/WorkAssignmentApiService"
+import { WorkAssignmentApiService, WorkAssignmentDto, WorkAssignmentPatchRequest, WorkAssignmentStatus } from "src/shared/api/WorkAssignmentApiService"
+import { NO_PROGRAM_CODE } from "src/shared/constants/Shared"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
-import { hasPermission, UserGroup } from "src/shared/user/roles"
-import { NO_PROGRAM_CODE } from "src/shared/constants/Shared"
 import { ProgramFilter } from "src/shared/ui/filter"
 import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
+import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./WorkTasksPage.module.scss"
 
 const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]
+const LANES: WorkAssignmentStatus[] = ["TODO", "DOING", "REVIEW", "REDO", "DONE"]
 
 const STATUS_COLOR: Record<string, string> = {
     TODO: "gray",
@@ -36,6 +37,8 @@ export const WorkTasksPage: React.FC = () => {
     const isManager = hasPermission(user, MANAGERS)
     const [assignee, setAssignee] = useState<string | null>(null)
     const [program, setProgram] = useState<string | null>(null)
+    const [edit, setEdit] = useState<WorkAssignmentDto | null>(null)
+    const [editAssignee, setEditAssignee] = useState<string | null>(null)
     const assigneeProgram = program === NO_PROGRAM_CODE ? "" : program
 
     setDocumentTitleByLocale("pages.tasks.title")
@@ -48,6 +51,14 @@ export const WorkTasksPage: React.FC = () => {
         },
         validate: {
             title: (value) => (value.trim().length < 3 ? intl.formatMessage({ id: "pages.tasks.required" }) : null),
+        },
+    })
+
+    const editForm = useForm({
+        initialValues: {
+            title: "",
+            body: "",
+            dueDate: null as Date | null,
         },
     })
 
@@ -79,9 +90,9 @@ export const WorkTasksPage: React.FC = () => {
         },
     })
 
-    const { mutate: patch } = useMutation({
-        mutationFn: ({ id, status }: { id: string; status: string }) =>
-            WorkAssignmentApiService.patch(id, { status }),
+    const { mutate: patch, isPending: isPatching } = useMutation({
+        mutationFn: ({ id, payload }: { id: string; payload: WorkAssignmentPatchRequest }) =>
+            WorkAssignmentApiService.patch(id, payload),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ["work-assignments"] }),
     })
 
@@ -94,11 +105,45 @@ export const WorkTasksPage: React.FC = () => {
         })
     })
 
+    const openEdit = (item: WorkAssignmentDto) => {
+        setEdit(item)
+        setEditAssignee(item.assignee ?? null)
+        editForm.setValues({
+            title: item.title,
+            body: item.body ?? "",
+            dueDate: item.dueDate ? dayjs(item.dueDate).toDate() : null,
+        })
+    }
+
+    const saveEdit = editForm.onSubmit((values) => {
+        if (!edit) return
+        patch({
+            id: edit.id,
+            payload: {
+                title: values.title.trim(),
+                body: values.body.trim() || null,
+                assignee: editAssignee,
+                dueDate: values.dueDate ? dayjs(values.dueDate).format("YYYY-MM-DD") : null,
+            },
+        })
+        setEdit(null)
+    })
+
     const toReport = (item: WorkAssignmentDto) => {
         if (item.status === "TODO") {
-            patch({ id: item.id, status: "DOING" })
+            patch({ id: item.id, payload: { status: "DOING" } })
         }
         navigate(`/report/create?task=${encodeURIComponent(item.title)}`)
+    }
+
+    const canDragTo = (status: string) => isManager || status === "TODO" || status === "DOING"
+
+    const onDrop = (status: string, event: React.DragEvent) => {
+        event.preventDefault()
+        const id = event.dataTransfer.getData("text/plain")
+        const card = visible.find((item) => item.id === id)
+        if (!card || card.status === status || !canDragTo(status)) return
+        patch({ id, payload: { status } })
     }
 
     return (
@@ -161,48 +206,108 @@ export const WorkTasksPage: React.FC = () => {
                     <FormattedMessage id="pages.tasks.empty" />
                 </Text>
             ) : (
-                <div className={classes.grid}>
-                    {visible.map((item) => (
-                        <article key={item.id} className={classes.card}>
-                            <div className={classes.meta}>
-                                <Badge variant="light" color={STATUS_COLOR[item.status] ?? "gray"}>
-                                    <FormattedMessage id={`pages.tasks.status.${item.status}`} />
-                                </Badge>
-                                {item.dueDate && (
-                                    <Badge variant="outline" color="gray">
-                                        {dayjs(item.dueDate).format("DD.MM")}
+                <div className={classes.board}>
+                    {LANES.map((lane) => {
+                        const cards = visible.filter((item) => item.status === lane)
+                        return (
+                            <section
+                                key={lane}
+                                className={classes.lane}
+                                onDragOver={(event) => event.preventDefault()}
+                                onDrop={(event) => onDrop(lane, event)}
+                            >
+                                <div className={classes.laneHead}>
+                                    <FormattedMessage id={`pages.tasks.status.${lane}`} />
+                                    <Badge size="sm" variant="light" color={STATUS_COLOR[lane]}>
+                                        {cards.length}
                                     </Badge>
-                                )}
-                            </div>
-                            <div className={classes.title}>{item.title}</div>
-                            {item.body && <div className={classes.body}>{item.body}</div>}
-                            <Text className={classes.assignee} c="dimmed">
-                                {item.assigneeName || item.assignee || "—"}
-                            </Text>
-                            {item.status !== "DONE" && item.assignee === user?.username && (
-                                <div className={classes.actions}>
-                                    {item.status === "TODO" && (
-                                        <Button
-                                            size="xs"
-                                            variant="light"
-                                            onClick={() => patch({ id: item.id, status: "DOING" })}
-                                        >
-                                            <FormattedMessage id="pages.tasks.take" />
-                                        </Button>
-                                    )}
-                                    <Button
-                                        size="xs"
-                                        leftSection={<IconChecklist size={14} />}
-                                        onClick={() => toReport(item)}
-                                    >
-                                        <FormattedMessage id="pages.tasks.to-report" />
-                                    </Button>
                                 </div>
-                            )}
-                        </article>
-                    ))}
+                                {cards.map((item) => (
+                                    <article
+                                        key={item.id}
+                                        className={classes.card}
+                                        draggable
+                                        onDragStart={(event) => event.dataTransfer.setData("text/plain", item.id)}
+                                        onClick={() => openEdit(item)}
+                                    >
+                                        <div className={classes.meta}>
+                                            {item.dueDate && (
+                                                <Badge variant="outline" color="gray">
+                                                    {dayjs(item.dueDate).format("DD.MM")}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        <div className={classes.title}>{item.title}</div>
+                                        {item.body && <div className={classes.body}>{item.body}</div>}
+                                        <Text className={classes.assignee} c="dimmed">
+                                            {item.assigneeName || item.assignee || "—"}
+                                        </Text>
+                                        {item.status !== "DONE" && item.assignee === user?.username && (
+                                            <div className={classes.actions}>
+                                                <Button
+                                                    size="xs"
+                                                    leftSection={<IconChecklist size={14} />}
+                                                    onClick={(event) => {
+                                                        event.stopPropagation()
+                                                        toReport(item)
+                                                    }}
+                                                >
+                                                    <FormattedMessage id="pages.tasks.to-report" />
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </article>
+                                ))}
+                            </section>
+                        )
+                    })}
                 </div>
             )}
+
+            <Modal
+                opened={!!edit}
+                onClose={() => setEdit(null)}
+                title={<FormattedMessage id="pages.tasks.edit" />}
+                centered
+            >
+                {edit && (
+                    <form onSubmit={isManager ? saveEdit : (event) => event.preventDefault()}>
+                        <Flex direction="column" gap="sm">
+                            <TextInput
+                                label={<FormattedMessage id="pages.tasks.fields.title" />}
+                                disabled={!isManager}
+                                {...editForm.getInputProps("title")}
+                            />
+                            <Textarea
+                                label={<FormattedMessage id="pages.tasks.fields.body" />}
+                                minRows={4}
+                                disabled={!isManager}
+                                {...editForm.getInputProps("body")}
+                            />
+                            {isManager && (
+                                <UserSearch
+                                    key={edit.id}
+                                    label={<FormattedMessage id="pages.tasks.fields.assignee" />}
+                                    initialSearch={edit.assigneeName || edit.assignee || ""}
+                                    onUserChange={(picked) => setEditAssignee(picked?.username ?? null)}
+                                />
+                            )}
+                            <DateInput
+                                label={<FormattedMessage id="pages.tasks.fields.due" />}
+                                valueFormat="DD.MM.YYYY"
+                                clearable
+                                disabled={!isManager}
+                                {...editForm.getInputProps("dueDate")}
+                            />
+                            {isManager && (
+                                <Button type="submit" loading={isPatching}>
+                                    <FormattedMessage id="pages.tasks.save" />
+                                </Button>
+                            )}
+                        </Flex>
+                    </form>
+                )}
+            </Modal>
         </Flex>
     )
 }

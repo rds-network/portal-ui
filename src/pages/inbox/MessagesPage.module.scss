@@ -1,0 +1,57 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.page;
+    max-width: 1280px;
+}
+
+.list {
+    width: 340px;
+    flex-shrink: 0;
+}
+
+.item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+.itemActive {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+.thread {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.messages {
+    max-height: 420px;
+}
+
+.mine,
+.theirs {
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+
+.mine {
+    background: #ecfdf5;
+    margin-left: 40px;
+}
+
+.theirs {
+    background: #f8fafc;
+    margin-right: 40px;
+}

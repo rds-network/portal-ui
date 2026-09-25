@@ -207,6 +207,8 @@
             "empty": "Još nema zadataka",
             "take": "Preuzmi",
             "to-report": "Unesi u izveštaj",
+            "edit": "Kartica zadatka",
+            "save": "Sačuvaj",
             "open": "Otvoreni zadaci",
             "add": "Dodaj u izveštaj",
             "fields": {
@@ -223,6 +225,30 @@
                 "REDO": "Dorada",
                 "DONE": "Urađeno"
             }
+        },
+        "messages": {
+            "title": "Poruke",
+            "empty": "Još nema poruka",
+            "pick": "Izaberite razgovor",
+            "new": "Novo",
+            "reply": "Odgovor",
+            "send": "Pošalji",
+            "sent": "Obaveštenje je poslato",
+            "notify": "Pošalji obaveštenje",
+            "subject": "Tema",
+            "body": "Tekst"
+        },
+        "overdue": {
+            "title": "Nedostavljeni izveštaji",
+            "description": "Volonteri bez prihvaćenog izveštaja 2 nedelje ili duže. Posle 3 nedelje ide upozorenje o blokadi naloga i raskidu ugovora.",
+            "total": "Na listi: {count}",
+            "notify": "Pošalji obaveštenja",
+            "sent": "Poslato: {count}",
+            "empty": "Svi su uredni",
+            "person": "Volonter",
+            "program": "Program",
+            "weeks": "Nedelja bez izveštaja",
+            "last": "Poslednji prihvaćen"
         },
         "welcome": {
             "title": "Portal volontera",
@@ -484,6 +510,7 @@
             "status": "Status",
             "view-profile": "Pogledaj profil",
             "send-message": "Pošalji poruku",
+            "send-notice": "Pošalji obaveštenje",
             "no-reports": "Nema izveštaja",
             "na": "N/A",
             "partial-reports": "Delimični izveštaji",
@@ -905,7 +932,9 @@
             "reporting-guide": "Vodič za predaju izveštaja",
             "heat-map": "Toplotna karta",
             "announcements": "Slanje obaveštenja",
-            "tasks": "Zadaci"
+            "tasks": "Zadaci",
+            "messages": "Poruke",
+            "overdue": "Nedostavljeni izveštaji"
         },
         "volunteers": {
             "volunteers": "Volonteri",

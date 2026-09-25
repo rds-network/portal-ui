@@ -207,6 +207,8 @@
             "empty": "No tasks yet",
             "take": "Start",
             "to-report": "Add to report",
+            "edit": "Task card",
+            "save": "Save",
             "open": "Open tasks",
             "add": "Add to report",
             "fields": {
@@ -223,6 +225,30 @@
                 "REDO": "Rework",
                 "DONE": "Done"
             }
+        },
+        "messages": {
+            "title": "Messages",
+            "empty": "No messages yet",
+            "pick": "Select a conversation",
+            "new": "New",
+            "reply": "Reply",
+            "send": "Send",
+            "sent": "Notification sent",
+            "notify": "Send notification",
+            "subject": "Subject",
+            "body": "Message"
+        },
+        "overdue": {
+            "title": "Missing reports",
+            "description": "Volunteers without an accepted report for 2 weeks or more. After 3 weeks they get a warning about account block and contract termination.",
+            "total": "In the list: {count}",
+            "notify": "Send notices now",
+            "sent": "Sent: {count}",
+            "empty": "Everyone is up to date",
+            "person": "Volunteer",
+            "program": "Program",
+            "weeks": "Weeks without a report",
+            "last": "Last accepted"
         },
         "welcome": {
             "title": "Volunteer portal",
@@ -484,6 +510,7 @@
             "last-report": "Last Report",
             "status": "Status",
             "send-message": "Send Message",
+            "send-notice": "Send notification",
             "no-reports": "No Reports",
             "na": "N/A",
             "partial-reports": "Partial Reports",
@@ -905,7 +932,9 @@
             "reporting-guide": "Reporting Guidelines",
             "heat-map": "Heat Map",
             "announcements": "Broadcast notifications",
-            "tasks": "Tasks"
+            "tasks": "Tasks",
+            "messages": "Messages",
+            "overdue": "Missing reports"
         },
         "volunteers": {
             "volunteers": "Volunteers",

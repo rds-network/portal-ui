@@ -1,6 +1,6 @@
 import { Avatar, Badge, Box, Button, Checkbox, Flex, HoverCard, Text } from "@mantine/core"
 import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
-import { IconCheckupList, IconMessage2Exclamation, IconUser } from "@tabler/icons-react"
+import { IconBell, IconCheckupList, IconMessage2Exclamation, IconUser } from "@tabler/icons-react"
 import dayjs, { Dayjs } from "dayjs"
 import React, { useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -24,6 +24,7 @@ interface VolunteerRowProps {
     year: number
     isSelected: boolean
     onVolunteerSelect: (volunteerId: number) => void
+    onNotifyVolunteer?: (username: string, name: string) => void
     startDate: Dayjs
 }
 
@@ -33,6 +34,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
     year,
     isSelected,
     onVolunteerSelect,
+    onNotifyVolunteer,
     startDate,
 }) => {
     const intl = useIntl()
@@ -249,6 +251,18 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                             </Button>
                                         </Flex>
 
+                                        <Button
+                                            variant="light"
+                                            leftSection={<IconBell size={16} />}
+                                            onClick={() =>
+                                                onNotifyVolunteer?.(
+                                                    volunteer.volunteerInfo.username,
+                                                    volunteer.volunteerInfo.fullName
+                                                )
+                                            }
+                                        >
+                                            <FormattedMessage id={locales.sendNotice} />
+                                        </Button>
                                         <Button
                                             leftSection={<IconMessage2Exclamation size={16} />}
                                             onClick={() => setTicketDrawerOpen(true)}
