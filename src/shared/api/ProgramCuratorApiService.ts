@@ -21,6 +21,11 @@ export const ProgramCuratorApiService = {
         const response = await RequestHttp.get<ProgramCuratorDto[]>("/program-curators", { validateStatus: alive })
         return response.data ?? []
     },
+    async me(): Promise<{ curator: boolean }> {
+        const response = await RequestHttp.get<{ curator: boolean }>("/program-curators/me", { validateStatus: alive })
+        if (response.status !== 200) return { curator: false }
+        return { curator: !!response.data?.curator }
+    },
     async assign(payload: ProgramCuratorWriteRequest): Promise<ProgramCuratorDto> {
         const response = await RequestHttp.post<ProgramCuratorDto>("/program-curators", payload)
         return response.data

@@ -111,18 +111,32 @@ export const MessagesPage: React.FC = () => {
                             <Title order={3} className={classes.threadTitle}>
                                 {thread.subject}
                             </Title>
-                            {heatmapUser(thread) && (
-                                <Button
-                                    variant="light"
-                                    onClick={() =>
-                                        navigate(
-                                            `/volunteers/heatmap?search=${encodeURIComponent(heatmapUser(thread)!)}`
-                                        )
-                                    }
-                                >
-                                    <FormattedMessage id="pages.overdue.openHeatmap" />
-                                </Button>
-                            )}
+                            <Flex gap="sm" wrap="wrap">
+                                {thread.kind === "REPORT_CUSTOMER" && (
+                                    <Button
+                                        variant="light"
+                                        onClick={() =>
+                                            navigate(
+                                                thread.reportId ? `/report/${thread.reportId}` : "/reports/review"
+                                            )
+                                        }
+                                    >
+                                        <FormattedMessage id="pages.review-reports.open" />
+                                    </Button>
+                                )}
+                                {heatmapUser(thread) && (
+                                    <Button
+                                        variant="light"
+                                        onClick={() =>
+                                            navigate(
+                                                `/volunteers/heatmap?search=${encodeURIComponent(heatmapUser(thread)!)}`
+                                            )
+                                        }
+                                    >
+                                        <FormattedMessage id="pages.overdue.openHeatmap" />
+                                    </Button>
+                                )}
+                            </Flex>
                         </Flex>
                         <ScrollArea className={classes.messages} mt="md">
                             <Flex direction="column" gap="sm">

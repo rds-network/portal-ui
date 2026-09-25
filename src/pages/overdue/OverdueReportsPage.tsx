@@ -6,10 +6,11 @@ import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { InboxApiService, OverdueWeekDto, ReportOverdueDto } from "src/shared/api/InboxApiService"
+import { InboxApiService, OverdueNoticePersonDto, OverdueWeekDto, ReportOverdueDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
+import { downloadCsv } from "src/shared/utils/downloadCsv"
 import { formatContractEnd } from "src/shared/utils/latestContractEnd"
 import classes from "./OverdueReportsPage.module.scss"
 
@@ -63,22 +64,47 @@ export const OverdueReportsPage: React.FC = () => {
         enabled: previewOpen,
     })
 
+    const exportNotices = (people: OverdueNoticePersonDto[], filename: string) => {
+        downloadCsv(filename, [
+            ["ФИО", "Логин", "Программа", "Предупреждений", "Уведомлён", "Чёрный список", "МУП", "Последняя рассылка"],
+            ...people.map((person) => [
+                person.fullName,
+                person.username,
+                person.program,
+                person.warningCount,
+                person.notified ? "да" : "нет",
+                person.watchlist ? "да" : "нет",
+                person.mupSent ? "да" : "нет",
+                person.lastSentAt ? dayjs(person.lastSentAt).format("DD.MM.YYYY HH:mm") : "",
+            ]),
+        ])
+    }
+
     const { mutate: notify, isPending } = useMutation({
         mutationFn: () => InboxApiService.notifyOverdue([...excluded]),
-        onSuccess: (sent) => {
+        onSuccess: (result) => {
             notifications.show(
                 SuccessNotification(
                     <Text size="sm">
-                        <FormattedMessage id="pages.overdue.sent" values={{ count: sent }} />
+                        <FormattedMessage id="pages.overdue.sent" values={{ count: result.sent }} />
                     </Text>,
                     null
                 )
             )
+            if (result.recipients.length > 0) {
+                exportNotices(result.recipients, `overdue-notices-${dayjs().format("YYYY-MM-DD")}.csv`)
+            }
             setPreviewOpen(false)
             queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue-notices"] })
             queryClient.invalidateQueries({ queryKey: ["inbox"] })
             queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
         },
+    })
+
+    const { data: ledger = [] } = useQuery({
+        queryKey: ["report-overdue-notices"],
+        queryFn: () => InboxApiService.overdueNotices(),
     })
 
     const openHeatmap = (username: string) => {
@@ -134,9 +160,20 @@ export const OverdueReportsPage: React.FC = () => {
                             </Text>
                         )}
                     </div>
-                    <Button onClick={() => setPreviewOpen(true)} disabled={isLoading || sendCount === 0}>
-                        <FormattedMessage id="pages.overdue.notify" />
-                    </Button>
+                    <Group gap="sm">
+                        <Button
+                            variant="light"
+                            onClick={() =>
+                                exportNotices(ledger, `overdue-ledger-${dayjs().format("YYYY-MM-DD")}.csv`)
+                            }
+                            disabled={ledger.length === 0}
+                        >
+                            <FormattedMessage id="pages.overdue.export" />
+                        </Button>
+                        <Button onClick={() => setPreviewOpen(true)} disabled={isLoading || sendCount === 0}>
+                            <FormattedMessage id="pages.overdue.notify" />
+                        </Button>
+                    </Group>
                 </Flex>
                 {items.length > 0 && (
                     <Text size="sm" c="dimmed" mb="sm">
@@ -207,14 +244,25 @@ export const OverdueReportsPage: React.FC = () => {
                                     </div>
                                     <div style={{ minWidth: 180, flex: "1 1 180px" }}>
                                         <Text fw={600}>{item.fullName}</Text>
-                                        {(item.warningCount ?? 0) > 0 && (
-                                            <Text size="xs" c={(item.warningCount ?? 0) >= 3 ? "red" : "orange"}>
-                                                <FormattedMessage
-                                                    id="pages.overdue.warnings"
-                                                    values={{ count: item.warningCount }}
-                                                />
-                                            </Text>
-                                        )}
+                                        <Group gap={6} mt={4}>
+                                            {(item.warningCount ?? 0) > 0 && (
+                                                <Badge
+                                                    size="sm"
+                                                    variant="light"
+                                                    color={(item.warningCount ?? 0) >= 3 ? "red" : "orange"}
+                                                >
+                                                    <FormattedMessage
+                                                        id="pages.overdue.notified"
+                                                        values={{ count: item.warningCount }}
+                                                    />
+                                                </Badge>
+                                            )}
+                                            {(item.watchlist || (item.warningCount ?? 0) >= 2) && (
+                                                <Badge size="sm" color="dark">
+                                                    <FormattedMessage id="pages.overdue.watchlist" />
+                                                </Badge>
+                                            )}
+                                        </Group>
                                         <Text size="xs" c="dimmed">
                                             {item.program || item.username}
                                             {formatContractEnd(item.contractEnd) && (

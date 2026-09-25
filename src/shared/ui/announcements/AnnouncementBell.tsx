@@ -126,6 +126,10 @@ export const AnnouncementBell: React.FC = () => {
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
                                     setOpened(false)
+                                    if (item.kind === "REPORT_CUSTOMER") {
+                                        navigate(item.reportId ? `/report/${item.reportId}` : "/reports/review")
+                                        return
+                                    }
                                     const login = item.heatmapUser || item.counterpart
                                     if (login && (item.kind.startsWith("OVERDUE") || item.kind === "TASK")) {
                                         navigate(`/volunteers/heatmap?search=${encodeURIComponent(login)}`)

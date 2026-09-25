@@ -17,6 +17,7 @@ export interface ItemProps {
     link: string
     roles?: string[]
     hideFrom?: string[]
+    curatorInbox?: boolean
 }
 
 export interface ItemGroupProps {

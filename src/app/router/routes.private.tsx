@@ -24,6 +24,7 @@ const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPa
 const ResourcesPage = lazy(() => import("src/pages/resources/ResourcesPage"))
 const ActivityPage = lazy(() => import("src/pages/activity/ActivityPage"))
 const CuratorsPage = lazy(() => import("src/pages/curators/CuratorsPage"))
+const CuratorReportsPage = lazy(() => import("src/pages/reportsReview/CuratorReportsPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -113,6 +114,10 @@ export const routes: RouteProps[] = [
     {
         path: "/reports/overdue",
         element: <OverdueReportsPage />,
+    },
+    {
+        path: "/reports/review",
+        element: <CuratorReportsPage />,
     },
     {
         path: "/resources",

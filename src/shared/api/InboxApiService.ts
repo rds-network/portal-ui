@@ -10,6 +10,7 @@ export type InboxThreadDto = {
     lastBody?: string | null
     counterpart?: string | null
     heatmapUser?: string | null
+    reportId?: string | null
 }
 
 export type InboxMessageDto = {
@@ -25,6 +26,7 @@ export type InboxThreadDetailDto = {
     kind: string
     createdBy?: string | null
     heatmapUser?: string | null
+    reportId?: string | null
     messages: InboxMessageDto[]
 }
 
@@ -47,8 +49,26 @@ export type ReportOverdueDto = {
     level: string
     lastReportWeek?: string | null
     warningCount?: number
+    notified?: boolean
+    watchlist?: boolean
     subject?: string | null
     body?: string | null
+}
+
+export type OverdueNoticePersonDto = {
+    username: string
+    fullName: string
+    program?: string | null
+    warningCount: number
+    lastSentAt?: string | null
+    notified: boolean
+    watchlist: boolean
+    mupSent: boolean
+}
+
+export type OverdueNotifyResultDto = {
+    sent: number
+    recipients: OverdueNoticePersonDto[]
 }
 
 export type OverduePreviewDto = {
@@ -124,13 +144,21 @@ export const InboxApiService = {
         return response.data ?? {}
     },
 
-    async notifyOverdue(exclude: string[] = []): Promise<number> {
-        const response = await RequestHttp.post<{ sent: number }>(
+    async notifyOverdue(exclude: string[] = []): Promise<OverdueNotifyResultDto> {
+        const response = await RequestHttp.post<OverdueNotifyResultDto>(
             "/report-overdue/notify",
             { exclude },
             { validateStatus: alive }
         )
-        if (response.status !== 200) return 0
-        return response.data?.sent ?? 0
+        if (response.status !== 200) return { sent: 0, recipients: [] }
+        return response.data ?? { sent: 0, recipients: [] }
+    },
+
+    async overdueNotices(): Promise<OverdueNoticePersonDto[]> {
+        const response = await RequestHttp.get<OverdueNoticePersonDto[]>("/report-overdue/notices", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return []
+        return response.data ?? []
     },
 }

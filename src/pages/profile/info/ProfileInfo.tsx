@@ -380,6 +380,11 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             </Badge>
                         </Tooltip>
                     )}
+                    {warningCount >= 2 && (
+                        <Badge color="dark" radius="md">
+                            <FormattedMessage id="pages.profile.watchlist" />
+                        </Badge>
+                    )}
 
                     {showSensitiveData && userInfo?.id !== currentUser?.id && (
                         <UserMenu user={userInfo} type="profile" />

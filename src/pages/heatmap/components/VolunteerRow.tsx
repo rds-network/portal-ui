@@ -222,6 +222,12 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                         {warningCount > 0 && (
                                             <Text size="xs" c={warningCount >= 3 ? "red" : "orange"}>
                                                 <FormattedMessage id={locales.warnings} values={{ count: warningCount }} />
+                                                {warningCount >= 2 && (
+                                                    <>
+                                                        {" · "}
+                                                        <FormattedMessage id="pages.heat-map.watchlist" />
+                                                    </>
+                                                )}
                                             </Text>
                                         )}
                                         <Text size="xs" c="dimmed">

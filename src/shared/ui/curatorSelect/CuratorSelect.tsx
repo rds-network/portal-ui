@@ -1,7 +1,7 @@
 import { Select } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
 import { useQuery } from "@tanstack/react-query"
-import React, { ReactNode, useEffect, useMemo } from "react"
+import React, { ReactNode, useEffect } from "react"
 import { useIntl } from "react-intl"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
@@ -21,7 +21,7 @@ export const CuratorSelect: React.FC<Props> = ({ label, description, form, path,
         queryFn: () => ProgramCuratorApiService.list(),
     })
 
-    const options = useMemo(() => {
+    const options = React.useMemo(() => {
         const byUser = new Map<string, { username: string; fullName: string; programs: typeof rows }>()
         rows.forEach((row) => {
             const current = byUser.get(row.username) ?? { username: row.username, fullName: row.fullName, programs: [] }
@@ -49,18 +49,21 @@ export const CuratorSelect: React.FC<Props> = ({ label, description, form, path,
         }
     }, [initialUsername])
 
+    const inputProps = form && path ? form.getInputProps(path) : {}
+
     return (
         <Select
             label={label}
             description={description}
             data={options}
             searchable
-            clearable
+            required
+            withAsterisk
+            clearable={false}
+            allowDeselect={false}
             nothingFoundMessage={intl.formatMessage({ id: "pages.curators.none" })}
-            value={form && path ? form.getValues()[path] || null : initialUsername || null}
-            onChange={(value) => {
-                if (form && path) form.setFieldValue(path, value)
-            }}
+            key={form && path ? form.key(path) : undefined}
+            {...inputProps}
         />
     )
 }

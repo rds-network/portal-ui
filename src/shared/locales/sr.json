@@ -268,7 +268,10 @@
             "skip": "U slanju",
             "skipHint": "Svi su označeni. Skinite kvačicu onima koj ne treba slati.",
             "warnings": "Upozorenja: {count} od 3",
-            "warningsHint": "Na 3 obaveštenja pismo o raskidu automatski ide u MUP.",
+            "warningsHint": "Posle slanja osobe se označavaju. Ponovno kašnjenje ide na preliminarnu crnu listu za raskid. Na 3 obaveštenja pismo ide u MUP.",
+            "notified": "obavešten {count}/3",
+            "watchlist": "crna lista",
+            "export": "Izvezi obaveštene",
             "excluded": "Izostavljeno iz slanja: {count}"
         },
         "activity": {
@@ -318,7 +321,8 @@
             "documentTitle": "Profil",
             "deactivated": "Deaktiviran",
             "warnings": "Upozorenja o izveštajima: {count} od 3",
-            "warningsHint": "Na 3 obaveštenja pismo o raskidu automatski ide u MUP.",
+            "warningsHint": "Posle slanja o nedostavljanju osoba se označava. Ponovno kašnjenje ide na preliminarnu crnu listu za raskid.",
+            "watchlist": "crna lista",
             "curator": "Kustos: {programs}",
             "props": {
                 "city": "Grad",
@@ -468,7 +472,7 @@
             "task-date": "Datum",
             "task-date-description": "Kada je zadatak završen",
             "task-customer": "Kupac",
-            "task-customer-description": "Samo kustos programa. On dobija obaveštenje i može da prihvati izveštaj.",
+            "task-customer-description": "Obavezno polje. Samo kustos programa. On dobija obaveštenje i može da prihvati izveštaj.",
             "customer-required": "Navedite naručioca zadatka",
             "required": "Obavezno",
             "min-letters": "Najmanje {count} znakova",
@@ -553,6 +557,7 @@
             "title": "Toplinska mapa aktivnosti",
             "contract-until": "ugovor do {date}",
             "warnings": "upozorenja {count}/3",
+            "watchlist": "crna lista",
             "curator": "kustos",
             "last-report": "Poslednji izveštaj",
             "status": "Status",
@@ -893,6 +898,13 @@
                 }
             }
         },
+        "review-reports": {
+            "title": "Na prijemu",
+            "description": "Izveštaji gde ste naručilac. Novi stižu i na zvono i odmah otvaraju izveštaj.",
+            "list": "Izveštaji za prijem",
+            "empty": "Još nema izveštaja gde ste naručilac",
+            "open": "Otvori izveštaj"
+        },
         "curators": {
             "title": "Kustosi programa",
             "description": "Timlidovi programa. Naručilac zadatka bira se samo iz ovog spiska.",
@@ -1062,7 +1074,8 @@
             "announcements": "Slanje obaveštenja",
             "tasks": "Zadaci",
             "messages": "Poruke",
-            "overdue": "Nedostavljeni izveštaji"
+            "overdue": "Nedostavljeni izveštaji",
+            "review": "Na prijemu"
         },
         "volunteers": {
             "volunteers": "Volonteri",

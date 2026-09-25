@@ -23,6 +23,11 @@ export const Content: ItemGroupProps[] = [
                 link: "/reports/personal",
             },
             {
+                label: "navbar.reports.review",
+                link: "/reports/review",
+                curatorInbox: true,
+            },
+            {
                 label: "navbar.reports.new-report",
                 link: "/report/create",
             },
