@@ -122,7 +122,7 @@ export const OverdueReportsPage: React.FC = () => {
                     <FormattedMessage id="pages.overdue.warningsHint" />
                 </Text>
             </div>
-            <Card withBorder padding={{ base: "sm", sm: "lg" }} radius="lg">
+            <Card withBorder p="md" radius="lg">
                 <Flex justify="space-between" align="center" mb="md" wrap="wrap" gap="sm">
                     <div>
                         <Text>
