@@ -72,7 +72,22 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                         <div className={classes.headerSpacer} />
                         <div className={classes.weekHeaders}>
                             {weeks.map((w) => (
-                                <div key={w.date.toString()} className={classes.weekHeader}>
+                                <div
+                                    key={w.date.toString()}
+                                    className={classes.weekHeader}
+                                    style={{ cursor: "pointer" }}
+                                    title="Все отчёты недели"
+                                    onClick={() => {
+                                        const meta = volunteers[0]?.weeks.find((item) => item.week === w.weekNumber)
+                                        const from = meta?.weekStart
+                                            ? dayjs(meta.weekStart).format("YYYY-MM-DD")
+                                            : w.date.format("YYYY-MM-DD")
+                                        const to = meta?.weekEnd
+                                            ? dayjs(meta.weekEnd).format("YYYY-MM-DD")
+                                            : w.date.add(6, "day").format("YYYY-MM-DD")
+                                        window.open(`/reports?dateFrom=${from}&dateTo=${to}`, "_blank")
+                                    }}
+                                >
                                     <Text size="xs" c="dimmed">
                                         {w.weekNumber}
                                     </Text>

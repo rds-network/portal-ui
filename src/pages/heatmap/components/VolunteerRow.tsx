@@ -248,11 +248,28 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                             <Box
                                 className={`${classes.weekSquare} ${classes[getSquareColor(week.weekNumber)]}`}
                                 style={{ cursor: "pointer" }}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    const weekData = weekByNumber.get(week.weekNumber)
+                                    const from = weekData?.weekStart
+                                        ? dayjs(weekData.weekStart).format("YYYY-MM-DD")
+                                        : week.date.format("YYYY-MM-DD")
+                                    const to = weekData?.weekEnd
+                                        ? dayjs(weekData.weekEnd).format("YYYY-MM-DD")
+                                        : week.date.add(6, "day").format("YYYY-MM-DD")
+                                    window.open(
+                                        `/reports?login=${encodeURIComponent(volunteer.volunteerInfo.username)}&dateFrom=${from}&dateTo=${to}`,
+                                        "_blank"
+                                    )
+                                }}
                             />
                         </HoverCard.Target>
 
                         <HoverCard.Dropdown>
                             <Text size="xs">{getSquareInfoLabel(week.weekNumber)}</Text>
+                            <Text size="xs" c="dimmed" mt={4}>
+                                <FormattedMessage id={locales.openWeek} />
+                            </Text>
                         </HoverCard.Dropdown>
                     </HoverCard>
                 ))}
