@@ -6,7 +6,7 @@ import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import LocalizedMarkdown from "src/shared/ui/markdown/LocalizedMarkdown"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
-import { CleanCityCourse } from "./CleanCityCourse"
+import { CleanCityDocs } from "./CleanCityDocs"
 import classes from "./ReportingGuide.module.scss"
 import { locales } from "./lib/locales"
 
@@ -65,7 +65,7 @@ export const ReportingGuide = () => {
             />
 
             {program === URBANISM ? (
-                <CleanCityCourse />
+                <CleanCityDocs />
             ) : (
                 <LocalizedMarkdown id={locales.text} />
             )}

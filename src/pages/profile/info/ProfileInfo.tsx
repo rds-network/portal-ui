@@ -445,7 +445,16 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         >
                             <FormattedMessage id="pages.mup.open" />
                         </Button>
-                        <MupLetterModal opened={mupOpened} close={closeMup} username={userInfo.username} />
+                        <MupLetterModal
+                            opened={mupOpened}
+                            close={closeMup}
+                            username={userInfo.username}
+                            fullName={userInfo.fullName || ""}
+                            birthDate={userInfo.birthDate ? dayjs(userInfo.birthDate).format("DD.MM.YYYY") : ""}
+                            address={getFullAddress(userInfo.postalCode, userInfo.city, userInfo.address)}
+                            phone={userInfo.phone || ""}
+                            email={userInfo.email || ""}
+                        />
                     </>
                 )}
             <Drawer opened={opened} onClose={close} title={<FormattedMessage id="pages.profile.documentTitle" />}>

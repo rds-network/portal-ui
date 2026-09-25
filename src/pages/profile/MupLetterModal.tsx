@@ -2,22 +2,43 @@ import { Button, Flex, Modal, Text, TextInput, Textarea } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { MupLetterApiService } from "src/shared/api/MupLetterApiService"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
+import { MUP_TO, buildMupLetter } from "./mupLetter"
 
 type Props = {
     opened: boolean
     close: () => void
     username: string
+    fullName?: string
+    passport?: string
+    birthDate?: string
+    address?: string
+    phone?: string
+    email?: string
 }
 
-export const MupLetterModal: React.FC<Props> = ({ opened, close, username }) => {
+export const MupLetterModal: React.FC<Props> = ({
+    opened,
+    close,
+    username,
+    fullName = "",
+    passport = "",
+    birthDate = "",
+    address = "",
+    phone = "",
+    email = "",
+}) => {
     const queryClient = useQueryClient()
-    const [to, setTo] = useState("upravazastrance@mup.gov.rs")
-    const [subject, setSubject] = useState("")
-    const [body, setBody] = useState("")
+    const fallback = useMemo(
+        () => buildMupLetter({ fullName, passport, birthDate, address, phone, email }),
+        [fullName, passport, birthDate, address, phone, email]
+    )
+    const [to, setTo] = useState(fallback.to)
+    const [subject, setSubject] = useState(fallback.subject)
+    const [body, setBody] = useState(fallback.body)
 
     const { data: draft } = useQuery({
         queryKey: ["mup-draft", username],
@@ -32,8 +53,14 @@ export const MupLetterModal: React.FC<Props> = ({ opened, close, username }) => 
     })
 
     useEffect(() => {
-        if (!draft) return
-        setTo(draft.to)
+        setTo(fallback.to)
+        setSubject(fallback.subject)
+        setBody(fallback.body)
+    }, [fallback, opened])
+
+    useEffect(() => {
+        if (!draft?.subject || !draft.body) return
+        setTo(draft.to || MUP_TO)
         setSubject(draft.subject)
         setBody(draft.body)
     }, [draft])

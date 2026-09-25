@@ -1,0 +1,57 @@
+.docs {
+    width: 100%;
+}
+
+.hero {
+    padding: 28px 24px 20px;
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 55%, #34d399 100%);
+
+    :global(.mantine-Title-root) {
+        color: #fff;
+    }
+}
+
+.lead {
+    margin: 16px 0 8px;
+    color: var(--mantine-color-dimmed);
+}
+
+.step {
+    overflow: hidden;
+}
+
+.num {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: #0f766e;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.stepBody {
+    flex: 1;
+    min-width: 0;
+}
+
+.prose {
+    p {
+        margin: 8px 0 0;
+        line-height: 1.7;
+    }
+}
+
+.shot {
+    display: block;
+    width: 100%;
+    max-width: 920px;
+    margin-top: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
