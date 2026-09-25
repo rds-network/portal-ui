@@ -228,12 +228,20 @@ export const OverdueReportsPage: React.FC = () => {
                                             )}
                                         </Text>
                                     </div>
-                                    <Flex gap={6} wrap="wrap">
-                                        <Badge color={(item.hoursShort ?? 0) >= 20 ? "red" : "gray"}>
+                                    <Flex gap={6} wrap="wrap" align="center">
+                                        <Badge color={(item.hoursShort ?? 0) > 0 ? "red" : "gray"}>
                                             {item.hoursRequired
                                                 ? `${item.hoursWorked ?? 0}/${item.hoursRequired}`
                                                 : item.hoursShort ?? 0}
                                         </Badge>
+                                        {(item.hoursShort ?? 0) > 0 && (
+                                            <Text size="xs" c="red">
+                                                <FormattedMessage
+                                                    id="pages.heat-map.status-text-missed-weeks"
+                                                    values={{ count: item.hoursShort }}
+                                                />
+                                            </Text>
+                                        )}
                                         <Badge
                                             color={
                                                 item.weeksMissed >= 3
