@@ -112,6 +112,11 @@ export const ReportPage = () => {
         })
     }
 
+    const isCustomer = (report.tasks ?? []).some((task) => task.customer === currentUser?.username)
+    const canAcceptReport =
+        hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
+        isCustomer
+
     return (
         <Flex className={classes.root}>
             <Flex columnGap="sm" align="center" wrap="wrap">
@@ -243,7 +248,7 @@ export const ReportPage = () => {
                         <TaskCard task={task} users={users} key={task.id} />
                     ))}
             </Flex>
-            {report.status == ReportStatus.CREATED && hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && (
+            {report.status == ReportStatus.CREATED && canAcceptReport && (
                 <Flex direction="column" rowGap="sm">
                     <Textarea
                         className={classes.comment}

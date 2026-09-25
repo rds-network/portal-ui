@@ -264,8 +264,10 @@
             "samples": "Sample letters",
             "notifyConfirm": "Send to {count}",
             "openHeatmap": "Heat map",
-            "skip": "Skip",
-            "skipHint": "Tick people to keep out of this mailing.",
+            "skip": "In this send",
+            "skipHint": "Everyone is selected. Untick people you do not want to notify.",
+            "warnings": "Warnings: {count} of 3",
+            "warningsHint": "At 3 notices, a termination letter is sent to MUP automatically.",
             "excluded": "Excluded from mailing: {count}"
         },
         "activity": {
@@ -314,6 +316,8 @@
         "profile": {
             "documentTitle": "Profile",
             "deactivated": "Deactivated",
+            "warnings": "Missing-report warnings: {count} of 3",
+            "warningsHint": "At 3 notices, a termination letter is sent to MUP automatically.",
             "props": {
                 "city": "City",
                 "postalCode": "Postal code",
@@ -462,7 +466,8 @@
             "task-date": "Date",
             "task-date-description": "When the task was completed",
             "task-customer": "Customer",
-            "task-customer-description": "Who initiated the task?",
+            "task-customer-description": "The project curator (team lead) or the organizer. Required — they accept the report.",
+            "customer-required": "Specify the task customer",
             "required": "Required",
             "min-letters": "Minimum {count} letters",
             "invalid-url": "Invalid URL format",
@@ -545,6 +550,7 @@
             "reset": "Reset",
             "title": "Activity Heatmap",
             "contract-until": "contract until {date}",
+            "warnings": "warnings {count}/3",
             "reports-stats": "Reports Statistics",
             "last-report": "Last Report",
             "status": "Status",

@@ -264,8 +264,10 @@
             "samples": "Primeri pisama",
             "notifyConfirm": "Pošalji {count}",
             "openHeatmap": "Toplotna karta",
-            "skip": "Ne slati",
-            "skipHint": "Označite one koje treba izostaviti iz ove pošiljke.",
+            "skip": "U slanju",
+            "skipHint": "Svi su označeni. Skinite kvačicu onima koj ne treba slati.",
+            "warnings": "Upozorenja: {count} od 3",
+            "warningsHint": "Na 3 obaveštenja pismo o raskidu automatski ide u MUP.",
             "excluded": "Izostavljeno iz slanja: {count}"
         },
         "activity": {
@@ -314,6 +316,8 @@
         "profile": {
             "documentTitle": "Profil",
             "deactivated": "Deaktiviran",
+            "warnings": "Upozorenja o izveštajima: {count} od 3",
+            "warningsHint": "Na 3 obaveštenja pismo o raskidu automatski ide u MUP.",
             "props": {
                 "city": "Grad",
                 "postalCode": "Poštanski broj",
@@ -462,7 +466,8 @@
             "task-date": "Datum",
             "task-date-description": "Kada je zadatak završen",
             "task-customer": "Kupac",
-            "task-customer-description": "Ko je bio inicijator zadatka",
+            "task-customer-description": "Kurator projekta (timlid) ili organizator. Obavezno — on prima izveštaj.",
+            "customer-required": "Navedite naručioca zadatka",
             "required": "Obavezno",
             "min-letters": "Najmanje {count} znakova",
             "invalid-url": "Nevalidni format URL",
@@ -545,6 +550,7 @@
             "reset": "Resetuj",
             "title": "Toplinska mapa aktivnosti",
             "contract-until": "ugovor do {date}",
+            "warnings": "upozorenja {count}/3",
             "last-report": "Poslednji izveštaj",
             "status": "Status",
             "view-profile": "Pogledaj profil",

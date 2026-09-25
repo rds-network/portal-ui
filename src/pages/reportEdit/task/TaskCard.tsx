@@ -66,7 +66,7 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
             .or(z.literal("")),
         timeSpent: z.number(requiredMessage).min(1),
         date: z.date(requiredMessage),
-        customer: z.string().optional(),
+        customer: z.string(requiredMessage).min(1, requiredMessage),
     })
 
     const fileUploaderRef = createRef<FileUploaderInterface>()

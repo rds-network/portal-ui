@@ -46,6 +46,7 @@ export type ReportOverdueDto = {
     recentWeeks?: OverdueWeekDto[]
     level: string
     lastReportWeek?: string | null
+    warningCount?: number
     subject?: string | null
     body?: string | null
 }
@@ -102,6 +103,25 @@ export const InboxApiService = {
     async createPersonalAnnouncement(payload: { title: string; body: string; username: string }) {
         const response = await RequestHttp.post("/announcements/personal", payload)
         return response.data
+    },
+
+    async overdueWarnings(username: string): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>(
+            `/report-overdue/warnings/${encodeURIComponent(username)}`,
+            { validateStatus: alive }
+        )
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
+    },
+
+    async overdueCounts(usernames: string[] = []): Promise<Record<string, number>> {
+        const params = usernames.length ? { usernames } : undefined
+        const response = await RequestHttp.get<Record<string, number>>("/report-overdue/counts", {
+            params,
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return {}
+        return response.data ?? {}
     },
 
     async notifyOverdue(exclude: string[] = []): Promise<number> {

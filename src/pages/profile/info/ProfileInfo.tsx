@@ -26,6 +26,7 @@ import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
 import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
+import { InboxApiService } from "src/shared/api/InboxApiService"
 import { CitiesApiService } from "src/shared/api/CitiesApiService"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 import { Locale } from "src/shared/constants/Locales"
@@ -58,6 +59,12 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const { data: cities = [] } = useQuery({
         queryKey: ["cities"],
         queryFn: () => CitiesApiService.getCities().then((response) => response.data),
+    })
+
+    const { data: warningCount = 0 } = useQuery({
+        queryKey: ["overdue-warnings", userInfo?.username],
+        queryFn: () => InboxApiService.overdueWarnings(userInfo!.username),
+        enabled: !!userInfo?.username && !!showSensitiveData,
     })
 
     const validationSchema = z.object({
@@ -354,6 +361,13 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         <Badge color="red" radius="md" variant="light">
                             <FormattedMessage id="pages.profile.deactivated" />
                         </Badge>
+                    )}
+                    {warningCount > 0 && (
+                        <Tooltip label={<FormattedMessage id="pages.profile.warningsHint" />}>
+                            <Badge color={warningCount >= 3 ? "red" : "orange"} radius="md" variant="light">
+                                <FormattedMessage id="pages.profile.warnings" values={{ count: warningCount }} />
+                            </Badge>
+                        </Tooltip>
                     )}
 
                     {showSensitiveData && userInfo?.id !== currentUser?.id && (

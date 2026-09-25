@@ -50,7 +50,8 @@ export const OverdueReportsPage: React.FC = () => {
     }, [items])
 
     const sendCount = items.length - excluded.size
-    const allExcluded = items.length > 0 && excluded.size === items.length
+    const allIncluded = items.length > 0 && excluded.size === 0
+    const someExcluded = excluded.size > 0 && excluded.size < items.length
 
     const { data: preview } = useQuery({
         queryKey: ["report-overdue-preview"],
@@ -90,11 +91,11 @@ export const OverdueReportsPage: React.FC = () => {
     }
 
     const toggleAll = () => {
-        if (allExcluded) {
-            setExcluded(new Set())
+        if (allIncluded) {
+            setExcluded(new Set(items.map((item) => item.username)))
             return
         }
-        setExcluded(new Set(items.map((item) => item.username)))
+        setExcluded(new Set())
     }
 
     const samples = useMemo(
@@ -110,6 +111,9 @@ export const OverdueReportsPage: React.FC = () => {
                 </Title>
                 <Text c="dimmed" mt={6}>
                     <FormattedMessage id="pages.overdue.description" />
+                </Text>
+                <Text size="sm" c="orange" mt={4}>
+                    <FormattedMessage id="pages.overdue.warningsHint" />
                 </Text>
             </div>
             <Card withBorder p="lg" radius="lg">
@@ -150,8 +154,8 @@ export const OverdueReportsPage: React.FC = () => {
                             <Table.Tr>
                                 <Table.Th w={70}>
                                     <Checkbox
-                                        checked={allExcluded}
-                                        indeterminate={excluded.size > 0 && !allExcluded}
+                                        checked={allIncluded}
+                                        indeterminate={someExcluded}
                                         onChange={toggleAll}
                                         label={<FormattedMessage id="pages.overdue.skip" />}
                                         styles={{ label: { fontSize: 12 } }}
@@ -193,13 +197,21 @@ export const OverdueReportsPage: React.FC = () => {
                                         }}
                                     >
                                         <Checkbox
-                                            checked={excluded.has(item.username)}
+                                            checked={!excluded.has(item.username)}
                                             onChange={() => toggleExclude(item.username)}
                                             aria-label={item.fullName}
                                         />
                                     </Table.Td>
                                     <Table.Td>
                                         <Text fw={600}>{item.fullName}</Text>
+                                        {(item.warningCount ?? 0) > 0 && (
+                                            <Text size="xs" c={(item.warningCount ?? 0) >= 3 ? "red" : "orange"}>
+                                                <FormattedMessage
+                                                    id="pages.overdue.warnings"
+                                                    values={{ count: item.warningCount }}
+                                                />
+                                            </Text>
+                                        )}
                                         <Text size="xs" c="dimmed">
                                             {item.username}
                                             {formatContractEnd(item.contractEnd) && (

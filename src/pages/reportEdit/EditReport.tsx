@@ -175,6 +175,16 @@ export const EditReport = () => {
                 }
             }
         }
+        if (tasks.some((task) => !task.customer)) {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id={locales.customerRequired} />
+                    </Text>
+                )
+            )
+            return
+        }
         if (!allTasksInOneWeek(tasks)) {
             notifications.show(
                 ErrorNotification(

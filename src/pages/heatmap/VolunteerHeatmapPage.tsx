@@ -6,6 +6,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from "re
 import { FormattedMessage } from "react-intl"
 import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
+import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ReportHeatMapApiService } from "src/shared/api/ReportHeatMapApiService"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
 import { heatmapTemplates } from "src/shared/email/templates"
@@ -194,6 +195,13 @@ export const VolunteerHeatmapPage: React.FC = () => {
         refetchOnMount: false,
     })
 
+    const heatmapUsernames = (volunteerData?.content ?? []).map((item) => item.volunteerInfo.username)
+    const { data: warningCounts = {} } = useQuery({
+        queryKey: ["overdue-counts", heatmapUsernames.join(",")],
+        queryFn: () => InboxApiService.overdueCounts(heatmapUsernames),
+        enabled: heatmapUsernames.length > 0,
+    })
+
     // --- обработчики, мемоизированные чтобы не триггерить лишние рендеры ---
 
     const handleVolunteerSelect = useCallback((volunteerId: number) => {
@@ -289,6 +297,7 @@ export const VolunteerHeatmapPage: React.FC = () => {
                         selectedVolunteers={selectedVolunteers}
                         totalVolunteers={totalVolunteers}
                         onNotifyVolunteer={(username, name) => openNotify([{ username, name }])}
+                        warningCounts={warningCounts}
                     />
 
                     <Flex justify="space-between" align="center" mt="md" gap="md" wrap="wrap">

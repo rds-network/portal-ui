@@ -16,6 +16,7 @@ interface Props {
     selectedVolunteers: Set<number>
     totalVolunteers: number
     onNotifyVolunteer?: (username: string, name: string) => void
+    warningCounts?: Record<string, number>
 }
 
 export const VolunteerReportHeatmap: React.FC<Props> = ({
@@ -25,6 +26,7 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
     selectedVolunteers,
     totalVolunteers,
     onNotifyVolunteer,
+    warningCounts = {},
 }) => {
     const navigate = useNavigate()
     const startDate = dayjs(new Date(year, 1, 1))
@@ -107,6 +109,7 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                             onVolunteerSelect={onVolunteerSelect}
                             onNotifyVolunteer={onNotifyVolunteer}
                             startDate={startDate}
+                            warningCount={warningCounts[v.volunteerInfo.username] ?? 0}
                         />
                     ))}
                 </div>

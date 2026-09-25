@@ -9,4 +9,5 @@ export const locales = {
     confirmTitle: "pages.edit-report.confirm-title",
     confirmDescription: "pages.edit-report.confirm-description",
     differentWeeks: "pages.edit-report.different-weeks-alert",
+    customerRequired: "pages.edit-report.customer-required",
 }

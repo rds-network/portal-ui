@@ -27,6 +27,7 @@ interface VolunteerRowProps {
     onVolunteerSelect: (volunteerId: number) => void
     onNotifyVolunteer?: (username: string, name: string) => void
     startDate: Dayjs
+    warningCount?: number
 }
 
 const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
@@ -37,6 +38,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
     onVolunteerSelect,
     onNotifyVolunteer,
     startDate,
+    warningCount = 0,
 }) => {
     const intl = useIntl()
     const navigate = useNavigate()
@@ -200,6 +202,11 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                         >
                                             {volunteer.volunteerInfo.fullName}
                                         </Text>
+                                        {warningCount > 0 && (
+                                            <Text size="xs" c={warningCount >= 3 ? "red" : "orange"}>
+                                                <FormattedMessage id={locales.warnings} values={{ count: warningCount }} />
+                                            </Text>
+                                        )}
                                         <Text size="xs" c="dimmed">
                                             {programDescription}
                                             {contractUntil && (
