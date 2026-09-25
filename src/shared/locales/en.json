@@ -277,12 +277,13 @@
         "mup": {
             "title": "Letter to Serbian MUP",
             "open": "Notify MUP",
-            "hint": "A filled Serbian template with this volunteer’s data. You can edit it before sending. It goes to upravazastrance@mup.gov.rs and is saved with other portal mailings.",
+            "hint": "A filled Serbian template with this volunteer’s data. After sending, the profile is deactivated: portal login is closed and current sessions are dropped.",
             "to": "To",
             "subject": "Subject",
             "body": "Text",
-            "send": "Prepare and send",
-            "sent": "MUP letter sent and saved",
+            "send": "Send and close access",
+            "sent": "MUP letter sent; portal access is closed",
+            "sentKeepAccess": "Letter sent, but access could not be closed — deactivate the profile by hand",
             "history": "Saved mailings"
         },
         "welcome": {

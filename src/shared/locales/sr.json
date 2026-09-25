@@ -277,12 +277,13 @@
         "mup": {
             "title": "Pismo MUP-u Srbije",
             "open": "Obaveštenje MUP-u",
-            "hint": "Tipsko pismo sa podacima volontera. Možete ga izmeniti pre slanja. Ide na upravazastrance@mup.gov.rs i čuva se u slanjima portala.",
+            "hint": "Tipsko pismo sa podacima volontera. Posle slanja nalog se deaktivira: prijava na portal se zatvara, trenutne sesije se prekidaju.",
             "to": "Kome",
             "subject": "Predmet",
             "body": "Tekst",
-            "send": "Sačini i pošalji",
-            "sent": "Pismo MUP-u je poslato i sačuvano",
+            "send": "Pošalji i zatvori pristup",
+            "sent": "Pismo MUP-u je poslato, pristup portalu je zatvoren",
+            "sentKeepAccess": "Pismo je poslato, ali pristup nije zatvoren — deaktivirajte nalog ručno",
             "history": "Sačuvane pošiljke"
         },
         "welcome": {

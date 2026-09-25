@@ -20,6 +20,7 @@ export type MupLetterDto = {
     to: string[]
     subject: string
     body: string
+    deactivated?: boolean
 }
 
 const alive = (status: number) => status === 200 || status === 404 || status >= 500

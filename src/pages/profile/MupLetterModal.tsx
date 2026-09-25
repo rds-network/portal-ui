@@ -79,16 +79,20 @@ export const MupLetterModal: React.FC<Props> = ({
                 subject: subject.trim(),
                 body: body.trim(),
             }),
-        onSuccess: () => {
+        onSuccess: (result) => {
             notifications.show(
                 SuccessNotification(
                     <Text size="sm">
-                        <FormattedMessage id="pages.mup.sent" />
+                        <FormattedMessage
+                            id={result.deactivated ? "pages.mup.sent" : "pages.mup.sentKeepAccess"}
+                        />
                     </Text>,
                     null
                 )
             )
             queryClient.invalidateQueries({ queryKey: ["mup-letters"] })
+            queryClient.invalidateQueries({ queryKey: ["getInfo"] })
+            close()
         },
     })
 
