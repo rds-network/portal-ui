@@ -26,7 +26,7 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, ro
         enabled: !!showUnread,
         refetchInterval: 60_000,
     })
-    const needsCuratorInbox = (hasChildren ? items : [])?.some((item) => item.curatorInbox)
+    const needsCuratorInbox = (hasChildren ? items : [])?.some((item) => item.curatorInbox || item.showIfCurator)
     const { data: curatorMe } = useQuery({
         queryKey: ["program-curators", "me"],
         queryFn: () => ProgramCuratorApiService.me(),
@@ -42,7 +42,10 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, ro
         !!curatorMe?.curator || hasPermission(user, ["ADMIN", "ADMIN_VOLUNTEER", "MAIN_VOLUNTEER"])
 
     const children = (hasChildren ? items : [])
-        ?.filter((item) => hasPermission(user, item.roles, item.hideFrom))
+        ?.filter(
+            (item) =>
+                hasPermission(user, item.roles, item.hideFrom) || (item.showIfCurator && curatorMe?.curator)
+        )
         .filter((item) => !item.curatorInbox || canSeeCuratorInbox)
         .map((item) => {
             const isExternal = item.link?.startsWith("http://") || item.link?.startsWith("https://")

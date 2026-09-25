@@ -20,6 +20,7 @@ export interface ItemProps {
     roles?: string[]
     hideFrom?: string[]
     curatorInbox?: boolean
+    showIfCurator?: boolean
 }
 
 export interface ItemGroupProps {

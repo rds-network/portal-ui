@@ -4,3 +4,34 @@ import { RequestHttp } from "src/shared/http/RequestHttp"
 export const AnnouncementApiService = new AnnouncementsApi(undefined, undefined, RequestHttp)
 
 export type { AnnouncementAudience, AnnouncementCreateRequest, AnnouncementDto } from "@rds-network/portal-api-axios"
+
+export type PortalBannerDto = {
+    id: string
+    title: string
+    body: string
+    createdBy?: string | null
+    createTime: string
+}
+
+export type AnnouncementPublishRequest = {
+    title: string
+    body: string
+    audience: string
+    programCode?: string | null
+    username?: string | null
+    banner?: boolean
+}
+
+const alive = (status: number) => status === 200 || status === 204
+
+export const AnnouncementExtraApi = {
+    async getBanner(): Promise<PortalBannerDto | null> {
+        const response = await RequestHttp.get<PortalBannerDto>("/announcements/banner", { validateStatus: alive })
+        if (response.status === 204 || !response.data?.id) return null
+        return response.data
+    },
+    async publish(payload: AnnouncementPublishRequest) {
+        const response = await RequestHttp.post("/announcements/publish", payload)
+        return response.data
+    },
+}

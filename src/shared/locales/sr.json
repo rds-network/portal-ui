@@ -117,7 +117,8 @@
             "title": "Obaveštenja",
             "loading": "Učitavanje…",
             "empty": "Nema obaveštenja",
-            "new": "Novo"
+            "new": "Novo",
+            "dismiss": "Zatvori"
         },
         "ticket-modal": {
             "modalTitle": "Kreirati tiket",
@@ -176,11 +177,12 @@
         "announcements": {
             "admin": {
                 "title": "Slanje obaveštenja",
-                "description": "Poruka će se pojaviti u zvoncu volonterima unutar portala (bez email-a).",
+                "description": "U vaše ime. Zvonce — obaveštenja na portalu. Traka — žuta traka na vrhu. Bez email-a.",
                 "fields": {
                     "title": "Naslov",
                     "body": "Tekst",
                     "bodyHint": "Podržan je jednostavan HTML: <p>, <b>, <a href=\"...\">",
+                    "placement": "Gde prikazati",
                     "audience": "Publika",
                     "program": "Program",
                     "programPlaceholder": "Izaberite program",
@@ -191,6 +193,11 @@
                     "program": "Samo program",
                     "person": "Konkretna osoba"
                 },
+                "placement": {
+                    "bell": "U zvonce",
+                    "banner": "Žuta traka na vrhu"
+                },
+                "bannerNoPerson": "Gornja traka ne može da se pošalje jednoj osobi",
                 "publish": "Objavi",
                 "success": "Obaveštenje je objavljeno",
                 "required": "Obavezno polje",

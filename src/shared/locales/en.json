@@ -117,7 +117,8 @@
             "title": "Notifications",
             "loading": "Loading…",
             "empty": "No notifications",
-            "new": "New"
+            "new": "New",
+            "dismiss": "Dismiss"
         },
         "ticket-modal": {
             "modalTitle": "Create Ticket",
@@ -176,11 +177,12 @@
         "announcements": {
             "admin": {
                 "title": "Broadcast notifications",
-                "description": "The message will appear in the bell icon for volunteers inside the portal (no email).",
+                "description": "Sent in your name. Bell — in-portal notifications. Banner — a yellow bar at the top. No email.",
                 "fields": {
                     "title": "Title",
                     "body": "Message",
                     "bodyHint": "Simple HTML is supported: <p>, <b>, <a href=\"...\">",
+                    "placement": "Where to show",
                     "audience": "Audience",
                     "program": "Program",
                     "programPlaceholder": "Select a program",
@@ -191,6 +193,11 @@
                     "program": "Program only",
                     "person": "Specific person"
                 },
+                "placement": {
+                    "bell": "In the bell",
+                    "banner": "Yellow banner at the top"
+                },
+                "bannerNoPerson": "The top banner cannot be sent to one person",
                 "publish": "Publish",
                 "success": "Notification published",
                 "required": "Required field",

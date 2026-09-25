@@ -21,10 +21,12 @@ export const ProgramCuratorApiService = {
         const response = await RequestHttp.get<ProgramCuratorDto[]>("/program-curators", { validateStatus: alive })
         return response.data ?? []
     },
-    async me(): Promise<{ curator: boolean }> {
-        const response = await RequestHttp.get<{ curator: boolean }>("/program-curators/me", { validateStatus: alive })
-        if (response.status !== 200) return { curator: false }
-        return { curator: !!response.data?.curator }
+    async me(): Promise<{ curator: boolean; programs: string[] }> {
+        const response = await RequestHttp.get<{ curator: boolean; programs?: string[] }>("/program-curators/me", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return { curator: false, programs: [] }
+        return { curator: !!response.data?.curator, programs: response.data?.programs || [] }
     },
     async assign(payload: ProgramCuratorWriteRequest): Promise<ProgramCuratorDto> {
         const response = await RequestHttp.post<ProgramCuratorDto>("/program-curators", payload)

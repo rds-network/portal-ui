@@ -3,7 +3,7 @@
     --portal-shell-inset: 20px;
     display: flex;
     position: fixed;
-    inset: 80px 0 34px;
+    inset: calc(80px + var(--portal-banner-height, 0px)) 0 34px;
     padding: 0 var(--portal-shell-inset);
     gap: 8px;
 }
@@ -25,7 +25,7 @@
 }
 @media (max-width: 64em) {
     .appShell {
-        inset: 72px 0 34px;
+        inset: calc(72px + var(--portal-banner-height, 0px)) 0 34px;
         padding: 0;
     }
 }

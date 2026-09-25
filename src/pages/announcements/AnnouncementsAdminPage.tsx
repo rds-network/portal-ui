@@ -2,7 +2,7 @@ import { Button, Card, Flex, Select, Text, TextInput, Title } from "@mantine/cor
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
-import { AnnouncementAudience, AnnouncementCreateRequest } from "@rds-network/portal-api-axios"
+import { AnnouncementAudience } from "@rds-network/portal-api-axios"
 import { IconSend } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import Highlight from "@tiptap/extension-highlight"
@@ -16,8 +16,8 @@ import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { AnnouncementApiService } from "src/shared/api/AnnouncementApiService"
-import { InboxApiService } from "src/shared/api/InboxApiService"
+import { AnnouncementExtraApi } from "src/shared/api/AnnouncementApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -27,7 +27,7 @@ import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
 import classes from "./AnnouncementsAdminPage.module.scss"
 
-const ADMIN_ROLES = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"]
+const ADMIN_ROLES = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"]
 
 type AudienceChoice = AnnouncementAudience | "USER"
 
@@ -37,6 +37,7 @@ type AnnouncementFormValues = {
     audience: AudienceChoice
     programCode: string | null
     username: string | null
+    placement: "bell" | "banner"
 }
 
 export const AnnouncementsAdminPage: React.FC = () => {
@@ -46,12 +47,6 @@ export const AnnouncementsAdminPage: React.FC = () => {
     const queryClient = useQueryClient()
 
     setDocumentTitleByLocale("pages.announcements.admin.title")
-
-    useEffect(() => {
-        if (!hasPermission(user, ADMIN_ROLES)) {
-            navigate("/unauthorized", { replace: true })
-        }
-    }, [user, navigate])
 
     const requiredMessage = { message: intl.formatMessage({ id: "pages.announcements.admin.required" }) }
     const minMessage = (count: number) => intl.formatMessage({ id: "pages.user-list.min-letters" }, { count })
@@ -69,8 +64,16 @@ export const AnnouncementsAdminPage: React.FC = () => {
                     ),
                     programCode: z.string().nullable(),
                     username: z.string().nullable(),
+                    placement: z.enum(["bell", "banner"]),
                 })
                 .superRefine((values, ctx) => {
+                    if (values.placement === "banner" && values.audience === "USER") {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            path: ["audience"],
+                            message: intl.formatMessage({ id: "pages.announcements.admin.bannerNoPerson" }),
+                        })
+                    }
                     if (values.audience === AnnouncementAudience.Program && !values.programCode) {
                         ctx.addIssue({
                             code: z.ZodIssueCode.custom,
@@ -96,9 +99,34 @@ export const AnnouncementsAdminPage: React.FC = () => {
             audience: AnnouncementAudience.All,
             programCode: null,
             username: null,
+            placement: "bell",
         },
         validate: zodResolver(validationSchema),
     })
+
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
+    const isManager = hasPermission(user, ADMIN_ROLES)
+    const curatorPrograms = curatorMe?.programs || []
+    const isCuratorOnly = !isManager && !!curatorMe?.curator
+
+    useEffect(() => {
+        if (!user || curatorMe === undefined) return
+        if (!isManager && !curatorMe.curator) {
+            navigate("/unauthorized", { replace: true })
+        }
+    }, [user, isManager, curatorMe, navigate])
+
+    useEffect(() => {
+        if (!isCuratorOnly) return
+        form.setFieldValue("audience", AnnouncementAudience.Program)
+        if (curatorPrograms.length === 1) {
+            form.setFieldValue("programCode", curatorPrograms[0])
+        }
+    }, [isCuratorOnly, curatorPrograms.join(",")])
 
     const { data: programs = [] } = useQuery({
         queryKey: ["programs"],
@@ -107,31 +135,27 @@ export const AnnouncementsAdminPage: React.FC = () => {
 
     const programOptions = useMemo(
         () =>
-            programs.map((program) => ({
-                value: program.code,
-                label: getLocalizedName(program, intl.locale) || program.code,
-            })),
-        [programs, intl.locale]
+            programs
+                .filter((program) => !isCuratorOnly || curatorPrograms.includes(program.code))
+                .map((program) => ({
+                    value: program.code,
+                    label: getLocalizedName(program, intl.locale) || program.code,
+                })),
+        [programs, intl.locale, isCuratorOnly, curatorPrograms]
     )
 
     const [person, setPerson] = useState<string | null>(null)
 
     const { mutate: publish, isPending } = useMutation({
         mutationFn: async (values: AnnouncementFormValues) => {
-            if (values.audience === "USER") {
-                return InboxApiService.createPersonalAnnouncement({
-                    title: values.title.trim(),
-                    body: values.body.trim(),
-                    username: values.username!,
-                })
-            }
-            const payload: AnnouncementCreateRequest = {
+            return AnnouncementExtraApi.publish({
                 title: values.title.trim(),
                 body: values.body.trim(),
                 audience: values.audience,
                 programCode: values.audience === AnnouncementAudience.Program ? values.programCode : null,
-            }
-            return AnnouncementApiService.createAnnouncement(payload).then((r) => r.data)
+                username: values.audience === "USER" ? values.username : null,
+                banner: values.placement === "banner",
+            })
         },
     })
 
@@ -249,20 +273,54 @@ export const AnnouncementsAdminPage: React.FC = () => {
                         </Flex>
 
                         <Select
-                            label={<FormattedMessage id="pages.announcements.admin.fields.audience" />}
+                            label={<FormattedMessage id="pages.announcements.admin.fields.placement" />}
                             data={[
                                 {
-                                    value: AnnouncementAudience.All,
-                                    label: intl.formatMessage({ id: "pages.announcements.admin.audience.all" }),
+                                    value: "bell",
+                                    label: intl.formatMessage({ id: "pages.announcements.admin.placement.bell" }),
                                 },
+                                {
+                                    value: "banner",
+                                    label: intl.formatMessage({ id: "pages.announcements.admin.placement.banner" }),
+                                },
+                            ]}
+                            {...form.getInputProps("placement")}
+                            onChange={(value) => {
+                                form.setFieldValue("placement", value === "banner" ? "banner" : "bell")
+                                if (value === "banner" && form.values.audience === "USER") {
+                                    form.setFieldValue("audience", AnnouncementAudience.All)
+                                    form.setFieldValue("username", null)
+                                    setPerson(null)
+                                }
+                            }}
+                        />
+                        <Select
+                            label={<FormattedMessage id="pages.announcements.admin.fields.audience" />}
+                            data={[
+                                ...(!isCuratorOnly
+                                    ? [
+                                          {
+                                              value: AnnouncementAudience.All,
+                                              label: intl.formatMessage({
+                                                  id: "pages.announcements.admin.audience.all",
+                                              }),
+                                          },
+                                      ]
+                                    : []),
                                 {
                                     value: AnnouncementAudience.Program,
                                     label: intl.formatMessage({ id: "pages.announcements.admin.audience.program" }),
                                 },
-                                {
-                                    value: "USER",
-                                    label: intl.formatMessage({ id: "pages.announcements.admin.audience.person" }),
-                                },
+                                ...(!isCuratorOnly && form.values.placement !== "banner"
+                                    ? [
+                                          {
+                                              value: "USER",
+                                              label: intl.formatMessage({
+                                                  id: "pages.announcements.admin.audience.person",
+                                              }),
+                                          },
+                                      ]
+                                    : []),
                             ]}
                             {...form.getInputProps("audience")}
                             onChange={(value) => {

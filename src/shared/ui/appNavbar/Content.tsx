@@ -86,7 +86,8 @@ export const Content: ItemGroupProps[] = [
             {
                 label: "navbar.reports.announcements",
                 link: "/announcements/admin",
-                roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"],
+                roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
+                showIfCurator: true,
             },
         ],
         roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO", "INTERVIEWER", "ADMIN", "MAIN_VOLUNTEER"],
