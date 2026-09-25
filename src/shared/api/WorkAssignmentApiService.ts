@@ -30,14 +30,14 @@ export type WorkAssignmentPatchRequest = {
     dueDate?: string | null
 }
 
-const okOrMissing = (status: number) => status === 200 || status === 404
+const alive = (status: number) => status === 200 || status === 201 || status === 404 || status >= 500
 
 export const WorkAssignmentApiService = {
     async list(): Promise<WorkAssignmentDto[]> {
         const response = await RequestHttp.get<WorkAssignmentDto[]>("/work-assignments", {
-            validateStatus: okOrMissing,
+            validateStatus: alive,
         })
-        if (response.status === 404) return []
+        if (response.status !== 200) return []
         return response.data ?? []
     },
 
