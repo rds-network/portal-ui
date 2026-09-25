@@ -27,6 +27,24 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
     onNotifyVolunteer,
 }) => {
     const navigate = useNavigate()
+    const startDate = dayjs(new Date(year, 1, 1))
+    const endDate = dayjs().year() == year ? dayjs() : dayjs(new Date(year, 12, 31))
+    const totalWeeks = volunteers[0]?.weeks.length ?? 0
+
+    const weeks: WeekInfo[] = useMemo(() => {
+        const arr: WeekInfo[] = []
+        let d = startDate.clone()
+
+        for (let i = 0; i < totalWeeks; i++) {
+            arr.push({
+                date: d.clone(),
+                weekNumber: i + 1,
+            })
+            d = d.add(1, "week").startOf("week")
+        }
+
+        return arr
+    }, [startDate.valueOf(), totalWeeks])
 
     const openWeekForAll = (weekNumber: number, weekDate: dayjs.Dayjs) => {
         const meta = volunteers[0]?.weeks.find((item) => item.week === weekNumber)
@@ -49,25 +67,6 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
             </Box>
         )
     }
-
-    const startDate = dayjs(new Date(year, 1, 1))
-    const endDate = dayjs().year() == year ? dayjs() : dayjs(new Date(year, 12, 31))
-    const totalWeeks = volunteers[0].weeks.length
-
-    const weeks: WeekInfo[] = useMemo(() => {
-        const arr: WeekInfo[] = []
-        let d = startDate.clone()
-
-        for (let i = 0; i < totalWeeks; i++) {
-            arr.push({
-                date: d.clone(),
-                weekNumber: i + 1,
-            })
-            d = d.add(1, "week").startOf("week")
-        }
-
-        return arr
-    }, [startDate, totalWeeks])
 
     return (
         <Flex className={classes.heatmapContainer}>
