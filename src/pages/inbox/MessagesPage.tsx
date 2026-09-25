@@ -6,6 +6,7 @@ import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
+import { useScreenSize } from "src/shared/hooks/useDesktop"
 import { UserContext } from "src/app/providers/UserContext"
 import classes from "./MessagesPage.module.scss"
 
@@ -13,8 +14,11 @@ export const MessagesPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
     const queryClient = useQueryClient()
+    const { isMobile } = useScreenSize()
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [reply, setReply] = useState("")
+    const showList = !isMobile || !selectedId
+    const showThread = !isMobile || !!selectedId
 
     setDocumentTitleByLocale("pages.messages.title")
 
@@ -50,7 +54,8 @@ export const MessagesPage: React.FC = () => {
     }
 
     return (
-        <Flex className={classes.root} gap="lg">
+        <Flex className={classes.root} direction={isMobile ? "column" : "row"} gap="lg">
+            {showList && (
             <div className={classes.list}>
                 <Title order={2} mb="md">
                     <FormattedMessage id="pages.messages.title" />
@@ -88,6 +93,8 @@ export const MessagesPage: React.FC = () => {
                     </button>
                 ))}
             </div>
+            )}
+            {showThread && (
             <div className={classes.thread}>
                 {!thread ? (
                     <Text c="dimmed">
@@ -96,7 +103,14 @@ export const MessagesPage: React.FC = () => {
                 ) : (
                     <>
                         <Flex justify="space-between" align="center" gap="sm" wrap="wrap">
-                            <Title order={3}>{thread.subject}</Title>
+                            {isMobile && (
+                                <Button variant="subtle" size="compact-sm" onClick={() => setSelectedId(null)}>
+                                    <FormattedMessage id="pages.messages.back" />
+                                </Button>
+                            )}
+                            <Title order={3} className={classes.threadTitle}>
+                                {thread.subject}
+                            </Title>
                             {heatmapUser(thread) && (
                                 <Button
                                     variant="light"
@@ -146,6 +160,7 @@ export const MessagesPage: React.FC = () => {
                     </>
                 )}
             </div>
+            )}
         </Flex>
     )
 }

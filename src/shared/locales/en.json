@@ -237,6 +237,7 @@
             "pick": "Select a conversation",
             "new": "New",
             "reply": "Reply",
+            "back": "Back to list",
             "send": "Send",
             "sent": "Notification sent",
             "notify": "Send notification",

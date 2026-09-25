@@ -13,6 +13,18 @@
     }
 }
 
+.tabs {
+    width: 100%;
+    max-width: 100%;
+
+    :global(.mantine-SegmentedControl-label) {
+        padding-inline: 8px;
+        white-space: normal;
+        line-height: 1.25;
+        font-size: 13px;
+    }
+}
+
 .lead {
     margin: 16px 0 8px;
     color: var(--mantine-color-dimmed);
@@ -47,11 +59,49 @@
     }
 }
 
-.shot {
+.shotBtn {
     display: block;
     width: 100%;
     max-width: 920px;
     margin-top: 16px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+}
+
+.shot {
+    display: block;
+    width: 100%;
     border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid light-dark(#e2e8f0, var(--mantine-color-dark-4));
+}
+
+.lightboxModal {
+    max-width: min(96vw, 1100px);
+}
+
+.lightboxBody {
+    display: flex;
+    justify-content: center;
+}
+
+.lightbox {
+    display: block;
+    width: 100%;
+    max-height: 86vh;
+    object-fit: contain;
+    cursor: zoom-out;
+    border-radius: 8px;
+}
+
+@media (max-width: 48em) {
+    .hero {
+        padding: 20px 14px 16px;
+    }
+
+    .tabs :global(.mantine-SegmentedControl-label) {
+        padding-inline: 4px;
+        font-size: 12px;
+    }
 }

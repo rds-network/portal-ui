@@ -1,5 +1,6 @@
-import { Anchor, Card, Flex, SegmentedControl, Text, Title } from "@mantine/core"
+import { Anchor, Card, Flex, Modal, SegmentedControl, Text, Title } from "@mantine/core"
 import React, { useState } from "react"
+import { useScreenSize } from "src/shared/hooks/useDesktop"
 import classes from "./CleanCityDocs.module.scss"
 
 const ECO = "https://calm-breeze-c3ec.ta05021997.workers.dev"
@@ -11,20 +12,29 @@ const DOCS = {
 
 type Tab = "volunteer" | "user" | "curator"
 
-const Step: React.FC<{ n: number; title: string; children: React.ReactNode; img?: string; alt?: string }> = ({
-    n,
-    title,
-    children,
-    img,
-    alt,
-}) => (
+const Step: React.FC<{
+    n: number
+    title: string
+    children: React.ReactNode
+    img?: string
+    alt?: string
+    onOpen?: (src: string, alt: string) => void
+}> = ({ n, title, children, img, alt, onOpen }) => (
     <Card withBorder radius="lg" p="lg" className={classes.step}>
         <Flex gap="sm" align="flex-start">
             <span className={classes.num}>{n}</span>
             <div className={classes.stepBody}>
                 <Title order={4}>{title}</Title>
                 <div className={classes.prose}>{children}</div>
-                {img && <img src={img} alt={alt || title} className={classes.shot} />}
+                {img && (
+                    <button
+                        type="button"
+                        className={classes.shotBtn}
+                        onClick={() => onOpen?.(img, alt || title)}
+                    >
+                        <img src={img} alt={alt || title} className={classes.shot} />
+                    </button>
+                )}
             </div>
         </Flex>
     </Card>
@@ -32,6 +42,9 @@ const Step: React.FC<{ n: number; title: string; children: React.ReactNode; img?
 
 export const CleanCityDocs: React.FC = () => {
     const [tab, setTab] = useState<Tab>("volunteer")
+    const [preview, setPreview] = useState<{ src: string; alt: string } | null>(null)
+    const { isMobile } = useScreenSize()
+    const openShot = (src: string, alt: string) => setPreview({ src, alt })
 
     return (
         <div className={classes.docs}>
@@ -43,6 +56,8 @@ export const CleanCityDocs: React.FC = () => {
                 </Text>
                 <SegmentedControl
                     mt="md"
+                    fullWidth
+                    className={classes.tabs}
                     value={tab}
                     onChange={(value) => setTab(value as Tab)}
                     data={[
@@ -90,7 +105,7 @@ export const CleanCityDocs: React.FC = () => {
                     </Step>
 
                     <Title order={3}>Часть II. Точка на Экомапе</Title>
-                    <Step n={1} title="Добавить точку на карте" img={`${ECO}/eco-03-pick-location.jpg`}>
+                    <Step n={1} title="Добавить точку на карте" img={`${ECO}/eco-03-pick-location.jpg`} onOpen={openShot}>
                         <p>
                             Откройте{" "}
                             <Anchor href="https://ekomapa.rs/" target="_blank">
@@ -100,13 +115,13 @@ export const CleanCityDocs: React.FC = () => {
                             город»». Круг на карте — радиус зоны.
                         </p>
                     </Step>
-                    <Step n={2} title="Заполнение и отправка" img={`${ECO}/eco-05-point-form.jpg`}>
+                    <Step n={2} title="Заполнение и отправка" img={`${ECO}/eco-05-point-form.jpg`} onOpen={openShot}>
                         <p>
                             Задайте радиус, краткое описание, загрузите до 5 фото «до» и нажмите «Добавить точку». После
                             уборки в «Мои точки» загрузите «после», мешки и литры и отправьте на модерацию.
                         </p>
                     </Step>
-                    <Step n={3} title="Пары фото" img={`${ECO}/eco-08-photo-pairs.jpg`}>
+                    <Step n={3} title="Пары фото" img={`${ECO}/eco-08-photo-pairs.jpg`} onOpen={openShot}>
                         <p>
                             Перед отчётом на портале соберите пары с одного ракурса. Без одобренной точки отчёт на
                             портале не примут. Проверка точки — до 24 часов.
@@ -121,13 +136,13 @@ export const CleanCityDocs: React.FC = () => {
             {tab === "user" && (
                 <Flex direction="column" gap="md">
                     <Title order={3}>Как сдать отчёт на портале</Title>
-                    <Step n={1} title="Новый отчёт" img={`${ECO}/portal-02-new-report.jpg`}>
+                    <Step n={1} title="Новый отчёт" img={`${ECO}/portal-02-new-report.jpg`} onOpen={openShot}>
                         <p>
                             За неделю — один отчёт. Кнопка «Новый отчёт». Скопируйте с Экомапы код точки, координаты,
                             описание и ссылку на карту.
                         </p>
                     </Step>
-                    <Step n={2} title="Поля задачи" img={`${ECO}/portal-04-report-fields.jpg`}>
+                    <Step n={2} title="Поля задачи" img={`${ECO}/portal-04-report-fields.jpg`} onOpen={openShot}>
                         <p>
                             Название — код и место. Описание — вставка с Экомапы. Результат — ссылка на точку. Часы и
                             дата по локации. Заказчик и файлы не нужны. Несколько уборок — несколько задач в одном
@@ -166,6 +181,26 @@ export const CleanCityDocs: React.FC = () => {
                     </Anchor>
                 </Flex>
             )}
+
+            <Modal
+                opened={!!preview}
+                onClose={() => setPreview(null)}
+                title={preview?.alt}
+                size={isMobile ? "xl" : "auto"}
+                fullScreen={isMobile}
+                centered
+                padding="sm"
+                classNames={{ content: classes.lightboxModal, body: classes.lightboxBody }}
+            >
+                {preview && (
+                    <img
+                        src={preview.src}
+                        alt={preview.alt}
+                        className={classes.lightbox}
+                        onClick={() => setPreview(null)}
+                    />
+                )}
+            </Modal>
         </div>
     )
 }

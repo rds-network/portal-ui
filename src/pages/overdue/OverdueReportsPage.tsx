@@ -122,7 +122,7 @@ export const OverdueReportsPage: React.FC = () => {
                     <FormattedMessage id="pages.overdue.warningsHint" />
                 </Text>
             </div>
-            <Card withBorder p="lg" radius="lg">
+            <Card withBorder padding={{ base: "sm", sm: "lg" }} radius="lg">
                 <Flex justify="space-between" align="center" mb="md" wrap="wrap" gap="sm">
                     <div>
                         <Text>
@@ -144,7 +144,7 @@ export const OverdueReportsPage: React.FC = () => {
                     </Text>
                 )}
                 <Flex justify="center" mb="md">
-                    <Group gap="xs">
+                    <Group gap="xs" justify="center" wrap="wrap">
                         <Legend color="noReports" label="pages.heat-map.no-reports" />
                         <Legend color="partialReports" label="pages.heat-map.partial-reports" />
                         <Legend color="fullReports" label="pages.heat-map.full-reports" />

@@ -66,3 +66,20 @@
     height: 16px;
     border-radius: 2px;
 }
+
+@media (max-width: $mantine-breakpoint-md) {
+    .weekHeader,
+    .weekSquares {
+        grid-template-columns: repeat(auto-fill, 16px);
+    }
+
+    .weekSquare {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+
+    .weekNum {
+        font-size: 0.6rem;
+    }
+}

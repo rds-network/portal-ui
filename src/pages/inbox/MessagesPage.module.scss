@@ -14,26 +14,33 @@
     display: block;
     width: 100%;
     text-align: left;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: light-dark(#fff, var(--mantine-color-dark-6));
+    border: 1px solid light-dark(#e5e7eb, var(--mantine-color-dark-4));
     border-radius: 12px;
     padding: 12px;
     margin-bottom: 8px;
     cursor: pointer;
+    color: inherit;
 }
 
 .itemActive {
-    border-color: #93c5fd;
-    background: #eff6ff;
+    border-color: var(--mantine-color-blue-6);
+    background: light-dark(#eff6ff, var(--mantine-color-dark-5));
 }
 
 .thread {
     flex: 1;
     min-width: 0;
-    background: #fff;
-    border: 1px solid #e5e7eb;
+    background: light-dark(#fff, var(--mantine-color-dark-6));
+    border: 1px solid light-dark(#e5e7eb, var(--mantine-color-dark-4));
     border-radius: 16px;
     padding: 20px;
+}
+
+.threadTitle {
+    flex: 1 1 160px;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .messages {
@@ -47,11 +54,34 @@
 }
 
 .mine {
-    background: #ecfdf5;
+    background: light-dark(#ecfdf5, #163528);
     margin-left: 40px;
 }
 
 .theirs {
-    background: #f8fafc;
+    background: light-dark(#f8fafc, var(--mantine-color-dark-5));
     margin-right: 40px;
+}
+
+@media (max-width: 48em) {
+    .root {
+        flex-direction: column;
+    }
+
+    .list,
+    .thread {
+        width: 100%;
+    }
+
+    .thread {
+        padding: 14px;
+    }
+
+    .mine {
+        margin-left: 12px;
+    }
+
+    .theirs {
+        margin-right: 12px;
+    }
 }
