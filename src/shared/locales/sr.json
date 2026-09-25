@@ -437,7 +437,9 @@
             "program-filter": "Filter programa",
             "program-filter-not-selected": "Nije odabrano",
             "project-filter": "Filter projekata",
-            "project-filter-not-selected": "Nije odabrano"
+            "project-filter-not-selected": "Nije odabrano",
+            "digest-title": "Pregled nedelje",
+            "show-tasks": "Šta je urađeno"
         },
         "heat-map": {
             "description": "Monitoring aktivnosti volontera i njihovog izveštavanja",
@@ -479,6 +481,7 @@
             },
             "profile": "Profil",
             "reports": "Izveštaji",
+            "open-week": "Otvori izveštaje nedelje",
             "ticket": "Kreirajte tiket"
         },
         "user-list": {

@@ -39,4 +39,5 @@ export const locales = {
     profile: "pages.heat-map.profile",
     reports: "pages.heat-map.reports",
     ticket: "pages.heat-map.ticket",
+    openWeek: "pages.heat-map.open-week",
 }

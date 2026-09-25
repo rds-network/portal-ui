@@ -437,7 +437,9 @@
             "program-filter": "Фильтр программ",
             "program-filter-not-selected": "Не выбрано",
             "project-filter": "Фильтр проектов",
-            "project-filter-not-selected": "Не выбрано"
+            "project-filter-not-selected": "Не выбрано",
+            "digest-title": "Сводка за неделю",
+            "show-tasks": "Что сделано"
         },
         "heat-map": {
             "description": "Мониторинг активности волонтеров и их отчетности",
@@ -479,6 +481,7 @@
             },
             "profile": "Профиль",
             "reports": "Отчеты",
+            "open-week": "Открыть отчёты недели",
             "ticket": "Создать тикет"
         },
         "user-list": {

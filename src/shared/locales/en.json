@@ -437,7 +437,9 @@
             "program-filter": "Program filter",
             "program-filter-not-selected": "Not selected",
             "project-filter": "Project filter",
-            "project-filter-not-selected": "Not selected"
+            "project-filter-not-selected": "Not selected",
+            "digest-title": "Week summary",
+            "show-tasks": "What was done"
         },
         "heat-map": {
             "description": "Monitoring volunteer activity and reporting",
@@ -479,6 +481,7 @@
             },
             "profile": "Profile",
             "reports": "Reports",
+            "open-week": "Open reports for this week",
             "ticket": "Create ticket"
         },
         "user-list": {

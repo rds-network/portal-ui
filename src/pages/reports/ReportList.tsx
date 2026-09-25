@@ -28,6 +28,9 @@ import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { defaultFilter, defaultPage, defaultPageResponse, defaultUser } from "./lib/defaults"
 import { locales } from "./lib/locales"
 import { allowedRoles } from "./lib/roles"
+import { WeekDigest } from "./WeekDigest"
+import { getTaskDisplayDescription, getTaskDisplayName } from "src/shared/taskTranslation/lib/taskTranslation"
+import { getSpentTime } from "src/shared/report/timeSpent"
 import classes from "./ReportList.module.scss"
 
 export const ReportList = () => {
@@ -45,6 +48,7 @@ export const ReportList = () => {
 
     const [resetKey, setResetKey] = useState(0)
     const [filtersOpened, setFiltersOpened] = useState(false)
+    const [openReportId, setOpenReportId] = useState<string | null>(null)
     const [pageRequest, setPageRequest] = useState<PageRequest>({
         ...defaultPage,
         pageNumber: Math.max(0, parseInt(searchParams.get("page") || "1") - 1),
@@ -238,6 +242,26 @@ export const ReportList = () => {
 
     const { data: users = {} } = resolveUsers(logins)
 
+    const weekSelected = Boolean(filter.dateFrom && filter.dateTo)
+    const { data: digestReports = [] } = useQuery({
+        queryKey: ["weekDigest", filter, selectedProgram, selectedProject],
+        enabled: weekSelected,
+        queryFn: () => {
+            let project: string | null = null
+            if (selectedProject) {
+                project = selectedProject === NO_PROJECT_CODE ? "" : selectedProject
+            }
+            return ReportApiService.getReports(
+                { pageNumber: 0, pageSize: 300, sort: ["createTime;desc"] },
+                {
+                    ...filter,
+                    program: selectedProgram === NO_PROGRAM_CODE ? "" : selectedProgram,
+                    project,
+                }
+            ).then((r) => r.data.content || [])
+        },
+    })
+
     const onUserSelected = (selectedUser: UserInfoDto | null) => {
         const newFilter = { ...filter, login: selectedUser?.username || null }
         const filterChanged = newFilter.login !== filter.login
@@ -309,9 +333,10 @@ export const ReportList = () => {
         const createTime = dayjs(report.createTime).format("DD MMM YYYY HH:mm")
         const timeSpent = getSpentTimeFromReport(report, intl)
         const filesCount = getReportFilesCount(report)
+        const opened = openReportId === report.id
         return (
+            <React.Fragment key={report.id}>
             <Table.Tr
-                key={report.id}
                 className={classes.row}
                 onClick={() => {
                     localStorage.setItem("reportListState", window.location.search)
@@ -380,9 +405,44 @@ export const ReportList = () => {
                                 </Text>
                             </Flex>
                         )}
+                        <Button
+                            variant="subtle"
+                            size="compact-xs"
+                            mt={4}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                setOpenReportId(opened ? null : report.id || null)
+                            }}
+                        >
+                            <FormattedMessage id={locales.showTasks} />
+                        </Button>
                     </Flex>
                 </Table.Td>
             </Table.Tr>
+            {opened && (
+                <Table.Tr>
+                    <Table.Td colSpan={8} onClick={(e) => e.stopPropagation()}>
+                        <Flex direction="column" gap={8} py={6}>
+                            {(report.tasks || []).map((task, i) => (
+                                <div key={task.id || i}>
+                                    <Text size="sm" fw={600}>
+                                        {getTaskDisplayName(task, false) || "—"}{" "}
+                                        <Text span c="dimmed" fw={400}>
+                                            · {getSpentTime(task.timeSpent, intl)}
+                                        </Text>
+                                    </Text>
+                                    {getTaskDisplayDescription(task, false) && (
+                                        <Text size="sm" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>
+                                            {getTaskDisplayDescription(task, false)}
+                                        </Text>
+                                    )}
+                                </div>
+                            ))}
+                        </Flex>
+                    </Table.Td>
+                </Table.Tr>
+            )}
+            </React.Fragment>
         )
     })
 
@@ -567,6 +627,12 @@ export const ReportList = () => {
                         </Flex>
                     </>
                 )}
+                <Text size="xs" c="dimmed" lineClamp={3} mt={6}>
+                    {(report.tasks || [])
+                        .map((t) => getTaskDisplayName(t, false))
+                        .filter(Boolean)
+                        .join(" · ")}
+                </Text>
             </Flex>
         )
     })
@@ -750,6 +816,15 @@ export const ReportList = () => {
                             )}
                         </Flex>
                     </Flex>
+                )}
+                {weekSelected && digestReports.length > 0 && (
+                    <WeekDigest
+                        reports={digestReports}
+                        programs={programs}
+                        users={users}
+                        dateFrom={filter.dateFrom || ""}
+                        dateTo={filter.dateTo || ""}
+                    />
                 )}
                 {isMobile ? (
                     <Flex direction="column" rowGap={8} className={classes.mobileList}>
