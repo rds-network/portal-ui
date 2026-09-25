@@ -1,8 +1,8 @@
-import { Badge, Button, Card, Flex, Loader, Modal, Table, Text, Title } from "@mantine/core"
+import { Badge, Button, Card, Checkbox, Flex, Loader, Modal, Table, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
@@ -20,6 +20,7 @@ export const OverdueReportsPage: React.FC = () => {
     const queryClient = useQueryClient()
     const [previewOpen, setPreviewOpen] = useState(false)
     const [letter, setLetter] = useState<ReportOverdueDto | null>(null)
+    const [excluded, setExcluded] = useState<Set<string>>(new Set())
 
     setDocumentTitleByLocale("pages.overdue.title")
 
@@ -34,6 +35,14 @@ export const OverdueReportsPage: React.FC = () => {
         queryFn: () => InboxApiService.overdue(),
     })
 
+    useEffect(() => {
+        const known = new Set(items.map((item) => item.username))
+        setExcluded((prev) => new Set([...prev].filter((username) => known.has(username))))
+    }, [items])
+
+    const sendCount = items.length - excluded.size
+    const allExcluded = items.length > 0 && excluded.size === items.length
+
     const { data: preview } = useQuery({
         queryKey: ["report-overdue-preview"],
         queryFn: () => InboxApiService.overduePreview(),
@@ -41,7 +50,7 @@ export const OverdueReportsPage: React.FC = () => {
     })
 
     const { mutate: notify, isPending } = useMutation({
-        mutationFn: () => InboxApiService.notifyOverdue(),
+        mutationFn: () => InboxApiService.notifyOverdue([...excluded]),
         onSuccess: (sent) => {
             notifications.show(
                 SuccessNotification(
@@ -62,6 +71,28 @@ export const OverdueReportsPage: React.FC = () => {
         navigate(`/volunteers/heatmap?search=${encodeURIComponent(username)}`)
     }
 
+    const toggleExclude = (username: string) => {
+        setExcluded((prev) => {
+            const next = new Set(prev)
+            if (next.has(username)) next.delete(username)
+            else next.add(username)
+            return next
+        })
+    }
+
+    const toggleAll = () => {
+        if (allExcluded) {
+            setExcluded(new Set())
+            return
+        }
+        setExcluded(new Set(items.map((item) => item.username)))
+    }
+
+    const samples = useMemo(
+        () => (preview?.samples ?? items.slice(0, 5)).filter((item) => !excluded.has(item.username)),
+        [preview?.samples, items, excluded]
+    )
+
     return (
         <Flex className={classes.root} direction="column" gap="lg">
             <div>
@@ -74,13 +105,25 @@ export const OverdueReportsPage: React.FC = () => {
             </div>
             <Card withBorder p="lg" radius="lg">
                 <Flex justify="space-between" align="center" mb="md" wrap="wrap" gap="sm">
-                    <Text>
-                        <FormattedMessage id="pages.overdue.total" values={{ count: items.length }} />
-                    </Text>
-                    <Button onClick={() => setPreviewOpen(true)} disabled={isLoading}>
+                    <div>
+                        <Text>
+                            <FormattedMessage id="pages.overdue.total" values={{ count: items.length }} />
+                        </Text>
+                        {excluded.size > 0 && (
+                            <Text size="sm" c="dimmed">
+                                <FormattedMessage id="pages.overdue.excluded" values={{ count: excluded.size }} />
+                            </Text>
+                        )}
+                    </div>
+                    <Button onClick={() => setPreviewOpen(true)} disabled={isLoading || sendCount === 0}>
                         <FormattedMessage id="pages.overdue.notify" />
                     </Button>
                 </Flex>
+                {items.length > 0 && (
+                    <Text size="sm" c="dimmed" mb="sm">
+                        <FormattedMessage id="pages.overdue.skipHint" />
+                    </Text>
+                )}
                 {(isLoading || isFetching) && items.length === 0 ? (
                     <Flex align="center" gap="sm" py="lg">
                         <Loader size="sm" />
@@ -96,6 +139,15 @@ export const OverdueReportsPage: React.FC = () => {
                     <Table highlightOnHover>
                         <Table.Thead>
                             <Table.Tr>
+                                <Table.Th w={70}>
+                                    <Checkbox
+                                        checked={allExcluded}
+                                        indeterminate={excluded.size > 0 && !allExcluded}
+                                        onChange={toggleAll}
+                                        label={<FormattedMessage id="pages.overdue.skip" />}
+                                        styles={{ label: { fontSize: 12 } }}
+                                    />
+                                </Table.Th>
                                 <Table.Th>
                                     <FormattedMessage id="pages.overdue.person" />
                                 </Table.Th>
@@ -117,9 +169,23 @@ export const OverdueReportsPage: React.FC = () => {
                             {items.map((item) => (
                                 <Table.Tr
                                     key={item.username}
-                                    style={{ cursor: "pointer" }}
+                                    style={{
+                                        cursor: "pointer",
+                                        opacity: excluded.has(item.username) ? 0.45 : 1,
+                                    }}
                                     onClick={() => openHeatmap(item.username)}
                                 >
+                                    <Table.Td
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                        }}
+                                    >
+                                        <Checkbox
+                                            checked={excluded.has(item.username)}
+                                            onChange={() => toggleExclude(item.username)}
+                                            aria-label={item.fullName}
+                                        />
+                                    </Table.Td>
                                     <Table.Td>
                                         <Text fw={600}>{item.fullName}</Text>
                                         <Text size="xs" c="dimmed">
@@ -167,7 +233,7 @@ export const OverdueReportsPage: React.FC = () => {
                 centered
             >
                 <Text size="sm" c="dimmed" mb="md">
-                    <FormattedMessage id="pages.overdue.previewHint" values={{ count: items.length }} />
+                    <FormattedMessage id="pages.overdue.previewHint" values={{ count: sendCount }} />
                 </Text>
                 {(preview?.templates ?? []).map((item) => (
                     <Card key={item.level} withBorder p="sm" mb="sm" radius="md">
@@ -180,7 +246,7 @@ export const OverdueReportsPage: React.FC = () => {
                 <Text fw={650} mt="md" mb={6}>
                     <FormattedMessage id="pages.overdue.samples" />
                 </Text>
-                {(preview?.samples ?? items.slice(0, 5)).map((item) => (
+                {samples.map((item) => (
                     <Button
                         key={item.username}
                         variant="subtle"
@@ -191,8 +257,8 @@ export const OverdueReportsPage: React.FC = () => {
                         {item.fullName}
                     </Button>
                 ))}
-                <Button mt="md" fullWidth loading={isPending} onClick={() => notify()}>
-                    <FormattedMessage id="pages.overdue.notifyConfirm" />
+                <Button mt="md" fullWidth loading={isPending} disabled={sendCount === 0} onClick={() => notify()}>
+                    <FormattedMessage id="pages.overdue.notifyConfirm" values={{ count: sendCount }} />
                 </Button>
             </Modal>
 

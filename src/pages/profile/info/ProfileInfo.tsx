@@ -286,6 +286,18 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
 
     // Разрешаем менять пол своему профилю и админам
     const canEditGender = isAdmin || isOwnProfile
+    const mupCitizenship =
+        (
+            userInfo as UserInfoDto & {
+                residencePermits?: { nationality?: string }[]
+            }
+        )?.residencePermits?.find((permit) => permit.nationality)?.nationality || ""
+    const latestContractStart = userInfo?.contracts
+        ?.map((contract) => contract.startDate)
+        .filter((value): value is string => !!value)
+        .sort()
+        .at(-1)
+    const mupPeriodFrom = latestContractStart ? dayjs(latestContractStart).format("DD.MM.YYYY") : ""
 
     const handleProgramChange = async (programCode: string) => {
         if (isSyncing) return
@@ -451,9 +463,11 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             username={userInfo.username}
                             fullName={userInfo.fullName || ""}
                             birthDate={userInfo.birthDate ? dayjs(userInfo.birthDate).format("DD.MM.YYYY") : ""}
+                            citizenship={mupCitizenship}
                             address={getFullAddress(userInfo.postalCode, userInfo.city, userInfo.address)}
                             phone={userInfo.phone || ""}
                             email={userInfo.email || ""}
+                            periodFrom={mupPeriodFrom}
                         />
                     </>
                 )}

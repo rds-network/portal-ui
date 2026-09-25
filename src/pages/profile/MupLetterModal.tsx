@@ -15,9 +15,12 @@ type Props = {
     fullName?: string
     passport?: string
     birthDate?: string
+    citizenship?: string
     address?: string
     phone?: string
     email?: string
+    periodFrom?: string
+    periodTo?: string
 }
 
 export const MupLetterModal: React.FC<Props> = ({
@@ -27,14 +30,17 @@ export const MupLetterModal: React.FC<Props> = ({
     fullName = "",
     passport = "",
     birthDate = "",
+    citizenship = "",
     address = "",
     phone = "",
     email = "",
+    periodFrom = "",
+    periodTo = "",
 }) => {
     const queryClient = useQueryClient()
     const fallback = useMemo(
-        () => buildMupLetter({ fullName, passport, birthDate, address, phone, email }),
-        [fullName, passport, birthDate, address, phone, email]
+        () => buildMupLetter({ fullName, passport, birthDate, citizenship, address, phone, email, periodFrom, periodTo }),
+        [fullName, passport, birthDate, citizenship, address, phone, email, periodFrom, periodTo]
     )
     const [to, setTo] = useState(fallback.to)
     const [subject, setSubject] = useState(fallback.subject)

@@ -260,8 +260,11 @@
             "previewTitle": "Tekst obaveštenja",
             "previewHint": "Ovako će videti volonteri. U slanju je {count} osoba.",
             "samples": "Primeri pisama",
-            "notifyConfirm": "Pošalji svima sa liste",
-            "openHeatmap": "Toplotna karta"
+            "notifyConfirm": "Pošalji {count}",
+            "openHeatmap": "Toplotna karta",
+            "skip": "Ne slati",
+            "skipHint": "Označite one koje treba izostaviti iz ove pošiljke.",
+            "excluded": "Izostavljeno iz slanja: {count}"
         },
         "activity": {
             "title": "Hronika",
@@ -274,7 +277,7 @@
         "mup": {
             "title": "Pismo MUP-u Srbije",
             "open": "Obaveštenje MUP-u",
-            "hint": "Nacrt na srpskom. Pismo ide na upravazastrance@mup.gov.rs i čuva se u raspravama portala.",
+            "hint": "Tipsko pismo sa podacima volontera. Možete ga izmeniti pre slanja. Ide na upravazastrance@mup.gov.rs i čuva se u slanjima portala.",
             "to": "Kome",
             "subject": "Predmet",
             "body": "Tekst",

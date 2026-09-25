@@ -260,8 +260,11 @@
             "previewTitle": "Notification text",
             "previewHint": "This is what volunteers will see. {count} people in this send.",
             "samples": "Sample letters",
-            "notifyConfirm": "Send to everyone on the list",
-            "openHeatmap": "Heat map"
+            "notifyConfirm": "Send to {count}",
+            "openHeatmap": "Heat map",
+            "skip": "Skip",
+            "skipHint": "Tick people to keep out of this mailing.",
+            "excluded": "Excluded from mailing: {count}"
         },
         "activity": {
             "title": "Chronicle",
@@ -274,7 +277,7 @@
         "mup": {
             "title": "Letter to Serbian MUP",
             "open": "Notify MUP",
-            "hint": "Serbian draft. It goes to upravazastrance@mup.gov.rs and is saved with other portal mailings.",
+            "hint": "A filled Serbian template with this volunteer’s data. You can edit it before sending. It goes to upravazastrance@mup.gov.rs and is saved with other portal mailings.",
             "to": "To",
             "subject": "Subject",
             "body": "Text",

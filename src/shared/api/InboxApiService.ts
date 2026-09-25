@@ -94,10 +94,12 @@ export const InboxApiService = {
         return response.data
     },
 
-    async notifyOverdue(): Promise<number> {
-        const response = await RequestHttp.post<{ sent: number }>("/report-overdue/notify", undefined, {
-            validateStatus: alive,
-        })
+    async notifyOverdue(exclude: string[] = []): Promise<number> {
+        const response = await RequestHttp.post<{ sent: number }>(
+            "/report-overdue/notify",
+            { exclude },
+            { validateStatus: alive }
+        )
         if (response.status !== 200) return 0
         return response.data?.sent ?? 0
     },
