@@ -128,6 +128,21 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         return getSquareTooltip(weekNumber)
     }
 
+    const openWeekReports = (weekNumber: number, newTab = false) => {
+        const weekData = weekByNumber.get(weekNumber)
+        const info = weeks.find((w) => w.weekNumber === weekNumber)
+        const from = weekData?.weekStart
+            ? dayjs(weekData.weekStart).format("YYYY-MM-DD")
+            : info?.date.format("YYYY-MM-DD")
+        const to = weekData?.weekEnd
+            ? dayjs(weekData.weekEnd).format("YYYY-MM-DD")
+            : info?.date.add(6, "day").format("YYYY-MM-DD")
+        if (!from || !to) return
+        const url = `/reports?login=${encodeURIComponent(volunteer.volunteerInfo.username)}&dateFrom=${from}&dateTo=${to}`
+        if (newTab) window.open(url, "_blank")
+        else window.location.assign(url)
+    }
+
     const ticketBodyHtml = useMemo(() => {
         return getTicketBody({
             startDate,
@@ -248,28 +263,28 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                             <Box
                                 className={`${classes.weekSquare} ${classes[getSquareColor(week.weekNumber)]}`}
                                 style={{ cursor: "pointer" }}
+                                title={intl.formatMessage({ id: locales.openWeek })}
                                 onClick={(e) => {
                                     e.stopPropagation()
-                                    const weekData = weekByNumber.get(week.weekNumber)
-                                    const from = weekData?.weekStart
-                                        ? dayjs(weekData.weekStart).format("YYYY-MM-DD")
-                                        : week.date.format("YYYY-MM-DD")
-                                    const to = weekData?.weekEnd
-                                        ? dayjs(weekData.weekEnd).format("YYYY-MM-DD")
-                                        : week.date.add(6, "day").format("YYYY-MM-DD")
-                                    window.open(
-                                        `/reports?login=${encodeURIComponent(volunteer.volunteerInfo.username)}&dateFrom=${from}&dateTo=${to}`,
-                                        "_blank"
-                                    )
+                                    openWeekReports(week.weekNumber)
+                                }}
+                                onDoubleClick={(e) => {
+                                    e.stopPropagation()
+                                    openWeekReports(week.weekNumber)
                                 }}
                             />
                         </HoverCard.Target>
 
                         <HoverCard.Dropdown>
                             <Text size="xs">{getSquareInfoLabel(week.weekNumber)}</Text>
-                            <Text size="xs" c="dimmed" mt={4}>
+                            <Button
+                                size="xs"
+                                mt={8}
+                                fullWidth
+                                onClick={() => openWeekReports(week.weekNumber)}
+                            >
                                 <FormattedMessage id={locales.openWeek} />
-                            </Text>
+                            </Button>
                         </HoverCard.Dropdown>
                     </HoverCard>
                 ))}

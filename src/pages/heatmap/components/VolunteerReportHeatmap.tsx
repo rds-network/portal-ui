@@ -85,7 +85,17 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                                         const to = meta?.weekEnd
                                             ? dayjs(meta.weekEnd).format("YYYY-MM-DD")
                                             : w.date.add(6, "day").format("YYYY-MM-DD")
-                                        window.open(`/reports?dateFrom=${from}&dateTo=${to}`, "_blank")
+                                        window.location.assign(`/reports?dateFrom=${from}&dateTo=${to}`)
+                                    }}
+                                    onDoubleClick={() => {
+                                        const meta = volunteers[0]?.weeks.find((item) => item.week === w.weekNumber)
+                                        const from = meta?.weekStart
+                                            ? dayjs(meta.weekStart).format("YYYY-MM-DD")
+                                            : w.date.format("YYYY-MM-DD")
+                                        const to = meta?.weekEnd
+                                            ? dayjs(meta.weekEnd).format("YYYY-MM-DD")
+                                            : w.date.add(6, "day").format("YYYY-MM-DD")
+                                        window.location.assign(`/reports?dateFrom=${from}&dateTo=${to}`)
                                     }}
                                 >
                                     <Text size="xs" c="dimmed">
