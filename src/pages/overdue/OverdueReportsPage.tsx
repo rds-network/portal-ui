@@ -102,6 +102,32 @@ export const OverdueReportsPage: React.FC = () => {
         },
     })
 
+    const { mutate: cancelWarning, isPending: cancelling } = useMutation({
+        mutationFn: (username: string) =>
+            InboxApiService.cancelOverdueWarning(username, {
+                reason: "Снято администратором: отчёты не успели проверить",
+            }),
+        onSuccess: (result) => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage
+                            id="pages.overdue.cancelWarningDone"
+                            values={{ count: result.warningCount }}
+                        />
+                    </Text>,
+                    null
+                )
+            )
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue-notices"] })
+            queryClient.invalidateQueries({ queryKey: ["overdue-counts"] })
+            queryClient.invalidateQueries({ queryKey: ["overdue-warnings"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
+        },
+    })
+
     const { data: ledger = [] } = useQuery({
         queryKey: ["report-overdue-notices"],
         queryFn: () => InboxApiService.overdueNotices(),
@@ -146,6 +172,9 @@ export const OverdueReportsPage: React.FC = () => {
                 </Text>
                 <Text size="sm" c="orange" mt={4}>
                     <FormattedMessage id="pages.overdue.warningsHint" />
+                </Text>
+                <Text size="sm" c="dimmed" mt={4}>
+                    <FormattedMessage id="pages.overdue.cancelWarningHint" />
                 </Text>
             </div>
             <Card withBorder p="md" radius="lg">
@@ -310,6 +339,20 @@ export const OverdueReportsPage: React.FC = () => {
                                                 ? dayjs(item.lastReportWeek).format("DD.MM.YYYY")
                                                 : "—"}
                                         </Text>
+                                        {(item.warningCount ?? 0) > 0 && (
+                                            <Button
+                                                size="compact-xs"
+                                                variant="light"
+                                                color="orange"
+                                                loading={cancelling}
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+                                                    cancelWarning(item.username)
+                                                }}
+                                            >
+                                                <FormattedMessage id="pages.overdue.cancelWarning" />
+                                            </Button>
+                                        )}
                                     </Flex>
                                 </Flex>
                                 <div className={classes.weekSquares}>

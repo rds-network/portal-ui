@@ -187,4 +187,15 @@ export const InboxApiService = {
         if (response.status !== 200) return []
         return response.data ?? []
     },
+
+    async cancelOverdueWarning(
+        username: string,
+        payload: { all?: boolean; reason?: string } = {}
+    ): Promise<OverdueNoticePersonDto> {
+        const response = await RequestHttp.post<OverdueNoticePersonDto>(
+            `/report-overdue/warnings/${encodeURIComponent(username)}/cancel`,
+            payload
+        )
+        return response.data
+    },
 }

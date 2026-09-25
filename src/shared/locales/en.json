@@ -291,7 +291,11 @@
             "notified": "notified {count}/3",
             "watchlist": "blacklist",
             "export": "Export notified people",
-            "excluded": "Excluded from mailing: {count}"
+            "excluded": "Excluded from mailing: {count}",
+            "cancelWarning": "Cancel reprimand",
+            "cancelWarningAll": "Cancel all",
+            "cancelWarningDone": "Reprimand cancelled. Remaining {count}/3",
+            "cancelWarningHint": "Removes a mistaken notice and messages the volunteer. Red weeks clear after reports are accepted."
         },
         "activity": {
             "title": "Chronicle",
@@ -584,6 +588,8 @@
             "status": "Status",
             "send-message": "Send Message",
             "send-notice": "Send notification",
+            "cancel-warning": "Cancel reprimand",
+            "cancel-warning-done": "Reprimand cancelled for {name}. Remaining {count}/3",
             "no-reports": "No Reports",
             "na": "N/A",
             "partial-reports": "Partial Reports",

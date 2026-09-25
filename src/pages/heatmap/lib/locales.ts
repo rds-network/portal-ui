@@ -13,6 +13,8 @@ export const locales = {
     status: "pages.heat-map.status",
     sendMessage: "pages.heat-map.send-message",
     sendNotice: "pages.heat-map.send-notice",
+    cancelWarning: "pages.heat-map.cancel-warning",
+    cancelWarningDone: "pages.heat-map.cancel-warning-done",
     noReports: "pages.heat-map.no-reports",
     na: "pages.heat-map.na",
     partialReports: "pages.heat-map.partial-reports",

@@ -1,16 +1,19 @@
 import { Avatar, Badge, Box, Button, Checkbox, Flex, HoverCard, Text } from "@mantine/core"
+import { notifications } from "@mantine/notifications"
 import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
-import { IconBell, IconCheckupList, IconMessage2Exclamation, IconUser } from "@tabler/icons-react"
+import { IconBell, IconCheckupList, IconMessage2Exclamation, IconUser, IconUserOff } from "@tabler/icons-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs, { Dayjs } from "dayjs"
 import React, { useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
-import { useQuery } from "@tanstack/react-query"
 import { heatmapReportsPath, rememberHeatmapReturn } from "src/pages/heatmap/lib/openWeekReports"
+import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { getTicketBody } from "src/pages/heatmap/lib/ticket"
 import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
 import TicketModal from "src/shared/ui/ticketModal/TicketModal"
+import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { formatContractEnd, latestContractEnd } from "src/shared/utils/latestContractEnd"
 import { locales } from "../lib/locales"
@@ -44,6 +47,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
 }) => {
     const intl = useIntl()
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [ticketDrawerOpen, setTicketDrawerOpen] = useState(false)
 
     // Map weekNumber -> weekInfo
@@ -52,6 +56,32 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         for (const w of volunteer.weeks) map.set(w.week, w)
         return map
     }, [volunteer.weeks])
+
+    const { mutate: cancelWarning, isPending: cancelling } = useMutation({
+        mutationFn: () =>
+            InboxApiService.cancelOverdueWarning(volunteer.volunteerInfo.username, {
+                reason: "Снято администратором: отчёты не успели проверить",
+            }),
+        onSuccess: (result) => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage
+                            id={locales.cancelWarningDone}
+                            values={{ name: result.fullName, count: result.warningCount }}
+                        />
+                    </Text>,
+                    null
+                )
+            )
+            queryClient.invalidateQueries({ queryKey: ["overdue-counts"] })
+            queryClient.invalidateQueries({ queryKey: ["overdue-warnings"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue-notices"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
+        },
+    })
 
     const programDescription = (() => {
         const program = volunteer.volunteerInfo.program
@@ -304,6 +334,17 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                         >
                                             <FormattedMessage id={locales.sendNotice} />
                                         </Button>
+                                        {warningCount > 0 && (
+                                            <Button
+                                                variant="light"
+                                                color="orange"
+                                                leftSection={<IconUserOff size={16} />}
+                                                loading={cancelling}
+                                                onClick={() => cancelWarning()}
+                                            >
+                                                <FormattedMessage id={locales.cancelWarning} />
+                                            </Button>
+                                        )}
                                         <Button
                                             leftSection={<IconMessage2Exclamation size={16} />}
                                             onClick={() => setTicketDrawerOpen(true)}

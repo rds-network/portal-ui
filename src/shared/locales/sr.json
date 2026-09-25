@@ -291,7 +291,11 @@
             "notified": "obavešten {count}/3",
             "watchlist": "crna lista",
             "export": "Izvezi obaveštene",
-            "excluded": "Izostavljeno iz slanja: {count}"
+            "excluded": "Izostavljeno iz slanja: {count}",
+            "cancelWarning": "Poništi kaznu",
+            "cancelWarningAll": "Poništi sve",
+            "cancelWarningDone": "Kazna poništena. Ostalo {count}/3",
+            "cancelWarningHint": "Skida pogrešno obaveštenje i šalje poruku volonteru. Crvene nedelje nestaju posle prihvatanja izveštaja."
         },
         "activity": {
             "title": "Hronika",
@@ -584,6 +588,8 @@
             "view-profile": "Pogledaj profil",
             "send-message": "Pošalji poruku",
             "send-notice": "Pošalji obaveštenje",
+            "cancel-warning": "Poništi kaznu",
+            "cancel-warning-done": "Kazna poništena za {name}. Ostalo {count}/3",
             "no-reports": "Nema izveštaja",
             "na": "N/A",
             "partial-reports": "Delimični izveštaji",

@@ -291,7 +291,11 @@
             "notified": "уведомлён {count}/3",
             "watchlist": "чёрный список",
             "export": "Выгрузить уведомлённых",
-            "excluded": "Убрано из рассылки: {count}"
+            "excluded": "Убрано из рассылки: {count}",
+            "cancelWarning": "Снять порицание",
+            "cancelWarningAll": "Снять все",
+            "cancelWarningDone": "Порицание снято. Осталось {count}/3",
+            "cancelWarningHint": "Снимает ошибочное уведомление и пишет волонтёру. Красные недели на карте пропадут после приёмки отчётов."
         },
         "activity": {
             "title": "Хроника",
@@ -584,6 +588,8 @@
             "status": "Статус",
             "send-message": "Отправить письмо",
             "send-notice": "Отправить уведомление",
+            "cancel-warning": "Снять порицание",
+            "cancel-warning-done": "Порицание снято у {name}. Осталось {count}/3",
             "no-reports": "Нет отчетов",
             "na": "N/A",
             "partial-reports": "Частичные отчеты",
