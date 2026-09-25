@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Flex, ScrollArea, Text, Textarea, Title } from "@mantine/core"
+import { Alert, Badge, Button, Flex, Text, Textarea, Title } from "@mantine/core"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useState } from "react"
@@ -73,67 +73,71 @@ export const MessagesPage: React.FC = () => {
         <Flex className={classes.root} direction={isMobile ? "column" : "row"} gap="lg">
             {showList && (
             <div className={classes.list}>
-                <Title order={2} mb="md">
-                    <FormattedMessage id="pages.messages.title" />
-                </Title>
-                {pendingAck > 0 && (
-                    <Alert color="orange" mb="md">
-                        <FormattedMessage id="pages.messages.ackBlock" values={{ count: pendingAck }} />
-                    </Alert>
-                )}
-                {threads.length === 0 && (
-                    <Text c="dimmed">
-                        <FormattedMessage id="pages.messages.empty" />
-                    </Text>
-                )}
-                {threads.map((item) => (
-                    <button
-                        key={item.id}
-                        type="button"
-                        className={`${classes.item} ${selectedId === item.id ? classes.itemActive : ""}`}
-                        onClick={() => openThread(item)}
-                    >
-                        <Flex justify="space-between" gap="sm">
-                            <Text fw={600} lineClamp={1}>
-                                {item.subject}
+                <div className={classes.listHeader}>
+                    <Title order={2}>
+                        <FormattedMessage id="pages.messages.title" />
+                    </Title>
+                    {pendingAck > 0 && (
+                        <Alert color="orange" mt="md">
+                            <FormattedMessage id="pages.messages.ackBlock" values={{ count: pendingAck }} />
+                        </Alert>
+                    )}
+                </div>
+                <div className={classes.listScroll}>
+                    {threads.length === 0 && (
+                        <Text c="dimmed">
+                            <FormattedMessage id="pages.messages.empty" />
+                        </Text>
+                    )}
+                    {threads.map((item) => (
+                        <button
+                            key={item.id}
+                            type="button"
+                            className={`${classes.item} ${selectedId === item.id ? classes.itemActive : ""}`}
+                            onClick={() => openThread(item)}
+                        >
+                            <Flex justify="space-between" gap="sm">
+                                <Text fw={600} lineClamp={1}>
+                                    {item.subject}
+                                </Text>
+                                {item.unread && (
+                                    <Badge size="xs" color="blue">
+                                        <FormattedMessage id="pages.messages.new" />
+                                    </Badge>
+                                )}
+                            </Flex>
+                            <Text size="xs" c="dimmed">
+                                {item.recipient || item.counterpart || item.createdBy || "портал"} ·{" "}
+                                {dayjs(item.createTime).format("DD.MM HH:mm")}
                             </Text>
-                            {item.unread && (
-                                <Badge size="xs" color="blue">
-                                    <FormattedMessage id="pages.messages.new" />
-                                </Badge>
-                            )}
-                        </Flex>
-                        <Text size="xs" c="dimmed">
-                            {item.recipient || item.counterpart || item.createdBy || "портал"} ·{" "}
-                            {dayjs(item.createTime).format("DD.MM HH:mm")}
-                        </Text>
-                        <Text size="xs" c={item.recipientLastSeen ? "dimmed" : "orange"} mt={2}>
-                            {item.recipientLastSeen ? (
-                                <FormattedMessage
-                                    id="pages.messages.lastSeen"
-                                    values={{ time: formatSeen(item.recipientLastSeen) }}
-                                />
-                            ) : (
-                                <FormattedMessage id="pages.messages.lastSeenNever" />
-                            )}
-                        </Text>
-                        <Text size="xs" c={item.receivedAt ? "teal" : "red"} mt={2}>
-                            {item.receivedAt ? (
-                                <FormattedMessage
-                                    id="pages.messages.receivedAt"
-                                    values={{ time: formatSeen(item.receivedAt) }}
-                                />
-                            ) : (
-                                <FormattedMessage id="pages.messages.notReceived" />
-                            )}
-                        </Text>
-                        {item.lastBody && (
-                            <Text size="sm" c="dimmed" lineClamp={2} mt={4}>
-                                {item.lastBody}
+                            <Text size="xs" c={item.recipientLastSeen ? "dimmed" : "orange"} mt={2}>
+                                {item.recipientLastSeen ? (
+                                    <FormattedMessage
+                                        id="pages.messages.lastSeen"
+                                        values={{ time: formatSeen(item.recipientLastSeen) }}
+                                    />
+                                ) : (
+                                    <FormattedMessage id="pages.messages.lastSeenNever" />
+                                )}
                             </Text>
-                        )}
-                    </button>
-                ))}
+                            <Text size="xs" c={item.receivedAt ? "teal" : "red"} mt={2}>
+                                {item.receivedAt ? (
+                                    <FormattedMessage
+                                        id="pages.messages.receivedAt"
+                                        values={{ time: formatSeen(item.receivedAt) }}
+                                    />
+                                ) : (
+                                    <FormattedMessage id="pages.messages.notReceived" />
+                                )}
+                            </Text>
+                            {item.lastBody && (
+                                <Text size="sm" c="dimmed" lineClamp={2} mt={4}>
+                                    {item.lastBody}
+                                </Text>
+                            )}
+                        </button>
+                    ))}
+                </div>
             </div>
             )}
             {showThread && (
@@ -144,67 +148,69 @@ export const MessagesPage: React.FC = () => {
                     </Text>
                 ) : (
                     <>
-                        <Flex justify="space-between" align="center" gap="sm" wrap="wrap">
-                            {isMobile && (
-                                <Button variant="subtle" size="compact-sm" onClick={() => setSelectedId(null)}>
-                                    <FormattedMessage id="pages.messages.back" />
+                        <div className={classes.threadHeader}>
+                            <Flex justify="space-between" align="center" gap="sm" wrap="wrap">
+                                {isMobile && (
+                                    <Button variant="subtle" size="compact-sm" onClick={() => setSelectedId(null)}>
+                                        <FormattedMessage id="pages.messages.back" />
+                                    </Button>
+                                )}
+                                <Title order={3} className={classes.threadTitle}>
+                                    {thread.subject}
+                                </Title>
+                                <Flex gap="sm" wrap="wrap">
+                                    {thread.kind === "REPORT_CUSTOMER" && (
+                                        <Button
+                                            variant="light"
+                                            onClick={() =>
+                                                navigate(
+                                                    thread.reportId ? `/report/${thread.reportId}` : "/reports/review"
+                                                )
+                                            }
+                                        >
+                                            <FormattedMessage id="pages.review-reports.open" />
+                                        </Button>
+                                    )}
+                                    {heatmapUser(thread) && (
+                                        <Button
+                                            variant="light"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/volunteers/heatmap?search=${encodeURIComponent(heatmapUser(thread)!)}`
+                                                )
+                                            }
+                                        >
+                                            <FormattedMessage id="pages.overdue.openHeatmap" />
+                                        </Button>
+                                    )}
+                                </Flex>
+                            </Flex>
+                            <Text size="sm" c="dimmed" mt={6}>
+                                {thread.recipientLastSeen ? (
+                                    <FormattedMessage
+                                        id="pages.messages.lastSeen"
+                                        values={{ time: formatSeen(thread.recipientLastSeen) }}
+                                    />
+                                ) : (
+                                    <FormattedMessage id="pages.messages.lastSeenNever" />
+                                )}
+                                {" · "}
+                                {thread.receivedAt ? (
+                                    <FormattedMessage
+                                        id="pages.messages.receivedAt"
+                                        values={{ time: formatSeen(thread.receivedAt) }}
+                                    />
+                                ) : (
+                                    <FormattedMessage id="pages.messages.notReceived" />
+                                )}
+                            </Text>
+                            {thread.needsAck && (
+                                <Button mt="sm" color="orange" loading={acking} onClick={() => ack()}>
+                                    <FormattedMessage id="pages.messages.ack" />
                                 </Button>
                             )}
-                            <Title order={3} className={classes.threadTitle}>
-                                {thread.subject}
-                            </Title>
-                            <Flex gap="sm" wrap="wrap">
-                                {thread.kind === "REPORT_CUSTOMER" && (
-                                    <Button
-                                        variant="light"
-                                        onClick={() =>
-                                            navigate(
-                                                thread.reportId ? `/report/${thread.reportId}` : "/reports/review"
-                                            )
-                                        }
-                                    >
-                                        <FormattedMessage id="pages.review-reports.open" />
-                                    </Button>
-                                )}
-                                {heatmapUser(thread) && (
-                                    <Button
-                                        variant="light"
-                                        onClick={() =>
-                                            navigate(
-                                                `/volunteers/heatmap?search=${encodeURIComponent(heatmapUser(thread)!)}`
-                                            )
-                                        }
-                                    >
-                                        <FormattedMessage id="pages.overdue.openHeatmap" />
-                                    </Button>
-                                )}
-                            </Flex>
-                        </Flex>
-                        <Text size="sm" c="dimmed" mt={6}>
-                            {thread.recipientLastSeen ? (
-                                <FormattedMessage
-                                    id="pages.messages.lastSeen"
-                                    values={{ time: formatSeen(thread.recipientLastSeen) }}
-                                />
-                            ) : (
-                                <FormattedMessage id="pages.messages.lastSeenNever" />
-                            )}
-                            {" · "}
-                            {thread.receivedAt ? (
-                                <FormattedMessage
-                                    id="pages.messages.receivedAt"
-                                    values={{ time: formatSeen(thread.receivedAt) }}
-                                />
-                            ) : (
-                                <FormattedMessage id="pages.messages.notReceived" />
-                            )}
-                        </Text>
-                        {thread.needsAck && (
-                            <Button mt="sm" color="orange" loading={acking} onClick={() => ack()}>
-                                <FormattedMessage id="pages.messages.ack" />
-                            </Button>
-                        )}
-                        <ScrollArea className={classes.messages} mt="md">
+                        </div>
+                        <div className={classes.messages}>
                             <Flex direction="column" gap="sm">
                                 {thread.messages.map((message) => {
                                     const mine = message.author === user?.username
@@ -220,23 +226,24 @@ export const MessagesPage: React.FC = () => {
                                     )
                                 })}
                             </Flex>
-                        </ScrollArea>
-                        <Textarea
-                            mt="md"
-                            minRows={3}
-                            value={reply}
-                            onChange={(event) => setReply(event.currentTarget.value)}
-                            placeholder={undefined}
-                            label={<FormattedMessage id="pages.messages.reply" />}
-                        />
-                        <Button
-                            mt="sm"
-                            disabled={reply.trim().length === 0}
-                            loading={isPending}
-                            onClick={() => sendReply()}
-                        >
-                            <FormattedMessage id="pages.messages.send" />
-                        </Button>
+                        </div>
+                        <div className={classes.composer}>
+                            <Textarea
+                                minRows={3}
+                                value={reply}
+                                onChange={(event) => setReply(event.currentTarget.value)}
+                                placeholder={undefined}
+                                label={<FormattedMessage id="pages.messages.reply" />}
+                            />
+                            <Button
+                                mt="sm"
+                                disabled={reply.trim().length === 0}
+                                loading={isPending}
+                                onClick={() => sendReply()}
+                            >
+                                <FormattedMessage id="pages.messages.send" />
+                            </Button>
+                        </div>
                     </>
                 )}
             </div>
