@@ -12,14 +12,16 @@ import TextAlign from "@tiptap/extension-text-align"
 import Underline from "@tiptap/extension-underline"
 import { useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import React, { useContext, useEffect, useMemo } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { AnnouncementApiService } from "src/shared/api/AnnouncementApiService"
+import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
+import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { hasPermission } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
@@ -27,11 +29,14 @@ import classes from "./AnnouncementsAdminPage.module.scss"
 
 const ADMIN_ROLES = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"]
 
+type AudienceChoice = AnnouncementAudience | "USER"
+
 type AnnouncementFormValues = {
     title: string
     body: string
-    audience: AnnouncementAudience
+    audience: AudienceChoice
     programCode: string | null
+    username: string | null
 }
 
 export const AnnouncementsAdminPage: React.FC = () => {
@@ -58,8 +63,12 @@ export const AnnouncementsAdminPage: React.FC = () => {
                 .object({
                     title: z.string(requiredMessage).trim().min(3, minMessage(3)).max(200, maxMessage(200)),
                     body: z.string(requiredMessage).trim().min(1, requiredMessage).max(10000, maxMessage(10000)),
-                    audience: z.enum([AnnouncementAudience.All, AnnouncementAudience.Program], requiredMessage),
+                    audience: z.enum(
+                        [AnnouncementAudience.All, AnnouncementAudience.Program, "USER"],
+                        requiredMessage
+                    ),
                     programCode: z.string().nullable(),
+                    username: z.string().nullable(),
                 })
                 .superRefine((values, ctx) => {
                     if (values.audience === AnnouncementAudience.Program && !values.programCode) {
@@ -67,6 +76,13 @@ export const AnnouncementsAdminPage: React.FC = () => {
                             code: z.ZodIssueCode.custom,
                             path: ["programCode"],
                             message: intl.formatMessage({ id: "pages.announcements.admin.emptyProgram" }),
+                        })
+                    }
+                    if (values.audience === "USER" && !values.username) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            path: ["username"],
+                            message: intl.formatMessage({ id: "pages.announcements.admin.emptyPerson" }),
                         })
                     }
                 }),
@@ -79,6 +95,7 @@ export const AnnouncementsAdminPage: React.FC = () => {
             body: "",
             audience: AnnouncementAudience.All,
             programCode: null,
+            username: null,
         },
         validate: zodResolver(validationSchema),
     })
@@ -97,9 +114,25 @@ export const AnnouncementsAdminPage: React.FC = () => {
         [programs, intl.locale]
     )
 
+    const [person, setPerson] = useState<string | null>(null)
+
     const { mutate: publish, isPending } = useMutation({
-        mutationFn: (payload: AnnouncementCreateRequest) =>
-            AnnouncementApiService.createAnnouncement(payload).then((r) => r.data),
+        mutationFn: async (values: AnnouncementFormValues) => {
+            if (values.audience === "USER") {
+                return InboxApiService.createPersonalAnnouncement({
+                    title: values.title.trim(),
+                    body: values.body.trim(),
+                    username: values.username!,
+                })
+            }
+            const payload: AnnouncementCreateRequest = {
+                title: values.title.trim(),
+                body: values.body.trim(),
+                audience: values.audience,
+                programCode: values.audience === AnnouncementAudience.Program ? values.programCode : null,
+            }
+            return AnnouncementApiService.createAnnouncement(payload).then((r) => r.data)
+        },
     })
 
     const editor = useEditor(
@@ -125,10 +158,8 @@ export const AnnouncementsAdminPage: React.FC = () => {
     const onPublish = form.onSubmit((values) => {
         publish(
             {
-                title: values.title.trim(),
-                body: values.body.trim(),
-                audience: values.audience,
-                programCode: values.audience === AnnouncementAudience.Program ? values.programCode : null,
+                ...values,
+                username: person,
             },
             {
                 onSuccess: () => {
@@ -141,6 +172,7 @@ export const AnnouncementsAdminPage: React.FC = () => {
                         )
                     )
                     form.reset()
+                    setPerson(null)
                     editor?.commands.clearContent()
                     queryClient.invalidateQueries({ queryKey: ["announcements"] })
                 },
@@ -225,18 +257,34 @@ export const AnnouncementsAdminPage: React.FC = () => {
                                     value: AnnouncementAudience.Program,
                                     label: intl.formatMessage({ id: "pages.announcements.admin.audience.program" }),
                                 },
+                                {
+                                    value: "USER",
+                                    label: intl.formatMessage({ id: "pages.announcements.admin.audience.person" }),
+                                },
                             ]}
                             {...form.getInputProps("audience")}
                             onChange={(value) => {
-                                form.setFieldValue(
-                                    "audience",
-                                    (value as AnnouncementAudience) || AnnouncementAudience.All
-                                )
+                                form.setFieldValue("audience", (value as AudienceChoice) || AnnouncementAudience.All)
                                 if (value !== AnnouncementAudience.Program) {
                                     form.setFieldValue("programCode", null)
                                 }
+                                if (value !== "USER") {
+                                    form.setFieldValue("username", null)
+                                    setPerson(null)
+                                }
                             }}
                         />
+                        {form.values.audience === "USER" && (
+                            <UserSearch
+                                key="announce-person"
+                                label={<FormattedMessage id="pages.announcements.admin.fields.person" />}
+                                onUserChange={(picked) => {
+                                    const login = picked?.username ?? null
+                                    setPerson(login)
+                                    form.setFieldValue("username", login)
+                                }}
+                            />
+                        )}
                         {form.values.audience === AnnouncementAudience.Program && (
                             <Select
                                 label={<FormattedMessage id="pages.announcements.admin.fields.program" />}

@@ -72,8 +72,16 @@ export const InboxApiService = {
         return response.data ?? []
     },
 
+    async createPersonalAnnouncement(payload: { title: string; body: string; username: string }) {
+        const response = await RequestHttp.post("/announcements/personal", payload)
+        return response.data
+    },
+
     async notifyOverdue(): Promise<number> {
-        const response = await RequestHttp.post<{ sent: number }>("/report-overdue/notify")
+        const response = await RequestHttp.post<{ sent: number }>("/report-overdue/notify", undefined, {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return 0
         return response.data?.sent ?? 0
     },
 }

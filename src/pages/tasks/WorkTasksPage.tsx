@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Flex, Modal, Text, Textarea, TextInput, Title } from "@mantine/core"
+import { Badge, Button, Flex, Modal, Text, Textarea, TextInput, Title } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
@@ -37,6 +37,7 @@ export const WorkTasksPage: React.FC = () => {
     const isManager = hasPermission(user, MANAGERS)
     const [assignee, setAssignee] = useState<string | null>(null)
     const [program, setProgram] = useState<string | null>(null)
+    const [createOpen, setCreateOpen] = useState(false)
     const [edit, setEdit] = useState<WorkAssignmentDto | null>(null)
     const [editAssignee, setEditAssignee] = useState<string | null>(null)
     const assigneeProgram = program === NO_PROGRAM_CODE ? "" : program
@@ -86,7 +87,10 @@ export const WorkTasksPage: React.FC = () => {
             form.reset()
             setAssignee(null)
             setProgram(null)
+            setCreateOpen(false)
             queryClient.invalidateQueries({ queryKey: ["work-assignments"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
         },
     })
 
@@ -158,48 +162,21 @@ export const WorkTasksPage: React.FC = () => {
             </div>
 
             {isManager && (
-                <Card withBorder p="lg" radius="lg">
-                    <Title order={4} mb="md">
-                        <FormattedMessage id="pages.tasks.create" />
-                    </Title>
-                    <form onSubmit={onCreate}>
-                        <Flex direction="column" gap="sm">
-                            <TextInput
-                                label={<FormattedMessage id="pages.tasks.fields.title" />}
-                                {...form.getInputProps("title")}
-                            />
-                            <Textarea
-                                label={<FormattedMessage id="pages.tasks.fields.body" />}
-                                minRows={3}
-                                {...form.getInputProps("body")}
-                            />
-                            <ProgramFilter
-                                label={<FormattedMessage id="pages.tasks.fields.program" />}
-                                value={program}
-                                onChange={(next) => {
-                                    setProgram(next)
-                                    setAssignee(null)
-                                }}
-                            />
-                            <UserSearch
-                                key={program ?? "all"}
-                                label={<FormattedMessage id="pages.tasks.fields.assignee" />}
-                                program={assigneeProgram}
-                                onUserChange={(picked) => setAssignee(picked?.username ?? null)}
-                            />
-                            <DateInput
-                                label={<FormattedMessage id="pages.tasks.fields.due" />}
-                                valueFormat="DD.MM.YYYY"
-                                clearable
-                                {...form.getInputProps("dueDate")}
-                            />
-                            <Button type="submit" leftSection={<IconPlus size={16} />} loading={isPending} w="fit-content">
-                                <FormattedMessage id="pages.tasks.submit" />
-                            </Button>
-                        </Flex>
-                    </form>
-                </Card>
+                <Button leftSection={<IconPlus size={16} />} w="fit-content" onClick={() => setCreateOpen(true)}>
+                    <FormattedMessage id="pages.tasks.create" />
+                </Button>
             )}
+
+            <Flex gap="md" wrap="wrap" className={classes.legend}>
+                {LANES.map((lane) => (
+                    <Flex key={lane} align="center" gap={6}>
+                        <span className={`${classes.swatch} ${classes[lane.toLowerCase()]}`} />
+                        <Text size="sm">
+                            <FormattedMessage id={`pages.tasks.status.${lane}`} />
+                        </Text>
+                    </Flex>
+                ))}
+            </Flex>
 
             {visible.length === 0 && !isFetching ? (
                 <Text c="dimmed">
@@ -225,7 +202,7 @@ export const WorkTasksPage: React.FC = () => {
                                 {cards.map((item) => (
                                     <article
                                         key={item.id}
-                                        className={classes.card}
+                                        className={`${classes.card} ${classes[item.status.toLowerCase()]}`}
                                         draggable
                                         onDragStart={(event) => event.dataTransfer.setData("text/plain", item.id)}
                                         onClick={() => openEdit(item)}
@@ -263,6 +240,50 @@ export const WorkTasksPage: React.FC = () => {
                     })}
                 </div>
             )}
+
+            <Modal
+                opened={createOpen}
+                onClose={() => setCreateOpen(false)}
+                title={<FormattedMessage id="pages.tasks.create" />}
+                centered
+            >
+                <form onSubmit={onCreate}>
+                    <Flex direction="column" gap="sm">
+                        <TextInput
+                            label={<FormattedMessage id="pages.tasks.fields.title" />}
+                            {...form.getInputProps("title")}
+                        />
+                        <Textarea
+                            label={<FormattedMessage id="pages.tasks.fields.body" />}
+                            minRows={3}
+                            {...form.getInputProps("body")}
+                        />
+                        <ProgramFilter
+                            label={<FormattedMessage id="pages.tasks.fields.program" />}
+                            value={program}
+                            onChange={(next) => {
+                                setProgram(next)
+                                setAssignee(null)
+                            }}
+                        />
+                        <UserSearch
+                            key={program ?? "all"}
+                            label={<FormattedMessage id="pages.tasks.fields.assignee" />}
+                            program={assigneeProgram}
+                            onUserChange={(picked) => setAssignee(picked?.username ?? null)}
+                        />
+                        <DateInput
+                            label={<FormattedMessage id="pages.tasks.fields.due" />}
+                            valueFormat="DD.MM.YYYY"
+                            clearable
+                            {...form.getInputProps("dueDate")}
+                        />
+                        <Button type="submit" leftSection={<IconPlus size={16} />} loading={isPending}>
+                            <FormattedMessage id="pages.tasks.submit" />
+                        </Button>
+                    </Flex>
+                </form>
+            </Modal>
 
             <Modal
                 opened={!!edit}

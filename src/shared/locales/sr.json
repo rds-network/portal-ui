@@ -183,18 +183,21 @@
                     "bodyHint": "Podržan je jednostavan HTML: <p>, <b>, <a href=\"...\">",
                     "audience": "Publika",
                     "program": "Program",
-                    "programPlaceholder": "Izaberite program"
+                    "programPlaceholder": "Izaberite program",
+                    "person": "Volonter"
                 },
                 "audience": {
                     "all": "Svi aktivni volonteri",
-                    "program": "Samo program"
+                    "program": "Samo program",
+                    "person": "Konkretna osoba"
                 },
                 "publish": "Objavi",
                 "success": "Obaveštenje je objavljeno",
                 "required": "Obavezno polje",
                 "emptyTitle": "Unesite naslov (najmanje 3 karaktera)",
                 "emptyBody": "Unesite tekst obaveštenja",
-                "emptyProgram": "Izaberite program za slanje"
+                "emptyProgram": "Izaberite program za slanje",
+                "emptyPerson": "Izaberite volontera"
             }
         },
         "tasks": {

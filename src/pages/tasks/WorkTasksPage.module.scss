@@ -36,10 +36,26 @@
     gap: 16px;
 }
 
+.legend {
+    align-items: center;
+}
+
+.swatch,
 .card {
-    background: #fffbeb;
-    border: 1px solid #f3e8c8;
     border-radius: 16px;
+}
+
+.swatch {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #d1d5db;
+    display: inline-block;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-left-width: 5px;
     padding: 12px;
     min-height: 120px;
     display: flex;
@@ -47,6 +63,31 @@
     gap: 8px;
     cursor: grab;
     margin-bottom: 10px;
+}
+
+.todo {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.doing {
+    background: #eff6ff;
+    border-color: #2563eb;
+}
+
+.review {
+    background: #fefce8;
+    border-color: #ca8a04;
+}
+
+.redo {
+    background: #fff7ed;
+    border-color: #ea580c;
+}
+
+.done {
+    background: #ecfdf5;
+    border-color: #059669;
 }
 
 .meta {

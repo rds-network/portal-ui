@@ -1,7 +1,7 @@
 import { Box, Flex, Group, Text } from "@mantine/core"
 import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
-import React, { useMemo } from "react"
+import React from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { heatmapReportsPath, rememberHeatmapReturn } from "../lib/openWeekReports"
@@ -30,21 +30,12 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
     const startDate = dayjs(new Date(year, 1, 1))
     const endDate = dayjs().year() == year ? dayjs() : dayjs(new Date(year, 12, 31))
     const totalWeeks = volunteers[0]?.weeks.length ?? 0
-
-    const weeks: WeekInfo[] = useMemo(() => {
-        const arr: WeekInfo[] = []
-        let d = startDate.clone()
-
-        for (let i = 0; i < totalWeeks; i++) {
-            arr.push({
-                date: d.clone(),
-                weekNumber: i + 1,
-            })
-            d = d.add(1, "week").startOf("week")
-        }
-
-        return arr
-    }, [startDate.valueOf(), totalWeeks])
+    const weeks: WeekInfo[] = []
+    let weekCursor = startDate.clone()
+    for (let i = 0; i < totalWeeks; i++) {
+        weeks.push({ date: weekCursor.clone(), weekNumber: i + 1 })
+        weekCursor = weekCursor.add(1, "week").startOf("week")
+    }
 
     const openWeekForAll = (weekNumber: number, weekDate: dayjs.Dayjs) => {
         const meta = volunteers[0]?.weeks.find((item) => item.week === weekNumber)
