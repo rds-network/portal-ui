@@ -319,6 +319,7 @@
             "deactivated": "Deactivated",
             "warnings": "Missing-report warnings: {count} of 3",
             "warningsHint": "At 3 notices, a termination letter is sent to MUP automatically.",
+            "curator": "Curator: {programs}",
             "props": {
                 "city": "City",
                 "postalCode": "Postal code",
@@ -467,7 +468,7 @@
             "task-date": "Date",
             "task-date-description": "When the task was completed",
             "task-customer": "Customer",
-            "task-customer-description": "The project curator (team lead) or the organizer. Required — they accept the report.",
+            "task-customer-description": "Only a program curator. They get a notice and can accept the report.",
             "customer-required": "Specify the task customer",
             "required": "Required",
             "min-letters": "Minimum {count} letters",
@@ -552,6 +553,7 @@
             "title": "Activity Heatmap",
             "contract-until": "contract until {date}",
             "warnings": "warnings {count}/3",
+            "curator": "curator",
             "reports-stats": "Reports Statistics",
             "last-report": "Last Report",
             "status": "Status",
@@ -891,6 +893,17 @@
                 }
             }
         },
+        "curators": {
+            "title": "Program curators",
+            "description": "Program team leads. The task customer can only be chosen from this list.",
+            "program": "Program",
+            "person": "Curator",
+            "assign": "Assign",
+            "remove": "Remove",
+            "saved": "Curator assigned",
+            "empty": "None yet",
+            "none": "Assign curators first"
+        },
         "resources": {
             "title": "Our resources",
             "description": "Links to sites, offices, file banks and courses. An admin can add a new card.",
@@ -1056,7 +1069,8 @@
             "all-volunteers": "All volunteers",
             "applications": "Applications",
             "statistics": "Statistics",
-            "mintrud-report": "Mintrud report"
+            "mintrud-report": "Mintrud report",
+            "curators": "Curators"
         },
         "account-settings": "Account settings",
         "activity": "Chronicle",

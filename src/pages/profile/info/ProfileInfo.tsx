@@ -27,6 +27,7 @@ import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
 import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { InboxApiService } from "src/shared/api/InboxApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { CitiesApiService } from "src/shared/api/CitiesApiService"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 import { Locale } from "src/shared/constants/Locales"
@@ -37,6 +38,7 @@ import { CitySelect } from "src/shared/ui/citySelect/CitySelect"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getFullAddress } from "src/shared/utils/getFullAddress"
+import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
 import { ProgramSelectInline } from "../select/ProgramSelect"
 import { ProjectSelectInline } from "../select/ProjectSelect"
@@ -66,6 +68,15 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         queryFn: () => InboxApiService.overdueWarnings(userInfo!.username),
         enabled: !!userInfo?.username && !!showSensitiveData,
     })
+
+    const { data: curatorRows = [] } = useQuery({
+        queryKey: ["program-curators"],
+        queryFn: () => ProgramCuratorApiService.list(),
+        enabled: !!userInfo?.username,
+    })
+    const curatorPrograms = curatorRows
+        .filter((row) => row.username.toLowerCase() === (userInfo?.username || "").toLowerCase())
+        .map((row) => getLocalizedName({ nameRu: row.programNameRu, nameEn: row.programNameEn, nameSr: row.programNameSr }, locale))
 
     const validationSchema = z.object({
         city: z
@@ -376,6 +387,14 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 </Flex>
             </Flex>
             <Text className={classes.userName}>{userInfo?.fullName}</Text>
+            {curatorPrograms.length > 0 && (
+                <Badge color="teal" radius="md" variant="light" mt={6} w="fit-content">
+                    <FormattedMessage
+                        id="pages.profile.curator"
+                        values={{ programs: curatorPrograms.join(", ") }}
+                    />
+                </Badge>
+            )}
             <IDBadge id={userInfo.id} />
             <ProgramSelectInline
                 value={selectedProgram}

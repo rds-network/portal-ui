@@ -24,8 +24,8 @@ import {
     getTaskDisplayName,
     hasTaskTranslation,
 } from "src/shared/taskTranslation/lib/taskTranslation"
+import { CuratorSelect } from "src/shared/ui/curatorSelect/CuratorSelect"
 import { FileUploader, FileUploaderInterface } from "src/shared/ui/fileUploader/FileUploader"
-import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { z } from "zod"
 import classes from "./TaskCard.module.scss"
 
@@ -242,12 +242,12 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
                 description={<FormattedMessage id={locales.resultDescription} />}
                 leftSection={<IconLink size={18} />}
             />
-            <UserSearch
+            <CuratorSelect
                 form={form}
                 path="customer"
                 label={<FormattedMessage id={locales.customer} />}
                 description={<FormattedMessage id={locales.customerDescription} />}
-                initialSearch={props.task.customer ? props.task.customer : undefined}
+                initialUsername={props.task.customer}
             />
             <FileUploader
                 maxFiles={15}

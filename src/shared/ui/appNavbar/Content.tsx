@@ -68,12 +68,17 @@ export const Content: ItemGroupProps[] = [
                 roles: ["ADMIN_VOLUNTEER"],
             },
             {
+                label: "navbar.volunteers.curators",
+                link: "/curators",
+                roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
+            },
+            {
                 label: "navbar.reports.announcements",
                 link: "/announcements/admin",
                 roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO"],
             },
         ],
-        roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO", "INTERVIEWER", "ADMIN"],
+        roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO", "INTERVIEWER", "ADMIN", "MAIN_VOLUNTEER"],
     },
     {
         label: "navbar.activity",

@@ -319,6 +319,7 @@
             "deactivated": "Deaktiviran",
             "warnings": "Upozorenja o izveštajima: {count} od 3",
             "warningsHint": "Na 3 obaveštenja pismo o raskidu automatski ide u MUP.",
+            "curator": "Kustos: {programs}",
             "props": {
                 "city": "Grad",
                 "postalCode": "Poštanski broj",
@@ -467,7 +468,7 @@
             "task-date": "Datum",
             "task-date-description": "Kada je zadatak završen",
             "task-customer": "Kupac",
-            "task-customer-description": "Kurator projekta (timlid) ili organizator. Obavezno — on prima izveštaj.",
+            "task-customer-description": "Samo kustos programa. On dobija obaveštenje i može da prihvati izveštaj.",
             "customer-required": "Navedite naručioca zadatka",
             "required": "Obavezno",
             "min-letters": "Najmanje {count} znakova",
@@ -552,6 +553,7 @@
             "title": "Toplinska mapa aktivnosti",
             "contract-until": "ugovor do {date}",
             "warnings": "upozorenja {count}/3",
+            "curator": "kustos",
             "last-report": "Poslednji izveštaj",
             "status": "Status",
             "view-profile": "Pogledaj profil",
@@ -891,6 +893,17 @@
                 }
             }
         },
+        "curators": {
+            "title": "Kustosi programa",
+            "description": "Timlidovi programa. Naručilac zadatka bira se samo iz ovog spiska.",
+            "program": "Program",
+            "person": "Kustos",
+            "assign": "Dodeli",
+            "remove": "Ukloni",
+            "saved": "Kustos je dodeljen",
+            "empty": "Još nema nikoga",
+            "none": "Prvo dodelite kustosе"
+        },
         "resources": {
             "title": "Naši resursi",
             "description": "Linkovi ka sajtovima, kancelarijama, bankama fajlova i kursevima. Admin može da doda novu karticu.",
@@ -1056,7 +1069,8 @@
             "all-volunteers": "Svi volonteri",
             "applications": "Aplikacije",
             "statistics": "Statistika",
-            "mintrud-report": "izveštaj o volontiranju"
+            "mintrud-report": "izveštaj o volontiranju",
+            "curators": "Kustosi"
         },
         "account-settings": "Podešavanja naloga",
         "activity": "Hronika",

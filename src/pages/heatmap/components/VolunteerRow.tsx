@@ -5,7 +5,9 @@ import dayjs, { Dayjs } from "dayjs"
 import React, { useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
+import { useQuery } from "@tanstack/react-query"
 import { heatmapReportsPath, rememberHeatmapReturn } from "src/pages/heatmap/lib/openWeekReports"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { getTicketBody } from "src/pages/heatmap/lib/ticket"
 import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
 import TicketModal from "src/shared/ui/ticketModal/TicketModal"
@@ -83,6 +85,13 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
     const statusColor = getVolunteerStatusColor()
     const statusText = getVolunteerStatusText()
     const contractUntil = formatContractEnd(latestContractEnd(volunteer.volunteerInfo.contracts))
+    const { data: curatorRows = [] } = useQuery({
+        queryKey: ["program-curators"],
+        queryFn: () => ProgramCuratorApiService.list(),
+    })
+    const isProgramCurator = curatorRows.some(
+        (row) => row.username.toLowerCase() === volunteer.volunteerInfo.username.toLowerCase()
+    )
 
     const getSquareColor = (weekNumber: number) => {
         const weekData = weekByNumber.get(weekNumber)
@@ -201,6 +210,14 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                             onClick={() => onVolunteerSelect(volunteer.volunteerInfo.id)}
                                         >
                                             {volunteer.volunteerInfo.fullName}
+                                            {isProgramCurator && (
+                                                <>
+                                                    {" · "}
+                                                    <Text span size="xs" c="teal">
+                                                        <FormattedMessage id="pages.heat-map.curator" />
+                                                    </Text>
+                                                </>
+                                            )}
                                         </Text>
                                         {warningCount > 0 && (
                                             <Text size="xs" c={warningCount >= 3 ? "red" : "orange"}>
