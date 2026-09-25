@@ -549,6 +549,7 @@
             "project-filter": "Project filter",
             "project-filter-not-selected": "Not selected",
             "digest-title": "Week summary",
+            "week-short": "wk. {week}",
             "show-tasks": "What was done"
         },
         "heat-map": {

@@ -1,7 +1,5 @@
 @use "../../app/styles/surfaces" as s;
 
-$table-min-width: 58rem;
-
 .root {
     @include s.page;
     flex-direction: column;
@@ -54,62 +52,66 @@ $table-min-width: 58rem;
     min-width: 12rem;
 }
 
-.table {
+.cardList {
     width: 100%;
-    min-width: $table-min-width;
-    table-layout: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
-.row {
-    transition: transform 0.2s ease;
+.reportCard {
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding: 14px 16px;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 1px solid light-dark(#e5e7eb, var(--portal-border));
+    background: light-dark(#f8fafc, var(--portal-surface));
+    box-shadow: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
 
     &:hover {
-        cursor: pointer;
-        transform: scale(1.02);
+        background: light-dark(#eef2ff, color-mix(in srgb, var(--portal-surface) 86%, white));
+        border-color: light-dark(#c7d2fe, var(--portal-border));
     }
 }
 
-.avatar {
-    &:hover {
-        cursor: pointer;
-    }
+.cardTitle {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
-.columnVolunteer {
-    width: 12rem;
-    padding: 0.3rem;
+.cardHours {
+    margin-top: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    color: light-dark(#0f766e, #5eead4);
 }
 
-.columnDate {
-    width: 12rem;
+.cardMeta {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: light-dark(#6b7280, var(--portal-muted));
 }
 
-.columnWeeks {
-    width: 8rem;
+.taskPreview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
 }
 
-.columnTimeSpent {
-    width: 8rem;
-}
-
-.columnStatus {
-    width: 8rem;
-}
-
-.columnProgram {
-    width: 10rem;
-}
-
-.columnProject {
-    width: 10rem;
-}
-
-.columnStats {
-    width: 10rem;
-}
-
-.stats {
-    font-size: small;
+.taskLine {
+    font-size: 12px;
+    line-height: 1.45;
+    color: light-dark(#374151, inherit);
+    white-space: pre-wrap;
 }
 
 .pagination {
@@ -149,84 +151,4 @@ $table-min-width: 58rem;
     row-gap: 1rem;
     align-items: center;
     justify-content: center;
-}
-
-.mobileList {
-    width: 100%;
-    row-gap: 0.5rem;
-}
-
-.mobileCard {
-    width: 100%;
-    flex-direction: column;
-    row-gap: 0.5rem;
-    padding: 0.75rem;
-    border-radius: var(--mantine-spacing-xs);
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
-    box-shadow: 0 0 0.3rem 0.1rem light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
-    transition: transform 0.2s ease;
-
-    &:hover {
-        cursor: pointer;
-        transform: scale(1.02);
-    }
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        padding: 1rem;
-        row-gap: 0.75rem;
-    }
-
-    & {
-        @include s.glass;
-        padding: 24px;
-        min-width: 0;
-        max-width: 100%;
-    }
-}
-
-.reportHeader {
-    width: 100%;
-    flex-direction: column;
-    row-gap: 0.25rem;
-}
-
-.reportBody {
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        column-gap: 1rem;
-    }
-}
-
-.reportLeft {
-    flex: 1;
-    flex-direction: column;
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        row-gap: 0;
-    }
-
-    @media (max-width: 1023px) {
-        row-gap: 1rem;
-    }
-}
-
-.taskPreview {
-    padding: 2px 4px 10px;
-    color: inherit;
-}
-
-.reportRight {
-    flex: 1;
-    flex-direction: column;
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        row-gap: 0;
-    }
-
-    @media (max-width: 1023px) {
-        row-gap: 1rem;
-    }
 }

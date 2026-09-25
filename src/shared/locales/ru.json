@@ -549,6 +549,7 @@
             "project-filter": "Фильтр проектов",
             "project-filter-not-selected": "Не выбрано",
             "digest-title": "Сводка за неделю",
+            "week-short": "нед. {week}",
             "show-tasks": "Что сделано"
         },
         "heat-map": {

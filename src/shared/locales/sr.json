@@ -549,6 +549,7 @@
             "project-filter": "Filter projekata",
             "project-filter-not-selected": "Nije odabrano",
             "digest-title": "Pregled nedelje",
+            "week-short": "ned. {week}",
             "show-tasks": "Šta je urađeno"
         },
         "heat-map": {
