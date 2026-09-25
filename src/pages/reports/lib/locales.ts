@@ -23,5 +23,4 @@ export const locales = {
     noProgram: "pages.user-list.no-program",
     noProject: "pages.user-list.no-project",
     digestTitle: "pages.report-list.digest-title",
-    showTasks: "pages.report-list.show-tasks",
 }

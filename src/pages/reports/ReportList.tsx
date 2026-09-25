@@ -33,6 +33,27 @@ import { WeekDigest } from "./WeekDigest"
 import { getTaskDisplayDescription, getTaskDisplayName } from "src/shared/taskTranslation/lib/taskTranslation"
 import { getSpentTime } from "src/shared/report/timeSpent"
 import classes from "./ReportList.module.scss"
+import type { IntlShape } from "react-intl"
+
+const ReportTaskPreview = ({ report, intl }: { report: ReportDto; intl: IntlShape }) => (
+    <Flex direction="column" gap={8} py={6} className={classes.taskPreview}>
+        {(report.tasks || []).map((task, i) => (
+            <div key={task.id || i}>
+                <Text size="sm" fw={600}>
+                    {getTaskDisplayName(task, false) || "—"}{" "}
+                    <Text span c="dimmed" fw={400}>
+                        · {getSpentTime(task.timeSpent, intl)}
+                    </Text>
+                </Text>
+                {getTaskDisplayDescription(task, false) && (
+                    <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+                        {getTaskDisplayDescription(task, false)}
+                    </Text>
+                )}
+            </div>
+        ))}
+    </Flex>
+)
 
 export const ReportList = () => {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -49,7 +70,6 @@ export const ReportList = () => {
 
     const [resetKey, setResetKey] = useState(0)
     const [filtersOpened, setFiltersOpened] = useState(false)
-    const [openReportId, setOpenReportId] = useState<string | null>(null)
     const [pageRequest, setPageRequest] = useState<PageRequest>({
         ...defaultPage,
         pageNumber: Math.max(0, parseInt(searchParams.get("page") || "1") - 1),
@@ -338,7 +358,6 @@ export const ReportList = () => {
         const createTime = dayjs(report.createTime).format("DD MMM YYYY HH:mm")
         const timeSpent = getSpentTimeFromReport(report, intl)
         const filesCount = getReportFilesCount(report)
-        const opened = openReportId === report.id
         return (
             <React.Fragment key={report.id}>
             <Table.Tr
@@ -410,43 +429,14 @@ export const ReportList = () => {
                                 </Text>
                             </Flex>
                         )}
-                        <Button
-                            variant="subtle"
-                            size="compact-xs"
-                            mt={4}
-                            onClick={(e) => {
-                                e.stopPropagation()
-                                setOpenReportId(opened ? null : report.id || null)
-                            }}
-                        >
-                            <FormattedMessage id={locales.showTasks} />
-                        </Button>
                     </Flex>
                 </Table.Td>
             </Table.Tr>
-            {opened && (
-                <Table.Tr>
-                    <Table.Td colSpan={8} onClick={(e) => e.stopPropagation()}>
-                        <Flex direction="column" gap={8} py={6}>
-                            {(report.tasks || []).map((task, i) => (
-                                <div key={task.id || i}>
-                                    <Text size="sm" fw={600}>
-                                        {getTaskDisplayName(task, false) || "—"}{" "}
-                                        <Text span c="dimmed" fw={400}>
-                                            · {getSpentTime(task.timeSpent, intl)}
-                                        </Text>
-                                    </Text>
-                                    {getTaskDisplayDescription(task, false) && (
-                                        <Text size="sm" c="dimmed" style={{ whiteSpace: "pre-wrap" }}>
-                                            {getTaskDisplayDescription(task, false)}
-                                        </Text>
-                                    )}
-                                </div>
-                            ))}
-                        </Flex>
-                    </Table.Td>
-                </Table.Tr>
-            )}
+            <Table.Tr>
+                <Table.Td colSpan={8} onClick={(e) => e.stopPropagation()}>
+                    <ReportTaskPreview report={report} intl={intl} />
+                </Table.Td>
+            </Table.Tr>
             </React.Fragment>
         )
     })
@@ -632,12 +622,7 @@ export const ReportList = () => {
                         </Flex>
                     </>
                 )}
-                <Text size="xs" c="dimmed" lineClamp={3} mt={6}>
-                    {(report.tasks || [])
-                        .map((t) => getTaskDisplayName(t, false))
-                        .filter(Boolean)
-                        .join(" · ")}
-                </Text>
+                <ReportTaskPreview report={report} intl={intl} />
             </Flex>
         )
     })

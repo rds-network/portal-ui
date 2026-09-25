@@ -213,6 +213,11 @@ $table-min-width: 58rem;
     }
 }
 
+.taskPreview {
+    padding: 2px 4px 10px;
+    color: inherit;
+}
+
 .reportRight {
     flex: 1;
     flex-direction: column;
