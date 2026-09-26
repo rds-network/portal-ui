@@ -841,6 +841,7 @@
         "applications": {
             "assignee": "Assignee",
             "unassigned": "Unassigned",
+            "assignToMe": "Assign to me",
             "notesCount": "Comments: {count}",
             "unassignedApplications": "Unassigned",
             "allAssignees": "All assignees",

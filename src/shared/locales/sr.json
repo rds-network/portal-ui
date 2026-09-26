@@ -841,6 +841,7 @@
         "applications": {
             "assignee": "Odgovorna osoba",
             "unassigned": "Nije dodeljeno",
+            "assignToMe": "Dodeli meni",
             "notesCount": "Komentari: {count}",
             "unassignedApplications": "Nedodeljene",
             "allAssignees": "Sve odgovorne osobe",

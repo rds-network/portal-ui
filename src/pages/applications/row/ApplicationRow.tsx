@@ -1,6 +1,6 @@
 import { Avatar, Badge, Flex, Text, Tooltip, UnstyledButton } from "@mantine/core"
 import { ApplicationDto, ContractDto, UserInfoDto } from "@rds-network/portal-api-axios"
-import { IconCalendar, IconMail, IconMessageCircle, IconUser } from "@tabler/icons-react"
+import { IconCalendar, IconMail, IconMessageCircle } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { MouseEvent, ReactNode } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -9,6 +9,7 @@ import { ContractDate } from "src/pages/applications/contract/ContractDate"
 import { ApplicationMenu } from "src/pages/applications/menu/ApplicationMenu"
 import { useApplicationUpdate } from "src/shared/api/applications/useApplicationUpdate"
 import { ApplicationAssigneeAvatar } from "../assignee/ApplicationAssigneeAvatar"
+import { ApplicationAssigneeSelect } from "../assignee/ApplicationAssigneeSelect"
 import { CopyText } from "src/shared/ui/copyText/CopyText"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { ApplicationStatusSelect } from "src/shared/ui/select/ApplicationStatusSelect"
@@ -104,10 +105,6 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
     )
 
     const created = dayjs(application.created).format("DD MMM YYYY")
-    const assigneeName =
-        assigneeUser?.fullName ||
-        application.assignee ||
-        intl.formatMessage({ id: "pages.applications.unassigned" })
 
     return (
         <div
@@ -161,11 +158,9 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
                         <ContractDate application={application} onChange={onContractChanged} disabled={isUpdating} />
                     </Flex>
                 </div>
-                <TextPropertyBox
-                    name="pages.applications.assignee"
-                    value={assigneeName}
-                    icon={<IconUser size={16} />}
-                />
+                <div className={classes.field} data-row-action>
+                    <ApplicationAssigneeSelect application={application} disabled={isUpdating} />
+                </div>
                 <div className={classes.statusBox} data-row-action>
                     <Text c="dimmed" size="xs">
                         <FormattedMessage id="pages.applications.status" />

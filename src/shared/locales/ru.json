@@ -841,6 +841,7 @@
         "applications": {
             "assignee": "Ответственный",
             "unassigned": "Не назначен",
+            "assignToMe": "Назначить себе",
             "notesCount": "Комментарии: {count}",
             "unassignedApplications": "Не назначенные",
             "allAssignees": "Все ответственные",
