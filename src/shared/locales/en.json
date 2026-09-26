@@ -1009,6 +1009,7 @@
             "description": "Reports where you are the customer. New ones also arrive on the bell and open the report.",
             "list": "Reports to accept",
             "empty": "No reports where you are the customer yet",
+            "emptyFiltered": "No reports with this status. Clear the filter — the report may already be accepted or returned.",
             "open": "Open report"
         },
         "curators": {

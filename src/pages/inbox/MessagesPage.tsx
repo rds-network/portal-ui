@@ -121,12 +121,18 @@ export const MessagesPage: React.FC = () => {
                                 )}
                             </Flex>
                             <Text size="xs" c="dimmed">
-                                {item.recipientName ||
-                                    item.counterpartName ||
-                                    item.recipient ||
-                                    item.counterpart ||
-                                    item.createdBy ||
-                                    "портал"}{" "}
+                                {item.kind === "REPORT_CUSTOMER"
+                                    ? item.counterpartName ||
+                                      item.createdBy ||
+                                      item.recipientName ||
+                                      item.recipient ||
+                                      "портал"
+                                    : item.recipientName ||
+                                      item.counterpartName ||
+                                      item.recipient ||
+                                      item.counterpart ||
+                                      item.createdBy ||
+                                      "портал"}{" "}
                                 · {dayjs(item.createTime).format("DD.MM HH:mm")}
                             </Text>
                             <Text size="xs" c={item.recipientLastSeen ? "dimmed" : "orange"} mt={2}>

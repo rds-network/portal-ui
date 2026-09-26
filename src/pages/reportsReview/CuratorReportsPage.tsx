@@ -98,7 +98,18 @@ export const CuratorReportsPage: React.FC = () => {
                     </Flex>
                     {reports.length === 0 ? (
                         <Text c="dimmed">
-                            <FormattedMessage id="pages.review-reports.empty" />
+                            <FormattedMessage
+                                id={
+                                    status
+                                        ? "pages.review-reports.emptyFiltered"
+                                        : "pages.review-reports.empty"
+                                }
+                                defaultMessage={
+                                    status
+                                        ? "Нет отчётов с этим статусом. Сбросьте фильтр статуса — возможно, отчёт уже принят или отклонён."
+                                        : "Нет отчётов на приёмку"
+                                }
+                            />
                         </Text>
                     ) : (
                         <Flex className={classes.reportsList} direction="column">

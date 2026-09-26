@@ -1009,6 +1009,7 @@
             "description": "Izveštaji gde ste naručilac. Novi stižu i na zvono i odmah otvaraju izveštaj.",
             "list": "Izveštaji za prijem",
             "empty": "Još nema izveštaja gde ste naručilac",
+            "emptyFiltered": "Nema izveštaja sa ovim statusom. Resetujte filter — izveštaj je možda već prihvaćen ili vraćen.",
             "open": "Otvori izveštaj"
         },
         "curators": {
