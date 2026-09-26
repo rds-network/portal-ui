@@ -2,10 +2,10 @@
 
 .root {
     @include s.glass;
-    padding: 12px 14px;
+    padding: 10px 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
     min-height: 0;
     height: 100%;
@@ -16,12 +16,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     flex-shrink: 0;
 }
 
 .title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     letter-spacing: -0.02em;
     margin: 0;
@@ -29,8 +29,8 @@
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
-    gap: 12px;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 10px;
     align-items: stretch;
     flex: 1;
     min-height: 0;
@@ -38,7 +38,7 @@
 
 .calendarCard {
     border: 1px solid var(--portal-border);
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
     background: var(--portal-solid);
     min-height: 0;
@@ -47,7 +47,7 @@
 }
 
 .calendarHead {
-    padding: 8px 10px;
+    padding: 6px 8px;
     background: var(--portal-accent-soft);
     border-bottom: 1px solid var(--portal-border);
     flex-shrink: 0;
@@ -59,24 +59,27 @@
 
 .calendarSub {
     color: var(--portal-muted);
-    margin-top: 1px;
-    line-height: 1.3;
+    margin-top: 0;
+    line-height: 1.25;
+    font-size: 10px !important;
 }
 
 .calendarBody {
-    padding: 6px 6px 8px;
+    padding: 4px 6px 6px;
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .monthNav {
     appearance: none;
     border: 1px solid var(--portal-border);
     background: var(--portal-surface);
-    border-radius: 8px;
-    width: 26px;
-    height: 26px;
+    border-radius: 6px;
+    width: 22px;
+    height: 22px;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -91,12 +94,23 @@
 
 .monthLabel {
     text-transform: capitalize;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--portal-ink);
+    line-height: 1.2;
+}
+
+.months {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    flex: 1;
+    min-height: 0;
+    align-content: start;
 }
 
 .picker {
     width: 100%;
+    min-width: 0;
 
     :global(.mantine-DatePicker-calendarHeader),
     :global(.mantine-CalendarHeader-calendarHeader) {
@@ -111,23 +125,25 @@
     :global(.mantine-DatePicker-day),
     :global(.mantine-Day-day) {
         width: 100%;
-        height: 28px;
-        min-height: 28px;
+        height: 20px;
+        min-height: 20px;
         min-width: 0;
-        font-size: 12px;
+        font-size: 10px;
         line-height: 1;
+        padding: 0;
     }
 
     :global(.mantine-DatePicker-weekdaysRow),
     :global(.mantine-DatePicker-monthThead) {
         th {
-            padding-bottom: 2px;
-            font-size: 11px;
+            padding: 0 0 1px;
+            font-size: 9px;
+            font-weight: 600;
         }
     }
 
     :global(.mantine-DatePicker-monthRow) td {
-        padding: 1px 0;
+        padding: 0;
     }
 
     :global(.mantine-DatePicker-levelsGroup) {
@@ -141,16 +157,16 @@
     place-items: center;
     width: 100%;
     height: 100%;
-    min-height: 26px;
+    min-height: 18px;
 }
 
 .dayNum {
     display: grid;
     place-items: center;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 500;
     line-height: 1;
 }
@@ -159,7 +175,7 @@
     background: var(--portal-accent);
     color: #fff;
     font-weight: 700;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--portal-accent) 22%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--portal-accent) 25%, transparent);
 }
 
 .dayWithEvent {
@@ -173,10 +189,15 @@
     flex-direction: column;
 }
 
+.listTitle {
+    color: var(--portal-ink);
+    flex-shrink: 0;
+}
+
 .listScroll {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 5px;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
@@ -186,11 +207,11 @@
 
 .eventCard {
     display: grid;
-    grid-template-columns: 52px minmax(0, 1fr);
-    gap: 10px;
-    padding: 10px 12px;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 6px;
+    padding: 6px 8px;
     border: 1px solid var(--portal-border);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--portal-solid);
     flex-shrink: 0;
 }
@@ -220,7 +241,30 @@
 
 .eventWhen {
     text-align: center;
-    padding-top: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+    padding-top: 1px;
+}
+
+.eventDay {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--portal-ink);
+}
+
+.eventMonth {
+    font-size: 9px;
+    font-weight: 650;
+    text-transform: lowercase;
+    color: var(--portal-ink);
+}
+
+.eventTime {
+    font-size: 10px;
+    color: var(--portal-muted);
+    margin-top: 2px;
 }
 
 .eventBody {
@@ -231,13 +275,28 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    gap: 4px;
+}
+
+.eventTitle {
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.25;
+    margin-top: 2px;
+    color: var(--portal-ink);
+}
+
+.eventMeta {
+    font-size: 10px;
+    color: var(--portal-muted);
+    line-height: 1.25;
+    margin-top: 1px;
 }
 
 .mapLink {
     display: inline-block;
-    margin-top: 6px;
-    font-size: 13px;
+    margin-top: 2px;
+    font-size: 11px;
     color: var(--portal-accent);
     text-decoration: none;
 
@@ -248,21 +307,25 @@
 
 .empty {
     color: var(--portal-muted);
-    font-size: 14px;
-    padding: 8px 0;
+    font-size: 12px;
+    padding: 4px 0;
 }
 
 @media (max-width: 60em) {
     .root {
         height: auto;
-        max-height: 480px;
+        max-height: 520px;
     }
 
     .layout {
         grid-template-columns: minmax(0, 1fr);
     }
 
+    .months {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .calendarCard {
-        max-height: 240px;
+        max-height: 280px;
     }
 }
