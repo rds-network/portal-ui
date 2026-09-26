@@ -222,7 +222,29 @@
             "messages": "Poruke",
             "allMessages": "Sve poruke →",
             "events": "Događaji",
-            "eventsSoon": "Kalendar događaja biće ovde — prenosimo ga sa ekomape."
+            "eventsSoon": "Kalendar događaja biće ovde — prenosimo ga sa ekomape.",
+            "eventsEmpty": "Još nema predstojećih događaja",
+            "addEvent": "Dodaj",
+            "saveEvent": "Sačuvaj",
+            "eventCreated": "Događaj je dodat",
+            "eventRequired": "Popunite obavezna polja",
+            "eventTitle": "Naziv",
+            "eventTypeLabel": "Tip",
+            "eventWhen": "Datum",
+            "eventTime": "Vreme",
+            "eventWhere": "Gde / link",
+            "eventDescription": "Opis",
+            "eventType": {
+                "CALL": "Poziv",
+                "SUBBOTNIK": "Subotnik",
+                "MEETING": "Mitinzi",
+                "LECTURE": "Predavanje",
+                "OTHER": "Ostalo"
+            },
+            "projects": "Novo u projektima",
+            "projectsHint": "Uglavnom, vodiči i zakoni",
+            "projectsEmpty": "Nije moguće učitati feed",
+            "read": "Pročitaj →"
         },
         "tasks": {
             "title": "Zadaci",

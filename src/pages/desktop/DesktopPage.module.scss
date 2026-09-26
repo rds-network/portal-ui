@@ -129,6 +129,66 @@
     grid-column: 1 / -1;
 }
 
+.projectGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.projectCard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid var(--portal-border);
+    background: var(--portal-solid);
+    text-decoration: none;
+    color: inherit;
+    min-height: 160px;
+    transition:
+        border-color 0.15s ease,
+        transform 0.15s ease;
+
+    &:hover {
+        border-color: var(--portal-accent);
+        transform: translateY(-1px);
+    }
+}
+
+.projectTag {
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.projectTitle {
+    flex: 1;
+    letter-spacing: -0.02em;
+}
+
+.projectLink {
+    margin-top: auto;
+    font-size: 13px;
+    color: var(--portal-accent);
+}
+
+.source_uglavnom .projectTag,
+.source_uglavnom .projectLink {
+    color: #c45c26;
+}
+
+.source_guides .projectTag,
+.source_guides .projectLink {
+    color: #2f5d9f;
+}
+
+.source_laws .projectTag,
+.source_laws .projectLink {
+    color: #2f7a4b;
+}
+
 @media (max-width: 60em) {
     .grid {
         grid-template-columns: minmax(0, 1fr);
@@ -137,5 +197,9 @@
     .heatmap,
     .full {
         grid-column: auto;
+    }
+
+    .projectGrid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

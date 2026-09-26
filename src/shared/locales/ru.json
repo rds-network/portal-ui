@@ -222,7 +222,29 @@
             "messages": "Сообщения",
             "allMessages": "Все сообщения →",
             "events": "Мероприятия",
-            "eventsSoon": "Календарь событий появится здесь — перенесём из экомапы."
+            "eventsSoon": "Календарь событий появится здесь — перенесём из экомапы.",
+            "eventsEmpty": "Пока нет ближайших событий",
+            "addEvent": "Добавить",
+            "saveEvent": "Сохранить",
+            "eventCreated": "Событие добавлено",
+            "eventRequired": "Заполните обязательные поля",
+            "eventTitle": "Название",
+            "eventTypeLabel": "Тип",
+            "eventWhen": "Дата",
+            "eventTime": "Время",
+            "eventWhere": "Где / ссылка",
+            "eventDescription": "Описание",
+            "eventType": {
+                "CALL": "Созвон",
+                "SUBBOTNIK": "Субботник",
+                "MEETING": "Митинг",
+                "LECTURE": "Лекция",
+                "OTHER": "Другое"
+            },
+            "projects": "Новое в проектах",
+            "projectsHint": "Uglavnom, гайды и законодательство",
+            "projectsEmpty": "Пока не удалось загрузить ленту",
+            "read": "Читать →"
         },
         "tasks": {
             "title": "Задачи",

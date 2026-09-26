@@ -1,8 +1,11 @@
-import { Badge, Button, Flex, Text, Title } from "@mantine/core"
+import { Badge, Button, Flex, Modal, Select, Text, Textarea, TextInput, Title } from "@mantine/core"
+import { DateInput } from "@mantine/dates"
+import { useForm } from "@mantine/form"
+import { notifications } from "@mantine/notifications"
 import { IconPlus } from "@tabler/icons-react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useContext, useMemo } from "react"
+import React, { useContext, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
@@ -10,12 +13,17 @@ import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUse
 import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/reportsPersonal/lib/constants"
 import { defaultUser } from "src/pages/reports/lib/defaults"
 import { InboxApiService } from "src/shared/api/InboxApiService"
+import { PortalEventApiService, PortalEventType } from "src/shared/api/PortalEventApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { fetchProjectFeed } from "src/shared/api/ProjectFeedApi"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
+import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
+import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import classes from "./DesktopPage.module.scss"
 
@@ -27,14 +35,32 @@ const STATUS_COLOR: Record<string, string> = {
     DONE: "green",
 }
 
+const EVENT_COLOR: Record<string, string> = {
+    CALL: "blue",
+    SUBBOTNIK: "teal",
+    MEETING: "violet",
+    LECTURE: "cyan",
+    OTHER: "gray",
+}
+
 const ACTIVE_TASK_STATUSES = new Set(["TODO", "DOING", "REVIEW", "REDO"])
+const MANAGER_ROLES = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
 
 export const DesktopPage: React.FC = () => {
     setDocumentTitleByLocale("pages.desktop.title")
     const { user } = useContext(UserContext)
     const intl = useIntl()
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const { programs, projects } = useProgramProjectFilter(null, null)
+    const [eventOpen, setEventOpen] = useState(false)
+
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
+    const canManageEvents = hasPermission(user, MANAGER_ROLES) || !!curatorMe?.curator
 
     const reportFilter = useMemo(
         () => ({ ...defaultFilter, login: user?.username || null }),
@@ -79,6 +105,51 @@ export const DesktopPage: React.FC = () => {
         })
         return sorted.slice(0, 4)
     }, [threads])
+
+    const { data: events = [] } = useQuery({
+        queryKey: ["portal-events", "upcoming"],
+        queryFn: () => PortalEventApiService.list(true, 6),
+    })
+
+    const { data: projectFeed = [] } = useQuery({
+        queryKey: ["project-feed"],
+        queryFn: () => fetchProjectFeed(),
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const eventForm = useForm({
+        initialValues: {
+            title: "",
+            description: "",
+            startsAt: null as Date | null,
+            time: "12:00",
+            location: "",
+            type: "MEETING" as PortalEventType,
+            programCode: curatorMe?.programs?.[0] || "",
+        },
+        validate: {
+            title: (value) =>
+                value.trim().length < 3 ? intl.formatMessage({ id: "pages.desktop.eventRequired" }) : null,
+            startsAt: (value) => (!value ? intl.formatMessage({ id: "pages.desktop.eventRequired" }) : null),
+        },
+    })
+
+    const { mutate: createEvent, isPending: creatingEvent } = useMutation({
+        mutationFn: PortalEventApiService.create,
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.desktop.eventCreated" />
+                    </Text>,
+                    null
+                )
+            )
+            eventForm.reset()
+            setEventOpen(false)
+            queryClient.invalidateQueries({ queryKey: ["portal-events"] })
+        },
+    })
 
     return (
         <Flex className={classes.root} direction="column">
@@ -184,9 +255,7 @@ export const DesktopPage: React.FC = () => {
                                     </Text>
                                     <Text className={classes.rowMeta} lineClamp={1}>
                                         {task.customerName || task.customer || "—"}
-                                        {task.dueDate
-                                            ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
-                                            : ""}
+                                        {task.dueDate ? ` · ${dayjs(task.dueDate).format("DD MMM")}` : ""}
                                     </Text>
                                 </div>
                                 <Badge
@@ -253,12 +322,160 @@ export const DesktopPage: React.FC = () => {
                         <Title order={2} className={classes.cardTitle}>
                             <FormattedMessage id="pages.desktop.events" />
                         </Title>
+                        {canManageEvents && (
+                            <Button
+                                size="compact-sm"
+                                variant="light"
+                                leftSection={<IconPlus size={14} />}
+                                onClick={() => setEventOpen(true)}
+                            >
+                                <FormattedMessage id="pages.desktop.addEvent" />
+                            </Button>
+                        )}
                     </div>
-                    <Text className={classes.empty}>
-                        <FormattedMessage id="pages.desktop.eventsSoon" />
-                    </Text>
+                    <div className={classes.list}>
+                        {events.length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage id="pages.desktop.eventsEmpty" />
+                            </Text>
+                        )}
+                        {events.map((event) => (
+                            <div key={event.id} className={classes.row}>
+                                <div className={classes.rowBody}>
+                                    <Text fw={600} lineClamp={1}>
+                                        {event.title}
+                                    </Text>
+                                    <Text className={classes.rowMeta} lineClamp={1}>
+                                        {dayjs(event.startsAt).format("DD MMM YYYY · HH:mm")}
+                                        {event.location ? ` · ${event.location}` : ""}
+                                    </Text>
+                                </div>
+                                <Badge color={EVENT_COLOR[event.type] || "gray"} variant="light" radius="md">
+                                    <FormattedMessage
+                                        id={`pages.desktop.eventType.${event.type}`}
+                                        defaultMessage={event.type}
+                                    />
+                                </Badge>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                <section className={`${classes.card} ${classes.full}`}>
+                    <div className={classes.cardHeader}>
+                        <div>
+                            <Title order={2} className={classes.cardTitle}>
+                                <FormattedMessage id="pages.desktop.projects" />
+                            </Title>
+                            <Text size="sm" c="dimmed">
+                                <FormattedMessage id="pages.desktop.projectsHint" />
+                            </Text>
+                        </div>
+                    </div>
+                    {projectFeed.length === 0 ? (
+                        <Text className={classes.empty}>
+                            <FormattedMessage id="pages.desktop.projectsEmpty" />
+                        </Text>
+                    ) : (
+                        <div className={classes.projectGrid}>
+                            {projectFeed.map((item) => (
+                                <a
+                                    key={`${item.source}-${item.url}`}
+                                    className={`${classes.projectCard} ${classes[`source_${item.source}`]}`}
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <Text className={classes.projectTag}>{item.tag}</Text>
+                                    <Text fw={650} lineClamp={3} className={classes.projectTitle}>
+                                        {item.title}
+                                    </Text>
+                                    <Text size="xs" c="dimmed">
+                                        {item.subtitle}
+                                    </Text>
+                                    <Text className={classes.projectLink}>
+                                        <FormattedMessage id="pages.desktop.read" />
+                                    </Text>
+                                </a>
+                            ))}
+                        </div>
+                    )}
                 </section>
             </div>
+
+            <Modal
+                opened={eventOpen}
+                onClose={() => setEventOpen(false)}
+                title={<FormattedMessage id="pages.desktop.addEvent" />}
+            >
+                <Flex direction="column" gap="sm">
+                    <TextInput
+                        label={<FormattedMessage id="pages.desktop.eventTitle" />}
+                        {...eventForm.getInputProps("title")}
+                    />
+                    <Select
+                        label={<FormattedMessage id="pages.desktop.eventTypeLabel" />}
+                        data={[
+                            { value: "CALL", label: intl.formatMessage({ id: "pages.desktop.eventType.CALL" }) },
+                            {
+                                value: "SUBBOTNIK",
+                                label: intl.formatMessage({ id: "pages.desktop.eventType.SUBBOTNIK" }),
+                            },
+                            {
+                                value: "MEETING",
+                                label: intl.formatMessage({ id: "pages.desktop.eventType.MEETING" }),
+                            },
+                            {
+                                value: "LECTURE",
+                                label: intl.formatMessage({ id: "pages.desktop.eventType.LECTURE" }),
+                            },
+                            { value: "OTHER", label: intl.formatMessage({ id: "pages.desktop.eventType.OTHER" }) },
+                        ]}
+                        {...eventForm.getInputProps("type")}
+                    />
+                    <DateInput
+                        label={<FormattedMessage id="pages.desktop.eventWhen" />}
+                        valueFormat="DD.MM.YYYY"
+                        {...eventForm.getInputProps("startsAt")}
+                    />
+                    <TextInput
+                        label={<FormattedMessage id="pages.desktop.eventTime" />}
+                        placeholder="14:00"
+                        value={eventForm.values.time}
+                        onChange={(e) => eventForm.setFieldValue("time", e.currentTarget.value)}
+                    />
+                    <TextInput
+                        label={<FormattedMessage id="pages.desktop.eventWhere" />}
+                        {...eventForm.getInputProps("location")}
+                    />
+                    <Textarea
+                        label={<FormattedMessage id="pages.desktop.eventDescription" />}
+                        minRows={3}
+                        {...eventForm.getInputProps("description")}
+                    />
+                    <Button
+                        loading={creatingEvent}
+                        onClick={() => {
+                            const result = eventForm.validate()
+                            if (result.hasErrors || !eventForm.values.startsAt) return
+                            createEvent({
+                                title: eventForm.values.title.trim(),
+                                description: eventForm.values.description.trim() || null,
+                                startsAt: dayjs(eventForm.values.startsAt)
+                                    .hour(Number((eventForm.values.time || "12:00").split(":")[0] || 12))
+                                    .minute(Number((eventForm.values.time || "12:00").split(":")[1] || 0))
+                                    .second(0)
+                                    .toISOString(),
+                                location: eventForm.values.location.trim() || null,
+                                type: eventForm.values.type,
+                                programCode: eventForm.values.programCode || curatorMe?.programs?.[0] || null,
+                            })
+                        }}
+                    >
+                        <FormattedMessage id="pages.desktop.saveEvent" />
+                    </Button>
+                </Flex>
+            </Modal>
         </Flex>
     )
 }

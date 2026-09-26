@@ -222,7 +222,29 @@
             "messages": "Messages",
             "allMessages": "All messages →",
             "events": "Events",
-            "eventsSoon": "An events calendar will appear here — we’ll bring it from Ekomapa."
+            "eventsSoon": "An events calendar will appear here — we’ll bring it from Ekomapa.",
+            "eventsEmpty": "No upcoming events yet",
+            "addEvent": "Add",
+            "saveEvent": "Save",
+            "eventCreated": "Event created",
+            "eventRequired": "Fill in the required fields",
+            "eventTitle": "Title",
+            "eventTypeLabel": "Type",
+            "eventWhen": "Date",
+            "eventTime": "Time",
+            "eventWhere": "Where / link",
+            "eventDescription": "Description",
+            "eventType": {
+                "CALL": "Call",
+                "SUBBOTNIK": "Cleanup",
+                "MEETING": "Meeting",
+                "LECTURE": "Lecture",
+                "OTHER": "Other"
+            },
+            "projects": "New in projects",
+            "projectsHint": "Uglavnom, guides and laws",
+            "projectsEmpty": "Could not load the feed",
+            "read": "Read →"
         },
         "tasks": {
             "title": "Tasks",
