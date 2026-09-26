@@ -661,6 +661,7 @@
             "partial-reports": "Частичные отчеты",
             "full-reports": "Полные отчеты",
             "overtime-reports": "Переработка",
+            "leave": "Отпуск",
             "pending": "Ожидание",
             "legend": "Легенда",
             "total-hours": "Всего часов",
@@ -675,6 +676,7 @@
             "no-data": "Нет данных для отображения",
             "tooltip": {
                 "na": "{name}: N/A — нет контракта за {from} - {to} ({week})",
+                "leave": "Отпуск — {from} - {to} ({week})",
                 "waiting": "{name}: Ожидание — {from} - {to} ({week})",
                 "no-reports": "{name}: Нет отчетов за {from} - {to} ({week})",
                 "reports": "{name}: {hours} из {hoursRequired} {hoursLabel} за {from} - {to} ({week})",

@@ -54,6 +54,7 @@ export type OverdueWeekDto = {
     weekStart: string
     hoursWorked: number
     hoursRequired: number
+    leaveDays?: number
 }
 
 export type ReportOverdueDto = {

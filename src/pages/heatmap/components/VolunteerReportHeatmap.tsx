@@ -75,6 +75,7 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                     <Legend color="partialReports" label={locales.partialReports} />
                     <Legend color="fullReports" label={locales.fullReports} />
                     <Legend color="overtimeReports" label={locales.overtimeReports} />
+                    <Legend color="leave" label={locales.leave} />
                     <Legend color="na" label={locales.na} />
                     <Legend color="waiting" label={locales.pending} />
                 </Group>

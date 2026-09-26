@@ -46,7 +46,9 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
         const isCurrentYear = dayjs().year() == dayjs(weekData.weekStart).year()
         const isCurrentWeek = dayjs().isBetween(weekData.weekStart, weekData.weekEnd, "day", "[]")
         const hasReports = weekData.hoursWorked > 0
+        const leaveDays = Number((weekData as HeatMapItem & { leaveDays?: number }).leaveDays ?? 0)
 
+        if (leaveDays > 0 && weekData.hoursRequired === 0) return "leave"
         if (weekData.hoursRequired === 0) return "na"
         if (isCurrentWeek && isCurrentYear && !hasReports) return "waiting"
         if (weekData.hoursWorked === 0) return "noReports"
@@ -82,6 +84,9 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
             week: weekLabel,
         }
 
+        if (color === "leave") {
+            return intl.formatMessage({ id: "pages.heat-map.tooltip.leave" }, params)
+        }
         if (color === "na") {
             return intl.formatMessage({ id: locales.tooltipNA }, params)
         }
@@ -164,6 +169,12 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                         <Box className={`${classes.legendSquare} ${classes.overtimeReports}`} />
                         <Text size="xs">
                             <FormattedMessage id={locales.overtimeReports} />
+                        </Text>
+                    </Flex>
+                    <Flex align="center" gap={4}>
+                        <Box className={`${classes.legendSquare} ${classes.leave}`} />
+                        <Text size="xs">
+                            <FormattedMessage id="pages.heat-map.leave" />
                         </Text>
                     </Flex>
                     <Flex align="center" gap={4}>
@@ -262,6 +273,13 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                     <Box className={`${classes.legendSquare} ${classes.overtimeReports}`} />
                     <Text size="xs">
                         <FormattedMessage id={locales.overtimeReports} />
+                    </Text>
+                </Flex>
+
+                <Flex align="center" gap={4}>
+                    <Box className={`${classes.legendSquare} ${classes.leave}`} />
+                    <Text size="xs">
+                        <FormattedMessage id="pages.heat-map.leave" />
                     </Text>
                 </Flex>
 

@@ -134,7 +134,9 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         const isCurrentYear = dayjs().year() == year
         const isCurrentWeek = dayjs().isBetween(weekData.weekStart, weekData.weekEnd, "day", "[]")
         const hasReports = weekData.hoursWorked > 0
+        const leaveDays = Number((weekData as { leaveDays?: number }).leaveDays ?? 0)
 
+        if (leaveDays > 0 && weekData.hoursRequired === 0) return "leave"
         if (weekData.hoursRequired === 0) return "na"
         if (isCurrentWeek && isCurrentYear && !hasReports) return "waiting"
         if (weekData.hoursWorked === 0) return "noReports"
@@ -174,6 +176,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
             week: intl.formatMessage({ id: locales.tooltipWeek }, { num: weekNumber }),
         }
 
+        if (color === "leave") return intl.formatMessage({ id: locales.tooltipLeave }, params)
         if (color === "na") return intl.formatMessage({ id: locales.tooltipNA }, params)
         if (color === "waiting") return intl.formatMessage({ id: locales.tooltipWaiting }, params)
 

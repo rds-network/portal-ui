@@ -105,6 +105,9 @@
 .overtimeReports {
     background: #25566a;
 }
+.leave {
+    background: var(--mantine-color-green-6);
+}
 .na {
     background: light-dark(#dfe7e8, #3a515a);
     .weekNumber {
@@ -204,6 +207,9 @@
     }
     .overtimeReports {
         background: var(--mantine-color-blue-9);
+    }
+    .leave {
+        background: var(--mantine-color-green-6);
     }
     .na {
         background: var(--mantine-color-gray-4);

@@ -661,6 +661,7 @@
             "partial-reports": "Delimični izveštaji",
             "full-reports": "Puni izveštaji",
             "overtime-reports": "Prekovremeni rad",
+            "leave": "Odmor",
             "pending": "Na čekanju",
             "legend": "Legenda",
             "total-hours": "Ukupno sati",
@@ -675,6 +676,7 @@
             "no-data": "Nema podataka za prikaz",
             "tooltip": {
                 "na": "{name}: N/A — nema ugovora za {from} - {to} ({week})",
+                "leave": "Odmor — {from} - {to} ({week})",
                 "waiting": "{name}: Na čekanju — {from} - {to} ({week})",
                 "no-reports": "{name}: Nema izveštaja za {from} - {to} ({week})",
                 "reports": "{name}: {hours} od {hoursRequired} {hoursLabel} za {from} - {to} ({week})",

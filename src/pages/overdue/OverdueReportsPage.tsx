@@ -20,6 +20,7 @@ const thisMonday = () => dayjs().startOf("isoWeek").format("YYYY-MM-DD")
 
 const weekTone = (week: OverdueWeekDto) => {
     const current = week.weekStart === thisMonday()
+    if ((week.leaveDays ?? 0) > 0 && !week.hoursRequired) return "leave"
     if (current && week.hoursWorked === 0) return "waiting"
     if (!week.hoursRequired) return "na"
     if (week.hoursWorked === 0) return "noReports"
@@ -261,6 +262,7 @@ export const OverdueReportsPage: React.FC = () => {
                         <Legend color="partialReports" label="pages.heat-map.partial-reports" />
                         <Legend color="fullReports" label="pages.heat-map.full-reports" />
                         <Legend color="overtimeReports" label="pages.heat-map.overtime-reports" />
+                        <Legend color="leave" label="pages.heat-map.leave" />
                         <Legend color="na" label="pages.heat-map.na" />
                         <Legend color="waiting" label="pages.heat-map.pending" />
                     </Group>
