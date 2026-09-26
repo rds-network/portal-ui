@@ -24,6 +24,7 @@ import { locales } from "src/pages/report/lib/locales"
 import { ReportNote } from "src/pages/report/note/ReportNote"
 import { TaskCard } from "src/pages/report/task/TaskCard"
 import { ReportApiService } from "src/shared/api/ReportApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
@@ -113,9 +114,21 @@ export const ReportPage = () => {
     }
 
     const isCustomer = (report.tasks ?? []).some((task) => task.customer === currentUser?.username)
+    const { data: delegates = [] } = useQuery({
+        queryKey: ["program-curators", "delegates"],
+        queryFn: () => ProgramCuratorApiService.delegates(),
+        enabled: !!currentUser && !isCustomer,
+    })
+    const isAcceptanceDelegate = delegates.some(
+        (row) =>
+            row.delegateUsername === currentUser?.username &&
+            (report.tasks ?? []).some((task) => task.customer === row.curatorUsername) &&
+            (!report.program || row.programCode === report.program)
+    )
     const canAcceptReport =
         hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
-        isCustomer
+        isCustomer ||
+        isAcceptanceDelegate
 
     return (
         <Flex className={classes.root}>
