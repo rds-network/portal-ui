@@ -26,7 +26,7 @@ import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/users
 import { allowedRoles } from "src/pages/users/lib/roles"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { VolunteersDashboard } from "src/pages/users/VolunteersDashboard"
-import { UserApiService } from "src/shared/api/user/UserApiService"
+import { UserAccountApiService, UserApiService } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
@@ -213,7 +213,8 @@ export const UserList = () => {
     }
 
     const { mutate: updateUserProgram } = useMutation({
-        mutationFn: async ({ userId, program }: { userId: string; program: string }) => {
+        mutationFn: async ({ userId, program }: { userId: string; program: string | null }) => {
+            if (!program) return UserAccountApiService.clearProgram(parseInt(userId))
             const response = await UserApiService.setProgram(parseInt(userId), program)
             return response.data
         },
@@ -241,7 +242,8 @@ export const UserList = () => {
     })
 
     const { mutate: updateUserProject } = useMutation({
-        mutationFn: async ({ userId, project }: { userId: string; project: string }) => {
+        mutationFn: async ({ userId, project }: { userId: string; project: string | null }) => {
+            if (!project) return UserAccountApiService.clearProject(parseInt(userId))
             const response = await UserApiService.setProject(parseInt(userId), project)
             return response.data
         },

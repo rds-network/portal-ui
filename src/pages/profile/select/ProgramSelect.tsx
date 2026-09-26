@@ -17,7 +17,7 @@ export function ProgramSelectInline({
     value: string | null | undefined
     canEdit: boolean
     type?: "default" | "button"
-    onChange: (program: string) => void
+    onChange: (program: string | null) => void
     locale: string
     programsOverride?: ProgramDto[]
 }) {
@@ -42,13 +42,12 @@ export function ProgramSelectInline({
                     data={programOptions}
                     value={value || null}
                     onChange={(val) => {
-                        if (val) {
-                            onChange(val)
-                            setIsEditing(false)
-                        }
+                        onChange(val)
+                        setIsEditing(false)
                     }}
                     onBlur={() => setIsEditing(false)}
                     autoFocus
+                    clearable
                     style={{ width: 180 }}
                     placeholder={intl.formatMessage({ id: "pages.profile.selectProgram" })}
                     dropdownOpened={isDropdownOpened}

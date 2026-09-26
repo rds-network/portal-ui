@@ -10,4 +10,7 @@ export const locales = {
     confirmDescription: "pages.edit-report.confirm-description",
     differentWeeks: "pages.edit-report.different-weeks-alert",
     customerRequired: "pages.edit-report.customer-required",
+    blockedTitle: "pages.edit-report.blocked-title",
+    blockedDescription: "pages.edit-report.blocked-description",
+    blockedReason: "pages.edit-report.blocked-reason",
 }

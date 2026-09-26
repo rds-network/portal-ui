@@ -17,8 +17,8 @@ type Props = {
     user: UserInfoDto
     canEditProgram: () => boolean
     canEditProject: (targetUserId: number) => boolean
-    updateUserProgram: (variables: { userId: string; program: string }) => Promise<any> | void
-    updateUserProject: (variables: { userId: string; project: string }) => Promise<any> | void
+    updateUserProgram: (variables: { userId: string; program: string | null }) => Promise<any> | void
+    updateUserProject: (variables: { userId: string; project: string | null }) => Promise<any> | void
     intl: IntlShape
     navigate: NavigateFunction
     setDrawerOpened: (open: boolean) => void
@@ -63,7 +63,7 @@ export const UserRow = ({
         }
     }, [selectedProgram, selectedProject, programs])
 
-    const handleProgramChange = async (program: string) => {
+    const handleProgramChange = async (program: string | null) => {
         if (isSyncing) return
 
         const prevProgram = selectedProgram
@@ -79,7 +79,7 @@ export const UserRow = ({
         }
     }
 
-    const handleProjectChange = async (project: string) => {
+    const handleProjectChange = async (project: string | null) => {
         if (isSyncing) return
 
         const prevProject = selectedProject

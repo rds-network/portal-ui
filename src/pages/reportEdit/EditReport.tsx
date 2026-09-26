@@ -1,7 +1,8 @@
-import { Anchor, Badge, Button, Flex, Text, Title } from "@mantine/core"
+import { Alert, Anchor, Badge, Button, Flex, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { TaskDto } from "@rds-network/portal-api-axios"
 import {
+    IconAlertTriangle,
     IconArrowLeft,
     IconCircleCheck,
     IconChevronRight,
@@ -19,6 +20,7 @@ import classes from "src/pages/reportEdit/EditReport.module.scss"
 import { defaultTask } from "src/pages/reportEdit/lib/defaults"
 import { TaskCard, TaskCardInterface } from "src/pages/reportEdit/task/TaskCard"
 import { ReportApiService } from "src/shared/api/ReportApiService"
+import { reportBlockOf } from "src/shared/api/user/UserApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { setDocumentTitleByLocale, setDocumentTitleByString } from "src/shared/hooks/useDocumentTitle"
 import { useReportDraft } from "src/shared/hooks/useReportDraft"
@@ -113,6 +115,8 @@ export const EditReport = () => {
             return [...current, { ...defaultTask, id: uuid(), name: taskName }]
         })
     }, [editMode, location.search, setTasks])
+
+    const reportBlock = reportBlockOf(currentUser)
 
     const { data: myAssignments = [] } = useQuery({
         queryKey: ["work-assignments"],
@@ -228,6 +232,28 @@ export const EditReport = () => {
                     <FormattedMessage id={editMode ? locales.titleEdit : locales.title} />
                 </Title>
             </div>
+            {reportBlock.reportBlocked && (
+                <Alert
+                    color="red"
+                    icon={<IconAlertTriangle size={18} />}
+                    title={<FormattedMessage id={locales.blockedTitle} />}
+                >
+                    <FormattedMessage
+                        id={locales.blockedDescription}
+                        values={{
+                            name: reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || "",
+                        }}
+                    />
+                    {reportBlock.reportBlockedReason && (
+                        <Text size="sm" mt={6}>
+                            <FormattedMessage
+                                id={locales.blockedReason}
+                                values={{ reason: reportBlock.reportBlockedReason }}
+                            />
+                        </Text>
+                    )}
+                </Alert>
+            )}
             <div className={classes.workspace}>
                 <div className={classes.taskContainer}>
                     <Flex direction="column" rowGap={24}>
@@ -305,7 +331,7 @@ export const EditReport = () => {
                         rightSection={editMode ? <IconDeviceFloppy size={18} /> : <IconChevronRight size={18} />}
                         onClick={onSend}
                         loading={isSending}
-                        disabled={isSending}
+                        disabled={isSending || !!reportBlock.reportBlocked}
                     >
                         <FormattedMessage id={editMode ? locales.saveButton : locales.sendButton} />
                     </Button>

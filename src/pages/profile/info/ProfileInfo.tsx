@@ -29,7 +29,7 @@ import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { CitiesApiService } from "src/shared/api/CitiesApiService"
-import { UserApiService } from "src/shared/api/user/UserApiService"
+import { reportBlockOf, UserAccountApiService, UserApiService } from "src/shared/api/user/UserApiService"
 import { Locale } from "src/shared/constants/Locales"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
@@ -200,7 +200,8 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     })
 
     const { mutateAsync: updateProgram } = useMutation({
-        mutationFn: async (program: string) => {
+        mutationFn: async (program: string | null) => {
+            if (!program) return UserAccountApiService.clearProgram(userInfo.id)
             const response = await UserApiService.setProgram(userInfo.id, program)
             return response.data
         },
@@ -234,7 +235,8 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     })
 
     const { mutateAsync: updateProject } = useMutation({
-        mutationFn: async (project: string) => {
+        mutationFn: async (project: string | null) => {
+            if (!project) return UserAccountApiService.clearProject(userInfo.id)
             const response = await UserApiService.setProject(userInfo.id, project)
             return response.data
         },
@@ -291,6 +293,9 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
 
     const { programs, visiblePrograms, visibleProjects } = useProgramProjectFilter(selectedProgram, selectedProject)
 
+    const reportBlock = reportBlockOf(userInfo)
+    const reportBlockedByName = reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || ""
+
     // Админы могут редактировать программы всем (включая себя)
     // Обычные пользователи могут установить программу только если у них ее еще нет
     const isAdmin = hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])
@@ -317,7 +322,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         .at(-1)
     const mupPeriodFrom = latestContractStart ? dayjs(latestContractStart).format("DD.MM.YYYY") : ""
 
-    const handleProgramChange = async (programCode: string) => {
+    const handleProgramChange = async (programCode: string | null) => {
         if (isSyncing) return
 
         const prevProgram = selectedProgram
@@ -333,7 +338,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         }
     }
 
-    const handleProjectChange = async (projectCode: string) => {
+    const handleProjectChange = async (projectCode: string | null) => {
         if (isSyncing) return
 
         const prevProject = selectedProject
@@ -385,9 +390,27 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             <FormattedMessage id="pages.profile.watchlist" />
                         </Badge>
                     )}
+                    {reportBlock.reportBlocked && (
+                        <Tooltip
+                            multiline
+                            w={320}
+                            label={
+                                reportBlock.reportBlockedReason || (
+                                    <FormattedMessage id="pages.profile.reportBlockedHint" />
+                                )
+                            }
+                        >
+                            <Badge color="red" radius="md" variant="filled">
+                                <FormattedMessage
+                                    id="pages.profile.reportBlocked"
+                                    values={{ name: reportBlockedByName }}
+                                />
+                            </Badge>
+                        </Tooltip>
+                    )}
 
                     {showSensitiveData && userInfo?.id !== currentUser?.id && (
-                        <UserMenu user={userInfo} type="profile" />
+                        <UserMenu user={userInfo} type="profile" onChanged={onUserInfoUpdate} />
                     )}
                 </Flex>
             </Flex>
