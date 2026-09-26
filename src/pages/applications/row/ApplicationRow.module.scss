@@ -15,6 +15,22 @@
     min-width: 0;
 }
 
+.skills {
+    margin-top: 6px;
+    min-width: 0;
+}
+
+.skillsLabel {
+    line-height: 1.2;
+}
+
+.skillsValue {
+    margin-top: 2px;
+    color: var(--portal-ink);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
 .applicationLink {
     color: inherit;
     font-weight: 700;

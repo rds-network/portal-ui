@@ -1,12 +1,13 @@
 import { Box, Button, Card, Switch, CloseButton, Flex, Input, Pagination, Skeleton, Table, Text } from "@mantine/core"
 import { ApplicationsFilter, PageRequest } from "@rds-network/portal-api-axios"
-import { IconFilterOff, IconSearch, IconUfo } from "@tabler/icons-react"
+import { IconArrowsExchange, IconFilterOff, IconSearch, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import React, { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { ApplicationAssigneeFilter } from "src/pages/applications/assignee/ApplicationAssigneeFilter"
+import { ApplicationTransferModal } from "src/pages/applications/assignee/ApplicationTransferModal"
 import { allowedRoles } from "src/pages/applications/lib/roles"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { ApplicationRow } from "src/pages/applications/row/ApplicationRow"
@@ -69,6 +70,7 @@ export const Applications = () => {
     }
     const listStartRef = React.useRef<HTMLDivElement>(null)
     const previousIsMobile = React.useRef(isMobile)
+    const [transferOpen, setTransferOpen] = React.useState(false)
 
     // URL is the source of truth for filters and pagination, including back/forward navigation.
     const updateUrlParams = (newSearch: string, newFilter: ApplicationsFilter, newPage = 0) => {
@@ -205,6 +207,18 @@ export const Applications = () => {
                             size="sm"
                             className={classes.assigneeFilter}
                         />
+                        <Button
+                            variant="light"
+                            size="sm"
+                            radius="md"
+                            leftSection={<IconArrowsExchange size={16} />}
+                            onClick={() => setTransferOpen(true)}
+                        >
+                            <FormattedMessage
+                                id="pages.applications.transfer.action"
+                                defaultMessage="Передать полномочия"
+                            />
+                        </Button>
                         <CreateUser withLabel size="sm" className={classes.addUserButton} />
                     </div>
                     <Flex className={classes.secondaryControls}>
@@ -304,6 +318,12 @@ export const Applications = () => {
                     </Text>
                 </Flex>
             )}
+
+            <ApplicationTransferModal
+                opened={transferOpen}
+                onClose={() => setTransferOpen(false)}
+                initialFrom={filter.assignee || null}
+            />
         </Flex>
     )
 }

@@ -163,6 +163,17 @@ export const ApplicationRow = ({
                             </Text>
                             {statusControl}
                         </div>
+
+                        {application.skills?.trim() && (
+                            <div className={classes.mobileRow}>
+                                <Text size="xs" c="dimmed" className={classes.mobileLabel}>
+                                    <FormattedMessage id="pages.applications.view.skills" />:
+                                </Text>
+                                <Text size="xs" lineClamp={3}>
+                                    {application.skills}
+                                </Text>
+                            </div>
+                        )}
                     </Box>
                 </Flex>
             </Card>
@@ -194,6 +205,16 @@ export const ApplicationRow = ({
                     <Box data-row-action w="fit-content" maw="100%">
                         <CopyText text={application.email} size={isLargeDesktop ? "sm" : "xs"} />
                     </Box>
+                    {application.skills?.trim() && (
+                        <div className={classes.skills}>
+                            <Text size="xs" c="dimmed" className={classes.skillsLabel}>
+                                <FormattedMessage id="pages.applications.view.skills" />
+                            </Text>
+                            <Text size="xs" lineClamp={2} className={classes.skillsValue}>
+                                {application.skills}
+                            </Text>
+                        </div>
+                    )}
                 </Flex>
             </Table.Td>
             <Table.Td>
