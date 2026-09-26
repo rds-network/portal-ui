@@ -39,4 +39,12 @@ export const locales = {
     userCreatedMessage: "pages.user-list.user-created-message",
     resetFilters: "common.reset-filters",
     deactivated: "pages.user-list.deactivated",
+    showDeactivated: "pages.user-list.showDeactivated",
+    dashboardTitle: "pages.user-list.dashboard.title",
+    dashboardSubtitle: "pages.user-list.dashboard.subtitle",
+    dashboardSubtitleAll: "pages.user-list.dashboard.subtitleAll",
+    dashboardActive: "pages.user-list.dashboard.active",
+    dashboardDeactivated: "pages.user-list.dashboard.deactivated",
+    dashboardPrograms: "pages.user-list.dashboard.programs",
+    dashboardProjects: "pages.user-list.dashboard.projects",
 }

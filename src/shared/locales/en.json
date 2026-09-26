@@ -693,7 +693,7 @@
         "user-list": {
             "title": "All volunteers",
             "total": "Total: {total}",
-            "search": "Search",
+            "search": "Search by name or email",
             "add-user": "Add user",
             "new-user": "New user",
             "first-name": "First name",
@@ -729,7 +729,17 @@
             "invalid-name": "Invalid characters",
             "invalid-username": "Only latin letters and numbers, cannot start with a number",
             "user-created-message": "User successfully created",
-            "deactivated": "Deactivated"
+            "deactivated": "Deactivated",
+            "showDeactivated": "Show deactivated",
+            "dashboard": {
+                "title": "Volunteers summary",
+                "subtitle": "Active: {count}",
+                "subtitleAll": "Total: {count}",
+                "active": "Active: {count}",
+                "deactivated": "Deactivated: {count}",
+                "programs": "By programs",
+                "projects": "By projects"
+            }
         },
         "playgrounds": {
             "title": "Playgrounds report",

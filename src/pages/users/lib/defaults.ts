@@ -14,7 +14,7 @@ export const defaultPage: PageRequest = {
 }
 
 export const defaultFilter: UserSearchFilter = {
-    onlyInactive: false,
+    onlyActive: true,
 }
 
 export const defaultPageResponse: PageResponse = {

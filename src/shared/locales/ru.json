@@ -693,7 +693,7 @@
         "user-list": {
             "title": "Все волонтеры",
             "total": "Всего: {total}",
-            "search": "Поиск",
+            "search": "Поиск по имени или email",
             "add-user": "Добавить пользователя",
             "new-user": "Новый пользователь",
             "first-name": "Имя",
@@ -729,7 +729,17 @@
             "invalid-name": "Недопустимые символы",
             "invalid-username": "Только латинские буквы и цифры, не может начинаться с цифры",
             "user-created-message": "Пользователь успешно создан",
-            "deactivated": "Деактивирован"
+            "deactivated": "Деактивирован",
+            "showDeactivated": "Показать деактивированные",
+            "dashboard": {
+                "title": "Сводка по волонтёрам",
+                "subtitle": "Активных: {count}",
+                "subtitleAll": "Всего: {count}",
+                "active": "Активные: {count}",
+                "deactivated": "Деактивированные: {count}",
+                "programs": "По программам",
+                "projects": "По проектам"
+            }
         },
         "playgrounds": {
             "title": "Отчет по площадке",

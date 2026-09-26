@@ -693,7 +693,7 @@
         "user-list": {
             "title": "Svi volonteri",
             "total": "Ukupno: {total}",
-            "search": "Pretraga",
+            "search": "Pretraga po imenu ili email-u",
             "add-user": "Dodaj korisnika",
             "new-user": "Novi volonter",
             "first-name": "Ime",
@@ -729,7 +729,17 @@
             "invalid-name": "Nevažeći znakovi",
             "invalid-username": "Samo latinična slova i brojevi, ne može početi sa brojem",
             "user-created-message": "Korisnik je uspešno kreiran",
-            "deactivated": "Deaktiviran"
+            "deactivated": "Deaktiviran",
+            "showDeactivated": "Prikaži deaktivirane",
+            "dashboard": {
+                "title": "Pregled volontera",
+                "subtitle": "Aktivnih: {count}",
+                "subtitleAll": "Ukupno: {count}",
+                "active": "Aktivni: {count}",
+                "deactivated": "Deaktivirani: {count}",
+                "programs": "Po programima",
+                "projects": "Po projektima"
+            }
         },
         "playgrounds": {
             "title": "Izveštaj o igralištu",

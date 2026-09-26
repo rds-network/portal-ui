@@ -8,13 +8,14 @@ import {
     Input,
     Pagination,
     Paper,
+    Switch,
     Table,
     Text,
     Title,
 } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
-import { ContractDto, PageRequest } from "@rds-network/portal-api-axios"
-import { IconFilterEdit, IconFilterOff, IconPencil, IconPlus, IconUfo } from "@tabler/icons-react"
+import { ContractDto, PageRequest, UserSearchFilter } from "@rds-network/portal-api-axios"
+import { IconFilterEdit, IconFilterOff, IconPencil, IconPlus, IconSearch, IconUfo } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
@@ -24,6 +25,7 @@ import { UserContext } from "src/app/providers/UserContext"
 import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/users/lib/defaults"
 import { allowedRoles } from "src/pages/users/lib/roles"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
+import { VolunteersDashboard } from "src/pages/users/VolunteersDashboard"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
@@ -55,6 +57,9 @@ export const UserList = () => {
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
     const [selectedProgram, setSelectedProgram] = useState<string | null>(searchParams.get("program") || null)
     const [selectedProject, setSelectedProject] = useState<string | null>(searchParams.get("project") || null)
+    const showDeactivated = searchParams.get("deactivated") === "1"
+
+    const filter: UserSearchFilter = showDeactivated ? {} : { ...defaultFilter, onlyActive: true }
 
     const { programs, projects, visiblePrograms, visibleProjects } = useProgramProjectFilter(
         selectedProgram,
@@ -76,7 +81,7 @@ export const UserList = () => {
         }
 
         const pageNumber = programChanged ? 0 : pageRequest.pageNumber || 0
-        updateUrlParams(debouncedSearch, newProgram, nextProject, pageNumber)
+        updateUrlParams(debouncedSearch, newProgram, nextProject, pageNumber, showDeactivated)
     }
 
     const handleProjectChange = (newProject: string | null) => {
@@ -105,13 +110,12 @@ export const UserList = () => {
         }
 
         const pageNumber = projectChanged ? 0 : pageRequest.pageNumber || 0
-        updateUrlParams(debouncedSearch, nextProgram, newProject, pageNumber)
+        updateUrlParams(debouncedSearch, nextProgram, newProject, pageNumber, showDeactivated)
     }
 
     const isMobile = useMediaQuery("(max-width: 1360px)")
     const [filtersOpened, setFiltersOpened] = useState(false)
 
-    const [filter] = useState(defaultFilter)
     const [pageRequest, setPageRequest] = useState<PageRequest>({
         ...defaultPage,
         pageNumber: Math.max(0, parseInt(searchParams.get("page") || "1") - 1),
@@ -168,7 +172,8 @@ export const UserList = () => {
         newSearch: string,
         newProgram: string | null,
         newProject: string | null,
-        newPage: number = 0
+        newPage: number = 0,
+        newShowDeactivated: boolean = showDeactivated
     ) => {
         const params = new URLSearchParams()
 
@@ -182,6 +187,10 @@ export const UserList = () => {
 
         if (newProject) {
             params.set("project", newProject)
+        }
+
+        if (newShowDeactivated) {
+            params.set("deactivated", "1")
         }
 
         if (newPage > 0) {
@@ -218,6 +227,7 @@ export const UserList = () => {
                 )
             )
             queryClient.invalidateQueries({ queryKey: ["searchUsers"] })
+            queryClient.invalidateQueries({ queryKey: ["volunteers-dashboard"] })
         },
         onError: () => {
             notifications.show(
@@ -245,6 +255,7 @@ export const UserList = () => {
                 )
             )
             queryClient.invalidateQueries({ queryKey: ["searchUsers"] })
+            queryClient.invalidateQueries({ queryKey: ["volunteers-dashboard"] })
         },
         onError: () => {
             notifications.show(
@@ -281,13 +292,13 @@ export const UserList = () => {
 
     // Эффект для обновления URL при изменении debouncedSearch
     useEffect(() => {
-        updateUrlParams(debouncedSearch, selectedProgram, selectedProject, pageRequest.pageNumber || 0)
+        updateUrlParams(debouncedSearch, selectedProgram, selectedProject, pageRequest.pageNumber || 0, showDeactivated)
     }, [debouncedSearch])
 
     // Эффект для обновления URL при изменении страницы
     useEffect(() => {
         const pageNumber = pageRequest.pageNumber || 0
-        updateUrlParams(debouncedSearch, selectedProgram, selectedProject, pageNumber)
+        updateUrlParams(debouncedSearch, selectedProgram, selectedProject, pageNumber, showDeactivated)
     }, [pageRequest.pageNumber])
 
     // Эффект для обновления размера страницы при изменении типа устройства
@@ -321,7 +332,7 @@ export const UserList = () => {
         isFetching,
     } = useQuery({
         initialData: { content: [], page: defaultPageResponse },
-        queryKey: ["searchUsers", debouncedSearch, pageRequest, filter, selectedProgram, selectedProject],
+        queryKey: ["searchUsers", debouncedSearch, pageRequest, filter, selectedProgram, selectedProject, showDeactivated],
         queryFn: () => {
             let project: string | undefined = undefined
             if (selectedProject) {
@@ -450,8 +461,9 @@ export const UserList = () => {
         if ((debouncedSearch || "").trim()) count += 1
         if (selectedProgram !== null) count += 1
         if (selectedProject !== null) count += 1
+        if (showDeactivated) count += 1
         return count
-    }, [debouncedSearch, selectedProgram, selectedProject])
+    }, [debouncedSearch, selectedProgram, selectedProject, showDeactivated])
 
     const resetFilters = () => {
         setSearch("")
@@ -459,10 +471,60 @@ export const UserList = () => {
         setSelectedProgram(null)
         setSelectedProject(null)
         setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
-        updateUrlParams("", null, null, 0)
+        updateUrlParams("", null, null, 0, false)
+    }
+
+    const handleShowDeactivatedChange = () => {
+        setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
+        updateUrlParams(debouncedSearch, selectedProgram, selectedProject, 0, !showDeactivated)
     }
 
     const selectedUser = selectedUserId ? content.find((u) => u.id === selectedUserId) : null
+
+    const searchInput = (
+        <Input
+            aria-label={intl.formatMessage({ id: locales.search })}
+            placeholder={intl.formatMessage({ id: locales.search })}
+            leftSection={<IconSearch size={18} aria-hidden="true" />}
+            leftSectionPointerEvents="none"
+            value={search}
+            onChange={(event) => setSearch(event.currentTarget.value)}
+            rightSectionPointerEvents="all"
+            size="sm"
+            radius="md"
+            rightSection={
+                <CloseButton
+                    aria-label="Clear input"
+                    onClick={() => setSearch("")}
+                    style={{ display: search ? undefined : "none" }}
+                />
+            }
+            className={classes.searchInput}
+        />
+    )
+
+    const secondaryControls = (
+        <Flex className={classes.secondaryControls}>
+            <Switch
+                label={<FormattedMessage id={locales.showDeactivated} />}
+                checked={showDeactivated}
+                onChange={handleShowDeactivatedChange}
+                size="sm"
+                className={classes.deactivatedSwitch}
+            />
+            <Button
+                variant="subtle"
+                size="compact-sm"
+                radius="md"
+                leftSection={<IconFilterOff size={16} aria-hidden="true" />}
+                onClick={resetFilters}
+                disabled={activeFiltersCountMemo === 0 && !search}
+                className={classes.resetButton}
+            >
+                <FormattedMessage id={locales.resetFilters} />
+            </Button>
+        </Flex>
+    )
 
     return (
         <Flex className={classes.root}>
@@ -470,8 +532,18 @@ export const UserList = () => {
                 <Title order={1} className={classes.title}>
                     <FormattedMessage id={locales.title} />
                 </Title>
+
+                <VolunteersDashboard
+                    showDeactivated={showDeactivated}
+                    activeProgram={selectedProgram}
+                    activeProject={selectedProject}
+                    onSelectProgram={handleProgramChange}
+                    onSelectProject={handleProjectChange}
+                />
+
+                <div ref={listStartRef} />
                 {isMobile ? (
-                    <Flex direction="column">
+                    <Flex direction="column" className={classes.filterPanel}>
                         <Button
                             variant="light"
                             size="sm"
@@ -488,86 +560,37 @@ export const UserList = () => {
                         </Button>
                         <Collapse in={filtersOpened} style={{ marginTop: 8 }}>
                             <Flex direction="column" gap={8}>
-                                <Flex className={classes.filters}>
-                                    <Input
-                                        placeholder={intl.formatMessage({ id: locales.search })}
-                                        value={search}
-                                        onChange={(event) => setSearch(event.currentTarget.value)}
-                                        rightSectionPointerEvents="all"
-                                        rightSection={
-                                            <CloseButton
-                                                aria-label="Clear input"
-                                                onClick={() => setSearch("")}
-                                                style={{ display: search ? undefined : "none" }}
-                                            />
-                                        }
-                                    />
-                                    <ProgramFilter
-                                        value={selectedProgram}
-                                        onChange={handleProgramChange}
-                                        programsOverride={visiblePrograms}
-                                    />
-                                    <ProjectFilter
-                                        value={selectedProject}
-                                        onChange={handleProjectChange}
-                                        projectsOverride={visibleProjects}
-                                    />
-                                    {activeFiltersCountMemo > 0 && (
-                                        <Button
-                                            variant="transparent"
-                                            size="sm"
-                                            leftSection={<IconFilterOff size={16} />}
-                                            onClick={resetFilters}
-                                        >
-                                            <Text size="sm">
-                                                <FormattedMessage id={locales.resetFilters} />
-                                            </Text>
-                                        </Button>
-                                    )}
-                                </Flex>
+                                {searchInput}
+                                <ProgramFilter
+                                    value={selectedProgram}
+                                    onChange={handleProgramChange}
+                                    programsOverride={visiblePrograms}
+                                />
+                                <ProjectFilter
+                                    value={selectedProject}
+                                    onChange={handleProjectChange}
+                                    projectsOverride={visibleProjects}
+                                />
+                                {secondaryControls}
                             </Flex>
                         </Collapse>
                     </Flex>
                 ) : (
-                    <Flex direction="column" gap={8}>
+                    <Flex direction="column" className={classes.filterPanel}>
                         <Flex className={classes.filters} wrap="wrap">
-                            <Input
-                                placeholder={intl.formatMessage({ id: locales.search })}
-                                value={search}
-                                onChange={(event) => setSearch(event.currentTarget.value)}
-                                rightSectionPointerEvents="all"
-                                rightSection={
-                                    <CloseButton
-                                        aria-label="Clear input"
-                                        onClick={() => setSearch("")}
-                                        style={{ display: search ? undefined : "none" }}
-                                    />
-                                }
-                            />
+                            {searchInput}
                             <ProgramFilter
                                 value={selectedProgram}
                                 onChange={handleProgramChange}
                                 programsOverride={visiblePrograms}
                             />
-
                             <ProjectFilter
                                 value={selectedProject}
                                 onChange={handleProjectChange}
                                 projectsOverride={visibleProjects}
                             />
-                            {activeFiltersCountMemo > 0 && (
-                                <Button
-                                    variant="transparent"
-                                    size="sm"
-                                    leftSection={<IconFilterOff size={16} />}
-                                    onClick={resetFilters}
-                                >
-                                    <Text size="sm">
-                                        <FormattedMessage id={locales.resetFilters} />
-                                    </Text>
-                                </Button>
-                            )}
                         </Flex>
+                        {secondaryControls}
                     </Flex>
                 )}
                 {isMobile ? (
