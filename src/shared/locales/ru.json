@@ -872,6 +872,14 @@
             "program-project-required": "Для завершения укажите программу и проект в анкете заявки",
             "contract-required": "Для завершения необходимо указать даты контракта",
             "showCompleted": "Показать завершенные",
+            "dashboard": {
+                "title": "Сводка по заявкам",
+                "subtitle": "Открытых: {count}",
+                "new": "Новые: {count}",
+                "paused": "На паузе: {count}",
+                "unassigned": "Без ответственного: {count}",
+                "assigneeBreakdown": "{newCount} нов. / {pausedCount} пауза"
+            },
             "add-note": "Добавить комментарий",
             "delete-comment": "Удалить комментарий",
             "menu": {

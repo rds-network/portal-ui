@@ -872,6 +872,14 @@
             "program-project-required": "Pre završetka izaberite program i projekat u prijavi",
             "contract-required": "Da biste završili, morate navesti datume ugovora",
             "showCompleted": "Prikaži završene",
+            "dashboard": {
+                "title": "Pregled prijava",
+                "subtitle": "Otvorenih: {count}",
+                "new": "Nove: {count}",
+                "paused": "Na pauzi: {count}",
+                "unassigned": "Bez odgovornog: {count}",
+                "assigneeBreakdown": "{newCount} nov. / {pausedCount} pauza"
+            },
             "add-note": "Dodaj komentar",
             "delete-comment": "Obriši komentar",
             "menu": {

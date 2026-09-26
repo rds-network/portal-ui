@@ -1,33 +1,74 @@
 @use "../../../app/styles/surfaces" as s;
 
-.clickableRow {
+.card {
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding: 16px 20px;
+    text-align: left;
+    font: inherit;
+    color: inherit;
     cursor: pointer;
+    border-radius: 16px;
+    border: 1px solid light-dark(#e5e7eb, var(--portal-border));
+    background: light-dark(#fff, var(--portal-surface));
+    box-shadow: none;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+
+    &:hover {
+        background: light-dark(#eef2ff, color-mix(in srgb, var(--portal-surface) 86%, white));
+        border-color: light-dark(#c7d2fe, var(--portal-border));
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--mantine-primary-color-filled);
+        outline-offset: 2px;
+    }
 }
-.mobileCard {
-    @include s.glass;
-    cursor: pointer;
-    padding: 20px;
+
+.cardTop {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.cardHeader {
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 20px 24px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
     min-width: 0;
     max-width: 100%;
 }
 
-.applicant {
-    min-width: 0;
+.statusBox {
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+    max-width: 220px;
 }
 
-.skills {
-    margin-top: 6px;
-    min-width: 0;
+.statusBoxControl {
+    margin-top: 4px;
 }
 
-.skillsLabel {
-    line-height: 1.2;
+.skillsPreview {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid light-dark(#e5e7eb, var(--portal-border));
 }
 
-.skillsValue {
-    margin-top: 2px;
-    color: var(--portal-ink);
-    line-height: 1.35;
+.skillsLine {
+    line-height: 1.45;
+    color: light-dark(#374151, inherit);
     overflow-wrap: anywhere;
 }
 
@@ -82,65 +123,13 @@
     }
 }
 
-.mobileCard {
-    margin-bottom: 0.75rem;
-    border: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
-    transition: all 0.2s ease;
-
-    &:hover {
-        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-}
-
-.mobileInfo {
-    padding-top: 0.75rem;
-    border-top: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
-}
-
-.mobileRow {
-    display: grid;
-    grid-template-columns: 10rem 2fr;
-    gap: 3rem;
-    align-items: center;
-    min-height: 40px;
-    > * {
-        min-width: 0;
-        overflow-wrap: anywhere;
-    }
-
-    @media (max-width: $mantine-breakpoint-sm) {
-        grid-template-columns: 4.5rem minmax(0, 1fr);
-        gap: 0.75rem;
-        min-height: 36px;
-    }
-
-    @media (min-width: $mantine-breakpoint-sm) and (max-width: $mantine-breakpoint-md) {
-        grid-template-columns: 8rem minmax(0, 1fr);
-        gap: 2rem;
-        min-height: 42px;
-    }
-}
-
-.mobileLabel {
-    font-weight: 500;
-
-    @media (max-width: $mantine-breakpoint-sm) {
-        font-size: 0.75rem;
-    }
-
-    @media (min-width: $mantine-breakpoint-sm) and (max-width: $mantine-breakpoint-md) {
-        font-size: 0.8rem;
-    }
-}
-
 .statusControl {
     display: flex;
     align-items: center;
     gap: 6px;
     min-width: 0;
 }
+
 .statusField {
     flex: 1;
     min-width: 0;
@@ -156,6 +145,7 @@
         padding-right: 22px !important;
     }
 }
+
 .reasonIndicator {
     display: inline-flex;
     align-items: center;
@@ -176,9 +166,11 @@
         outline-offset: 2px;
     }
 }
+
 .reasonPopover {
     max-width: calc(100vw - 32px);
 }
+
 .reasonText {
     white-space: pre-wrap;
     overflow-wrap: anywhere;

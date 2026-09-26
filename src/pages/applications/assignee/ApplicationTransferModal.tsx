@@ -96,6 +96,7 @@ export const ApplicationTransferModal: React.FC<Props> = ({ opened, onClose, ini
             )
             queryClient.invalidateQueries({ queryKey: ["getApplications"] })
             queryClient.invalidateQueries({ queryKey: ["applications-open-count"] })
+            queryClient.invalidateQueries({ queryKey: ["applications-dashboard"] })
             onClose()
         },
         onError: () => {

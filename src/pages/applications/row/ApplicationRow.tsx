@@ -1,6 +1,6 @@
-import { Box, Card, Flex, Table, Text, Tooltip, UnstyledButton } from "@mantine/core"
+import { Avatar, Badge, Flex, Text, Tooltip, UnstyledButton } from "@mantine/core"
 import { ApplicationDto, ContractDto, UserInfoDto } from "@rds-network/portal-api-axios"
-import { IconMessageCircle } from "@tabler/icons-react"
+import { IconCalendar, IconMail, IconMessageCircle, IconUser } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { MouseEvent, ReactNode } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -9,25 +9,21 @@ import { ContractDate } from "src/pages/applications/contract/ContractDate"
 import { ApplicationMenu } from "src/pages/applications/menu/ApplicationMenu"
 import { useApplicationUpdate } from "src/shared/api/applications/useApplicationUpdate"
 import { ApplicationAssigneeAvatar } from "../assignee/ApplicationAssigneeAvatar"
-import { useScreenSize } from "src/shared/hooks/useDesktop"
 import { CopyText } from "src/shared/ui/copyText/CopyText"
+import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { ApplicationStatusSelect } from "src/shared/ui/select/ApplicationStatusSelect"
-import { ApplicationStatus } from "src/shared/user/applications"
+import { ApplicationStatus, getApplicationStatusColor } from "src/shared/user/applications"
 import classes from "./ApplicationRow.module.scss"
 import { ApplicationStatusReason } from "./ApplicationStatusReason"
 
 interface ApplicationRowProps {
     applicationDto: ApplicationDto
+    /** @deprecated always card layout */
     isMobile?: boolean
     assigneeUser?: UserInfoDto
 }
 
-export const ApplicationRow = ({
-    applicationDto: application,
-    isMobile = false,
-    assigneeUser,
-}: ApplicationRowProps) => {
-    const { isLargeDesktop } = useScreenSize()
+export const ApplicationRow = ({ applicationDto: application, assigneeUser }: ApplicationRowProps) => {
     const navigate = useNavigate()
     const intl = useIntl()
     const { mutate: updateApplication, isPending: isUpdating } = useApplicationUpdate()
@@ -45,13 +41,15 @@ export const ApplicationRow = ({
                 to={applicationPath}
                 className={classes.notesCounter}
                 aria-label={notesLabel}
+                data-row-action
             >
                 <IconMessageCircle size={17} stroke={1.6} aria-hidden="true" />
                 <span>{notesCount > 99 ? "99+" : notesCount}</span>
             </UnstyledButton>
         </Tooltip>
     )
-    const onRowClick = (event: MouseEvent<HTMLElement>) => {
+
+    const onCardClick = (event: MouseEvent<HTMLElement>) => {
         const target = event.target as Element
         if (
             event.defaultPrevented ||
@@ -105,140 +103,96 @@ export const ApplicationRow = ({
         </div>
     )
 
-    if (isMobile) {
-        return (
-            <Card shadow="sm" padding="sm" radius="md" withBorder className={classes.mobileCard} onClick={onRowClick}>
-                <Flex direction="column" gap="md">
-                    <Flex justify="space-between" align="center">
-                        <Box className={classes.applicant}>
-                            <Text component={Link} to={applicationPath} className={classes.applicationLink} size="sm">
-                                {application.name}
-                            </Text>
-                            <Text c="dimmed" size="xs">
-                                {dayjs(application.created).format("DD MMM YYYY")}
-                            </Text>
-                        </Box>
-
-                        <Flex className={classes.rowActions}>
-                            {notesCounter}
-
-                            <ApplicationAssigneeAvatar login={application.assignee} user={assigneeUser} />
-                            <ApplicationMenu applicationDto={application} />
-                        </Flex>
-                    </Flex>
-
-                    <Box className={classes.mobileInfo}>
-                        <div className={classes.mobileRow}>
-                            <Text size="xs" c="dimmed" className={classes.mobileLabel}>
-                                <FormattedMessage id="pages.applications.view.type" />:
-                            </Text>
-                            <div>{type(application.type, false)}</div>
-                        </div>
-
-                        <div className={classes.mobileRow}>
-                            <Text size="xs" c="dimmed" className={classes.mobileLabel}>
-                                <FormattedMessage id="pages.applications.email" />:
-                            </Text>
-                            <div data-row-action>
-                                <CopyText text={application.email} size="xs" />
-                            </div>
-                        </div>
-
-                        <div className={classes.mobileRow}>
-                            <Text size="xs" c="dimmed" className={classes.mobileLabel}>
-                                <FormattedMessage id="pages.applications.contractStart" />:
-                            </Text>
-                            <div data-row-action>
-                                <ContractDate
-                                    application={application}
-                                    onChange={onContractChanged}
-                                    disabled={isUpdating}
-                                />
-                            </div>
-                        </div>
-
-                        <div className={classes.mobileRow}>
-                            <Text size="xs" c="dimmed" className={classes.mobileLabel}>
-                                <FormattedMessage id="pages.applications.status" />:
-                            </Text>
-                            {statusControl}
-                        </div>
-
-                        {application.skills?.trim() && (
-                            <div className={classes.mobileRow}>
-                                <Text size="xs" c="dimmed" className={classes.mobileLabel}>
-                                    <FormattedMessage id="pages.applications.view.skills" />:
-                                </Text>
-                                <Text size="xs" lineClamp={3}>
-                                    {application.skills}
-                                </Text>
-                            </div>
-                        )}
-                    </Box>
-                </Flex>
-            </Card>
-        )
-    }
+    const created = dayjs(application.created).format("DD MMM YYYY")
+    const assigneeName =
+        assigneeUser?.fullName ||
+        application.assignee ||
+        intl.formatMessage({ id: "pages.applications.unassigned" })
 
     return (
-        <Table.Tr key={application.id} className={classes.clickableRow} onClick={onRowClick}>
-            <Table.Td>
-                <Box>
-                    <Text c="dimmed" size={isLargeDesktop ? "sm" : "xs"} className={classes.compactText}>
-                        {dayjs(application.created).format(isLargeDesktop ? "DD MMM YYYY" : "DD.MM.YY")}
-                    </Text>
-
-                    {type(application.type, isLargeDesktop)}
-                </Box>
-            </Table.Td>
-            <Table.Td>
-                <Flex direction="column" gap="0" className={classes.applicant}>
-                    <Text
-                        component={Link}
-                        to={applicationPath}
-                        size={isLargeDesktop ? "sm" : "xs"}
-                        truncate="end"
-                        className={classes.applicationLink}
-                    >
-                        {application.name}
-                    </Text>
-                    <Box data-row-action w="fit-content" maw="100%">
-                        <CopyText text={application.email} size={isLargeDesktop ? "sm" : "xs"} />
-                    </Box>
-                    {application.skills?.trim() && (
-                        <div className={classes.skills}>
-                            <Text size="xs" c="dimmed" className={classes.skillsLabel}>
-                                <FormattedMessage id="pages.applications.view.skills" />
-                            </Text>
-                            <Text size="xs" lineClamp={2} className={classes.skillsValue}>
-                                {application.skills}
-                            </Text>
-                        </div>
-                    )}
-                </Flex>
-            </Table.Td>
-            <Table.Td>
-                <Box data-row-action w="fit-content">
-                    <ContractDate application={application} onChange={onContractChanged} disabled={isUpdating} />
-                </Box>
-            </Table.Td>
-            <Table.Td>{statusControl}</Table.Td>
-            <Table.Td>
-                <Flex className={classes.rowActions}>
+        <div
+            className={classes.card}
+            onClick={onCardClick}
+            role="link"
+            tabIndex={0}
+            onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault()
+                    navigate(applicationPath)
+                }
+            }}
+        >
+            <Flex className={classes.cardTop}>
+                <Badge color={getApplicationStatusColor(application.status || "")} radius="md" variant="light">
+                    <FormattedMessage id={`common.application-status.${application.status}`} />
+                </Badge>
+                {typeBadge(application.type)}
+                <Text size="sm" c="dimmed">
+                    {created}
+                </Text>
+                <Flex className={classes.rowActions} ml="auto" data-row-action>
                     {notesCounter}
-
                     <ApplicationAssigneeAvatar login={application.assignee} user={assigneeUser} />
                     <ApplicationMenu applicationDto={application} />
                 </Flex>
-            </Table.Td>
-        </Table.Tr>
+            </Flex>
+
+            <Flex className={classes.cardHeader}>
+                <TextPropertyBox
+                    name="pages.applications.name"
+                    value={application.name}
+                    icon={<Avatar name={application.name} color="initials" size={20} />}
+                />
+                <div className={classes.field} data-row-action>
+                    <Text c="dimmed" size="xs">
+                        <FormattedMessage id="pages.applications.email" />
+                    </Text>
+                    <Flex align="center" mt={4} gap="xs" miw={0}>
+                        <IconMail size={16} style={{ flexShrink: 0 }} />
+                        <CopyText text={application.email} size="sm" />
+                    </Flex>
+                </div>
+                <div className={classes.field} data-row-action>
+                    <Text c="dimmed" size="xs">
+                        <FormattedMessage id="pages.applications.contractStart" />
+                    </Text>
+                    <Flex align="center" mt={4} gap="xs" miw={0}>
+                        <IconCalendar size={16} style={{ flexShrink: 0 }} />
+                        <ContractDate application={application} onChange={onContractChanged} disabled={isUpdating} />
+                    </Flex>
+                </div>
+                <TextPropertyBox
+                    name="pages.applications.assignee"
+                    value={assigneeName}
+                    icon={<IconUser size={16} />}
+                />
+                <div className={classes.statusBox} data-row-action>
+                    <Text c="dimmed" size="xs">
+                        <FormattedMessage id="pages.applications.status" />
+                    </Text>
+                    <div className={classes.statusBoxControl}>{statusControl}</div>
+                </div>
+            </Flex>
+
+            {application.skills?.trim() ? (
+                <div className={classes.skillsPreview}>
+                    <Text size="xs" c="dimmed" mb={4}>
+                        <FormattedMessage id="pages.applications.view.skills" />
+                    </Text>
+                    <Text size="sm" className={classes.skillsLine} lineClamp={3}>
+                        {application.skills}
+                    </Text>
+                </div>
+            ) : null}
+        </div>
     )
 }
 
-const type = (type: String | undefined, isLargeDesktop: boolean = true): ReactNode => {
+const typeBadge = (type: String | undefined): ReactNode => {
+    if (!type) return null
     return (
-        <Text c={type === "NEW" ? "cyan" : "red"} size={isLargeDesktop ? "sm" : "xs"} className={classes.compactText}>
+        <Badge color={type === "NEW" ? "cyan" : "red"} radius="md" variant="outline">
             <FormattedMessage id={`common.application-type.${type}`} />
-        </Text>
+        </Badge>
     )
 }

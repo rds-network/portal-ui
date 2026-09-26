@@ -872,6 +872,14 @@
             "program-project-required": "Select a program and project in the application form before completing it",
             "contract-required": "Contract dates must be specified to complete",
             "showCompleted": "Show completed",
+            "dashboard": {
+                "title": "Applications overview",
+                "subtitle": "Open: {count}",
+                "new": "New: {count}",
+                "paused": "On pause: {count}",
+                "unassigned": "Unassigned: {count}",
+                "assigneeBreakdown": "{newCount} new / {pausedCount} paused"
+            },
             "add-note": "Add comment",
             "delete-comment": "Delete comment",
             "menu": {
