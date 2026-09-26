@@ -1,23 +1,26 @@
 import { Badge, Flex, Pagination, Text, Title } from "@mantine/core"
-import { IconCalendarWeek, IconChevronRight, IconClockCheck, IconListCheck } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
-import dayjs from "dayjs"
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { Link } from "react-router"
+import { useNavigate } from "react-router"
+import { UserContext } from "src/app/providers/UserContext"
+import { defaultUser } from "src/pages/reports/lib/defaults"
 import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
-import { getReportStatusColor } from "src/shared/report/status"
-import { getSpentTimeFromReport } from "src/shared/report/timeSpent"
-import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
+import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
+import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
 import { ReportStatusSelect } from "src/shared/ui/select/ReportStatusSelect"
+import { getLocalizedName } from "src/shared/utils/getLocalName"
 import classes from "../reportsPersonal/MyReports.module.scss"
 
 export const CuratorReportsPage: React.FC = () => {
     const intl = useIntl()
+    const navigate = useNavigate()
+    const { user } = useContext(UserContext)
     const [status, setStatus] = useState<string | null>("CREATED")
     const [page, setPage] = useState(0)
+    const { programs, projects } = useProgramProjectFilter(null, null)
 
     setDocumentTitleByLocale("pages.review-reports.title")
 
@@ -27,7 +30,36 @@ export const CuratorReportsPage: React.FC = () => {
     })
     const reports = data?.content ?? []
     const total = data?.total ?? 0
-    const users = resolveUsers(reports.map((report) => report.user))
+    const { data: users = {} } = resolveUsers([
+        ...reports.map((report) => report.user),
+        ...reports.map((report) => report.moderator),
+    ])
+
+    const cards = reports.map((report) => {
+        const creator = users[report.user || ""] || defaultUser(report.user || "")
+        const program = programs.find((item) => item.code === report.program)
+        const project = projects.find((item) => item.code === report.project)
+        return (
+            <ReportCard
+                key={report.id}
+                report={report}
+                creator={creator}
+                moderator={report.moderator ? users[report.moderator] || defaultUser(report.moderator) : null}
+                programName={
+                    program
+                        ? getLocalizedName(program, intl.locale)
+                        : intl.formatMessage({ id: "pages.user-list.no-program" })
+                }
+                projectName={
+                    project
+                        ? getLocalizedName(project, intl.locale)
+                        : intl.formatMessage({ id: "pages.user-list.no-project" })
+                }
+                currentUser={user}
+                onOpen={() => navigate(`/report/${report.id}`)}
+            />
+        )
+    })
 
     return (
         <Flex direction="column" style={{ height: "100%" }}>
@@ -70,56 +102,7 @@ export const CuratorReportsPage: React.FC = () => {
                         </Text>
                     ) : (
                         <Flex className={classes.reportsList} direction="column">
-                            {reports.map((report, index) => (
-                                <Link
-                                    key={report.id}
-                                    className={classes.report}
-                                    style={{ animationDelay: `${index * 45}ms` }}
-                                    to={`/report/${report.id}`}
-                                >
-                                    <div className={classes.weekIcon}>
-                                        <IconCalendarWeek size={23} stroke={1.5} />
-                                    </div>
-                                    <div className={classes.reportHeading}>
-                                        <Text fw={550}>
-                                            {users.data?.[report.user || ""]?.fullName || report.user}
-                                        </Text>
-                                        <Text size="xs" c="dimmed">
-                                            {dayjs(report.createTime).format("DD MMM YYYY")}
-                                            {report.week != null && (
-                                                <>
-                                                    {" · "}
-                                                    <FormattedMessage
-                                                        id="design.reportWeek"
-                                                        values={{ week: report.week }}
-                                                    />
-                                                </>
-                                            )}
-                                        </Text>
-                                    </div>
-                                    <Badge
-                                        color={getReportStatusColor(report.status)}
-                                        radius="md"
-                                        variant="light"
-                                        className={classes.status}
-                                    >
-                                        <FormattedMessage id={`common.report-status.${report.status}`} />
-                                    </Badge>
-                                    <div className={classes.reportDetails}>
-                                        <TextPropertyBox
-                                            name="pages.my-reports.report.task-count"
-                                            value={String(report.tasks?.length ?? 0)}
-                                            icon={<IconListCheck size={16} />}
-                                        />
-                                        <TextPropertyBox
-                                            name="pages.my-reports.report.time-spent"
-                                            value={getSpentTimeFromReport(report, intl)}
-                                            icon={<IconClockCheck size={16} />}
-                                        />
-                                    </div>
-                                    <IconChevronRight className={classes.arrow} size={18} />
-                                </Link>
-                            ))}
+                            {cards}
                         </Flex>
                     )}
                     {total > 20 && (
