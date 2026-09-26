@@ -32,6 +32,7 @@ export interface ItemGroupProps {
     link?: string
     roles?: string[]
     showUnread?: boolean
+    showApplications?: boolean
     showIfCurator?: boolean
     curatorInbox?: boolean
 }

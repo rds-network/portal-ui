@@ -109,6 +109,7 @@ export const Content: NavSection[] = [
                 icon: IconUserPlus,
                 link: "/applications",
                 roles: ["ADMIN_VOLUNTEER", "INTERVIEWER"],
+                showApplications: true,
             },
             {
                 label: "navbar.volunteers.all-volunteers",

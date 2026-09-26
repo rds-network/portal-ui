@@ -2,21 +2,27 @@
 
 .root {
     @include s.page;
+    height: calc(100dvh - 114px);
+    max-height: calc(100dvh - 114px);
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 10px;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    gap: 16px;
+    gap: 12px;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
 .eyebrow {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     letter-spacing: 0.13em;
     text-transform: uppercase;
@@ -25,46 +31,54 @@
 
 .title {
     @include s.title;
-    margin: 8px 0 6px;
+    margin: 2px 0 0;
+    font-size: clamp(22px, 2.4vw, 28px);
 }
 
 .subtitle {
     color: var(--portal-muted);
-    font-size: 14px;
+    font-size: 13px;
+    margin-top: 2px;
 }
 
 .grid {
+    flex: 1;
+    min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-    gap: 20px;
-    align-items: start;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 12px;
+    align-items: stretch;
 }
 
 .card {
     @include s.glass;
-    padding: 20px 22px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 8px;
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .cardHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .cardTitle {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.02em;
     margin: 0;
 }
 
 .cardLink {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--portal-accent);
     text-decoration: none;
     white-space: nowrap;
@@ -80,20 +94,32 @@
     gap: 8px;
 }
 
-.tasksCard {
-    height: 320px;
+.reportsCard {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.rightStack {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
     overflow: hidden;
 }
 
+.tasksCard,
 .messagesCard {
-    height: 420px;
+    flex: 1 1 0;
+    min-height: 0;
     overflow: hidden;
 }
 
 .listScroll {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     flex: 1;
     min-height: 0;
     overflow-y: auto;
@@ -105,17 +131,17 @@
     appearance: none;
     width: 100%;
     margin: 0;
-    padding: 12px 14px;
+    padding: 8px 10px;
     text-align: left;
     font: inherit;
     color: inherit;
     cursor: pointer;
-    border-radius: 14px;
+    border-radius: 12px;
     border: 1px solid var(--portal-border);
     background: var(--portal-solid);
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex-shrink: 0;
     transition:
         background 0.15s ease,
@@ -156,41 +182,53 @@
 }
 
 .rowMeta {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--portal-muted);
 }
 
 .empty {
     color: var(--portal-muted);
-    font-size: 14px;
-    padding: 8px 0;
+    font-size: 13px;
+    padding: 4px 0;
 }
 
 .heatmap {
     grid-column: 1 / -1;
+    grid-row: 1;
+    min-height: 0;
 }
 
-.full {
-    grid-column: 1 / -1;
+.eventsSlot {
+    grid-column: 1;
+    grid-row: 3;
+    min-height: 0;
+}
+
+.projectsCard {
+    grid-column: 2;
+    grid-row: 3;
 }
 
 .projectGrid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 
 .projectCard {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding: 16px;
-    border-radius: 16px;
+    gap: 4px;
+    padding: 10px;
+    border-radius: 12px;
     border: 1px solid var(--portal-border);
     background: var(--portal-solid);
     text-decoration: none;
     color: inherit;
-    min-height: 160px;
+    min-height: 0;
     transition:
         border-color 0.15s ease,
         transform 0.15s ease;
@@ -202,7 +240,7 @@
 }
 
 .projectTag {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 650;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -211,11 +249,12 @@
 .projectTitle {
     flex: 1;
     letter-spacing: -0.02em;
+    font-size: 13px;
 }
 
 .projectLink {
     margin-top: auto;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--portal-accent);
 }
 
@@ -235,13 +274,30 @@
 }
 
 @media (max-width: 60em) {
+    .root {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+    }
+
     .grid {
         grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        flex: none;
     }
 
     .heatmap,
-    .full {
+    .reportsCard,
+    .rightStack,
+    .eventsSlot,
+    .projectsCard {
         grid-column: auto;
+        grid-row: auto;
+    }
+
+    .tasksCard,
+    .messagesCard {
+        min-height: 180px;
     }
 
     .projectGrid {

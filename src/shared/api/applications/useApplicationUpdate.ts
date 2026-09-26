@@ -10,6 +10,7 @@ export const cacheApplication = (queryClient: QueryClient, application: Applicat
             : page
     )
     void queryClient.invalidateQueries({ queryKey: ["getApplications"] })
+    void queryClient.invalidateQueries({ queryKey: ["applications-open-count"] })
 }
 
 export const useApplicationUpdate = () => {

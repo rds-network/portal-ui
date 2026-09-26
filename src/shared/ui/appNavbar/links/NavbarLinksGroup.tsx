@@ -7,6 +7,7 @@ import classes from "src/shared/ui/appNavbar/links/NavbarLinksGroup.module.scss"
 import { hasPermission } from "src/shared/user/roles"
 import { useQuery } from "@tanstack/react-query"
 import { Link, useLocation } from "react-router"
+import { ApplicationBadgeApi } from "src/shared/api/applications/ApplicationBadgeApi"
 import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
@@ -16,6 +17,7 @@ export function NavItem({
     label,
     link,
     showUnread,
+    showApplications,
     curatorInbox,
 }: ItemGroupProps) {
     const location = useLocation()
@@ -27,6 +29,12 @@ export function NavItem({
         queryKey: ["inbox-unread"],
         queryFn: () => InboxApiService.unreadCount(),
         enabled: !!showUnread,
+        refetchInterval: 60_000,
+    })
+    const { data: openApplications = 0 } = useQuery({
+        queryKey: ["applications-open-count"],
+        queryFn: () => ApplicationBadgeApi.openCount(),
+        enabled: !!showApplications,
         refetchInterval: 60_000,
     })
     const { data: curatorMe } = useQuery({
@@ -55,6 +63,11 @@ export function NavItem({
         (showUnread && unread > 0 && (
             <Badge size="xs" color="blue" className={classes.badge}>
                 {unread > 99 ? "99+" : unread}
+            </Badge>
+        )) ||
+        (showApplications && openApplications > 0 && (
+            <Badge size="xs" color="blue" className={classes.badge}>
+                {openApplications > 99 ? "99+" : openApplications}
             </Badge>
         )) ||
         (curatorInbox && pendingReports > 0 && (
