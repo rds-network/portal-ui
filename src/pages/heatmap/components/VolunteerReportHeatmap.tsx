@@ -17,6 +17,8 @@ interface Props {
     totalVolunteers: number
     onNotifyVolunteer?: (username: string, name: string) => void
     warningCounts?: Record<string, number>
+    canManageActions?: boolean
+    canOpenReports?: boolean
 }
 
 export const VolunteerReportHeatmap: React.FC<Props> = ({
@@ -27,6 +29,8 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
     totalVolunteers,
     onNotifyVolunteer,
     warningCounts = {},
+    canManageActions = true,
+    canOpenReports = true,
 }) => {
     const navigate = useNavigate()
     const startDate = dayjs(new Date(year, 1, 1))
@@ -40,6 +44,7 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
     }
 
     const openWeekForAll = (weekNumber: number, weekDate: dayjs.Dayjs) => {
+        if (!canOpenReports) return
         const meta = volunteers[0]?.weeks.find((item) => item.week === weekNumber)
         const from = meta?.weekStart
             ? dayjs(meta.weekStart).format("YYYY-MM-DD")
@@ -85,8 +90,8 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                                 <div
                                     key={w.date.toString()}
                                     className={classes.weekHeader}
-                                    style={{ cursor: "pointer" }}
-                                    title="Отчёты недели"
+                                    style={{ cursor: canOpenReports ? "pointer" : "default" }}
+                                    title={canOpenReports ? "Отчёты недели" : undefined}
                                     onClick={() => openWeekForAll(w.weekNumber, w.date)}
                                     onDoubleClick={() => openWeekForAll(w.weekNumber, w.date)}
                                 >
@@ -110,6 +115,8 @@ export const VolunteerReportHeatmap: React.FC<Props> = ({
                             onNotifyVolunteer={onNotifyVolunteer}
                             startDate={startDate}
                             warningCount={warningCounts[v.volunteerInfo.username] ?? 0}
+                            canManageActions={canManageActions}
+                            canOpenReports={canOpenReports}
                         />
                     ))}
                 </div>

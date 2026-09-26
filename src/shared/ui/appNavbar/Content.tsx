@@ -90,6 +90,7 @@ export const Content: NavSection[] = [
                 icon: IconMap,
                 link: "/volunteers/heatmap",
                 roles: ["ADMIN_VOLUNTEER"],
+                showIfCurator: true,
             },
             {
                 label: "navbar.reports.overdue",

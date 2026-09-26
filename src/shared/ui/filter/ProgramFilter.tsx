@@ -13,6 +13,8 @@ interface ProgramFilterProps {
     placeholder?: string
     label?: ReactNode
     programsOverride?: ProgramDto[]
+    includeNoProgram?: boolean
+    clearable?: boolean
 }
 
 export function ProgramFilter({
@@ -22,6 +24,8 @@ export function ProgramFilter({
     placeholder,
     label,
     programsOverride,
+    includeNoProgram = true,
+    clearable = true,
 }: ProgramFilterProps) {
     const allPrograms = usePrograms()
     const programs = programsOverride ?? allPrograms
@@ -30,7 +34,9 @@ export function ProgramFilter({
     const selectRef = useRef<HTMLInputElement>(null)
 
     const programOptions = [
-        { value: "NO_PROGRAM", label: intl.formatMessage({ id: locales.noProgram }) },
+        ...(includeNoProgram
+            ? [{ value: "NO_PROGRAM", label: intl.formatMessage({ id: locales.noProgram }) }]
+            : []),
         ...programs.map((program) => ({
             value: program.code.toUpperCase(),
             label: getLocalizedName(program, intl.locale),
@@ -49,7 +55,7 @@ export function ProgramFilter({
             value={value}
             onChange={handleChange}
             placeholder={placeholder || intl.formatMessage({ id: locales.filterByProgram })}
-            clearable
+            clearable={clearable}
             searchable
             maxDropdownHeight={400}
             searchValue={search}

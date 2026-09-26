@@ -7,6 +7,7 @@ import { FormattedMessage } from "react-intl"
 import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService } from "src/shared/api/InboxApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { ReportHeatMapApiService } from "src/shared/api/ReportHeatMapApiService"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
 import { heatmapTemplates } from "src/shared/email/templates"
@@ -18,7 +19,7 @@ import { VolunteerReportFilters } from "./components/VolunteerReportFilters"
 import { VolunteerReportHeatmap } from "./components/VolunteerReportHeatmap"
 import { defaultPageResponse } from "./lib/defaults"
 import { locales } from "./lib/locales"
-import { hasAccess } from "./lib/roles"
+import { hasAccess, hasManagerHeatmapAccess } from "./lib/roles"
 import classes from "./VolunteerHeatmapPage.module.scss"
 
 const FILTER_KEY = "heatmapFilterState"
@@ -49,11 +50,23 @@ export const VolunteerHeatmapPage: React.FC = () => {
 
     setDocumentTitleByLocale(locales.title)
 
+    const { data: curatorMe, isFetched: curatorMeFetched } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
+
+    const isManager = hasManagerHeatmapAccess(user)
+    const isCurator = !!curatorMe?.curator
+    const isCuratorOnly = !isManager && isCurator
+    const curatorPrograms = curatorMe?.programs || []
+
     useEffect(() => {
-        if (!hasAccess(user)) {
+        if (!user || !curatorMeFetched) return
+        if (!hasAccess(user, isCurator)) {
             navigate("/unauthorized", { replace: true })
         }
-    }, [user, navigate])
+    }, [user, navigate, curatorMeFetched, isCurator])
 
     // --- фильтры / состояние ---
 
@@ -70,6 +83,15 @@ export const VolunteerHeatmapPage: React.FC = () => {
         selectedProgram,
         selectedProject
     )
+    const curatorVisiblePrograms = useMemo(
+        () =>
+            isCuratorOnly
+                ? visiblePrograms.filter((program) =>
+                      curatorPrograms.some((code) => code.toUpperCase() === program.code.toUpperCase())
+                  )
+                : visiblePrograms,
+        [isCuratorOnly, visiblePrograms, curatorPrograms]
+    )
     const [filterYear, setFilterYear] = useState<string>(
         searchParams.get("year") || savedFilters?.year || dayjs().year().toString()
     )
@@ -84,7 +106,22 @@ export const VolunteerHeatmapPage: React.FC = () => {
         pageSize: Number(savedFilters?.pageSize || 10),
     })
 
+    useEffect(() => {
+        if (!isCuratorOnly || curatorPrograms.length === 0) return
+        const allowed = new Set(curatorPrograms.map((code) => code.toUpperCase()))
+        if (selectedProgram && allowed.has(selectedProgram.toUpperCase())) return
+        setSelectedProgram(curatorPrograms[0].toUpperCase())
+        setSelectedProject(null)
+        setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
+    }, [isCuratorOnly, curatorPrograms.join(",")])
+
     const handleProgramChange = (newProgram: string | null) => {
+        if (isCuratorOnly) {
+            if (!newProgram) return
+            const allowed = curatorPrograms.some((code) => code.toUpperCase() === newProgram.toUpperCase())
+            if (!allowed) return
+        }
+
         const programChanged = newProgram !== selectedProgram
 
         setSelectedProgram(newProgram)
@@ -112,6 +149,11 @@ export const VolunteerHeatmapPage: React.FC = () => {
                     nextProgram = owningProgramCode.toUpperCase()
                 }
             }
+        }
+
+        if (isCuratorOnly && nextProgram) {
+            const allowed = curatorPrograms.some((code) => code.toUpperCase() === nextProgram!.toUpperCase())
+            if (!allowed) return
         }
 
         setSelectedProject(newProject)
@@ -169,6 +211,8 @@ export const VolunteerHeatmapPage: React.FC = () => {
         setSelectedVolunteers(new Set())
     }, [debouncedSearch, selectedProgram, selectedProject, filterYear, pageRequest.pageNumber, pageRequest.pageSize, setSearchParams])
 
+    const heatmapReady = !isCuratorOnly || !!selectedProgram
+
     // --- запрос данных ---
 
     const { data: volunteerData } = useQuery({
@@ -181,6 +225,7 @@ export const VolunteerHeatmapPage: React.FC = () => {
             selectedProject,
             filterYear,
         ],
+        enabled: heatmapReady,
         queryFn: () =>
             ReportHeatMapApiService.getVolunteerHeatMap(debouncedSearch, pageRequest, {
                 program: selectedProgram === NO_PROGRAM_CODE ? "" : selectedProgram || undefined,
@@ -199,7 +244,7 @@ export const VolunteerHeatmapPage: React.FC = () => {
     const { data: warningCounts = {} } = useQuery({
         queryKey: ["overdue-counts", heatmapUsernames.join(",")],
         queryFn: () => InboxApiService.overdueCounts(heatmapUsernames),
-        enabled: heatmapUsernames.length > 0,
+        enabled: isManager && heatmapUsernames.length > 0,
     })
 
     // --- обработчики, мемоизированные чтобы не триггерить лишние рендеры ---
@@ -219,11 +264,11 @@ export const VolunteerHeatmapPage: React.FC = () => {
     const handleResetFilters = useCallback(() => {
         localStorage.removeItem(FILTER_KEY)
         setSearch("")
-        setSelectedProgram(null)
+        setSelectedProgram(isCuratorOnly && curatorPrograms[0] ? curatorPrograms[0].toUpperCase() : null)
         setSelectedProject(null)
         setFilterYear(dayjs().year().toString())
         setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
-    }, [])
+    }, [isCuratorOnly, curatorPrograms])
 
     const handlePageSizeChange = useCallback((value: string | null) => {
         if (!value) return
@@ -285,8 +330,10 @@ export const VolunteerHeatmapPage: React.FC = () => {
                     year={filterYear}
                     onYearChange={setFilterYear}
                     onReset={handleResetFilters}
-                    programsOverride={visiblePrograms}
+                    programsOverride={curatorVisiblePrograms}
                     projectsOverride={visibleProjects}
+                    includeNoProgram={!isCuratorOnly}
+                    programClearable={!isCuratorOnly}
                 />
 
                 <Card withBorder p="lg">
@@ -296,30 +343,34 @@ export const VolunteerHeatmapPage: React.FC = () => {
                         onVolunteerSelect={handleVolunteerSelect}
                         selectedVolunteers={selectedVolunteers}
                         totalVolunteers={totalVolunteers}
-                        onNotifyVolunteer={(username, name) => openNotify([{ username, name }])}
+                        onNotifyVolunteer={isManager ? (username, name) => openNotify([{ username, name }]) : undefined}
                         warningCounts={warningCounts}
+                        canManageActions={isManager}
+                        canOpenReports={isManager}
                     />
 
                     <Flex justify="space-between" align="center" mt="md" gap="md" wrap="wrap">
-                        <Flex justify="space-between" align="center" wrap="wrap" gap="md" mb="sm">
-                            <Button
-                                leftSection={<IconMail size={16} />}
-                                disabled={selectedVolunteers.size === 0}
-                                onClick={() => setEmailDrawerOpen(true)}
-                            >
-                                <FormattedMessage id={locales.sendMessage} />
-                            </Button>
-                            <Button
-                                variant="light"
-                                leftSection={<IconBell size={16} />}
-                                disabled={selectedVolunteers.size === 0}
-                                onClick={() => openNotify(selectedPeople)}
-                            >
-                                <FormattedMessage id={locales.sendNotice} />
-                            </Button>
-                        </Flex>
+                        {isManager && (
+                            <Flex justify="space-between" align="center" wrap="wrap" gap="md" mb="sm">
+                                <Button
+                                    leftSection={<IconMail size={16} />}
+                                    disabled={selectedVolunteers.size === 0}
+                                    onClick={() => setEmailDrawerOpen(true)}
+                                >
+                                    <FormattedMessage id={locales.sendMessage} />
+                                </Button>
+                                <Button
+                                    variant="light"
+                                    leftSection={<IconBell size={16} />}
+                                    disabled={selectedVolunteers.size === 0}
+                                    onClick={() => openNotify(selectedPeople)}
+                                >
+                                    <FormattedMessage id={locales.sendNotice} />
+                                </Button>
+                            </Flex>
+                        )}
 
-                        <Flex gap="md" align="center">
+                        <Flex gap="md" align="center" ml={isManager ? undefined : "auto"}>
                             <Select
                                 size="sm"
                                 aria-label="Per page"
@@ -339,17 +390,21 @@ export const VolunteerHeatmapPage: React.FC = () => {
                         </Flex>
                     </Flex>
 
-                    <EmailDrawer
-                        opened={emailDrawerOpen}
-                        close={() => setEmailDrawerOpen(false)}
-                        templates={heatmapTemplates}
-                        recipients={emailRecipients}
-                    />
-                    <InboxNotifyModal
-                        opened={notifyOpen}
-                        close={() => setNotifyOpen(false)}
-                        recipients={notifyRecipients}
-                    />
+                    {isManager && (
+                        <>
+                            <EmailDrawer
+                                opened={emailDrawerOpen}
+                                close={() => setEmailDrawerOpen(false)}
+                                templates={heatmapTemplates}
+                                recipients={emailRecipients}
+                            />
+                            <InboxNotifyModal
+                                opened={notifyOpen}
+                                close={() => setNotifyOpen(false)}
+                                recipients={notifyRecipients}
+                            />
+                        </>
+                    )}
                 </Card>
             </Flex>
         </Flex>
