@@ -1,10 +1,10 @@
-import { Avatar, Button, Card, Flex, Select, Text, Title } from "@mantine/core"
+import { Avatar, Button, Card, Flex, Select, Text, Title, UnstyledButton } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { IconTrash, IconUserPlus } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useNavigate } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
@@ -53,6 +53,11 @@ export const CuratorsPage: React.FC = () => {
         queryFn: () => ProgramCuratorApiService.delegates(),
     })
 
+    const { data: moderators = [] } = useQuery({
+        queryKey: ["program-curators", "moderators"],
+        queryFn: () => ProgramCuratorApiService.moderators(),
+    })
+
     const { data: programs = [] } = useQuery({
         queryKey: ["programs"],
         queryFn: () => ProgramsApiService.getPrograms().then((response) => response.data),
@@ -69,8 +74,12 @@ export const CuratorsPage: React.FC = () => {
     }, [rows, isManager, curatorMe?.programs, user?.username])
 
     const avatarLogins = useMemo(
-        () => [...visibleRows.map((row) => row.username), ...delegates.map((row) => row.delegateUsername)],
-        [visibleRows, delegates]
+        () => [
+            ...visibleRows.map((row) => row.username),
+            ...delegates.map((row) => row.delegateUsername),
+            ...moderators.map((row) => row.username),
+        ],
+        [visibleRows, delegates, moderators]
     )
 
     const { data: users = {} } = resolveUsers(avatarLogins)
@@ -205,6 +214,49 @@ export const CuratorsPage: React.FC = () => {
                     </Button>
                 </Card>
             )}
+
+            <Card withBorder radius="lg" p="md" className={classes.card}>
+                <div>
+                    <Text fw={650}>
+                        <FormattedMessage id="pages.curators.moderatorsTitle" />
+                    </Text>
+                    <Text size="sm" c="dimmed" mt={4}>
+                        <FormattedMessage id="pages.curators.moderatorsHint" />
+                    </Text>
+                </div>
+                {moderators.length === 0 ? (
+                    <Text size="sm" c="dimmed">
+                        <FormattedMessage id="pages.curators.moderatorsEmpty" />
+                    </Text>
+                ) : (
+                    <div className={classes.moderators}>
+                        {moderators.map((moderator) => (
+                            <UnstyledButton
+                                key={moderator.username}
+                                component={Link}
+                                to={`/profile/${moderator.username}`}
+                                className={classes.moderator}
+                            >
+                                <Avatar
+                                    src={userOf(moderator.username)?.avatar?.link}
+                                    name={moderator.fullName || moderator.username}
+                                    size={36}
+                                    radius="xl"
+                                    color="initials"
+                                />
+                                <div>
+                                    <Text fw={600} size="sm">
+                                        {moderator.fullName}
+                                    </Text>
+                                    <Text size="xs" c="dimmed">
+                                        {moderator.username}
+                                    </Text>
+                                </div>
+                            </UnstyledButton>
+                        ))}
+                    </div>
+                )}
+            </Card>
 
             <div className={classes.grid}>
                 {grouped.map((item) => (

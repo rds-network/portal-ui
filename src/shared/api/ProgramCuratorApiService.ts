@@ -43,6 +43,11 @@ export type ReportApproverDto = {
     curatorFullName?: string | null
 }
 
+export type PortalModeratorDto = {
+    username: string
+    fullName: string
+}
+
 const alive = (status: number) => status === 200 || status === 201 || status === 204 || status === 404 || status >= 500
 
 export const ProgramCuratorApiService = {
@@ -52,6 +57,13 @@ export const ProgramCuratorApiService = {
     },
     async approvers(): Promise<ReportApproverDto[]> {
         const response = await RequestHttp.get<ReportApproverDto[]>("/program-curators/approvers", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return []
+        return response.data ?? []
+    },
+    async moderators(): Promise<PortalModeratorDto[]> {
+        const response = await RequestHttp.get<PortalModeratorDto[]>("/program-curators/moderators", {
             validateStatus: alive,
         })
         if (response.status !== 200) return []

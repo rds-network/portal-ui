@@ -1021,7 +1021,7 @@
         },
         "curators": {
             "title": "Program curators",
-            "description": "Program team leads. A curator can delegate report acceptance to another person — they appear in the customer list and can accept reports.",
+            "description": "Program team leads accept reports for their program. A curator can delegate acceptance — the delegate appears in the customer list. Portal moderators below handle global control (overdue, all reports), not a personal per-program queue.",
             "program": "Program",
             "person": "Curator",
             "assign": "Assign",
@@ -1035,7 +1035,10 @@
             "delegateSaved": "Acceptance delegated",
             "delegateRemove": "Remove delegate",
             "delegates": "Acceptance delegates",
-            "noDelegates": "No delegates"
+            "noDelegates": "No delegates",
+            "moderatorsTitle": "Portal moderators",
+            "moderatorsHint": "ADMIN_VOLUNTEER role: overdue lists, mailings, all reports, and accepting any report if needed. To get your «Pending acceptance» queue, appoint the moderator as an acceptance delegate.",
+            "moderatorsEmpty": "No active moderators yet"
         },
         "resources": {
             "title": "Our resources",

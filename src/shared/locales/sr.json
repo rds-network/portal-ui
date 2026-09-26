@@ -1021,7 +1021,7 @@
         },
         "curators": {
             "title": "Kustosi programa",
-            "description": "Timlidovi programa. Kustos može da delegira prijem izveštaja drugoj osobi — ona se pojavljuje u listi naručilaca i može da prihvati izveštaje.",
+            "description": "Timlidovi programa prihvataju izveštaje svog programa. Kustos može da delegira prijem — delegat se pojavljuje u listi naručilaca. Moderatori portala ispod su globalna kontrola (dužnici, svi izveštaji), ne lični red po programu.",
             "program": "Program",
             "person": "Kustos",
             "assign": "Dodeli",
@@ -1035,7 +1035,10 @@
             "delegateSaved": "Prijem je delegiran",
             "delegateRemove": "Ukloni delegata",
             "delegates": "Delegati prijema",
-            "noDelegates": "Nema delegata"
+            "noDelegates": "Nema delegata",
+            "moderatorsTitle": "Moderatori portala",
+            "moderatorsHint": "Uloga ADMIN_VOLUNTEER: dužnici, slanja, svi izveštaji i po potrebi prihvatanje bilo kog izveštaja. Da bi dobili tvoj red «Na prijemu», imenuj moderatora za delegata prijema.",
+            "moderatorsEmpty": "Još nema aktivnih moderatora"
         },
         "resources": {
             "title": "Naši resursi",
