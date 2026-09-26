@@ -1,12 +1,12 @@
-import { Button, Flex, Modal, Text, TextInput, Textarea } from "@mantine/core"
+import { Button, Flex, Modal, SegmentedControl, Text, TextInput, Textarea } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useEffect, useMemo, useState } from "react"
-import { FormattedMessage } from "react-intl"
+import { FormattedMessage, useIntl } from "react-intl"
 import { MupLetterApiService } from "src/shared/api/MupLetterApiService"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
-import { MUP_TO, buildMupLetter } from "./mupLetter"
+import { MUP_TO, MupLetterReason, buildMupLetter } from "./mupLetter"
 
 type Props = {
     opened: boolean
@@ -37,18 +37,32 @@ export const MupLetterModal: React.FC<Props> = ({
     periodFrom = "",
     periodTo = "",
 }) => {
+    const intl = useIntl()
     const queryClient = useQueryClient()
+    const [reason, setReason] = useState<MupLetterReason>("NON_COMPLIANCE")
     const fallback = useMemo(
-        () => buildMupLetter({ fullName, passport, birthDate, citizenship, address, phone, email, periodFrom, periodTo }),
-        [fullName, passport, birthDate, citizenship, address, phone, email, periodFrom, periodTo]
+        () =>
+            buildMupLetter({
+                fullName,
+                passport,
+                birthDate,
+                citizenship,
+                address,
+                phone,
+                email,
+                periodFrom,
+                periodTo,
+                reason,
+            }),
+        [fullName, passport, birthDate, citizenship, address, phone, email, periodFrom, periodTo, reason]
     )
     const [to, setTo] = useState(fallback.to)
     const [subject, setSubject] = useState(fallback.subject)
     const [body, setBody] = useState(fallback.body)
 
     const { data: draft } = useQuery({
-        queryKey: ["mup-draft", username],
-        queryFn: () => MupLetterApiService.draft(username),
+        queryKey: ["mup-draft", username, reason],
+        queryFn: () => MupLetterApiService.draft(username, reason),
         enabled: opened && !!username,
     })
 
@@ -59,6 +73,10 @@ export const MupLetterModal: React.FC<Props> = ({
     })
 
     useEffect(() => {
+        if (!opened) {
+            setReason("NON_COMPLIANCE")
+            return
+        }
         setTo(fallback.to)
         setSubject(fallback.subject)
         setBody(fallback.body)
@@ -78,6 +96,7 @@ export const MupLetterModal: React.FC<Props> = ({
                 to,
                 subject: subject.trim(),
                 body: body.trim(),
+                reason,
             }),
         onSuccess: (result) => {
             notifications.show(
@@ -102,6 +121,26 @@ export const MupLetterModal: React.FC<Props> = ({
                 <Text size="sm" c="dimmed">
                     <FormattedMessage id="pages.mup.hint" />
                 </Text>
+                <div>
+                    <Text size="sm" fw={500} mb={6}>
+                        <FormattedMessage id="pages.mup.reason" />
+                    </Text>
+                    <SegmentedControl
+                        fullWidth
+                        value={reason}
+                        onChange={(value) => setReason(value as MupLetterReason)}
+                        data={[
+                            {
+                                value: "NON_COMPLIANCE",
+                                label: intl.formatMessage({ id: "pages.mup.reasonNonCompliance" }),
+                            },
+                            {
+                                value: "VOLUNTEER_REQUEST",
+                                label: intl.formatMessage({ id: "pages.mup.reasonVolunteerRequest" }),
+                            },
+                        ]}
+                    />
+                </div>
                 <TextInput label={<FormattedMessage id="pages.mup.to" />} value={to} onChange={(e) => setTo(e.currentTarget.value)} />
                 <TextInput
                     label={<FormattedMessage id="pages.mup.subject" />}
