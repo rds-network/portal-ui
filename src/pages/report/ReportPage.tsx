@@ -81,6 +81,13 @@ export const ReportPage = () => {
     const program = useMemo(() => programs.find((p) => p.code === report.program), [programs, report.program])
     const project = useMemo(() => projects.find((p) => p.code === report.project), [projects, report.project])
 
+    const isCustomer = (report.tasks ?? []).some((task) => task.customer === currentUser?.username)
+    const { data: delegates = [] } = useQuery({
+        queryKey: ["program-curators", "delegates"],
+        queryFn: () => ProgramCuratorApiService.delegates(),
+        enabled: !!currentUser && !isCustomer,
+    })
+
     if (isFetchingReport || isFetchingUsers) {
         return (
             <Flex className={classes.root}>
@@ -113,12 +120,6 @@ export const ReportPage = () => {
         })
     }
 
-    const isCustomer = (report.tasks ?? []).some((task) => task.customer === currentUser?.username)
-    const { data: delegates = [] } = useQuery({
-        queryKey: ["program-curators", "delegates"],
-        queryFn: () => ProgramCuratorApiService.delegates(),
-        enabled: !!currentUser && !isCustomer,
-    })
     const isAcceptanceDelegate = delegates.some(
         (row) =>
             row.delegateUsername === currentUser?.username &&
