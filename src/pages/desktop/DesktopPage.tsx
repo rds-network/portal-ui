@@ -20,7 +20,6 @@ import {
     PortalEventWriteRequest,
 } from "src/shared/api/PortalEventApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
-import { fetchProjectFeed } from "src/shared/api/ProjectFeedApi"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
@@ -110,12 +109,6 @@ export const DesktopPage: React.FC = () => {
     const { data: events = [] } = useQuery({
         queryKey: ["portal-events", "upcoming"],
         queryFn: () => PortalEventApiService.list(true, 60),
-    })
-
-    const { data: projectFeed = [] } = useQuery({
-        queryKey: ["project-feed"],
-        queryFn: () => fetchProjectFeed(),
-        staleTime: 5 * 60 * 1000,
     })
 
     const eventForm = useForm({
@@ -297,101 +290,45 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <div className={classes.rightStack}>
-                    <section className={`${classes.card} ${classes.tasksCard}`}>
-                        <div className={classes.cardHeader}>
-                            <Title order={2} className={classes.cardTitle}>
-                                <FormattedMessage id="pages.desktop.tasks" />
-                            </Title>
-                            <Link className={classes.cardLink} to="/tasks">
-                                <FormattedMessage id="pages.desktop.openBoard" />
-                            </Link>
-                        </div>
-                        <div className={classes.listScroll}>
-                            {myTasks.length === 0 && (
-                                <Text className={classes.empty}>
-                                    <FormattedMessage id="pages.desktop.tasksEmpty" />
-                                </Text>
-                            )}
-                            {myTasks.map((task) => {
-                                const status = String(task.status).toUpperCase()
-                                const isNew =
-                                    status === "TODO" || dayjs().diff(dayjs(task.createTime), "hour") < 48
-                                return (
-                                    <button
-                                        key={task.id}
-                                        type="button"
-                                        className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
-                                        onClick={() => navigate("/tasks")}
-                                    >
-                                        <div className={classes.rowBody}>
-                                            <Text fw={600} lineClamp={1}>
-                                                {task.title}
-                                            </Text>
-                                            <Text className={classes.rowMeta} lineClamp={1}>
-                                                {task.customerName || task.customer || "—"}
-                                                {task.dueDate
-                                                    ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
-                                                    : ""}
-                                            </Text>
-                                        </div>
-                                        <Badge
-                                            color={STATUS_COLOR[status] || "gray"}
-                                            variant="light"
-                                            radius="md"
-                                            size="sm"
-                                        >
-                                            <FormattedMessage
-                                                id={`pages.tasks.status.${status}`}
-                                                defaultMessage={String(task.status)}
-                                            />
-                                        </Badge>
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    </section>
-
-                    <section className={`${classes.card} ${classes.messagesCard}`}>
-                        <div className={classes.cardHeader}>
-                            <Title order={2} className={classes.cardTitle}>
-                                <FormattedMessage id="pages.desktop.messages" />
-                            </Title>
-                            <Link className={classes.cardLink} to="/messages">
-                                <FormattedMessage id="pages.desktop.allMessages" />
-                            </Link>
-                        </div>
-                        <div className={classes.listScroll}>
-                            {recentMessages.length === 0 && (
-                                <Text className={classes.empty}>
-                                    <FormattedMessage id="pages.messages.empty" />
-                                </Text>
-                            )}
-                            {recentMessages.map((item) => (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    className={classes.row}
-                                    onClick={() => navigate("/messages")}
-                                >
-                                    <div className={classes.rowBody}>
-                                        <Text fw={item.unread ? 700 : 500} lineClamp={1}>
-                                            {item.subject}
-                                        </Text>
-                                        <Text className={classes.rowMeta} lineClamp={1}>
-                                            {item.lastBody || item.counterpartName || item.counterpart || "—"}
-                                        </Text>
-                                    </div>
-                                    {item.unread && (
-                                        <Badge color="ocean" variant="filled" radius="md" size="sm">
-                                            <FormattedMessage id="pages.messages.new" />
-                                        </Badge>
-                                    )}
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-                </div>
+                <section className={`${classes.card} ${classes.messagesCard}`}>
+                    <div className={classes.cardHeader}>
+                        <Title order={2} className={classes.cardTitle}>
+                            <FormattedMessage id="pages.desktop.messages" />
+                        </Title>
+                        <Link className={classes.cardLink} to="/messages">
+                            <FormattedMessage id="pages.desktop.allMessages" />
+                        </Link>
+                    </div>
+                    <div className={classes.listScroll}>
+                        {recentMessages.length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage id="pages.messages.empty" />
+                            </Text>
+                        )}
+                        {recentMessages.map((item) => (
+                            <button
+                                key={item.id}
+                                type="button"
+                                className={classes.row}
+                                onClick={() => navigate("/messages")}
+                            >
+                                <div className={classes.rowBody}>
+                                    <Text fw={item.unread ? 700 : 500} lineClamp={1}>
+                                        {item.subject}
+                                    </Text>
+                                    <Text className={classes.rowMeta} lineClamp={1}>
+                                        {item.lastBody || item.counterpartName || item.counterpart || "—"}
+                                    </Text>
+                                </div>
+                                {item.unread && (
+                                    <Badge color="ocean" variant="filled" radius="md" size="sm">
+                                        <FormattedMessage id="pages.messages.new" />
+                                    </Badge>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </section>
 
                 <div className={classes.eventsSlot}>
                     <DesktopEventsPanel
@@ -402,37 +339,58 @@ export const DesktopPage: React.FC = () => {
                     />
                 </div>
 
-                <section className={`${classes.card} ${classes.projectsCard}`}>
+                <section className={`${classes.card} ${classes.tasksCard}`}>
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.projects" />
+                            <FormattedMessage id="pages.desktop.tasks" />
                         </Title>
+                        <Link className={classes.cardLink} to="/tasks">
+                            <FormattedMessage id="pages.desktop.openBoard" />
+                        </Link>
                     </div>
-                    {projectFeed.length === 0 ? (
-                        <Text className={classes.empty}>
-                            <FormattedMessage id="pages.desktop.projectsEmpty" />
-                        </Text>
-                    ) : (
-                        <div className={classes.projectGrid}>
-                            {projectFeed.slice(0, 3).map((item) => (
-                                <a
-                                    key={`${item.source}-${item.url}`}
-                                    className={`${classes.projectCard} ${classes[`source_${item.source}`]}`}
-                                    href={item.url}
-                                    target="_blank"
-                                    rel="noreferrer"
+                    <div className={classes.listScroll}>
+                        {myTasks.length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage id="pages.desktop.tasksEmpty" />
+                            </Text>
+                        )}
+                        {myTasks.map((task) => {
+                            const status = String(task.status).toUpperCase()
+                            const isNew =
+                                status === "TODO" || dayjs().diff(dayjs(task.createTime), "hour") < 48
+                            return (
+                                <button
+                                    key={task.id}
+                                    type="button"
+                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
+                                    onClick={() => navigate("/tasks")}
                                 >
-                                    <Text className={classes.projectTag}>{item.tag}</Text>
-                                    <Text fw={650} lineClamp={2} className={classes.projectTitle}>
-                                        {item.title}
-                                    </Text>
-                                    <Text className={classes.projectLink}>
-                                        <FormattedMessage id="pages.desktop.read" />
-                                    </Text>
-                                </a>
-                            ))}
-                        </div>
-                    )}
+                                    <div className={classes.rowBody}>
+                                        <Text fw={600} lineClamp={1}>
+                                            {task.title}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                            {task.customerName || task.customer || "—"}
+                                            {task.dueDate
+                                                ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
+                                                : ""}
+                                        </Text>
+                                    </div>
+                                    <Badge
+                                        color={STATUS_COLOR[status] || "gray"}
+                                        variant="light"
+                                        radius="md"
+                                        size="sm"
+                                    >
+                                        <FormattedMessage
+                                            id={`pages.tasks.status.${status}`}
+                                            defaultMessage={String(task.status)}
+                                        />
+                                    </Badge>
+                                </button>
+                            )
+                        })}
+                    </div>
                 </section>
             </div>
 

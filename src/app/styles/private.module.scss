@@ -17,6 +17,16 @@
 .appShellMainScroll {
     height: 100%;
     width: 100%;
+
+    :global(.mantine-ScrollArea-viewport) {
+        height: 100% !important;
+    }
+
+    :global(.mantine-ScrollArea-viewport > div) {
+        height: 100% !important;
+        min-height: 100% !important;
+        display: block !important;
+    }
 }
 .divider {
     width: 100%;

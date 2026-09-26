@@ -184,7 +184,7 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                 >
                     <div
                         className={classes.compactWeekHeaders}
-                        style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(18px, 1fr))` }}
+                        style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(9px, 1fr))` }}
                     >
                         {weeks.map((weekItem) => (
                             <Text key={`h-${weekItem.week}`} size="xs" c="dimmed" ta="center">
@@ -194,7 +194,7 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                     </div>
                     <div
                         className={classes.compactWeekSquares}
-                        style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(18px, 1fr))` }}
+                        style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(9px, 1fr))` }}
                     >
                         {weeks.map((weekItem) => (
                             <HoverCard

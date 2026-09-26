@@ -1,7 +1,7 @@
 import { Alert, Badge, Button, Flex, Text, Textarea, Title } from "@mantine/core"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
@@ -32,6 +32,20 @@ export const MessagesPage: React.FC = () => {
         queryKey: ["inbox-pending-ack"],
         queryFn: () => InboxApiService.pendingAckCount(),
     })
+
+    const sortedThreads = useMemo(
+        () =>
+            [...threads].sort((a, b) => {
+                if (a.unread !== b.unread) return a.unread ? -1 : 1
+                return dayjs(b.createTime).valueOf() - dayjs(a.createTime).valueOf()
+            }),
+        [threads]
+    )
+
+    useEffect(() => {
+        if (isMobile || selectedId || sortedThreads.length === 0) return
+        setSelectedId(sortedThreads[0].id)
+    }, [isMobile, selectedId, sortedThreads])
 
     const { data: thread } = useQuery({
         queryKey: ["inbox", selectedId],
@@ -84,12 +98,12 @@ export const MessagesPage: React.FC = () => {
                     )}
                 </div>
                 <div className={classes.listScroll}>
-                    {threads.length === 0 && (
+                    {sortedThreads.length === 0 && (
                         <Text c="dimmed">
                             <FormattedMessage id="pages.messages.empty" />
                         </Text>
                     )}
-                    {threads.map((item) => (
+                    {sortedThreads.map((item) => (
                         <button
                             key={item.id}
                             type="button"

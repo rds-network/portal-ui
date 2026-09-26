@@ -3,12 +3,19 @@
     @include s.page;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 16px;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding-bottom: 0;
 }
 .header {
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 .title {
     @include s.title;
@@ -32,13 +39,18 @@
 .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 310px;
-    align-items: start;
+    align-items: stretch;
     gap: 24px;
     width: 100%;
+    flex: 1;
+    min-height: 0;
 }
 .reports {
     @include s.glass;
     min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
     flex-direction: column;
     padding: 24px;
     gap: 20px;
@@ -66,6 +78,9 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 .report {
     display: grid;

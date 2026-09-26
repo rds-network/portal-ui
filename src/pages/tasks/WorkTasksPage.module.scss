@@ -2,15 +2,16 @@
 
 .root {
     @include s.page;
-    max-width: 1480px;
-    height: calc(100dvh - 114px);
-    max-height: calc(100dvh - 114px);
+    max-width: none;
+    height: 100%;
+    max-height: 100%;
     min-height: 0;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    padding-bottom: 0;
 }
 
 .top {
