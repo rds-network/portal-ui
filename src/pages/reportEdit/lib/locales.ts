@@ -13,4 +13,6 @@ export const locales = {
     blockedTitle: "pages.edit-report.blocked-title",
     blockedDescription: "pages.edit-report.blocked-description",
     blockedReason: "pages.edit-report.blocked-reason",
+    controlTitle: "pages.edit-report.control-title",
+    controlDescription: "pages.edit-report.control-description",
 }

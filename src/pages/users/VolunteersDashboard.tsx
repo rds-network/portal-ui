@@ -5,7 +5,7 @@ import React, { useMemo } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { useProjects } from "src/app/providers/ProjectsProvider"
-import { UserApiService } from "src/shared/api/user/UserApiService"
+import { reportBlockOf, UserApiService } from "src/shared/api/user/UserApiService"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { locales } from "./lib/locales"
@@ -27,6 +27,7 @@ type DashboardStats = {
     total: number
     active: number
     deactivated: number
+    reportBlocked: number
     byProgram: Bucket[]
     byProject: Bucket[]
 }
@@ -36,10 +37,12 @@ const buildStats = (items: UserInfoDto[]): DashboardStats => {
     const projects = new Map<string, Bucket>()
     let active = 0
     let deactivated = 0
+    let reportBlocked = 0
 
     for (const item of items) {
         if (item.active) active += 1
         else deactivated += 1
+        if (reportBlockOf(item).reportBlocked) reportBlocked += 1
 
         const programCode = item.program?.code?.trim().toUpperCase() || null
         const programKey = programCode || NO_PROGRAM_CODE
@@ -64,6 +67,7 @@ const buildStats = (items: UserInfoDto[]): DashboardStats => {
         total: items.length,
         active,
         deactivated,
+        reportBlocked,
         byProgram: [...programs.values()].sort(sortBuckets),
         byProject: [...projects.values()].sort(sortBuckets),
     }
@@ -75,6 +79,8 @@ type Props = {
     activeProject: string | null
     onSelectProgram: (program: string | null) => void
     onSelectProject: (project: string | null) => void
+    reportBlockedActive: boolean
+    onToggleReportBlocked: () => void
 }
 
 export const VolunteersDashboard: React.FC<Props> = ({
@@ -83,6 +89,8 @@ export const VolunteersDashboard: React.FC<Props> = ({
     activeProject,
     onSelectProgram,
     onSelectProject,
+    reportBlockedActive,
+    onToggleReportBlocked,
 }) => {
     const intl = useIntl()
     const programs = usePrograms()
@@ -164,6 +172,19 @@ export const VolunteersDashboard: React.FC<Props> = ({
                         }
                         color="red"
                         interactive={false}
+                    />
+                )}
+                {(stats.reportBlocked > 0 || reportBlockedActive) && (
+                    <StatChip
+                        active={reportBlockedActive}
+                        onClick={onToggleReportBlocked}
+                        label={
+                            <FormattedMessage
+                                id={locales.dashboardReportBlocked}
+                                values={{ count: stats.reportBlocked }}
+                            />
+                        }
+                        color="red"
                     />
                 )}
             </Flex>

@@ -10,6 +10,8 @@ import {
     IconLockOpen2,
     IconMessageCircle,
     IconPlayerPlay,
+    IconShieldCheck,
+    IconShieldOff,
 } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useContext, useEffect, useState } from "react"
@@ -17,7 +19,14 @@ import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
-import { reportBlockOf, UserAccountApiService, UserApiService } from "src/shared/api/user/UserApiService"
+import {
+    reportBlockOf,
+    reportControllerNameOf,
+    reportControlOf,
+    UserAccountApiService,
+    UserApiService,
+} from "src/shared/api/user/UserApiService"
+import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { EmailDrawer } from "src/shared/ui/emailModal/EmailDrawer"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
@@ -43,6 +52,8 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
     const [emailDrawerOpen, setEmailDrawerOpen] = useState<boolean>(false)
     const [blockModalOpen, setBlockModalOpen] = useState<boolean>(false)
     const [blockReason, setBlockReason] = useState("")
+    const [controlModalOpen, setControlModalOpen] = useState<boolean>(false)
+    const [controllerLogin, setControllerLogin] = useState<string | null>(null)
 
     useEffect(() => setUserDto(user), [user])
 
@@ -73,6 +84,11 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
     // Куратор может ставить стоп только своим программам, но это решает бэкенд — здесь достаточно роли.
     const canManageReportBlock = hasPermission(currentUser, MANAGERS) || !!curatorMe?.curator
     const reportBlock = reportBlockOf(userDto)
+    const controllerName = reportControllerNameOf(userDto)
+    // Снять контроль может ещё и сам контролёр — остальное проверяет бэкенд.
+    const canClearReportController =
+        canManageReportBlock ||
+        reportControlOf(userDto).reportControllerUsername?.toLowerCase() === currentUser?.username?.toLowerCase()
 
     const { mutate: changeReportBlock, isPending: isChangingReportBlock } = useMutation({
         mutationFn: (reason: string | null) =>
@@ -83,6 +99,30 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
             setUserDto(updated)
             setBlockModalOpen(false)
             setBlockReason("")
+            setMenuOpened(false)
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.profileUpdated" />
+                    </Text>,
+                    null
+                )
+            )
+            queryClient.invalidateQueries({ queryKey: ["searchUsers"] })
+            queryClient.invalidateQueries({ queryKey: ["getInfo"] })
+            onChanged?.(updated)
+        },
+    })
+
+    const { mutate: changeReportController, isPending: isChangingReportController } = useMutation({
+        mutationFn: (login: string | null) =>
+            login === null
+                ? UserAccountApiService.clearReportController(userDto.id)
+                : UserAccountApiService.setReportController(userDto.id, login),
+        onSuccess: (updated) => {
+            setUserDto(updated)
+            setControlModalOpen(false)
+            setControllerLogin(null)
             setMenuOpened(false)
             notifications.show(
                 SuccessNotification(
@@ -135,6 +175,33 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                     </Button>
                     <Button color="red" loading={isChangingReportBlock} onClick={() => changeReportBlock(blockReason)}>
                         <FormattedMessage id={locales.menuReportBlock} />
+                    </Button>
+                </Flex>
+            </Modal>
+            <Modal
+                centered
+                opened={controlModalOpen}
+                onClose={() => setControlModalOpen(false)}
+                title={<FormattedMessage id={locales.menuReportController} />}
+            >
+                <Text size="sm" c="dimmed">
+                    <FormattedMessage id={locales.reportControllerDescription} />
+                </Text>
+                <UserSearch
+                    label={<FormattedMessage id={locales.reportControllerLabel} />}
+                    onUserChange={(picked) => setControllerLogin(picked?.username ?? null)}
+                />
+                <Flex mt="md" gap="sm" justify="flex-end">
+                    <Button variant="outline" onClick={() => setControlModalOpen(false)}>
+                        <FormattedMessage id={locales.reportBlockCancel} />
+                    </Button>
+                    <Button
+                        color="teal"
+                        disabled={!controllerLogin}
+                        loading={isChangingReportController}
+                        onClick={() => controllerLogin && changeReportController(controllerLogin)}
+                    >
+                        <FormattedMessage id={locales.reportControllerSubmit} />
                     </Button>
                 </Flex>
             </Modal>
@@ -194,6 +261,30 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                         onClick={() => changeReportBlock(null)}
                     >
                         <FormattedMessage id={locales.menuReportUnblock} />
+                    </Menu.Item>
+                )}
+                {canManageReportBlock && (
+                    <Menu.Item
+                        color="teal"
+                        leftSection={<IconShieldCheck size={14} />}
+                        disabled={isChangingReportController}
+                        onClick={() => {
+                            setMenuOpened(false)
+                            setControlModalOpen(true)
+                        }}
+                    >
+                        <FormattedMessage id={locales.menuReportController} />
+                    </Menu.Item>
+                )}
+                {canClearReportController && !!controllerName && (
+                    <Menu.Item
+                        leftSection={
+                            isChangingReportController ? <Loader size={14} /> : <IconShieldOff size={14} />
+                        }
+                        disabled={isChangingReportController}
+                        onClick={() => changeReportController(null)}
+                    >
+                        <FormattedMessage id={locales.menuReportControllerClear} />
                     </Menu.Item>
                 )}
                 {userDto.active && (

@@ -7,6 +7,7 @@ import {
     IconClock,
     IconMail,
     IconPencil,
+    IconShieldCheck,
     IconTrash,
     IconUserStar,
     IconWand,
@@ -25,7 +26,7 @@ import { ReportNote } from "src/pages/report/note/ReportNote"
 import { TaskCard } from "src/pages/report/task/TaskCard"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
-import { resolveUsers } from "src/shared/api/user/UserApiService"
+import { reportControllerNameOf, reportControlOf, resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 import { getReportStatusColor, ReportStatus } from "src/shared/report/status"
@@ -126,10 +127,23 @@ export const ReportPage = () => {
             (report.tasks ?? []).some((task) => task.customer === row.curatorUsername) &&
             (!report.program || row.programCode === report.program)
     )
-    const canAcceptReport =
-        hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
-        isCustomer ||
-        isAcceptanceDelegate
+    // Принудительный контроль — строгая виза: модератор и куратор программы принять не могут.
+    const authorController = reportControlOf(users[report.user || ""]).reportControllerUsername || null
+    const authorControllerName = reportControllerNameOf(users[report.user || ""])
+    const isAuthorController = authorController?.toLowerCase() === currentUser?.username?.toLowerCase()
+    const isControllerDelegate = delegates.some(
+        (row) =>
+            row.delegateUsername === currentUser?.username &&
+            row.curatorUsername.toLowerCase() === (authorController || "").toLowerCase() &&
+            (!report.program || row.programCode === report.program)
+    )
+    const canAcceptReport = authorController
+        ? isAuthorController ||
+          isControllerDelegate ||
+          hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO])
+        : hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
+          isCustomer ||
+          isAcceptanceDelegate
 
     return (
         <Flex className={classes.root}>
@@ -262,6 +276,11 @@ export const ReportPage = () => {
                         <TaskCard task={task} users={users} key={task.id} />
                     ))}
             </Flex>
+            {report.status == ReportStatus.CREATED && !canAcceptReport && !!authorControllerName && (
+                <Alert variant="light" color="teal" icon={<IconShieldCheck size={16} />}>
+                    <FormattedMessage id={locales.controlVisaRequired} values={{ name: authorControllerName }} />
+                </Alert>
+            )}
             {report.status == ReportStatus.CREATED && canAcceptReport && (
                 <Flex direction="column" rowGap="sm">
                     <Textarea

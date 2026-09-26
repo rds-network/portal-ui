@@ -26,7 +26,12 @@ import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/users
 import { allowedRoles } from "src/pages/users/lib/roles"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { VolunteersDashboard } from "src/pages/users/VolunteersDashboard"
-import { UserAccountApiService, UserApiService } from "src/shared/api/user/UserApiService"
+import {
+    reportBlockOf,
+    reportControllerNameOf,
+    UserAccountApiService,
+    UserApiService,
+} from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
@@ -58,8 +63,13 @@ export const UserList = () => {
     const [selectedProgram, setSelectedProgram] = useState<string | null>(searchParams.get("program") || null)
     const [selectedProject, setSelectedProject] = useState<string | null>(searchParams.get("project") || null)
     const showDeactivated = searchParams.get("deactivated") === "1"
+    const onlyReportBlocked = searchParams.get("reportBlocked") === "1"
 
-    const filter: UserSearchFilter = showDeactivated ? {} : { ...defaultFilter, onlyActive: true }
+    const baseFilter: UserSearchFilter = showDeactivated ? {} : { ...defaultFilter, onlyActive: true }
+    // reportBlocked ещё не в сгенерированном UserSearchFilter — бэкенд принимает поле как есть.
+    const filter: UserSearchFilter = onlyReportBlocked
+        ? ({ ...baseFilter, reportBlocked: true } as UserSearchFilter)
+        : baseFilter
 
     const { programs, projects, visiblePrograms, visibleProjects } = useProgramProjectFilter(
         selectedProgram,
@@ -173,7 +183,8 @@ export const UserList = () => {
         newProgram: string | null,
         newProject: string | null,
         newPage: number = 0,
-        newShowDeactivated: boolean = showDeactivated
+        newShowDeactivated: boolean = showDeactivated,
+        newReportBlocked: boolean = onlyReportBlocked
     ) => {
         const params = new URLSearchParams()
 
@@ -191,6 +202,10 @@ export const UserList = () => {
 
         if (newShowDeactivated) {
             params.set("deactivated", "1")
+        }
+
+        if (newReportBlocked) {
+            params.set("reportBlocked", "1")
         }
 
         if (newPage > 0) {
@@ -334,7 +349,16 @@ export const UserList = () => {
         isFetching,
     } = useQuery({
         initialData: { content: [], page: defaultPageResponse },
-        queryKey: ["searchUsers", debouncedSearch, pageRequest, filter, selectedProgram, selectedProject, showDeactivated],
+        queryKey: [
+            "searchUsers",
+            debouncedSearch,
+            pageRequest,
+            filter,
+            selectedProgram,
+            selectedProject,
+            showDeactivated,
+            onlyReportBlocked,
+        ],
         queryFn: () => {
             let project: string | undefined = undefined
             if (selectedProject) {
@@ -410,6 +434,23 @@ export const UserList = () => {
                         <UserMenu user={user} />
                     </div>
                 </Flex>
+                {(reportBlockOf(user).reportBlocked || reportControllerNameOf(user)) && (
+                    <Flex mt="xs" gap={4} wrap="wrap">
+                        {reportBlockOf(user).reportBlocked && (
+                            <Badge size="sm" color="red" radius="md" variant="filled">
+                                <FormattedMessage id={locales.reportBlockedShort} />
+                            </Badge>
+                        )}
+                        {reportControllerNameOf(user) && (
+                            <Badge size="sm" color="teal" radius="md" variant="light">
+                                <FormattedMessage
+                                    id={locales.reportControllerBadge}
+                                    values={{ name: reportControllerNameOf(user) }}
+                                />
+                            </Badge>
+                        )}
+                    </Flex>
+                )}
                 <Flex mt="xs" gap={4} wrap="wrap">
                     {user.groups.map((group) => (
                         <Badge key={group} size="xs" color="blue" variant="light">
@@ -464,8 +505,9 @@ export const UserList = () => {
         if (selectedProgram !== null) count += 1
         if (selectedProject !== null) count += 1
         if (showDeactivated) count += 1
+        if (onlyReportBlocked) count += 1
         return count
-    }, [debouncedSearch, selectedProgram, selectedProject, showDeactivated])
+    }, [debouncedSearch, selectedProgram, selectedProject, showDeactivated, onlyReportBlocked])
 
     const resetFilters = () => {
         setSearch("")
@@ -473,12 +515,17 @@ export const UserList = () => {
         setSelectedProgram(null)
         setSelectedProject(null)
         setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
-        updateUrlParams("", null, null, 0, false)
+        updateUrlParams("", null, null, 0, false, false)
     }
 
     const handleShowDeactivatedChange = () => {
         setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
         updateUrlParams(debouncedSearch, selectedProgram, selectedProject, 0, !showDeactivated)
+    }
+
+    const handleReportBlockedChange = () => {
+        setPageRequest((prev) => ({ ...prev, pageNumber: 0 }))
+        updateUrlParams(debouncedSearch, selectedProgram, selectedProject, 0, showDeactivated, !onlyReportBlocked)
     }
 
     const selectedUser = selectedUserId ? content.find((u) => u.id === selectedUserId) : null
@@ -514,6 +561,14 @@ export const UserList = () => {
                 size="sm"
                 className={classes.deactivatedSwitch}
             />
+            <Switch
+                label={<FormattedMessage id={locales.showReportBlocked} />}
+                checked={onlyReportBlocked}
+                onChange={handleReportBlockedChange}
+                size="sm"
+                color="red"
+                className={classes.deactivatedSwitch}
+            />
             <Button
                 variant="subtle"
                 size="compact-sm"
@@ -541,6 +596,8 @@ export const UserList = () => {
                     activeProject={selectedProject}
                     onSelectProgram={handleProgramChange}
                     onSelectProject={handleProjectChange}
+                    reportBlockedActive={onlyReportBlocked}
+                    onToggleReportBlocked={handleReportBlockedChange}
                 />
 
                 <div ref={listStartRef} />

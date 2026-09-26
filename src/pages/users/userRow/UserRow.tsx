@@ -12,6 +12,7 @@ import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilte
 import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { NavigateFunction } from "react-router"
 import { IDBadge } from "src/shared/ui/badges/IDBadge"
+import { reportBlockOf, reportControllerNameOf } from "src/shared/api/user/UserApiService"
 
 type Props = {
     user: UserInfoDto
@@ -91,6 +92,8 @@ export const UserRow = ({
             setSelectedProject(prevProject)
         }
     }
+
+    const controllerName = reportControllerNameOf(user)
 
     const lastContract =
         Array.isArray(user.contracts) && user.contracts.length > 0
@@ -172,10 +175,20 @@ export const UserRow = ({
                 </Button>
             </Table.Td>
             <Table.Td>
-                <Flex align="center" justify="end">
+                <Flex align="center" justify="end" gap={6} wrap="wrap">
                     {!user.active && (
                         <Badge color="red" radius="md" variant="light">
                             <FormattedMessage id={locales.deactivated} />
+                        </Badge>
+                    )}
+                    {reportBlockOf(user).reportBlocked && (
+                        <Badge color="red" radius="md" variant="filled">
+                            <FormattedMessage id={locales.reportBlockedShort} />
+                        </Badge>
+                    )}
+                    {controllerName && (
+                        <Badge color="teal" radius="md" variant="light">
+                            <FormattedMessage id={locales.reportControllerBadge} values={{ name: controllerName }} />
                         </Badge>
                     )}
                     <div className={classes.menuWrapper} onClick={(e) => e.stopPropagation()}>

@@ -9,6 +9,7 @@ import {
     IconNotes,
     IconDeviceFloppy,
     IconPlus,
+    IconShieldCheck,
 } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -20,7 +21,7 @@ import classes from "src/pages/reportEdit/EditReport.module.scss"
 import { defaultTask } from "src/pages/reportEdit/lib/defaults"
 import { TaskCard, TaskCardInterface } from "src/pages/reportEdit/task/TaskCard"
 import { ReportApiService } from "src/shared/api/ReportApiService"
-import { reportBlockOf } from "src/shared/api/user/UserApiService"
+import { reportBlockOf, reportControllerNameOf, reportControlOf } from "src/shared/api/user/UserApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { setDocumentTitleByLocale, setDocumentTitleByString } from "src/shared/hooks/useDocumentTitle"
 import { useReportDraft } from "src/shared/hooks/useReportDraft"
@@ -117,6 +118,8 @@ export const EditReport = () => {
     }, [editMode, location.search, setTasks])
 
     const reportBlock = reportBlockOf(currentUser)
+    const controllerLogin = reportControlOf(currentUser).reportControllerUsername || null
+    const controllerName = reportControllerNameOf(currentUser)
 
     const { data: myAssignments = [] } = useQuery({
         queryKey: ["work-assignments"],
@@ -177,6 +180,9 @@ export const EditReport = () => {
                 } else {
                     tasks[i] = cardRef.current.getValues()
                 }
+            }
+            if (controllerLogin) {
+                tasks[i] = { ...tasks[i], customer: controllerLogin }
             }
         }
         if (tasks.some((task) => !task.customer)) {
@@ -254,6 +260,15 @@ export const EditReport = () => {
                     )}
                 </Alert>
             )}
+            {!!controllerName && (
+                <Alert
+                    color="teal"
+                    icon={<IconShieldCheck size={18} />}
+                    title={<FormattedMessage id={locales.controlTitle} values={{ name: controllerName }} />}
+                >
+                    <FormattedMessage id={locales.controlDescription} values={{ name: controllerName }} />
+                </Alert>
+            )}
             <div className={classes.workspace}>
                 <div className={classes.taskContainer}>
                     <Flex direction="column" rowGap={24}>
@@ -290,6 +305,8 @@ export const EditReport = () => {
                                         index={index}
                                         deletable={tasks.length > 1}
                                         editMode={editMode}
+                                        lockedCustomer={controllerLogin}
+                                        lockedCustomerName={controllerName}
                                         onChange={handleTaskChange}
                                         onDelete={handleTaskDelete}
                                     />

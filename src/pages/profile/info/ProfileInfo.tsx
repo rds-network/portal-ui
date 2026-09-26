@@ -29,7 +29,13 @@ import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { CitiesApiService } from "src/shared/api/CitiesApiService"
-import { reportBlockOf, UserAccountApiService, UserApiService } from "src/shared/api/user/UserApiService"
+import {
+    reportBlockOf,
+    reportControllerNameOf,
+    UserAccountApiService,
+    UserApiService,
+} from "src/shared/api/user/UserApiService"
+import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { Locale } from "src/shared/constants/Locales"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
@@ -234,6 +240,36 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         },
     })
 
+    const { mutate: updateReportController, isPending: isUpdatingController } = useMutation({
+        mutationFn: async (login: string | null) =>
+            login === null
+                ? UserAccountApiService.clearReportController(userInfo.id)
+                : UserAccountApiService.setReportController(userInfo.id, login),
+        onSuccess: (data) => {
+            if (userInfo?.username === currentUser?.username) {
+                setUser(data)
+            }
+            onUserInfoUpdate?.(data)
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.profileUpdated" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+        onError: () => {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.updateError" />
+                    </Text>
+                )
+            )
+        },
+    })
+
     const { mutateAsync: updateProject } = useMutation({
         mutationFn: async (project: string | null) => {
             if (!project) return UserAccountApiService.clearProject(userInfo.id)
@@ -295,6 +331,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
 
     const reportBlock = reportBlockOf(userInfo)
     const reportBlockedByName = reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || ""
+    const reportControllerName = reportControllerNameOf(userInfo)
 
     // Админы могут редактировать программы всем (включая себя)
     // Обычные пользователи могут установить программу только если у них ее еще нет
@@ -309,6 +346,24 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
 
     // Разрешаем менять пол своему профилю и админам
     const canEditGender = isAdmin || isOwnProfile
+
+    // Контроль назначают менеджеры и куратор программы волонтера — точную проверку делает бэкенд.
+    const isCuratorOfThisProgram = curatorRows.some(
+        (row) =>
+            row.username.toLowerCase() === (currentUser?.username || "").toLowerCase() &&
+            !!programValue &&
+            row.programCode.toUpperCase() === programValue.toUpperCase()
+    )
+    const canManageReportControl =
+        !!showSensitiveData &&
+        !isOwnProfile &&
+        (hasPermission(currentUser, [
+            UserGroup.ADMIN,
+            UserGroup.ADMIN_SSO,
+            UserGroup.ADMIN_VOLUNTEER,
+            UserGroup.MAIN_VOLUNTEER,
+        ]) ||
+            isCuratorOfThisProgram)
     const mupCitizenship =
         (
             userInfo as UserInfoDto & {
@@ -408,6 +463,16 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             </Badge>
                         </Tooltip>
                     )}
+                    {!!reportControllerName && (
+                        <Tooltip multiline w={320} label={<FormattedMessage id="pages.profile.reportControlHint" />}>
+                            <Badge color="teal" radius="md" variant="filled">
+                                <FormattedMessage
+                                    id="pages.profile.reportControl"
+                                    values={{ name: reportControllerName }}
+                                />
+                            </Badge>
+                        </Tooltip>
+                    )}
 
                     {showSensitiveData && userInfo?.id !== currentUser?.id && (
                         <UserMenu user={userInfo} type="profile" onChanged={onUserInfoUpdate} />
@@ -438,6 +503,36 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 onChange={handleProjectChange}
                 projectsOverride={visibleProjects}
             />
+            {canManageReportControl && (
+                <Flex direction="column" gap={6} mt="xs">
+                    <Text size="sm" fw={500}>
+                        <FormattedMessage id="pages.profile.reportControlLabel" />
+                    </Text>
+                    {reportControllerName ? (
+                        <Flex align="center" gap={8} wrap="wrap">
+                            <Badge color="teal" radius="md" variant="light">
+                                {reportControllerName}
+                            </Badge>
+                            <Button
+                                size="compact-xs"
+                                variant="subtle"
+                                color="red"
+                                loading={isUpdatingController}
+                                onClick={() => updateReportController(null)}
+                            >
+                                <FormattedMessage id="pages.profile.reportControlClear" />
+                            </Button>
+                        </Flex>
+                    ) : (
+                        <UserSearch
+                            description={<FormattedMessage id="pages.profile.reportControlDescription" />}
+                            onUserChange={(picked) => {
+                                if (picked?.username) updateReportController(picked.username)
+                            }}
+                        />
+                    )}
+                </Flex>
+            )}
             <Container className={commonClasses.divider} />
             <TextPropertyBox
                 name={"pages.profile.props.address"}

@@ -19,6 +19,21 @@ export type ReportBlockInfo = {
 
 export const reportBlockOf = (user: unknown): ReportBlockInfo => (user as ReportBlockInfo | null) ?? {}
 
+/**
+ * Принудительный контроль сдачи отчётов — тоже ещё не в сгенерированном клиенте.
+ */
+export type ReportControlInfo = {
+    reportControllerUsername?: string | null
+    reportControllerFullName?: string | null
+}
+
+export const reportControlOf = (user: unknown): ReportControlInfo => (user as ReportControlInfo | null) ?? {}
+
+export const reportControllerNameOf = (user: unknown): string => {
+    const control = reportControlOf(user)
+    return control.reportControllerFullName || control.reportControllerUsername || ""
+}
+
 const alive = (status: number) => status === 200 || status === 404
 
 const unwrap = <T>(response: { status: number; data: T }): T => {
@@ -48,6 +63,22 @@ export const UserAccountApiService = {
     async clearReportBlock(id: number): Promise<UserInfoDto> {
         return unwrap(
             await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/report-block`, { validateStatus: alive })
+        )
+    },
+
+    async setReportController(id: number, username: string): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.put<UserInfoDto>(
+                `/user/account/${id}/report-controller`,
+                { username },
+                { validateStatus: alive }
+            )
+        )
+    },
+
+    async clearReportController(id: number): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/report-controller`, { validateStatus: alive })
         )
     },
 }
