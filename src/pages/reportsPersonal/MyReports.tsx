@@ -1,32 +1,26 @@
 import { Badge, Button, Flex, Pagination, Text, Title } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
 import { PageRequest, ReportFilter } from "@rds-network/portal-api-axios"
-import {
-    IconCalendarWeek,
-    IconChevronRight,
-    IconClockCheck,
-    IconFilterOff,
-    IconListCheck,
-    IconPlus,
-    IconUfo,
-} from "@tabler/icons-react"
+import { IconFilterOff, IconPlus, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { Link, useNavigate, useSearchParams } from "react-router"
+import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUserHeatmap"
 import { defaultFilter, defaultPage, defaultPageResponse, locales } from "src/pages/reportsPersonal/lib/constants"
 import { ReportsExporter } from "src/pages/reportsPersonal/reportsExporter/ReportsExporter"
+import { defaultUser } from "src/pages/reports/lib/defaults"
 import { ReportApiService } from "src/shared/api/ReportApiService"
+import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
-import { getReportStatusColor } from "src/shared/report/status"
-import { getSpentTimeFromReport } from "src/shared/report/timeSpent"
-import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
+import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
+import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
 import { ReportStatusSelect } from "src/shared/ui/select/ReportStatusSelect"
 import { WeekPicker } from "src/shared/ui/weekPicker/WeekPicker"
+import { getLocalizedName } from "src/shared/utils/getLocalName"
 import classes from "./MyReports.module.scss"
 
 export const MyReports = () => {
@@ -38,7 +32,6 @@ export const MyReports = () => {
 
     const isMobile = useMediaQuery("(max-width: 1360px)")
 
-    // Инициализация состояния из URL параметров
     const [pageRequest, setPageRequest] = useState<PageRequest>({
         ...defaultPage,
         pageNumber: Math.max(0, parseInt(searchParams.get("page") || "1") - 1),
@@ -50,6 +43,8 @@ export const MyReports = () => {
         dateFrom: searchParams.get("dateFrom") || null,
         dateTo: searchParams.get("dateTo") || null,
     })
+
+    const { programs, projects } = useProgramProjectFilter(null, null)
 
     useEffect(() => {
         const savedState = localStorage.getItem("myReportsListState")
@@ -66,10 +61,8 @@ export const MyReports = () => {
         }
     }, [])
 
-    // Ref для скролла к началу списка
     const listStartRef = React.useRef<HTMLDivElement>(null)
 
-    // Функция для синхронизации состояния с URL параметрами
     const syncStateFromUrl = () => {
         const urlStatus = searchParams.get("status") || null
         const urlDateFrom = searchParams.get("dateFrom") || null
@@ -86,7 +79,6 @@ export const MyReports = () => {
         setPageRequest({ ...pageRequest, pageNumber: urlPage })
     }
 
-    // Эффект для обработки навигации назад/вперед браузера
     useEffect(() => {
         const handlePopState = () => {
             syncStateFromUrl()
@@ -96,7 +88,6 @@ export const MyReports = () => {
         return () => window.removeEventListener("popstate", handlePopState)
     }, [searchParams])
 
-    // Функция для обновления URL параметров
     const updateUrlParams = (newFilter: ReportFilter, newPage: number = 0) => {
         const params = new URLSearchParams()
 
@@ -124,18 +115,15 @@ export const MyReports = () => {
         setFilter({ ...filter, login: user?.username })
     }, [user])
 
-    // Эффект для обновления URL при изменении фильтра
     useEffect(() => {
         updateUrlParams(filter, pageRequest.pageNumber || 0)
     }, [filter.status, filter.dateFrom, filter.dateTo])
 
-    // Эффект для обновления URL при изменении страницы
     useEffect(() => {
         const pageNumber = pageRequest.pageNumber || 0
         updateUrlParams(filter, pageNumber)
     }, [pageRequest.pageNumber])
 
-    // Эффект для скролла при смене страницы в мобильной версии
     useEffect(() => {
         if (pageRequest.pageNumber !== undefined) {
             if (listStartRef.current) {
@@ -155,6 +143,11 @@ export const MyReports = () => {
         initialData: { page: defaultPageResponse, content: [] },
         queryFn: () => ReportApiService.getReports(pageRequest, filter).then((response) => response.data),
     })
+
+    const reports = response.content
+    const { data: users = {} } = resolveUsers(
+        reports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[])
+    )
 
     const onWeekChange = (_week: number | null, start: Date | null, end: Date | null) => {
         const startDate = start ? dayjs(start).format(DEFAULT_DATE_FORMAT) : null
@@ -192,43 +185,35 @@ export const MyReports = () => {
         updateUrlParams(resetFilter, 0)
     }
 
-    const rows = response.content.map((report, index) => (
-        <Link
-            key={report.id}
-            className={classes.report}
-            style={{ animationDelay: `${index * 45}ms` }}
-            to={`/report/${report.id}`}
-            onClick={() => localStorage.setItem("myReportsListState", window.location.search)}
-        >
-            <div className={classes.weekIcon}>
-                <IconCalendarWeek size={23} stroke={1.5} />
-            </div>
-            <div className={classes.reportHeading}>
-                <Text fw={550}>
-                    <FormattedMessage id="design.reportWeek" values={{ week: report.week }} />
-                </Text>
-                <Text size="xs" c="dimmed">
-                    {dayjs(report.createTime).format("DD MMM YYYY")}
-                </Text>
-            </div>
-            <Badge color={getReportStatusColor(report.status)} radius="md" variant="light" className={classes.status}>
-                <FormattedMessage id={`common.report-status.${report.status}`} />
-            </Badge>
-            <div className={classes.reportDetails}>
-                <TextPropertyBox
-                    name={locales.reportTaskCount}
-                    value={String(report.tasks.length)}
-                    icon={<IconListCheck size={16} />}
-                />
-                <TextPropertyBox
-                    name={locales.reportTimeSpent}
-                    value={getSpentTimeFromReport(report, intl)}
-                    icon={<IconClockCheck size={16} />}
-                />
-            </div>
-            <IconChevronRight className={classes.arrow} size={18} />
-        </Link>
-    ))
+    const cards = reports.map((report) => {
+        const creator = (report.user && users[report.user]) || user || defaultUser(report.user || "")
+        const program = programs.find((p) => p.code === report.program)
+        const project = projects.find((p) => p.code === report.project)
+        return (
+            <ReportCard
+                key={report.id}
+                report={report}
+                creator={creator}
+                moderator={report.moderator ? users[report.moderator] || defaultUser(report.moderator) : null}
+                programName={
+                    program
+                        ? getLocalizedName(program, intl.locale)
+                        : intl.formatMessage({ id: "pages.user-list.no-program" })
+                }
+                projectName={
+                    project
+                        ? getLocalizedName(project, intl.locale)
+                        : intl.formatMessage({ id: "pages.user-list.no-project" })
+                }
+                currentUser={user}
+                hideVolunteer
+                onOpen={() => {
+                    localStorage.setItem("myReportsListState", window.location.search)
+                    navigate(`/report/${report.id}`)
+                }}
+            />
+        )
+    })
 
     return (
         <Flex direction="column" style={{ height: "100%" }}>
@@ -300,7 +285,7 @@ export const MyReports = () => {
                             </Flex>
                         </Flex>
                         <Flex className={classes.reportsList}>
-                            {rows.length == 0 && (
+                            {cards.length === 0 && (
                                 <Flex className={classes.emptyState}>
                                     <IconUfo size={48} />
                                     <Text>
@@ -308,7 +293,7 @@ export const MyReports = () => {
                                     </Text>
                                 </Flex>
                             )}
-                            {rows}
+                            {cards}
                         </Flex>
                         <Flex className={classes.paginationContainer}>
                             {response.page.totalElements != 0 && (
