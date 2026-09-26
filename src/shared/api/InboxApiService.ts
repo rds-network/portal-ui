@@ -18,6 +18,11 @@ export type InboxThreadDto = {
     receivedAt?: string | null
     ackRequired?: boolean
     needsAck?: boolean
+    messageCount?: number
+    lastAuthor?: string | null
+    lastAuthorName?: string | null
+    lastMessageTime?: string | null
+    hasReply?: boolean
 }
 
 export type InboxMessageDto = {
