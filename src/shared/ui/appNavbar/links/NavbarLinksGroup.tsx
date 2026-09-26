@@ -20,9 +20,7 @@ export function NavItem({
 }: ItemGroupProps) {
     const location = useLocation()
     const { user } = useContext(UserContext)
-    const isActive =
-        !!link &&
-        (location.pathname === link || (link === "/reports/personal" && location.pathname === "/"))
+    const isActive = !!link && location.pathname === link
     const isExternal = link?.startsWith("http://") || link?.startsWith("https://")
 
     const { data: unread = 0 } = useQuery({

@@ -64,6 +64,11 @@
     grid-template-columns: repeat(9, minmax(0, 1fr));
     gap: 5px;
 }
+@media (min-width: 80em) {
+    .weeksRow {
+        grid-template-columns: repeat(auto-fill, minmax(28px, 1fr));
+    }
+}
 .weekSquare {
     min-width: 0;
     aspect-ratio: 1;

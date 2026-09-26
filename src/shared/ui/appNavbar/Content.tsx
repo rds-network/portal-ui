@@ -7,6 +7,7 @@ import {
     IconFilePlus,
     IconFileText,
     IconHistory,
+    IconHome,
     IconLifebuoy,
     IconLink,
     IconMap,
@@ -30,6 +31,11 @@ export const Content: NavSection[] = [
     {
         label: "navbar.sections.work",
         items: [
+            {
+                label: "navbar.desktop",
+                icon: IconHome,
+                link: "/",
+            },
             {
                 label: "navbar.reports.tasks",
                 icon: IconChecklist,

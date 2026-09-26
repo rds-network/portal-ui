@@ -1,6 +1,7 @@
 import { lazy } from "react"
 import { Navigate, RouteProps } from "react-router"
 
+const DesktopPage = lazy(() => import("src/pages/desktop/DesktopPage"))
 const Logout = lazy(() => import("src/pages/logout/Logout"))
 const Profile = lazy(() => import("src/pages/profile/Profile"))
 const Report = lazy(() => import("src/pages/report/ReportPage"))
@@ -133,6 +134,6 @@ export const routes: RouteProps[] = [
     },
     {
         path: "/",
-        element: <MyReports />,
+        element: <DesktopPage />,
     },
 ]

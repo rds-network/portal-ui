@@ -208,6 +208,22 @@
                 "emptyPerson": "Izaberite volontera"
             }
         },
+        "desktop": {
+            "title": "Moj rad",
+            "subtitle": "Izveštaji, zadaci i poruke na jednom mestu.",
+            "reports": "Moji izveštaji",
+            "allReports": "Svi izveštaji i filteri →",
+            "tasks": "Šta uraditi",
+            "tasksHint": "Kartice dodeljene vama",
+            "tasksEmpty": "Još nema otvorenih zadataka",
+            "openBoard": "Tabla →",
+            "heatmap": "Istorija izveštavanja",
+            "toReports": "Ka izveštajima →",
+            "messages": "Poruke",
+            "allMessages": "Sve poruke →",
+            "events": "Događaji",
+            "eventsSoon": "Kalendar događaja biće ovde — prenosimo ga sa ekomape."
+        },
         "tasks": {
             "title": "Zadaci",
             "description": "Izvršilac vodi karticu do „Provere“. Naručilac može da vrati na doradu ili da prihvati. Rok počinje da teče od prvog pomeranja.",
@@ -1101,6 +1117,7 @@
             "admin": "Administracija",
             "system": "Sistem"
         },
+        "desktop": "Radni sto",
         "reports": {
             "reporting": "Izveštavanje",
             "my-reports": "Moji izveštaji",
