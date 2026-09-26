@@ -3,13 +3,27 @@
 .root {
     @include s.page;
     max-width: 1480px;
+    height: calc(100dvh - 114px);
+    max-height: calc(100dvh - 114px);
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.top {
+    flex-shrink: 0;
 }
 
 .board {
+    flex: 1;
+    min-height: 0;
     display: grid;
     grid-template-columns: repeat(5, minmax(180px, 1fr));
-    gap: 12px;
-    align-items: start;
+    gap: 10px;
+    align-items: stretch;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -17,9 +31,13 @@
 .lane {
     background: light-dark(#f8fafc, var(--mantine-color-dark-7));
     border: 1px solid light-dark(#e5e7eb, var(--mantine-color-dark-4));
-    border-radius: 16px;
-    padding: 10px;
-    min-height: 280px;
+    border-radius: 14px;
+    padding: 8px;
+    min-height: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .laneHead {
@@ -28,13 +46,20 @@
     justify-content: space-between;
     font-weight: 650;
     font-size: 13px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    padding: 2px 2px 0;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
+.laneCards {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 2px;
+    scrollbar-gutter: stable;
 }
 
 .legend {
@@ -43,12 +68,12 @@
 
 .swatch,
 .card {
-    border-radius: 16px;
+    border-radius: 12px;
 }
 
 .swatch {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     border: 1px solid light-dark(#d1d5db, var(--mantine-color-dark-3));
     display: inline-block;
 }
@@ -56,15 +81,14 @@
 .card {
     background: light-dark(#fff, var(--mantine-color-dark-6));
     border: 1px solid light-dark(#e5e7eb, var(--mantine-color-dark-4));
-    border-left-width: 5px;
-    padding: 12px;
-    min-height: 120px;
+    border-left-width: 4px;
+    padding: 8px 10px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     cursor: grab;
-    margin-bottom: 10px;
     color: inherit;
+    flex-shrink: 0;
 }
 
 .todo {
@@ -95,40 +119,78 @@
 .meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
 }
 
 .title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 650;
-    line-height: 1.35;
+    line-height: 1.3;
 }
 
 .body {
     color: var(--mantine-color-dimmed);
-    font-size: 13px;
-    line-height: 1.45;
+    font-size: 12px;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.person {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.personText {
+    min-width: 0;
     flex: 1;
 }
 
-.assignee {
-    font-size: 13px;
+.personLabel {
+    font-size: 10px;
+    line-height: 1.2;
+    color: var(--mantine-color-dimmed);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.personName {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.customer {
+    font-size: 11px;
+    color: var(--mantine-color-dimmed);
+    line-height: 1.3;
 }
 
 .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 4px;
+    gap: 6px;
 }
 
 @media (max-width: 48em) {
+    .root {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+    }
+
     .board {
         grid-template-columns: minmax(0, 1fr);
         overflow-x: visible;
+        flex: none;
     }
 
     .lane {
-        min-height: 0;
+        height: auto;
+        max-height: 360px;
     }
 }

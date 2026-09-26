@@ -1,4 +1,4 @@
-import { Badge, Button, Flex, Modal, Text, Textarea, TextInput, Title } from "@mantine/core"
+import { Avatar, Badge, Button, Flex, Modal, Text, Textarea, TextInput, Title } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
@@ -16,6 +16,7 @@ import {
     WorkAssignmentStatus,
 } from "src/shared/api/WorkAssignmentApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { NO_PROGRAM_CODE } from "src/shared/constants/Shared"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -89,6 +90,14 @@ export const WorkTasksPage: React.FC = () => {
             (item) => item.assignee === user?.username || item.customer === user?.username
         )
     }, [assignments, isManager, user?.username])
+
+    const { data: usersMap = {} } = resolveUsers(visible.map((item) => item.assignee))
+
+    const displayName = (login?: string | null, fallback?: string | null) => {
+        if (!login) return fallback || "—"
+        const resolved = usersMap[login]
+        return resolved?.fullName || fallback || login
+    }
 
     const { mutate: create, isPending } = useMutation({
         mutationFn: WorkAssignmentApiService.create,
@@ -210,101 +219,126 @@ export const WorkTasksPage: React.FC = () => {
     }
 
     return (
-        <Flex className={classes.root} direction="column" gap="lg">
-            <div>
+        <Flex className={classes.root} direction="column">
+            <div className={classes.top}>
                 <Title order={2}>
                     <FormattedMessage id="pages.tasks.title" />
                 </Title>
-                <Text c="dimmed" mt={6}>
+                <Text c="dimmed" mt={4} size="sm">
                     <FormattedMessage id="pages.tasks.description" />
                 </Text>
+                {isManager && (
+                    <Button
+                        leftSection={<IconPlus size={16} />}
+                        w="fit-content"
+                        mt="sm"
+                        onClick={() => setCreateOpen(true)}
+                    >
+                        <FormattedMessage id="pages.tasks.create" />
+                    </Button>
+                )}
+                <Flex gap="md" wrap="wrap" className={classes.legend} mt="sm">
+                    {LANES.map((lane) => (
+                        <Flex key={lane} align="center" gap={6}>
+                            <span className={`${classes.swatch} ${classes[lane.toLowerCase()]}`} />
+                            <Text size="sm">
+                                <FormattedMessage id={`pages.tasks.status.${lane}`} />
+                            </Text>
+                        </Flex>
+                    ))}
+                </Flex>
             </div>
 
-            {isManager && (
-                <Button leftSection={<IconPlus size={16} />} w="fit-content" onClick={() => setCreateOpen(true)}>
-                    <FormattedMessage id="pages.tasks.create" />
-                </Button>
-            )}
-
-            <Flex gap="md" wrap="wrap" className={classes.legend}>
-                {LANES.map((lane) => (
-                    <Flex key={lane} align="center" gap={6}>
-                        <span className={`${classes.swatch} ${classes[lane.toLowerCase()]}`} />
-                        <Text size="sm">
-                            <FormattedMessage id={`pages.tasks.status.${lane}`} />
-                        </Text>
-                    </Flex>
-                ))}
-            </Flex>
-
-            {visible.length === 0 && !isFetching ? (
-                <Text c="dimmed">
-                    <FormattedMessage id="pages.tasks.empty" />
-                </Text>
-            ) : (
-                <div className={classes.board}>
-                    {LANES.map((lane) => {
-                        const cards = visible.filter((item) => item.status === lane)
-                        return (
-                            <section
-                                key={lane}
-                                className={classes.lane}
-                                onDragOver={(event) => event.preventDefault()}
-                                onDrop={(event) => onDrop(lane, event)}
-                            >
-                                <div className={classes.laneHead}>
-                                    <FormattedMessage id={`pages.tasks.status.${lane}`} />
-                                    <Badge size="sm" variant="light" color={STATUS_COLOR[lane]}>
-                                        {cards.length}
-                                    </Badge>
-                                </div>
-                                {cards.map((item) => (
-                                    <article
-                                        key={item.id}
-                                        className={`${classes.card} ${classes[item.status.toLowerCase()]}`}
-                                        draggable
-                                        onDragStart={(event) => event.dataTransfer.setData("text/plain", item.id)}
-                                        onClick={() => openEdit(item)}
-                                    >
-                                        <div className={classes.meta}>
+            <div className={classes.board}>
+                {LANES.map((lane) => {
+                    const cards = visible.filter((item) => item.status === lane)
+                    return (
+                        <section
+                            key={lane}
+                            className={classes.lane}
+                            onDragOver={(event) => event.preventDefault()}
+                            onDrop={(event) => onDrop(lane, event)}
+                        >
+                            <div className={classes.laneHead}>
+                                <FormattedMessage id={`pages.tasks.status.${lane}`} />
+                                <Badge size="sm" variant="light" color={STATUS_COLOR[lane]}>
+                                    {cards.length}
+                                </Badge>
+                            </div>
+                            <div className={classes.laneCards}>
+                                {cards.length === 0 && !isFetching && (
+                                    <Text size="xs" c="dimmed" px={4}>
+                                        —
+                                    </Text>
+                                )}
+                                {cards.map((item) => {
+                                    const assigneeUser = item.assignee ? usersMap[item.assignee] : undefined
+                                    const name = displayName(item.assignee, item.assigneeName)
+                                    return (
+                                        <article
+                                            key={item.id}
+                                            className={`${classes.card} ${classes[item.status.toLowerCase()]}`}
+                                            draggable
+                                            onDragStart={(event) =>
+                                                event.dataTransfer.setData("text/plain", item.id)
+                                            }
+                                            onClick={() => openEdit(item)}
+                                        >
                                             {item.dueDate && (
-                                                <Badge variant="outline" color={item.startedAt ? "blue" : "gray"}>
-                                                    {dayjs(item.dueDate).format("DD.MM")}
-                                                    {!item.startedAt ? " · ждёт" : ""}
-                                                </Badge>
+                                                <div className={classes.meta}>
+                                                    <Badge
+                                                        size="xs"
+                                                        variant="outline"
+                                                        color={item.startedAt ? "blue" : "gray"}
+                                                    >
+                                                        {dayjs(item.dueDate).format("DD.MM")}
+                                                        {!item.startedAt ? " · ждёт" : ""}
+                                                    </Badge>
+                                                </div>
                                             )}
-                                        </div>
-                                        <div className={classes.title}>{item.title}</div>
-                                        {item.body && <div className={classes.body}>{item.body}</div>}
-                                        <Text className={classes.assignee} c="dimmed">
-                                            <FormattedMessage id="pages.tasks.fields.assignee" />:{" "}
-                                            {item.assigneeName || item.assignee || "—"}
-                                        </Text>
-                                        <Text className={classes.assignee} c="dimmed">
-                                            <FormattedMessage id="pages.tasks.fields.customer" />:{" "}
-                                            {item.customerName || item.customer || "—"}
-                                        </Text>
-                                        {item.status !== "DONE" && item.assignee === user?.username && (
-                                            <div className={classes.actions}>
-                                                <Button
-                                                    size="xs"
-                                                    leftSection={<IconChecklist size={14} />}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation()
-                                                        toReport(item)
-                                                    }}
-                                                >
-                                                    <FormattedMessage id="pages.tasks.to-report" />
-                                                </Button>
+                                            <div className={classes.title}>{item.title}</div>
+                                            {item.body && <div className={classes.body}>{item.body}</div>}
+                                            <div className={classes.person}>
+                                                <Avatar
+                                                    src={assigneeUser?.avatar?.link}
+                                                    size={28}
+                                                    radius="xl"
+                                                    color="initials"
+                                                    name={name !== "—" ? name : undefined}
+                                                />
+                                                <div className={classes.personText}>
+                                                    <div className={classes.personLabel}>
+                                                        <FormattedMessage id="pages.tasks.fields.assignee" />
+                                                    </div>
+                                                    <div className={classes.personName}>{name}</div>
+                                                </div>
                                             </div>
-                                        )}
-                                    </article>
-                                ))}
-                            </section>
-                        )
-                    })}
-                </div>
-            )}
+                                            <Text className={classes.customer} lineClamp={1}>
+                                                <FormattedMessage id="pages.tasks.fields.customer" />:{" "}
+                                                {item.customerName || item.customer || "—"}
+                                            </Text>
+                                            {item.status !== "DONE" && item.assignee === user?.username && (
+                                                <div className={classes.actions}>
+                                                    <Button
+                                                        size="compact-xs"
+                                                        leftSection={<IconChecklist size={12} />}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            toReport(item)
+                                                        }}
+                                                    >
+                                                        <FormattedMessage id="pages.tasks.to-report" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </article>
+                                    )
+                                })}
+                            </div>
+                        </section>
+                    )
+                })}
+            </div>
 
             <Modal
                 opened={createOpen}
