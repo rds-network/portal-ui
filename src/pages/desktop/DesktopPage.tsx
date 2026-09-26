@@ -86,11 +86,12 @@ export const DesktopPage: React.FC = () => {
     })
 
     const myTasks = useMemo(() => {
-        const mine = assignments.filter(
-            (item) =>
-                item.assignee === user?.username && ACTIVE_TASK_STATUSES.has(String(item.status).toUpperCase())
-        )
-        return mine.slice(0, 5)
+        return assignments
+            .filter(
+                (item) =>
+                    item.assignee === user?.username && ACTIVE_TASK_STATUSES.has(String(item.status).toUpperCase())
+            )
+            .sort((a, b) => dayjs(b.createTime).valueOf() - dayjs(a.createTime).valueOf())
     }, [assignments, user?.username])
 
     const { data: threads = [] } = useQuery({
@@ -296,7 +297,7 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <section className={classes.card}>
+                <section className={`${classes.card} ${classes.tasksCard}`}>
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
                             <FormattedMessage id="pages.desktop.tasks" />
@@ -308,40 +309,45 @@ export const DesktopPage: React.FC = () => {
                     <Text size="sm" c="dimmed">
                         <FormattedMessage id="pages.desktop.tasksHint" />
                     </Text>
-                    <div className={classes.list}>
+                    <div className={classes.listScroll}>
                         {myTasks.length === 0 && (
                             <Text className={classes.empty}>
                                 <FormattedMessage id="pages.desktop.tasksEmpty" />
                             </Text>
                         )}
-                        {myTasks.map((task) => (
-                            <button
-                                key={task.id}
-                                type="button"
-                                className={classes.row}
-                                onClick={() => navigate("/tasks")}
-                            >
-                                <div className={classes.rowBody}>
-                                    <Text fw={600} lineClamp={1}>
-                                        {task.title}
-                                    </Text>
-                                    <Text className={classes.rowMeta} lineClamp={1}>
-                                        {task.customerName || task.customer || "—"}
-                                        {task.dueDate ? ` · ${dayjs(task.dueDate).format("DD MMM")}` : ""}
-                                    </Text>
-                                </div>
-                                <Badge
-                                    color={STATUS_COLOR[String(task.status).toUpperCase()] || "gray"}
-                                    variant="light"
-                                    radius="md"
+                        {myTasks.map((task) => {
+                            const status = String(task.status).toUpperCase()
+                            const isNew =
+                                status === "TODO" || dayjs().diff(dayjs(task.createTime), "hour") < 48
+                            return (
+                                <button
+                                    key={task.id}
+                                    type="button"
+                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
+                                    onClick={() => navigate("/tasks")}
                                 >
-                                    <FormattedMessage
-                                        id={`pages.tasks.status.${String(task.status).toUpperCase()}`}
-                                        defaultMessage={String(task.status)}
-                                    />
-                                </Badge>
-                            </button>
-                        ))}
+                                    <div className={classes.rowBody}>
+                                        <Text fw={600} lineClamp={1}>
+                                            {task.title}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                            {task.customerName || task.customer || "—"}
+                                            {task.dueDate ? ` · ${dayjs(task.dueDate).format("DD MMM")}` : ""}
+                                        </Text>
+                                    </div>
+                                    <Badge
+                                        color={STATUS_COLOR[status] || "gray"}
+                                        variant="light"
+                                        radius="md"
+                                    >
+                                        <FormattedMessage
+                                            id={`pages.tasks.status.${status}`}
+                                            defaultMessage={String(task.status)}
+                                        />
+                                    </Badge>
+                                </button>
+                            )
+                        })}
                     </div>
                 </section>
 
