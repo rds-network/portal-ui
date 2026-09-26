@@ -84,7 +84,7 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
             <div className={classes.layout}>
                 <aside className={classes.calendarCard}>
                     <div className={classes.calendarHead}>
-                        <Text fw={700} c="white" size="sm">
+                        <Text fw={700} size="sm" className={classes.calendarHeadTitle}>
                             <FormattedMessage id="pages.desktop.eventsCalendarHead" />
                         </Text>
                         <Text size="xs" className={classes.calendarSub}>
@@ -92,7 +92,7 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                         </Text>
                     </div>
                     <div className={classes.calendarBody}>
-                        <Flex justify="space-between" align="center" mb={6} gap={4}>
+                        <Flex justify="space-between" align="center" mb={4} gap={4}>
                             <button
                                 type="button"
                                 className={classes.monthNav}
@@ -134,16 +134,14 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                 const has = daysWithEvents.has(key)
                                 const day = date.getDate()
                                 return (
-                                    <div className={classes.dayCell}>
-                                        <span>{day}</span>
-                                        {has && <span className={classes.dayDot} aria-hidden />}
+                                    <div
+                                        className={`${classes.dayCell} ${has ? classes.dayHasEvent : ""}`}
+                                    >
+                                        <span className={classes.dayNum}>{day}</span>
                                     </div>
                                 )
                             }}
                         />
-                        <Text size="xs" c="dimmed" mt={6}>
-                            <FormattedMessage id="pages.desktop.eventsCalendarHint" />
-                        </Text>
                     </div>
                 </aside>
 

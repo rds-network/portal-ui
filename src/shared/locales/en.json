@@ -225,7 +225,7 @@
             "eventsSoon": "An events calendar will appear here — we’ll bring it from Ekomapa.",
             "eventsEmpty": "No upcoming events yet",
             "eventsCalendarHead": "Pick a day",
-            "eventsCalendarSub": "Dots mark days with events. Click a day to see cards on the right.",
+            "eventsCalendarSub": "Highlighted days have events. Click a day to see cards on the right.",
             "eventsCalendarHint": "Exact time and place are inside the event card.",
             "eventsPrevMonth": "Previous month",
             "eventsNextMonth": "Next month",

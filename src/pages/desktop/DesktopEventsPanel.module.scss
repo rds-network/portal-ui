@@ -38,24 +38,35 @@
 .calendarCard {
     border: 1px solid var(--portal-border);
     border-radius: 14px;
-    overflow: auto;
+    overflow: hidden;
     background: var(--portal-solid);
     min-height: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .calendarHead {
-    padding: 10px 12px;
-    background: linear-gradient(135deg, #0f3d3a 0%, #1f6b5c 55%, #2f9a6a 100%);
+    padding: 8px 10px;
+    background: var(--portal-accent-soft);
+    border-bottom: 1px solid var(--portal-border);
+    flex-shrink: 0;
+}
+
+.calendarHeadTitle {
+    color: var(--portal-ink);
 }
 
 .calendarSub {
-    color: color-mix(in srgb, white 82%, transparent);
-    margin-top: 2px;
-    line-height: 1.35;
+    color: var(--portal-muted);
+    margin-top: 1px;
+    line-height: 1.3;
 }
 
 .calendarBody {
-    padding: 8px 8px 10px;
+    padding: 6px 6px 8px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .monthNav {
@@ -63,8 +74,8 @@
     border: 1px solid var(--portal-border);
     background: var(--portal-surface);
     border-radius: 8px;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -73,24 +84,49 @@
 
     &:hover {
         border-color: var(--portal-accent);
+        background: var(--portal-accent-soft);
     }
 }
 
 .monthLabel {
     text-transform: capitalize;
     font-size: 12px;
+    color: var(--portal-ink);
 }
 
 .picker {
     width: 100%;
+
+    :global(.mantine-DatePicker-calendarHeader),
+    :global(.mantine-CalendarHeader-calendarHeader) {
+        display: none;
+    }
 
     :global(.mantine-DatePicker-month) {
         width: 100%;
     }
 
     :global(.mantine-DatePicker-monthCell),
-    :global(.mantine-DatePicker-day) {
+    :global(.mantine-DatePicker-day),
+    :global(.mantine-Day-day) {
         width: 100%;
+        height: 28px;
+        min-height: 28px;
+        min-width: 0;
+        font-size: 12px;
+        line-height: 1;
+    }
+
+    :global(.mantine-DatePicker-weekdaysRow),
+    :global(.mantine-DatePicker-monthThead) {
+        th {
+            padding-bottom: 2px;
+            font-size: 11px;
+        }
+    }
+
+    :global(.mantine-DatePicker-monthRow) td {
+        padding: 1px 0;
     }
 
     :global(.mantine-DatePicker-levelsGroup) {
@@ -103,17 +139,26 @@
     display: grid;
     place-items: center;
     width: 100%;
+    height: 100%;
     min-height: 26px;
-    font-size: 12px;
 }
 
-.dayDot {
-    position: absolute;
-    bottom: 1px;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #1f6b5c;
+.dayNum {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.dayHasEvent .dayNum {
+    background: var(--portal-accent);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--portal-accent) 22%, transparent);
 }
 
 .dayWithEvent {

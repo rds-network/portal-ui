@@ -225,7 +225,7 @@
             "eventsSoon": "Kalendar događaja biće ovde — prenosimo ga sa ekomape.",
             "eventsEmpty": "Još nema predstojećih događaja",
             "eventsCalendarHead": "Izaberite dan",
-            "eventsCalendarSub": "Tačke — dani sa događajima. Klik na dan prikazuje kartice desno.",
+            "eventsCalendarSub": "Označeni dani imaju događaje. Klik prikazuje kartice desno.",
             "eventsCalendarHint": "Tačno vreme i mesto su u kartici događaja.",
             "eventsPrevMonth": "Prethodni mesec",
             "eventsNextMonth": "Sledeći mesec",
