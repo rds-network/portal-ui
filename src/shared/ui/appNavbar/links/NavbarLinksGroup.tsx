@@ -45,7 +45,9 @@ export function NavItem({
 
     if (curatorInbox) {
         const ok =
-            !!curatorMe?.curator || hasPermission(user, ["ADMIN", "ADMIN_VOLUNTEER", "MAIN_VOLUNTEER"])
+            !!curatorMe?.curator ||
+            hasPermission(user, ["ADMIN", "ADMIN_VOLUNTEER", "MAIN_VOLUNTEER"]) ||
+            pendingReports > 0
         if (!ok) return null
     }
 

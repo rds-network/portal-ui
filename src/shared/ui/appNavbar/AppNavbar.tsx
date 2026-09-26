@@ -56,7 +56,10 @@ export const AppNavbar = React.memo(function AppNavbar() {
     const sections = useMemo(() => {
         return Content.map((section) => {
             const items = section.items.filter(
-                (item) => hasPermission(user, item.roles) || (item.showIfCurator && curatorMe?.curator)
+                (item) =>
+                    item.curatorInbox ||
+                    hasPermission(user, item.roles) ||
+                    (item.showIfCurator && curatorMe?.curator)
             )
             if (items.length === 0) return null
             return (
