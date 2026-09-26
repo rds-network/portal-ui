@@ -209,7 +209,7 @@
             }
         },
         "desktop": {
-            "title": "My work",
+            "title": "Desktop",
             "subtitle": "Reports, tasks and messages in one place.",
             "reports": "My reports",
             "allReports": "All reports and filters →",
@@ -218,7 +218,7 @@
             "tasksEmpty": "No open tasks yet",
             "openBoard": "Board →",
             "heatmap": "Reporting history",
-            "toReports": "To reports →",
+            "heatmapWeeks": "weeks {from}–{to}",
             "messages": "Messages",
             "allMessages": "All messages →",
             "events": "Events",

@@ -175,6 +175,10 @@ export const DesktopPage: React.FC = () => {
             </div>
 
             <div className={classes.grid}>
+                <section className={classes.heatmap}>
+                    <CurrentUserHeatmap compact />
+                </section>
+
                 <section className={classes.card}>
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
@@ -271,10 +275,6 @@ export const DesktopPage: React.FC = () => {
                             </button>
                         ))}
                     </div>
-                </section>
-
-                <section className={classes.heatmap}>
-                    <CurrentUserHeatmap />
                 </section>
 
                 <section className={classes.card}>

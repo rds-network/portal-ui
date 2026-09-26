@@ -209,7 +209,7 @@
             }
         },
         "desktop": {
-            "title": "Moj rad",
+            "title": "Radni sto",
             "subtitle": "Izveštaji, zadaci i poruke na jednom mestu.",
             "reports": "Moji izveštaji",
             "allReports": "Svi izveštaji i filteri →",
@@ -218,7 +218,7 @@
             "tasksEmpty": "Još nema otvorenih zadataka",
             "openBoard": "Tabla →",
             "heatmap": "Istorija izveštavanja",
-            "toReports": "Ka izveštajima →",
+            "heatmapWeeks": "nedelje {from}–{to}",
             "messages": "Poruke",
             "allMessages": "Sve poruke →",
             "events": "Događaji",

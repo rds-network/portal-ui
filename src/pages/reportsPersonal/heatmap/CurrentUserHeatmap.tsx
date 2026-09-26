@@ -1,4 +1,4 @@
-import { Box, Flex, HoverCard, Loader, Text, Title } from "@mantine/core"
+import { Badge, Box, Flex, HoverCard, Loader, Text, Title } from "@mantine/core"
 import { IconCalendarWeek, IconClockHour4 } from "@tabler/icons-react"
 import { HeatMapItem, VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
 import { useQuery } from "@tanstack/react-query"
@@ -9,7 +9,13 @@ import { ReportHeatMapApiService } from "src/shared/api/ReportHeatMapApiService"
 import { locales } from "../lib/constants"
 import classes from "./CurrentUserHeatmap.module.scss"
 
-export const CurrentUserHeatmap = ({ className }: { className?: string }) => {
+type Props = {
+    className?: string
+    /** Single-row strip like the volunteer heatmap table */
+    compact?: boolean
+}
+
+export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
     const intl = useIntl()
 
     const { data, isLoading, isError } = useQuery({
@@ -24,14 +30,14 @@ export const CurrentUserHeatmap = ({ className }: { className?: string }) => {
 
     if (isLoading) {
         return (
-            <Flex justify="center" align="center" py="md">
-                <Loader />
+            <Flex justify="center" align="center" py="md" className={className}>
+                <Loader size="sm" />
             </Flex>
         )
     }
 
     if (isError || !data) {
-        return <Flex />
+        return <Flex className={className} />
     }
 
     const getSquareColor = (weekData: HeatMapItem) => {
@@ -100,8 +106,124 @@ export const CurrentUserHeatmap = ({ className }: { className?: string }) => {
         return summary
     }
 
+    const getStatusColor = (heatmap: VolunteerHeatMapItem) => {
+        if (!heatmap.totalRequired) return "gray"
+        if ((heatmap.totalWorked ?? 0) < heatmap.totalRequired) return "red"
+        return "green"
+    }
+
     const now = dayjs()
     const visibleYears = Object.entries(data).filter(([year]) => now.month() < 6 || Number(year) >= now.year())
+    const currentYearKey = String(now.year())
+    const compactHeatmap =
+        data[currentYearKey] || visibleYears.sort((a, b) => Number(b[0]) - Number(a[0]))[0]?.[1]
+
+    if (compact && compactHeatmap) {
+        const weeks = compactHeatmap.weeks || []
+        return (
+            <div className={`${classes.compactRoot} ${className || ""}`}>
+                <Flex className={classes.compactTop} justify="space-between" align="center" wrap="wrap" gap="sm">
+                    <Flex align="center" gap="sm">
+                        <IconCalendarWeek size={18} color="var(--portal-accent)" />
+                        <Title order={2} className={classes.compactTitle}>
+                            <FormattedMessage id="pages.desktop.heatmap" />
+                        </Title>
+                        <Text size="sm" c="dimmed">
+                            {now.year()} ·{" "}
+                            <FormattedMessage
+                                id="pages.desktop.heatmapWeeks"
+                                values={{ from: 1, to: weeks.length || now.week() }}
+                            />
+                        </Text>
+                    </Flex>
+                    <Badge color={getStatusColor(compactHeatmap)} variant="filled" radius="md">
+                        {compactHeatmap.totalWorked ?? 0}/{compactHeatmap.totalRequired ?? 0}
+                    </Badge>
+                </Flex>
+
+                <Flex gap="md" wrap="wrap" className={classes.compactLegend}>
+                    <Flex align="center" gap={4}>
+                        <Box className={`${classes.legendSquare} ${classes.noReports}`} />
+                        <Text size="xs">
+                            <FormattedMessage id={locales.noReports} />
+                        </Text>
+                    </Flex>
+                    <Flex align="center" gap={4}>
+                        <Box className={`${classes.legendSquare} ${classes.partialReports}`} />
+                        <Text size="xs">
+                            <FormattedMessage id={locales.partialReports} />
+                        </Text>
+                    </Flex>
+                    <Flex align="center" gap={4}>
+                        <Box className={`${classes.legendSquare} ${classes.fullReports}`} />
+                        <Text size="xs">
+                            <FormattedMessage id={locales.fullReports} />
+                        </Text>
+                    </Flex>
+                    <Flex align="center" gap={4}>
+                        <Box className={`${classes.legendSquare} ${classes.overtimeReports}`} />
+                        <Text size="xs">
+                            <FormattedMessage id={locales.overtimeReports} />
+                        </Text>
+                    </Flex>
+                    <Flex align="center" gap={4}>
+                        <Box className={`${classes.legendSquare} ${classes.na}`} />
+                        <Text size="xs">N/A</Text>
+                    </Flex>
+                    <Flex align="center" gap={4}>
+                        <Box className={`${classes.legendSquare} ${classes.waiting}`} />
+                        <Text size="xs">
+                            <FormattedMessage id="pages.heat-map.pending" defaultMessage="Ожидание" />
+                        </Text>
+                    </Flex>
+                </Flex>
+
+                <div
+                    className={classes.compactStrip}
+                    style={{ ["--weeks" as keyof React.CSSProperties]: String(weeks.length || 39) } as React.CSSProperties}
+                >
+                    <div
+                        className={classes.compactWeekHeaders}
+                        style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(18px, 1fr))` }}
+                    >
+                        {weeks.map((weekItem) => (
+                            <Text key={`h-${weekItem.week}`} size="xs" c="dimmed" ta="center">
+                                {weekItem.week}
+                            </Text>
+                        ))}
+                    </div>
+                    <div
+                        className={classes.compactWeekSquares}
+                        style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(18px, 1fr))` }}
+                    >
+                        {weeks.map((weekItem) => (
+                            <HoverCard
+                                key={weekItem.week}
+                                position="top"
+                                withArrow
+                                shadow="md"
+                                openDelay={0}
+                                closeDelay={80}
+                                withinPortal
+                            >
+                                <HoverCard.Target>
+                                    <Box
+                                        tabIndex={0}
+                                        aria-label={getSquareInfoLabel(weekItem)}
+                                        title={getSquareInfoLabel(weekItem)}
+                                        className={`${classes.compactSquare} ${classes[getSquareColor(weekItem)]}`}
+                                    />
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown>
+                                    <Text size="xs">{getSquareInfoLabel(weekItem)}</Text>
+                                </HoverCard.Dropdown>
+                            </HoverCard>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <Flex direction="column" gap="xs" className={`${classes.root} ${className || ""}`}>

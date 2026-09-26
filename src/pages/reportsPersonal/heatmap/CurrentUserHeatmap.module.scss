@@ -132,3 +132,86 @@
         padding: 20px;
     }
 }
+
+.compactRoot {
+    @include s.glass;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.compactTop {
+    gap: 10px;
+}
+
+.compactTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.compactLegend {
+    gap: 8px 14px;
+}
+
+.compactStrip {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.compactWeekHeaders,
+.compactWeekSquares {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18px, 1fr));
+    gap: 2px;
+    min-width: max(100%, calc(var(--weeks, 39) * 20px));
+}
+
+.compactWeekHeaders {
+    margin-bottom: 4px;
+}
+
+.compactSquare {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 3px;
+    cursor: default;
+    transition: transform 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+        transform: scale(1.12);
+    }
+}
+
+.compactRoot {
+    .noReports {
+        background: var(--mantine-color-red-6);
+    }
+    .partialReports {
+        background: var(--mantine-color-blue-2);
+    }
+    .fullReports {
+        background: var(--mantine-color-blue-5);
+    }
+    .overtimeReports {
+        background: var(--mantine-color-blue-9);
+    }
+    .na {
+        background: var(--mantine-color-gray-4);
+        border: 1px solid var(--mantine-color-gray-5);
+    }
+    .waiting {
+        background: light-dark(#fff, var(--mantine-color-dark-6));
+        border: 1px solid var(--mantine-color-gray-5);
+    }
+    .legendSquare {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+    }
+}
+
