@@ -17,6 +17,8 @@ import { ApplicationStatus, getApplicationStatusColor } from "src/shared/user/ap
 import classes from "./ApplicationRow.module.scss"
 import { ApplicationStatusReason } from "./ApplicationStatusReason"
 
+const NOTES_PREVIEW_LIMIT = 3
+
 interface ApplicationRowProps {
     applicationDto: ApplicationDto
     /** @deprecated always card layout */
@@ -31,6 +33,9 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
 
     const applicationPath = `/application/${application.id}`
     const notesCount = application.notes?.length || 0
+    const sortedNotes = [...(application.notes || [])]
+        .sort((a, b) => dayjs(b.createTime || 0).valueOf() - dayjs(a.createTime || 0).valueOf())
+        .slice(0, NOTES_PREVIEW_LIMIT)
     const notesLabel = intl.formatMessage(
         { id: "pages.applications.notesCount", defaultMessage: "Комментарии: {count}" },
         { count: notesCount }
@@ -178,6 +183,37 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
                         {application.skills}
                     </Text>
                 </div>
+            ) : null}
+
+            {sortedNotes.length > 0 && (
+                <div className={classes.skillsPreview}>
+                    <Text size="xs" c="dimmed" mb={4}>
+                        <FormattedMessage id="pages.applications.notes" />
+                    </Text>
+                    <Flex direction="column" gap={6}>
+                        {sortedNotes.map((note, index) => (
+                            <div key={note.id}>
+                                <Text size="xs" c="dimmed">
+                                    {[note.createdBy, note.createTime && dayjs(note.createTime).format("DD MMM YYYY")]
+                                        .filter(Boolean)
+                                        .join(" · ")}
+                                </Text>
+                                <Text size="sm" className={classes.skillsLine} lineClamp={index === 0 ? 4 : 2}>
+                                    {note.text}
+                                </Text>
+                            </div>
+                        ))}
+                    </Flex>
+                </div>
+            )}
+
+            {application.status === ApplicationStatus.PAUSED && application.comment?.trim() ? (
+                <Text size="sm" className={classes.pauseReason}>
+                    <Text span c="dimmed" size="xs" mr={6}>
+                        <FormattedMessage id="pages.applications.view.pause-reason" />:
+                    </Text>
+                    {application.comment}
+                </Text>
             ) : null}
         </div>
     )

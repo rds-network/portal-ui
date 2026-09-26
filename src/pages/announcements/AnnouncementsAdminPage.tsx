@@ -1,10 +1,11 @@
-import { Button, Card, Flex, Select, Text, TextInput, Title } from "@mantine/core"
+import { Badge, Button, Card, Flex, Select, Text, TextInput, Title } from "@mantine/core"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
 import { AnnouncementAudience } from "@rds-network/portal-api-axios"
-import { IconSend } from "@tabler/icons-react"
+import { IconSend, IconTrash } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import dayjs from "dayjs"
 import Highlight from "@tiptap/extension-highlight"
 import SubScript from "@tiptap/extension-subscript"
 import Superscript from "@tiptap/extension-superscript"
@@ -16,7 +17,7 @@ import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { AnnouncementExtraApi } from "src/shared/api/AnnouncementApiService"
+import { AnnouncementExtraApi, AnnouncementManageDto } from "src/shared/api/AnnouncementApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -145,6 +146,44 @@ export const AnnouncementsAdminPage: React.FC = () => {
     )
 
     const [person, setPerson] = useState<string | null>(null)
+
+    const { data: history = [], isFetching: historyLoading } = useQuery({
+        queryKey: ["announcements", "manage"],
+        queryFn: () => AnnouncementExtraApi.listManage(),
+        enabled: isManager,
+    })
+
+    const { mutate: removeAnnouncement, isPending: removing } = useMutation({
+        mutationFn: (id: string) => AnnouncementExtraApi.remove(id),
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.announcements.admin.history.deleted" />
+                    </Text>,
+                    null
+                )
+            )
+            queryClient.invalidateQueries({ queryKey: ["announcements"] })
+        },
+    })
+
+    const confirmRemove = (id: string) => {
+        if (!window.confirm(intl.formatMessage({ id: "pages.announcements.admin.history.deleteConfirm" }))) return
+        removeAnnouncement(id)
+    }
+
+    const audienceLabel = (item: AnnouncementManageDto) => {
+        if (item.audience === "PROGRAM") {
+            const program = programs.find((candidate) => candidate.code === item.programCode)
+            const name = (program && getLocalizedName(program, intl.locale)) || item.programCode
+            return `${intl.formatMessage({ id: "pages.announcements.admin.audience.program" })}: ${name}`
+        }
+        if (item.audience === "USER") {
+            return `${intl.formatMessage({ id: "pages.announcements.admin.audience.person" })}: ${item.targetUsername}`
+        }
+        return intl.formatMessage({ id: "pages.announcements.admin.audience.all" })
+    }
 
     const { mutate: publish, isPending } = useMutation({
         mutationFn: async (values: AnnouncementFormValues) => {
@@ -362,6 +401,71 @@ export const AnnouncementsAdminPage: React.FC = () => {
                     </Flex>
                 </form>
             </Card>
+
+            {isManager && (
+                <Card withBorder p="lg">
+                    <Title order={3} mb={4}>
+                        <FormattedMessage id="pages.announcements.admin.history.title" />
+                    </Title>
+                    <Text c="dimmed" size="sm" mb="md">
+                        <FormattedMessage id="pages.announcements.admin.history.description" />
+                    </Text>
+
+                    {history.length === 0 ? (
+                        <Text c="dimmed" size="sm">
+                            <FormattedMessage
+                                id={
+                                    historyLoading
+                                        ? "pages.announcements.admin.history.loading"
+                                        : "pages.announcements.admin.history.empty"
+                                }
+                            />
+                        </Text>
+                    ) : (
+                        <Flex direction="column" gap="sm">
+                            {history.map((item) => (
+                                <Flex key={item.id} className={classes.historyItem} gap="md" align="flex-start">
+                                    <Flex direction="column" gap={4} miw={0} style={{ flex: 1 }}>
+                                        <Text fw={600} size="sm">
+                                            {item.title}
+                                        </Text>
+                                        <Flex gap={8} wrap="wrap" align="center">
+                                            <Badge variant="light" radius="sm">
+                                                {intl.formatMessage({
+                                                    id: item.banner
+                                                        ? "pages.announcements.admin.placement.banner"
+                                                        : "pages.announcements.admin.placement.bell",
+                                                })}
+                                            </Badge>
+                                            <Text size="xs" c="dimmed">
+                                                {audienceLabel(item)}
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {dayjs(item.createTime).format("DD.MM.YYYY HH:mm")}
+                                            </Text>
+                                            {item.createdBy && (
+                                                <Text size="xs" c="dimmed">
+                                                    {item.createdBy}
+                                                </Text>
+                                            )}
+                                        </Flex>
+                                    </Flex>
+                                    <Button
+                                        variant="light"
+                                        color="red"
+                                        size="compact-sm"
+                                        leftSection={<IconTrash size={14} />}
+                                        loading={removing}
+                                        onClick={() => confirmRemove(item.id)}
+                                    >
+                                        <FormattedMessage id="pages.announcements.admin.history.delete" />
+                                    </Button>
+                                </Flex>
+                            ))}
+                        </Flex>
+                    )}
+                </Card>
+            )}
         </Flex>
     )
 }

@@ -5,7 +5,7 @@ import React, { useMemo } from "react"
 import { FormattedMessage } from "react-intl"
 import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
-import { ApplicationStatus } from "src/shared/user/applications"
+import { ApplicationStatus, getApplicationStatusColor } from "src/shared/user/applications"
 import { UNASSIGNED_ASSIGNEE } from "./lib/defaults"
 import classes from "./ApplicationsDashboard.module.scss"
 
@@ -14,6 +14,19 @@ const statsPage: PageRequest = {
     pageSize: 500,
     sort: ["created;desc"],
 }
+
+const OPEN_STATUSES = [
+    ApplicationStatus.CREATED,
+    ApplicationStatus.IN_PROGRESS,
+    ApplicationStatus.CLARIFICATION,
+    ApplicationStatus.PAUSED,
+    ApplicationStatus.READY_TO_SEND,
+    ApplicationStatus.DOCS_SENT,
+    ApplicationStatus.DOCS_RECEIVED,
+]
+
+/** Statuses hidden by the "showCompleted" filter on the backend. */
+const TERMINAL_STATUSES = [ApplicationStatus.DONE, ApplicationStatus.DENY]
 
 type AssigneeBucket = {
     key: string
@@ -25,19 +38,17 @@ type AssigneeBucket = {
 
 type DashboardStats = {
     open: number
-    created: number
-    paused: number
+    byStatus: Record<string, number>
     byAssignee: AssigneeBucket[]
 }
 
 const buildStats = (items: ApplicationDto[]): DashboardStats => {
     const map = new Map<string, AssigneeBucket>()
-    let created = 0
-    let paused = 0
+    const byStatus: Record<string, number> = {}
 
     for (const item of items) {
-        if (item.status === ApplicationStatus.CREATED) created += 1
-        if (item.status === ApplicationStatus.PAUSED) paused += 1
+        const status = item.status || ""
+        byStatus[status] = (byStatus[status] || 0) + 1
 
         const login = item.assignee?.trim() || null
         const key = login || UNASSIGNED_ASSIGNEE
@@ -54,7 +65,18 @@ const buildStats = (items: ApplicationDto[]): DashboardStats => {
         return b.total - a.total || (a.login || "").localeCompare(b.login || "")
     })
 
-    return { open: items.length, created, paused, byAssignee }
+    return { open: items.length, byStatus, byAssignee }
+}
+
+const countTerminal = (items: ApplicationDto[]): Record<string, number> => {
+    const counts: Record<string, number> = {}
+    for (const item of items) {
+        const status = item.status || ""
+        if (TERMINAL_STATUSES.some((terminal) => terminal === status)) {
+            counts[status] = (counts[status] || 0) + 1
+        }
+    }
+    return counts
 }
 
 type Props = {
@@ -77,6 +99,18 @@ export const ApplicationsDashboard: React.FC<Props> = ({
                 showCompleted: false,
             })
             return response.data.content || []
+        },
+        staleTime: 30_000,
+    })
+
+    // Terminal statuses are filtered out of the query above, so they need their own fetch.
+    const { data: terminalCounts = {} } = useQuery({
+        queryKey: ["applications-dashboard", "terminal"],
+        queryFn: async () => {
+            const response = await PrivateApplicationApiService.getApplications(statsPage, "", {
+                showCompleted: true,
+            })
+            return countTerminal(response.data.content || [])
         },
         staleTime: 30_000,
     })
@@ -107,24 +141,24 @@ export const ApplicationsDashboard: React.FC<Props> = ({
             </Text>
 
             <Flex gap={8} wrap="wrap" mb="md">
-                <StatChip
-                    active={activeStatus === ApplicationStatus.CREATED}
-                    onClick={() =>
-                        onSelectStatus(activeStatus === ApplicationStatus.CREATED ? null : ApplicationStatus.CREATED)
-                    }
-                    label={<FormattedMessage id="pages.applications.dashboard.new" values={{ count: stats.created }} />}
-                    color="gray"
-                />
-                <StatChip
-                    active={activeStatus === ApplicationStatus.PAUSED}
-                    onClick={() =>
-                        onSelectStatus(activeStatus === ApplicationStatus.PAUSED ? null : ApplicationStatus.PAUSED)
-                    }
-                    label={
-                        <FormattedMessage id="pages.applications.dashboard.paused" values={{ count: stats.paused }} />
-                    }
-                    color="orange"
-                />
+                {OPEN_STATUSES.map((status) => (
+                    <StatusChip
+                        key={status}
+                        status={status}
+                        count={stats.byStatus[status] || 0}
+                        active={activeStatus === status}
+                        onClick={() => onSelectStatus(activeStatus === status ? null : status)}
+                    />
+                ))}
+                {TERMINAL_STATUSES.filter((status) => (terminalCounts[status] || 0) > 0).map((status) => (
+                    <StatusChip
+                        key={status}
+                        status={status}
+                        count={terminalCounts[status] || 0}
+                        active={activeStatus === status}
+                        onClick={() => onSelectStatus(activeStatus === status ? null : status)}
+                    />
+                ))}
             </Flex>
 
             <Flex gap={8} wrap="wrap">
@@ -160,6 +194,29 @@ export const ApplicationsDashboard: React.FC<Props> = ({
         </div>
     )
 }
+
+const StatusChip = ({
+    status,
+    count,
+    active,
+    onClick,
+}: {
+    status: ApplicationStatus
+    count: number
+    active: boolean
+    onClick: () => void
+}) => (
+    <StatChip
+        active={active}
+        onClick={onClick}
+        color={getApplicationStatusColor(status) || "gray"}
+        label={
+            <>
+                <FormattedMessage id={`common.application-status.${status}`} />: {count}
+            </>
+        }
+    />
+)
 
 const StatChip = ({
     active,

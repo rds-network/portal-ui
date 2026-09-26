@@ -22,6 +22,17 @@ export type AnnouncementPublishRequest = {
     banner?: boolean
 }
 
+export type AnnouncementManageDto = {
+    id: string
+    title: string
+    createTime: string
+    createdBy?: string | null
+    audience: string
+    programCode?: string | null
+    targetUsername?: string | null
+    banner: boolean
+}
+
 const alive = (status: number) => status === 200 || status === 204
 
 export const AnnouncementExtraApi = {
@@ -33,5 +44,12 @@ export const AnnouncementExtraApi = {
     async publish(payload: AnnouncementPublishRequest) {
         const response = await RequestHttp.post("/announcements/publish", payload)
         return response.data
+    },
+    async listManage(): Promise<AnnouncementManageDto[]> {
+        const response = await RequestHttp.get<AnnouncementManageDto[]>("/announcements/manage")
+        return response.data || []
+    },
+    async remove(id: string): Promise<void> {
+        await RequestHttp.delete(`/announcements/${id}`)
     },
 }

@@ -72,6 +72,13 @@
     overflow-wrap: anywhere;
 }
 
+.pauseReason {
+    margin-top: 12px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+    color: light-dark(#92400e, var(--mantine-color-yellow-4));
+}
+
 .applicationLink {
     color: inherit;
     font-weight: 700;

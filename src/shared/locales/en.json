@@ -205,7 +205,16 @@
                 "emptyTitle": "Enter a title (at least 3 characters)",
                 "emptyBody": "Enter notification text",
                 "emptyProgram": "Select a program for the broadcast",
-                "emptyPerson": "Select a volunteer"
+                "emptyPerson": "Select a volunteer",
+                "history": {
+                    "title": "Mailing history",
+                    "description": "Recently sent notifications. Deleting removes the notification from the bell, the banner and this history.",
+                    "loading": "Loading…",
+                    "empty": "Nothing has been sent yet",
+                    "delete": "Delete",
+                    "deleteConfirm": "Delete this mailing? The notification will disappear for all recipients and from the history.",
+                    "deleted": "Mailing deleted"
+                }
             }
         },
         "desktop": {
@@ -867,6 +876,7 @@
             "assignee": "Assignee",
             "unassigned": "Unassigned",
             "assignToMe": "Assign to me",
+            "notes": "Comments",
             "notesCount": "Comments: {count}",
             "unassignedApplications": "Unassigned",
             "allAssignees": "All assignees",
@@ -908,8 +918,6 @@
             "dashboard": {
                 "title": "Applications overview",
                 "subtitle": "Open: {count}",
-                "new": "New: {count}",
-                "paused": "On pause: {count}",
                 "unassigned": "Unassigned: {count}",
                 "assigneeBreakdown": "{newCount} new / {pausedCount} paused"
             },

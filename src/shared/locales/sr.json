@@ -205,7 +205,16 @@
                 "emptyTitle": "Unesite naslov (najmanje 3 karaktera)",
                 "emptyBody": "Unesite tekst obaveštenja",
                 "emptyProgram": "Izaberite program za slanje",
-                "emptyPerson": "Izaberite volontera"
+                "emptyPerson": "Izaberite volontera",
+                "history": {
+                    "title": "Istorija slanja",
+                    "description": "Nedavno poslata obaveštenja. Brisanje uklanja obaveštenje iz zvonca, trake i iz ove istorije.",
+                    "loading": "Učitavanje…",
+                    "empty": "Još nije bilo slanja",
+                    "delete": "Obriši",
+                    "deleteConfirm": "Obrisati ovo slanje? Obaveštenje će nestati svim primaocima i iz istorije.",
+                    "deleted": "Slanje je obrisano"
+                }
             }
         },
         "desktop": {
@@ -867,6 +876,7 @@
             "assignee": "Odgovorna osoba",
             "unassigned": "Nije dodeljeno",
             "assignToMe": "Dodeli meni",
+            "notes": "Komentari",
             "notesCount": "Komentari: {count}",
             "unassignedApplications": "Nedodeljene",
             "allAssignees": "Sve odgovorne osobe",
@@ -908,8 +918,6 @@
             "dashboard": {
                 "title": "Pregled prijava",
                 "subtitle": "Otvorenih: {count}",
-                "new": "Nove: {count}",
-                "paused": "Na pauzi: {count}",
                 "unassigned": "Bez odgovornog: {count}",
                 "assigneeBreakdown": "{newCount} nov. / {pausedCount} pauza"
             },

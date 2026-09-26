@@ -16,6 +16,7 @@ import { PrivateApplicationApiService } from "src/shared/api/applications/Privat
 import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { useScreenSize } from "src/shared/hooks/useDesktop"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
+import { ApplicationStatus } from "src/shared/user/applications"
 import { hasPermission } from "src/shared/user/roles"
 import classes from "./Applications.module.scss"
 import { defaultPage, defaultPageResponse, UNASSIGNED_ASSIGNEE } from "./lib/defaults"
@@ -205,7 +206,16 @@ export const Applications = () => {
                             statusFilter
                         )
                     }
-                    onSelectStatus={(status) => updateUrlParams(debouncedSearch, filter, 0, status)}
+                    onSelectStatus={(status) => {
+                        // DONE and DENY are hidden unless completed applications are shown.
+                        const terminal = status === ApplicationStatus.DONE || status === ApplicationStatus.DENY
+                        updateUrlParams(
+                            debouncedSearch,
+                            terminal ? { ...filter, showCompleted: true } : filter,
+                            0,
+                            status
+                        )
+                    }}
                 />
 
                 <div ref={listStartRef} />
