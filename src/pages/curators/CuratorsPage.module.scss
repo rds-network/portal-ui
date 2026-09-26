@@ -24,6 +24,13 @@
     gap: 8px;
 }
 
+.personMain {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
 .curatorBlock {
     display: flex;
     flex-direction: column;

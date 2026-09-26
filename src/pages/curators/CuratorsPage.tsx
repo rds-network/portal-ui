@@ -1,4 +1,4 @@
-import { Button, Card, Flex, Select, Text, Title } from "@mantine/core"
+import { Avatar, Button, Card, Flex, Select, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { IconTrash, IconUserPlus } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
+import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
@@ -66,6 +67,16 @@ export const CuratorsPage: React.FC = () => {
                 row.username.toLowerCase() === (user?.username || "").toLowerCase()
         )
     }, [rows, isManager, curatorMe?.programs, user?.username])
+
+    const avatarLogins = useMemo(
+        () => [...visibleRows.map((row) => row.username), ...delegates.map((row) => row.delegateUsername)],
+        [visibleRows, delegates]
+    )
+
+    const { data: users = {} } = resolveUsers(avatarLogins)
+
+    const userOf = (login: string) =>
+        users[login] || users[Object.keys(users).find((key) => key.toLowerCase() === login.toLowerCase()) || ""]
 
     const grouped = useMemo(() => {
         const map = new Map<string, typeof visibleRows>()
@@ -215,11 +226,20 @@ export const CuratorsPage: React.FC = () => {
                                         className={classes.curatorBlock}
                                     >
                                         <div className={classes.person}>
-                                            <div>
-                                                <Text fw={600}>{curator.fullName}</Text>
-                                                <Text size="xs" c="dimmed">
-                                                    {curator.username}
-                                                </Text>
+                                            <div className={classes.personMain}>
+                                                <Avatar
+                                                    src={userOf(curator.username)?.avatar?.link}
+                                                    name={curator.fullName || curator.username}
+                                                    size={36}
+                                                    radius="xl"
+                                                    color="initials"
+                                                />
+                                                <div>
+                                                    <Text fw={600}>{curator.fullName}</Text>
+                                                    <Text size="xs" c="dimmed">
+                                                        {curator.username}
+                                                    </Text>
+                                                </div>
                                             </div>
                                             {isManager && (
                                                 <Button
@@ -251,11 +271,20 @@ export const CuratorsPage: React.FC = () => {
                                                     key={`${row.programCode}-${row.delegateUsername}`}
                                                     className={classes.delegate}
                                                 >
-                                                    <div>
-                                                        <Text size="sm">{row.delegateFullName}</Text>
-                                                        <Text size="xs" c="dimmed">
-                                                            {row.delegateUsername}
-                                                        </Text>
+                                                    <div className={classes.personMain}>
+                                                        <Avatar
+                                                            src={userOf(row.delegateUsername)?.avatar?.link}
+                                                            name={row.delegateFullName || row.delegateUsername}
+                                                            size={28}
+                                                            radius="xl"
+                                                            color="initials"
+                                                        />
+                                                        <div>
+                                                            <Text size="sm">{row.delegateFullName}</Text>
+                                                            <Text size="xs" c="dimmed">
+                                                                {row.delegateUsername}
+                                                            </Text>
+                                                        </div>
                                                     </div>
                                                     {canDelegate(curator.username) && (
                                                         <Button

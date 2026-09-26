@@ -10,11 +10,52 @@
     border-bottom: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
 }
 
+.meta {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.person {
+    min-width: 180px;
+    flex: 1 1 180px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: 88px minmax(110px, 140px) 52px 88px auto;
+    align-items: center;
+    column-gap: 8px;
+    flex: 1 1 420px;
+}
+
+.statHours,
+.statShort,
+.statWeeks,
+.statDate,
+.statAction {
+    min-width: 0;
+}
+
+.statShort {
+    color: var(--mantine-color-red-7);
+    font-size: var(--mantine-font-size-xs);
+    white-space: nowrap;
+}
+
+.statDate {
+    color: var(--mantine-color-dimmed);
+    font-size: var(--mantine-font-size-xs);
+    white-space: nowrap;
+}
+
 .weekHeader,
 .weekSquares {
     display: grid;
     gap: 2px;
-    grid-template-columns: repeat(auto-fill, minmax(20px, 1fr));
+    justify-content: start;
     justify-items: center;
 }
 
@@ -68,15 +109,14 @@
 }
 
 @media (max-width: $mantine-breakpoint-md) {
-    .weekHeader,
-    .weekSquares {
-        grid-template-columns: repeat(auto-fill, 16px);
+    .stats {
+        grid-template-columns: 80px minmax(100px, 1fr) 48px 72px auto;
+        flex: 1 1 100%;
     }
 
     .weekSquare {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 1 / 1;
+        width: 16px;
+        height: 16px;
     }
 
     .weekNum {

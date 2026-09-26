@@ -665,7 +665,7 @@
             "hours": "ч.",
             "pieces-short": "шт.",
             "status-text-all-ok": "Все отчеты сданы",
-            "status-text-missed-weeks": "Не хвататает {count} ч.",
+            "status-text-missed-weeks": "Не хватает {count} ч.",
             "total-volunteers": "Всего волонтеров",
             "total-weeks": "Всего недель",
             "active-filters": "Активные фильтры",

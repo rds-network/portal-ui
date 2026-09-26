@@ -28,6 +28,33 @@ const weekTone = (week: OverdueWeekDto) => {
     return "fullReports"
 }
 
+const hasOvertime = (item: ReportOverdueDto) => {
+    const short = item.hoursShort ?? 0
+    if (short > 0) return false
+    const required = item.hoursRequired ?? 0
+    if (!required) return false
+    return (item.hoursWorked ?? 0) > required
+}
+
+const overdueSortKey = (item: ReportOverdueDto) => {
+    const warnings = item.warningCount ?? 0
+    const short = item.hoursShort ?? 0
+    const weeks = item.weeksMissed ?? 0
+    // deficit first (0), then zero, overtime last (2)
+    const band = short > 0 ? 0 : hasOvertime(item) ? 2 : 1
+    return { warnings, band, short, weeks }
+}
+
+const compareOverdue = (a: ReportOverdueDto, b: ReportOverdueDto) => {
+    const left = overdueSortKey(a)
+    const right = overdueSortKey(b)
+    if (right.warnings !== left.warnings) return right.warnings - left.warnings
+    if (left.band !== right.band) return left.band - right.band
+    if (right.short !== left.short) return right.short - left.short
+    if (right.weeks !== left.weeks) return right.weeks - left.weeks
+    return (a.fullName || a.username).localeCompare(b.fullName || b.username, "ru")
+}
+
 export const OverdueReportsPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
@@ -154,11 +181,30 @@ export const OverdueReportsPage: React.FC = () => {
         setExcluded(new Set())
     }
 
-    const axisWeeks = items[0]?.recentWeeks ?? []
+    const sortedItems = useMemo(() => [...items].sort(compareOverdue), [items])
+
+    const axisWeeks = useMemo(() => {
+        const best = sortedItems.reduce<OverdueWeekDto[]>(
+            (acc, item) => ((item.recentWeeks?.length ?? 0) > acc.length ? item.recentWeeks ?? acc : acc),
+            []
+        )
+        return best
+    }, [sortedItems])
+
+    const weekGridStyle = useMemo(
+        () =>
+            axisWeeks.length > 0
+                ? { gridTemplateColumns: `repeat(${axisWeeks.length}, 20px)` }
+                : undefined,
+        [axisWeeks.length]
+    )
 
     const samples = useMemo(
-        () => (preview?.samples ?? items.slice(0, 5)).filter((item) => !excluded.has(item.username)),
-        [preview?.samples, items, excluded]
+        () =>
+            (preview?.samples ?? sortedItems.slice(0, 5))
+                .filter((item) => !excluded.has(item.username))
+                .sort(compareOverdue),
+        [preview?.samples, sortedItems, excluded]
     )
 
     return (
@@ -241,7 +287,7 @@ export const OverdueReportsPage: React.FC = () => {
                             />
                         </Flex>
                         {axisWeeks.length > 0 && (
-                            <div className={classes.weekHeader}>
+                            <div className={classes.weekHeader} style={weekGridStyle}>
                                 {axisWeeks.map((week, index) => (
                                     <span key={week.weekStart} className={classes.weekNum}>
                                         {index + 1}
@@ -249,7 +295,7 @@ export const OverdueReportsPage: React.FC = () => {
                                 ))}
                             </div>
                         )}
-                        {items.map((item) => (
+                        {sortedItems.map((item) => (
                             <div
                                 key={item.username}
                                 className={classes.row}
@@ -259,7 +305,7 @@ export const OverdueReportsPage: React.FC = () => {
                                 }}
                                 onClick={() => openHeatmap(item.username)}
                             >
-                                <Flex align="flex-start" gap="sm" mb={8} wrap="wrap">
+                                <div className={classes.meta}>
                                     <div
                                         onClick={(event) => {
                                             event.stopPropagation()
@@ -271,7 +317,7 @@ export const OverdueReportsPage: React.FC = () => {
                                             aria-label={item.fullName}
                                         />
                                     </div>
-                                    <div style={{ minWidth: 180, flex: "1 1 180px" }}>
+                                    <div className={classes.person}>
                                         <Text fw={600}>{item.fullName}</Text>
                                         <Group gap={6} mt={4}>
                                             {(item.warningCount ?? 0) > 0 && (
@@ -305,57 +351,65 @@ export const OverdueReportsPage: React.FC = () => {
                                             )}
                                         </Text>
                                     </div>
-                                    <Flex gap={6} wrap="wrap" align="center">
-                                        <Badge color={(item.hoursShort ?? 0) > 0 ? "red" : "gray"}>
-                                            {item.hoursRequired
-                                                ? `${item.hoursWorked ?? 0}/${item.hoursRequired}`
-                                                : item.hoursShort ?? 0}
-                                        </Badge>
-                                        {(item.hoursShort ?? 0) > 0 && (
-                                            <Text size="xs" c="red">
+                                    <div className={classes.stats}>
+                                        <div className={classes.statHours}>
+                                            <Badge color={(item.hoursShort ?? 0) > 0 ? "red" : "gray"}>
+                                                {item.hoursRequired
+                                                    ? `${item.hoursWorked ?? 0}/${item.hoursRequired}`
+                                                    : item.hoursShort ?? 0}
+                                            </Badge>
+                                        </div>
+                                        <div className={classes.statShort}>
+                                            {(item.hoursShort ?? 0) > 0 ? (
                                                 <FormattedMessage
                                                     id="pages.heat-map.status-text-missed-weeks"
                                                     values={{ count: item.hoursShort }}
                                                 />
-                                            </Text>
-                                        )}
-                                        <Badge
-                                            color={
-                                                item.weeksMissed >= 3
-                                                    ? "red"
-                                                    : item.weeksMissed >= 1
-                                                      ? "orange"
-                                                      : "gray"
-                                            }
-                                        >
-                                            {item.weeksMissed > 0 ? (
-                                                `+${item.weeksMissed}`
                                             ) : (
-                                                <FormattedMessage id="pages.overdue.snapshot" />
+                                                "\u00a0"
                                             )}
-                                        </Badge>
-                                        <Text size="xs" c="dimmed">
+                                        </div>
+                                        <div className={classes.statWeeks}>
+                                            <Badge
+                                                color={
+                                                    item.weeksMissed >= 3
+                                                        ? "red"
+                                                        : item.weeksMissed >= 1
+                                                          ? "orange"
+                                                          : "gray"
+                                                }
+                                            >
+                                                {item.weeksMissed > 0 ? (
+                                                    `+${item.weeksMissed}`
+                                                ) : (
+                                                    <FormattedMessage id="pages.overdue.snapshot" />
+                                                )}
+                                            </Badge>
+                                        </div>
+                                        <div className={classes.statDate}>
                                             {item.lastReportWeek
                                                 ? dayjs(item.lastReportWeek).format("DD.MM.YYYY")
                                                 : "—"}
-                                        </Text>
-                                        {(item.warningCount ?? 0) > 0 && (
-                                            <Button
-                                                size="compact-xs"
-                                                variant="light"
-                                                color="orange"
-                                                loading={cancelling}
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    cancelWarning(item.username)
-                                                }}
-                                            >
-                                                <FormattedMessage id="pages.overdue.cancelWarning" />
-                                            </Button>
-                                        )}
-                                    </Flex>
-                                </Flex>
-                                <div className={classes.weekSquares}>
+                                        </div>
+                                        <div className={classes.statAction}>
+                                            {(item.warningCount ?? 0) > 0 ? (
+                                                <Button
+                                                    size="compact-xs"
+                                                    variant="light"
+                                                    color="orange"
+                                                    loading={cancelling}
+                                                    onClick={(event) => {
+                                                        event.stopPropagation()
+                                                        cancelWarning(item.username)
+                                                    }}
+                                                >
+                                                    <FormattedMessage id="pages.overdue.cancelWarning" />
+                                                </Button>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className={classes.weekSquares} style={weekGridStyle}>
                                     {(item.recentWeeks ?? []).map((week) => (
                                         <span
                                             key={week.weekStart}
