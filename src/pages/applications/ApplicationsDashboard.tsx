@@ -6,7 +6,7 @@ import { FormattedMessage } from "react-intl"
 import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { ApplicationStatus } from "src/shared/user/applications"
-import { UNASSIGNED_ASSIGNEE } from "../lib/defaults"
+import { UNASSIGNED_ASSIGNEE } from "./lib/defaults"
 import classes from "./ApplicationsDashboard.module.scss"
 
 const statsPage: PageRequest = {
