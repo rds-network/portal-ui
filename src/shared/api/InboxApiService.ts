@@ -140,6 +140,10 @@ export const InboxApiService = {
         return response.data
     },
 
+    async delete(id: string): Promise<void> {
+        await RequestHttp.delete(`/inbox/${id}`)
+    },
+
     async overdue(): Promise<ReportOverdueDto[]> {
         const response = await RequestHttp.get<ReportOverdueDto[]>("/report-overdue", { validateStatus: alive })
         if (response.status !== 200) return []

@@ -56,10 +56,13 @@ export const UserSearch = ({
         }
     }, [selectedUser])
 
-    const searchFilter = program == null ? undefined : { program }
+    const searchFilter = {
+        onlyActive: true as const,
+        ...(program == null ? {} : { program }),
+    }
 
     const { data: users = [], isFetching } = useQuery({
-        queryKey: ["searchUsers", debouncedSearch, program],
+        queryKey: ["searchUsers", debouncedSearch, program, "onlyActive"],
         queryFn: () =>
             UserApiService.searchUsers(debouncedSearch, { pageNumber: 0, pageSize: 50 }, searchFilter).then(
                 (response) => response.data.content

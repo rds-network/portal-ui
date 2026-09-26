@@ -317,7 +317,10 @@
             "receivedAt": "primljeno {time}",
             "notReceived": "nije primljeno",
             "ack": "Primljeno",
-            "ackBlock": "Ima {count} obaveštenja bez potvrde. Kliknite Primljeno, inače je ostali portal zaključan."
+            "ackBlock": "Ima {count} obaveštenja bez potvrde. Kliknite Primljeno, inače je ostali portal zaključan.",
+            "delete": "Obriši",
+            "deleteConfirm": "Obrisati ovaj razgovor? Poruke će biti trajno uklonjene.",
+            "deleted": "Razgovor je obrisan"
         },
         "overdue": {
             "title": "Nedostavljeni izveštaji",

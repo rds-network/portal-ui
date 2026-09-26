@@ -1,14 +1,19 @@
 import { Alert, Badge, Flex, Text, Textarea, Title, Button } from "@mantine/core"
+import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useMemo, useState } from "react"
-import { FormattedMessage } from "react-intl"
+import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useScreenSize } from "src/shared/hooks/useDesktop"
+import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
+import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./MessagesPage.module.scss"
+
+const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]
 
 const formatSeen = (value?: string | null) => (value ? dayjs(value).format("DD.MM HH:mm") : null)
 
@@ -37,6 +42,7 @@ const sortThreads = (threads: InboxThreadDto[]) =>
 
 export const MessagesPage: React.FC = () => {
     const { user } = useContext(UserContext)
+    const intl = useIntl()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const { isMobile } = useScreenSize()
@@ -44,6 +50,7 @@ export const MessagesPage: React.FC = () => {
     const [reply, setReply] = useState("")
     const showList = !isMobile || !selectedId
     const showThread = !isMobile || !!selectedId
+    const canDelete = hasPermission(user, MANAGERS)
 
     setDocumentTitleByLocale("pages.messages.title")
 
@@ -87,6 +94,28 @@ export const MessagesPage: React.FC = () => {
         mutationFn: () => InboxApiService.ack(selectedId!),
         onSuccess: refreshInbox,
     })
+
+    const { mutate: removeThread, isPending: deleting } = useMutation({
+        mutationFn: (id: string) => InboxApiService.delete(id),
+        onSuccess: () => {
+            setSelectedId(null)
+            setReply("")
+            refreshInbox()
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.messages.deleted" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+    })
+
+    const confirmDelete = (id: string) => {
+        if (!window.confirm(intl.formatMessage({ id: "pages.messages.deleteConfirm" }))) return
+        removeThread(id)
+    }
 
     const openThread = (item: InboxThreadDto) => {
         setSelectedId(item.id)
@@ -234,6 +263,16 @@ export const MessagesPage: React.FC = () => {
                                                 }
                                             >
                                                 <FormattedMessage id="pages.overdue.openHeatmap" />
+                                            </Button>
+                                        )}
+                                        {canDelete && (
+                                            <Button
+                                                variant="light"
+                                                color="red"
+                                                loading={deleting}
+                                                onClick={() => confirmDelete(thread.id)}
+                                            >
+                                                <FormattedMessage id="pages.messages.delete" />
                                             </Button>
                                         )}
                                     </Flex>

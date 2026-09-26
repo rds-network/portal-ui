@@ -317,7 +317,10 @@
             "receivedAt": "received {time}",
             "notReceived": "not received",
             "ack": "Received",
-            "ackBlock": "{count} notices still need confirmation. Tap Received, or the rest of the portal stays locked."
+            "ackBlock": "{count} notices still need confirmation. Tap Received, or the rest of the portal stays locked.",
+            "delete": "Delete",
+            "deleteConfirm": "Delete this conversation? Messages will be permanently removed.",
+            "deleted": "Conversation deleted"
         },
         "overdue": {
             "title": "Missing reports",
