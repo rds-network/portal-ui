@@ -233,6 +233,10 @@
             "eventWhen": "Дата",
             "eventTime": "Время",
             "eventWhere": "Где / ссылка",
+            "eventWhereHint": "Точка: EKO-237. Маршрут: «маршрут 165». Или вставьте ссылку с карты ekomapa.rs (не путайте с кодом волонтёра EVO-).",
+            "eventWhereResolved": "Откроется на карте: {code}",
+            "openMap": "Открыть на экомапе →",
+            "openEkomapa": "Открыть экомапу",
             "eventDescription": "Описание",
             "eventType": {
                 "CALL": "Созвон",

@@ -2,7 +2,7 @@ import { Badge, Button, Flex, Modal, Select, Text, Textarea, TextInput, Title } 
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { IconPlus } from "@tabler/icons-react"
+import { IconExternalLink, IconPlus } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useMemo, useState } from "react"
@@ -19,6 +19,7 @@ import { fetchProjectFeed } from "src/shared/api/ProjectFeedApi"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
+import { ekomapaLocationLabel, isEkomapaMapUrl, normalizeEventLocation } from "src/shared/ekomapa/eventLocation"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -339,25 +340,48 @@ export const DesktopPage: React.FC = () => {
                                 <FormattedMessage id="pages.desktop.eventsEmpty" />
                             </Text>
                         )}
-                        {events.map((event) => (
-                            <div key={event.id} className={classes.row}>
-                                <div className={classes.rowBody}>
-                                    <Text fw={600} lineClamp={1}>
-                                        {event.title}
-                                    </Text>
-                                    <Text className={classes.rowMeta} lineClamp={1}>
-                                        {dayjs(event.startsAt).format("DD MMM YYYY · HH:mm")}
-                                        {event.location ? ` · ${event.location}` : ""}
-                                    </Text>
+                        {events.map((event) => {
+                            const mapLabel = ekomapaLocationLabel(event.location)
+                            const locationIsLink =
+                                !!event.location &&
+                                (/^https?:\/\//i.test(event.location) || isEkomapaMapUrl(event.location))
+                            return (
+                                <div key={event.id} className={classes.row}>
+                                    <div className={classes.rowBody}>
+                                        <Text fw={600} lineClamp={1}>
+                                            {event.title}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                            {dayjs(event.startsAt).format("DD MMM YYYY · HH:mm")}
+                                            {event.location
+                                                ? ` · ${mapLabel || event.location}`
+                                                : ""}
+                                        </Text>
+                                        {locationIsLink && (
+                                            <a
+                                                className={classes.cardLink}
+                                                href={
+                                                    event.location!.startsWith("http")
+                                                        ? event.location!
+                                                        : `https://${event.location}`
+                                                }
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <FormattedMessage id="pages.desktop.openMap" />
+                                            </a>
+                                        )}
+                                    </div>
+                                    <Badge color={EVENT_COLOR[event.type] || "gray"} variant="light" radius="md">
+                                        <FormattedMessage
+                                            id={`pages.desktop.eventType.${event.type}`}
+                                            defaultMessage={event.type}
+                                        />
+                                    </Badge>
                                 </div>
-                                <Badge color={EVENT_COLOR[event.type] || "gray"} variant="light" radius="md">
-                                    <FormattedMessage
-                                        id={`pages.desktop.eventType.${event.type}`}
-                                        defaultMessage={event.type}
-                                    />
-                                </Badge>
-                            </div>
-                        ))}
+                            )
+                        })}
                     </div>
                 </section>
 
@@ -446,8 +470,38 @@ export const DesktopPage: React.FC = () => {
                     />
                     <TextInput
                         label={<FormattedMessage id="pages.desktop.eventWhere" />}
+                        description={<FormattedMessage id="pages.desktop.eventWhereHint" />}
+                        placeholder="EKO-237  или  https://ekomapa.rs/map?trash_point=237"
+                        rightSection={
+                            <a
+                                href="https://ekomapa.rs/map"
+                                target="_blank"
+                                rel="noreferrer"
+                                title={intl.formatMessage({ id: "pages.desktop.openEkomapa" })}
+                                style={{ display: "flex", color: "var(--portal-accent)" }}
+                            >
+                                <IconExternalLink size={16} />
+                            </a>
+                        }
                         {...eventForm.getInputProps("location")}
+                        onBlur={(e) => {
+                            eventForm.getInputProps("location").onBlur?.(e)
+                            const next = normalizeEventLocation(e.currentTarget.value)
+                            if (next !== e.currentTarget.value) {
+                                eventForm.setFieldValue("location", next)
+                            }
+                        }}
                     />
+                    {isEkomapaMapUrl(eventForm.values.location) && (
+                        <Text size="xs" c="dimmed">
+                            <FormattedMessage
+                                id="pages.desktop.eventWhereResolved"
+                                values={{
+                                    code: ekomapaLocationLabel(eventForm.values.location) || "",
+                                }}
+                            />
+                        </Text>
+                    )}
                     <Textarea
                         label={<FormattedMessage id="pages.desktop.eventDescription" />}
                         minRows={3}
@@ -466,7 +520,7 @@ export const DesktopPage: React.FC = () => {
                                     .minute(Number((eventForm.values.time || "12:00").split(":")[1] || 0))
                                     .second(0)
                                     .toISOString(),
-                                location: eventForm.values.location.trim() || null,
+                                location: normalizeEventLocation(eventForm.values.location) || null,
                                 type: eventForm.values.type,
                                 programCode: eventForm.values.programCode || curatorMe?.programs?.[0] || null,
                             })

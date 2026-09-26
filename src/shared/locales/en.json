@@ -233,6 +233,10 @@
             "eventWhen": "Date",
             "eventTime": "Time",
             "eventWhere": "Where / link",
+            "eventWhereHint": "Point: EKO-237. Route: “route 165”. Or paste a link from ekomapa.rs/map (not the volunteer EVO- code).",
+            "eventWhereResolved": "Opens on the map: {code}",
+            "openMap": "Open on Ekomapa →",
+            "openEkomapa": "Open Ekomapa",
             "eventDescription": "Description",
             "eventType": {
                 "CALL": "Call",

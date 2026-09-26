@@ -233,6 +233,10 @@
             "eventWhen": "Datum",
             "eventTime": "Vreme",
             "eventWhere": "Gde / link",
+            "eventWhereHint": "Tačka: EKO-237. Ruta: „маршрут 165“. Ili nalepite link sa ekomapa.rs/map (ne mešajte sa kodom volontera EVO-).",
+            "eventWhereResolved": "Otvara se na mapi: {code}",
+            "openMap": "Otvori na ekomapi →",
+            "openEkomapa": "Otvori ekomapu",
             "eventDescription": "Opis",
             "eventType": {
                 "CALL": "Poziv",
