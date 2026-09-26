@@ -1086,6 +1086,12 @@
         "file-download": "Greška pri preuzimanju datoteke"
     },
     "navbar": {
+        "sections": {
+            "work": "Rad",
+            "reporting": "Izveštavanje",
+            "admin": "Administracija",
+            "system": "Sistem"
+        },
         "reports": {
             "reporting": "Izveštavanje",
             "my-reports": "Moji izveštaji",

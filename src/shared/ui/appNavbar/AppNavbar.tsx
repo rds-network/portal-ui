@@ -11,7 +11,8 @@ import { FormattedMessage } from "react-intl"
 import { hasPermission } from "src/shared/user/roles"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { useQuery } from "@tanstack/react-query"
-import { LinksGroup } from "./links/NavbarLinksGroup"
+import { NavItem } from "./links/NavbarLinksGroup"
+import linkClasses from "./links/NavbarLinksGroup.module.scss"
 import { useLocation } from "react-router"
 
 export interface ItemProps {
@@ -42,7 +43,6 @@ export const AppNavbar = React.memo(function AppNavbar() {
     const { menuOpened, setMenuOpened } = useContext(NavbarContext)
     const location = useLocation()
 
-    // Reset the mobile drawer after navigation or switching between mobile and desktop.
     useEffect(() => {
         setMenuOpened(false)
     }, [location.pathname, isDesktop, setMenuOpened])
@@ -52,10 +52,24 @@ export const AppNavbar = React.memo(function AppNavbar() {
         queryFn: () => ProgramCuratorApiService.me(),
         enabled: !!user,
     })
-    const items = useMemo(() => {
-        return Content.filter(
-            (item) => hasPermission(user, item.roles) || (item.showIfCurator && curatorMe?.curator)
-        ).map((item) => <LinksGroup {...item} key={item.label} />)
+
+    const sections = useMemo(() => {
+        return Content.map((section) => {
+            const items = section.items.filter(
+                (item) => hasPermission(user, item.roles) || (item.showIfCurator && curatorMe?.curator)
+            )
+            if (items.length === 0) return null
+            return (
+                <div className={linkClasses.section} key={section.label}>
+                    <p className={linkClasses.sectionTitle}>
+                        <FormattedMessage id={section.label} />
+                    </p>
+                    {items.map((item) => (
+                        <NavItem {...item} key={item.label} />
+                    ))}
+                </div>
+            )
+        })
     }, [user, curatorMe?.curator])
 
     const navigation = (
@@ -64,8 +78,8 @@ export const AppNavbar = React.memo(function AppNavbar() {
                 <UserButton />
             </div>
 
-            <ScrollArea className={classes.links}>
-                <div className={classes.linksInner}>{items}</div>
+            <ScrollArea className={classes.links} type="hover" offsetScrollbars={false}>
+                <div className={classes.linksInner}>{sections}</div>
             </ScrollArea>
 
             <Group className={classes.footer} justify="space-between">

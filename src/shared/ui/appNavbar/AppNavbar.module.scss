@@ -14,7 +14,7 @@
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    padding: 16px;
+    padding: 14px 12px;
 }
 .navbar,
 .mobileContent {
@@ -26,7 +26,7 @@
 }
 .header {
     display: flex;
-    padding: 4px 0 18px;
+    padding: 4px 4px 14px;
     border-bottom: 1px solid #ffffff16;
     min-width: 0;
 }
@@ -35,11 +35,11 @@
     min-height: 0;
 }
 .linksInner {
-    padding: 12px 0;
+    padding: 10px 0 8px;
     overflow-x: hidden;
 }
 .footer {
-    padding: 16px 6px 4px;
+    padding: 12px 0 2px;
     border-top: 1px solid #ffffff16;
 }
 .mobileContent {

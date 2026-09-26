@@ -1086,6 +1086,12 @@
         "file-download": "Error downloading file"
     },
     "navbar": {
+        "sections": {
+            "work": "Work",
+            "reporting": "Reporting",
+            "admin": "Administration",
+            "system": "System"
+        },
         "reports": {
             "reporting": "Reporting",
             "my-reports": "My reports",

@@ -1086,6 +1086,12 @@
         "file-download": "Ошибка загрузки файла"
     },
     "navbar": {
+        "sections": {
+            "work": "Работа",
+            "reporting": "Отчётность",
+            "admin": "Администрирование",
+            "system": "Система"
+        },
         "reports": {
             "reporting": "Отчетность",
             "my-reports": "Мои отчеты",
