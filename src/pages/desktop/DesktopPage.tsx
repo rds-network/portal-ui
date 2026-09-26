@@ -26,6 +26,7 @@ import { SuccessNotification } from "src/shared/notifications/SuccessNotificatio
 import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import { DesktopEventsPanel } from "./DesktopEventsPanel"
 import classes from "./DesktopPage.module.scss"
 
 const STATUS_COLOR: Record<string, string> = {
@@ -34,14 +35,6 @@ const STATUS_COLOR: Record<string, string> = {
     REVIEW: "yellow",
     REDO: "orange",
     DONE: "green",
-}
-
-const EVENT_COLOR: Record<string, string> = {
-    CALL: "blue",
-    SUBBOTNIK: "teal",
-    MEETING: "violet",
-    LECTURE: "cyan",
-    OTHER: "gray",
 }
 
 const ACTIVE_TASK_STATUSES = new Set(["TODO", "DOING", "REVIEW", "REDO"])
@@ -109,7 +102,7 @@ export const DesktopPage: React.FC = () => {
 
     const { data: events = [] } = useQuery({
         queryKey: ["portal-events", "upcoming"],
-        queryFn: () => PortalEventApiService.list(true, 6),
+        queryFn: () => PortalEventApiService.list(true, 60),
     })
 
     const { data: projectFeed = [] } = useQuery({
@@ -318,72 +311,11 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <section className={classes.card}>
-                    <div className={classes.cardHeader}>
-                        <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.events" />
-                        </Title>
-                        {canManageEvents && (
-                            <Button
-                                size="compact-sm"
-                                variant="light"
-                                leftSection={<IconPlus size={14} />}
-                                onClick={() => setEventOpen(true)}
-                            >
-                                <FormattedMessage id="pages.desktop.addEvent" />
-                            </Button>
-                        )}
-                    </div>
-                    <div className={classes.list}>
-                        {events.length === 0 && (
-                            <Text className={classes.empty}>
-                                <FormattedMessage id="pages.desktop.eventsEmpty" />
-                            </Text>
-                        )}
-                        {events.map((event) => {
-                            const mapLabel = ekomapaLocationLabel(event.location)
-                            const locationIsLink =
-                                !!event.location &&
-                                (/^https?:\/\//i.test(event.location) || isEkomapaMapUrl(event.location))
-                            return (
-                                <div key={event.id} className={classes.row}>
-                                    <div className={classes.rowBody}>
-                                        <Text fw={600} lineClamp={1}>
-                                            {event.title}
-                                        </Text>
-                                        <Text className={classes.rowMeta} lineClamp={1}>
-                                            {dayjs(event.startsAt).format("DD MMM YYYY · HH:mm")}
-                                            {event.location
-                                                ? ` · ${mapLabel || event.location}`
-                                                : ""}
-                                        </Text>
-                                        {locationIsLink && (
-                                            <a
-                                                className={classes.cardLink}
-                                                href={
-                                                    event.location!.startsWith("http")
-                                                        ? event.location!
-                                                        : `https://${event.location}`
-                                                }
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <FormattedMessage id="pages.desktop.openMap" />
-                                            </a>
-                                        )}
-                                    </div>
-                                    <Badge color={EVENT_COLOR[event.type] || "gray"} variant="light" radius="md">
-                                        <FormattedMessage
-                                            id={`pages.desktop.eventType.${event.type}`}
-                                            defaultMessage={event.type}
-                                        />
-                                    </Badge>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </section>
+                <DesktopEventsPanel
+                    events={events}
+                    canManage={canManageEvents}
+                    onAdd={() => setEventOpen(true)}
+                />
 
                 <section className={`${classes.card} ${classes.full}`}>
                     <div className={classes.cardHeader}>

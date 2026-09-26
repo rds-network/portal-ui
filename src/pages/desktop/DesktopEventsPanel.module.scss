@@ -1,0 +1,166 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.glass;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    grid-column: 1 / -1;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.calendarCard {
+    border: 1px solid var(--portal-border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--portal-solid);
+}
+
+.calendarHead {
+    padding: 12px 14px;
+    background: linear-gradient(135deg, #0f3d3a 0%, #1f6b5c 55%, #2f9a6a 100%);
+}
+
+.calendarSub {
+    color: color-mix(in srgb, white 82%, transparent);
+    margin-top: 2px;
+}
+
+.calendarBody {
+    padding: 12px 12px 14px;
+}
+
+.monthNav {
+    appearance: none;
+    border: 1px solid var(--portal-border);
+    background: var(--portal-surface);
+    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--portal-ink);
+
+    &:hover {
+        border-color: var(--portal-accent);
+    }
+}
+
+.monthLabel {
+    text-transform: capitalize;
+    font-size: 14px;
+}
+
+.picker {
+    width: 100%;
+
+    :global(.mantine-DatePicker-month) {
+        width: 100%;
+    }
+
+    :global(.mantine-DatePicker-monthCell),
+    :global(.mantine-DatePicker-day) {
+        width: 100%;
+    }
+}
+
+.dayCell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 30px;
+}
+
+.dayDot {
+    position: absolute;
+    bottom: 2px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #1f6b5c;
+}
+
+.dayWithEvent {
+    font-weight: 700;
+}
+
+.listPane {
+    min-width: 0;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.eventCard {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--portal-border);
+    border-radius: 14px;
+    background: var(--portal-solid);
+}
+
+.eventWhen {
+    text-align: center;
+    padding-top: 2px;
+}
+
+.eventBody {
+    min-width: 0;
+}
+
+.mapLink {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 13px;
+    color: var(--portal-accent);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.empty {
+    color: var(--portal-muted);
+    font-size: 14px;
+    padding: 8px 0;
+}
+
+@media (max-width: 60em) {
+    .root {
+        grid-column: auto;
+    }
+
+    .layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
