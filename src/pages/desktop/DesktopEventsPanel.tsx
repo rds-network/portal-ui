@@ -26,7 +26,7 @@ type Props = {
 export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, onEdit }) => {
     const intl = useIntl()
     const [month, setMonth] = useState<Date>(dayjs().startOf("month").toDate())
-    const [selectedDay, setSelectedDay] = useState<Date | null>(dayjs().startOf("day").toDate())
+    const [selectedDay, setSelectedDay] = useState<Date | null>(null)
 
     const daysWithEvents = useMemo(() => {
         const set = new Set<string>()
@@ -36,6 +36,14 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
         return set
     }, [events])
 
+    const upcoming = useMemo(
+        () =>
+            events
+                .filter((event) => dayjs(event.startsAt).isAfter(dayjs().subtract(2, "hour")))
+                .sort((a, b) => dayjs(a.startsAt).valueOf() - dayjs(b.startsAt).valueOf()),
+        [events]
+    )
+
     const eventsOnDay = useMemo(() => {
         if (!selectedDay) return []
         const key = dayjs(selectedDay).format("YYYY-MM-DD")
@@ -44,16 +52,16 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
             .sort((a, b) => dayjs(a.startsAt).valueOf() - dayjs(b.startsAt).valueOf())
     }, [events, selectedDay])
 
-    const upcomingFallback = useMemo(
-        () =>
-            events
-                .filter((event) => dayjs(event.startsAt).isAfter(dayjs().subtract(2, "hour")))
-                .slice(0, 5),
-        [events]
-    )
-
-    const list = selectedDay ? eventsOnDay : upcomingFallback
+    const list = selectedDay ? eventsOnDay : upcoming
     const showingSelectedDay = !!selectedDay
+
+    const selectDay = (value: Date | null) => {
+        if (value && selectedDay && dayjs(value).isSame(selectedDay, "day")) {
+            setSelectedDay(null)
+            return
+        }
+        setSelectedDay(value)
+    }
 
     return (
         <section className={classes.root}>
@@ -76,7 +84,7 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
             <div className={classes.layout}>
                 <aside className={classes.calendarCard}>
                     <div className={classes.calendarHead}>
-                        <Text fw={700} c="white">
+                        <Text fw={700} c="white" size="sm">
                             <FormattedMessage id="pages.desktop.eventsCalendarHead" />
                         </Text>
                         <Text size="xs" className={classes.calendarSub}>
@@ -84,14 +92,14 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                         </Text>
                     </div>
                     <div className={classes.calendarBody}>
-                        <Flex justify="space-between" align="center" mb="sm" gap={6}>
+                        <Flex justify="space-between" align="center" mb={6} gap={4}>
                             <button
                                 type="button"
                                 className={classes.monthNav}
                                 onClick={() => setMonth(dayjs(month).subtract(1, "month").toDate())}
                                 aria-label={intl.formatMessage({ id: "pages.desktop.eventsPrevMonth" })}
                             >
-                                <IconChevronLeft size={16} />
+                                <IconChevronLeft size={14} />
                             </button>
                             <Text fw={700} ta="center" className={classes.monthLabel}>
                                 {dayjs(month).format("MMMM YYYY")}
@@ -102,17 +110,17 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                 onClick={() => setMonth(dayjs(month).add(1, "month").toDate())}
                                 aria-label={intl.formatMessage({ id: "pages.desktop.eventsNextMonth" })}
                             >
-                                <IconChevronRight size={16} />
+                                <IconChevronRight size={14} />
                             </button>
                         </Flex>
                         <DatePicker
                             defaultDate={month}
                             key={dayjs(month).format("YYYY-MM")}
                             value={selectedDay}
-                            onChange={(value) => setSelectedDay(value)}
+                            onChange={selectDay}
                             firstDayOfWeek={1}
                             hideOutsideDates
-                            size="sm"
+                            size="xs"
                             className={classes.picker}
                             getDayProps={(date) => {
                                 const key = dayjs(date).format("YYYY-MM-DD")
@@ -133,7 +141,7 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                 )
                             }}
                         />
-                        <Text size="xs" c="dimmed" mt="sm">
+                        <Text size="xs" c="dimmed" mt={6}>
                             <FormattedMessage id="pages.desktop.eventsCalendarHint" />
                         </Text>
                     </div>
@@ -144,30 +152,34 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                         {showingSelectedDay ? (
                             <FormattedMessage
                                 id="pages.desktop.eventsOnDay"
-                                values={{ date: dayjs(selectedDay).format("DD MMMM YYYY") }}
+                                values={{ date: dayjs(selectedDay).format("D MMMM YYYY") }}
                             />
                         ) : (
                             <FormattedMessage id="pages.desktop.eventsUpcoming" />
                         )}
                     </Text>
 
-                    {list.length === 0 ? (
-                        <Text className={classes.empty}>
-                            {showingSelectedDay ? (
-                                <FormattedMessage id="pages.desktop.eventsNoDay" />
-                            ) : (
-                                <FormattedMessage id="pages.desktop.eventsEmpty" />
-                            )}
-                        </Text>
-                    ) : (
-                        <div className={classes.list}>
-                            {list.map((event) => {
+                    <div className={classes.listScroll}>
+                        {list.length === 0 ? (
+                            <Text className={classes.empty}>
+                                {showingSelectedDay ? (
+                                    <FormattedMessage id="pages.desktop.eventsNoDay" />
+                                ) : (
+                                    <FormattedMessage id="pages.desktop.eventsEmpty" />
+                                )}
+                            </Text>
+                        ) : (
+                            list.map((event) => {
                                 const mapLabel = ekomapaLocationLabel(event.location)
                                 const locationIsLink =
                                     !!event.location &&
                                     (/^https?:\/\//i.test(event.location) || isEkomapaMapUrl(event.location))
+                                const isNew = dayjs().diff(dayjs(event.createTime), "hour") < 48
                                 return (
-                                    <article key={event.id} className={classes.eventCard}>
+                                    <article
+                                        key={event.id}
+                                        className={`${classes.eventCard} ${isNew ? classes.eventNew : ""}`}
+                                    >
                                         <div className={classes.eventWhen}>
                                             <Text fw={700}>{dayjs(event.startsAt).format("D MMM")}</Text>
                                             <Text size="sm" c="dimmed">
@@ -202,7 +214,7 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                                     </ActionIcon>
                                                 )}
                                             </div>
-                                            <Text fw={650} mt={6}>
+                                            <Text fw={650} mt={6} lineClamp={2}>
                                                 {event.title}
                                             </Text>
                                             {event.description && (
@@ -232,9 +244,9 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                         </div>
                                     </article>
                                 )
-                            })}
-                        </div>
-                    )}
+                            })
+                        )}
+                    </div>
                 </div>
             </div>
         </section>

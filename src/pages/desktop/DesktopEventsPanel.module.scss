@@ -2,12 +2,13 @@
 
 .root {
     @include s.glass;
-    padding: 20px 22px;
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
     min-width: 0;
-    grid-column: 1 / -1;
+    height: 420px;
+    overflow: hidden;
 }
 
 .header {
@@ -15,6 +16,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .title {
@@ -26,43 +28,48 @@
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
-    gap: 18px;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 12px;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
 }
 
 .calendarCard {
     border: 1px solid var(--portal-border);
-    border-radius: 16px;
-    overflow: hidden;
+    border-radius: 14px;
+    overflow: auto;
     background: var(--portal-solid);
+    min-height: 0;
 }
 
 .calendarHead {
-    padding: 12px 14px;
+    padding: 10px 12px;
     background: linear-gradient(135deg, #0f3d3a 0%, #1f6b5c 55%, #2f9a6a 100%);
 }
 
 .calendarSub {
     color: color-mix(in srgb, white 82%, transparent);
     margin-top: 2px;
+    line-height: 1.35;
 }
 
 .calendarBody {
-    padding: 12px 12px 14px;
+    padding: 8px 8px 10px;
 }
 
 .monthNav {
     appearance: none;
     border: 1px solid var(--portal-border);
     background: var(--portal-surface);
-    border-radius: 10px;
-    width: 32px;
-    height: 32px;
+    border-radius: 8px;
+    width: 28px;
+    height: 28px;
     display: grid;
     place-items: center;
     cursor: pointer;
     color: var(--portal-ink);
+    flex-shrink: 0;
 
     &:hover {
         border-color: var(--portal-accent);
@@ -71,7 +78,7 @@
 
 .monthLabel {
     text-transform: capitalize;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .picker {
@@ -85,6 +92,10 @@
     :global(.mantine-DatePicker-day) {
         width: 100%;
     }
+
+    :global(.mantine-DatePicker-levelsGroup) {
+        justify-content: center;
+    }
 }
 
 .dayCell {
@@ -92,14 +103,15 @@
     display: grid;
     place-items: center;
     width: 100%;
-    min-height: 30px;
+    min-height: 26px;
+    font-size: 12px;
 }
 
 .dayDot {
     position: absolute;
-    bottom: 2px;
-    width: 5px;
-    height: 5px;
+    bottom: 1px;
+    width: 4px;
+    height: 4px;
     border-radius: 50%;
     background: #1f6b5c;
 }
@@ -110,22 +122,54 @@
 
 .listPane {
     min-width: 0;
-}
-
-.list {
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+}
+
+.listScroll {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-gutter: stable;
 }
 
 .eventCard {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
-    gap: 12px;
-    padding: 12px 14px;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 12px;
     border: 1px solid var(--portal-border);
-    border-radius: 14px;
+    border-radius: 12px;
     background: var(--portal-solid);
+    flex-shrink: 0;
+}
+
+.eventNew {
+    animation: eventNewPulse 2.4s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+        border-color: color-mix(in srgb, var(--portal-accent) 55%, var(--portal-border));
+    }
+}
+
+@keyframes eventNewPulse {
+    0%,
+    100% {
+        border-color: color-mix(in srgb, var(--portal-accent) 35%, var(--portal-border));
+        background: var(--portal-solid);
+        box-shadow: none;
+    }
+    50% {
+        border-color: color-mix(in srgb, var(--portal-accent) 70%, transparent);
+        background: color-mix(in srgb, var(--portal-accent) 8%, var(--portal-solid));
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--portal-accent) 18%, transparent);
+    }
 }
 
 .eventWhen {
@@ -164,10 +208,15 @@
 
 @media (max-width: 60em) {
     .root {
-        grid-column: auto;
+        height: auto;
+        max-height: 520px;
     }
 
     .layout {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .calendarCard {
+        max-height: 280px;
     }
 }

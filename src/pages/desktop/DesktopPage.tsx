@@ -351,7 +351,14 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <section className={classes.card}>
+                <DesktopEventsPanel
+                    events={events}
+                    canManage={canManageEvents}
+                    onAdd={openCreateEvent}
+                    onEdit={openEditEvent}
+                />
+
+                <section className={`${classes.card} ${classes.messagesCard}`}>
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
                             <FormattedMessage id="pages.desktop.messages" />
@@ -360,7 +367,7 @@ export const DesktopPage: React.FC = () => {
                             <FormattedMessage id="pages.desktop.allMessages" />
                         </Link>
                     </div>
-                    <div className={classes.list}>
+                    <div className={classes.listScroll}>
                         {recentMessages.length === 0 && (
                             <Text className={classes.empty}>
                                 <FormattedMessage id="pages.messages.empty" />
@@ -390,13 +397,6 @@ export const DesktopPage: React.FC = () => {
                         ))}
                     </div>
                 </section>
-
-                <DesktopEventsPanel
-                    events={events}
-                    canManage={canManageEvents}
-                    onAdd={openCreateEvent}
-                    onEdit={openEditEvent}
-                />
 
                 <section className={`${classes.card} ${classes.full}`}>
                     <div className={classes.cardHeader}>
