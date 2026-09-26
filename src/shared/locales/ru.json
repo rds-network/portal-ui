@@ -355,7 +355,12 @@
             "loading": "Загружаем хронику…",
             "time": "Время",
             "who": "Кто",
-            "what": "Что сделал"
+            "what": "Что сделал",
+            "onlineLabel": "Сейчас на сайте",
+            "onlineTitle": "Сейчас на сайте: {count}",
+            "onlineBreakdown": "Залогинены: {loggedIn} · гости: {guests}",
+            "onlineEmpty": "За последние 10 минут активности нет",
+            "onlineYou": "(вы)"
         },
         "mup": {
             "title": "Письмо в МУП Сербии",

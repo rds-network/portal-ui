@@ -355,7 +355,12 @@
             "loading": "Loading chronicle…",
             "time": "Time",
             "who": "Who",
-            "what": "What they did"
+            "what": "What they did",
+            "onlineLabel": "Now on site",
+            "onlineTitle": "Now on site: {count}",
+            "onlineBreakdown": "Signed in: {loggedIn} · guests: {guests}",
+            "onlineEmpty": "No activity in the last 10 minutes",
+            "onlineYou": "(you)"
         },
         "mup": {
             "title": "Letter to Serbian MUP",

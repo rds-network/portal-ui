@@ -1,4 +1,4 @@
-import { Anchor, Button, Card, Flex, Loader, Table, Text, TextInput, Title } from "@mantine/core"
+import { Anchor, Button, Card, Flex, Loader, ScrollArea, Table, Text, TextInput, Title } from "@mantine/core"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
@@ -11,6 +11,11 @@ import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./ActivityPage.module.scss"
 
 const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_SSO]
+
+const pathLabel = (path: string, query?: string | null) => {
+    if (!query) return path
+    return `${path}?${query}`
+}
 
 export const ActivityPage: React.FC = () => {
     const { user } = useContext(UserContext)
@@ -34,6 +39,24 @@ export const ActivityPage: React.FC = () => {
         queryFn: () => ActivityApiService.list({ q, sort, dir, page, size: 50 }),
     })
 
+    const { data: online } = useQuery({
+        queryKey: ["activity-online"],
+        queryFn: () => ActivityApiService.online(10),
+        refetchInterval: 30_000,
+    })
+
+    const { data: apiVersion } = useQuery({
+        queryKey: ["meta-api-version"],
+        queryFn: () => ActivityApiService.apiVersion(),
+        staleTime: 60_000,
+    })
+
+    const { data: uiVersion } = useQuery({
+        queryKey: ["meta-ui-version"],
+        queryFn: () => ActivityApiService.uiVersion(),
+        staleTime: 60_000,
+    })
+
     const toggle = (field: string) => {
         if (sort === field) setDir((prev) => (prev === "asc" ? "desc" : "asc"))
         else {
@@ -44,6 +67,7 @@ export const ActivityPage: React.FC = () => {
     }
 
     const rows = data?.content ?? []
+    const people = online?.people ?? []
 
     return (
         <Flex className={classes.root} direction="column" gap="lg">
@@ -51,10 +75,72 @@ export const ActivityPage: React.FC = () => {
                 <Title order={2}>
                     <FormattedMessage id="pages.activity.title" />
                 </Title>
+                <div className={classes.versions}>
+                    <div className={classes.versionPill}>
+                        UI #{uiVersion?.build ?? "…"} · {uiVersion?.sha ?? "…"}
+                    </div>
+                    <div className={classes.versionPill}>
+                        API #{apiVersion?.build ?? "…"} · {apiVersion?.sha ?? "…"}
+                    </div>
+                </div>
                 <Text c="dimmed" mt={6}>
                     <FormattedMessage id="pages.activity.description" />
                 </Text>
             </div>
+
+            <Card withBorder p="lg" radius="lg" className={classes.onlineCard}>
+                <Text size="xs" tt="uppercase" fw={600} c="dimmed" mb={4}>
+                    <FormattedMessage id="pages.activity.onlineLabel" />
+                </Text>
+                <Title order={4} mb={4}>
+                    <FormattedMessage id="pages.activity.onlineTitle" values={{ count: online?.total ?? 0 }} />
+                </Title>
+                <Text size="sm" c="dimmed" mb="sm">
+                    <FormattedMessage
+                        id="pages.activity.onlineBreakdown"
+                        values={{ loggedIn: online?.loggedIn ?? 0, guests: online?.guests ?? 0 }}
+                    />
+                </Text>
+                <ScrollArea h={180} type="auto" offsetScrollbars>
+                    {people.length === 0 ? (
+                        <Text size="sm" c="dimmed">
+                            <FormattedMessage id="pages.activity.onlineEmpty" />
+                        </Text>
+                    ) : (
+                        <Flex direction="column" gap={10}>
+                            {people.map((person, index) => (
+                                <div key={`${person.username || person.ip || "g"}-${index}`} className={classes.onlineRow}>
+                                    <Text size="sm" fw={600}>
+                                        {person.username ? (
+                                            <Anchor component={Link} to={`/profile/${person.username}`}>
+                                                {person.displayName}
+                                            </Anchor>
+                                        ) : (
+                                            person.displayName
+                                        )}
+                                        {person.self ? (
+                                            <Text span c="dimmed" fw={500}>
+                                                {" "}
+                                                <FormattedMessage id="pages.activity.onlineYou" />
+                                            </Text>
+                                        ) : null}
+                                        <Text span fw={500}>
+                                            {" "}
+                                            — {pathLabel(person.path, person.query)}
+                                        </Text>
+                                    </Text>
+                                    {person.ip ? (
+                                        <Text size="xs" c="dimmed">
+                                            {person.ip}
+                                        </Text>
+                                    ) : null}
+                                </div>
+                            ))}
+                        </Flex>
+                    )}
+                </ScrollArea>
+            </Card>
+
             <Card withBorder p="lg" radius="lg">
                 <Flex gap="sm" mb="md" wrap="wrap">
                     <TextInput

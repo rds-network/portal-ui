@@ -355,7 +355,12 @@
             "loading": "Učitava se hronika…",
             "time": "Vreme",
             "who": "Ko",
-            "what": "Šta je uradio"
+            "what": "Šta je uradio",
+            "onlineLabel": "Sada na sajtu",
+            "onlineTitle": "Sada na sajtu: {count}",
+            "onlineBreakdown": "Prijavljeni: {loggedIn} · gosti: {guests}",
+            "onlineEmpty": "Nema aktivnosti u poslednjih 10 minuta",
+            "onlineYou": "(vi)"
         },
         "mup": {
             "title": "Pismo MUP-u Srbije",

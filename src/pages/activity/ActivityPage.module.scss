@@ -4,3 +4,37 @@
     @include s.page;
     max-width: 1200px;
 }
+
+.versions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+    max-width: 280px;
+}
+
+.versionPill {
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--portal-border);
+    background: var(--portal-surface);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--portal-ink);
+    box-shadow: var(--portal-shadow);
+}
+
+.onlineCard {
+    @include s.glass;
+}
+
+.onlineRow {
+    padding-bottom: 8px;
+    border-bottom: 1px solid color-mix(in srgb, var(--portal-border) 70%, transparent);
+
+    &:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
