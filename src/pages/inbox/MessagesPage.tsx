@@ -156,15 +156,16 @@ export const MessagesPage: React.FC = () => {
                                                 <FormattedMessage id="pages.messages.new" />
                                             </Badge>
                                         )}
-                                        {item.hasReply ? (
-                                            <Badge size="xs" color="teal" variant="light">
-                                                <FormattedMessage id="pages.messages.replied" />
-                                            </Badge>
-                                        ) : (
-                                            <Badge size="xs" color="orange" variant="light">
-                                                <FormattedMessage id="pages.messages.awaitingReply" />
-                                            </Badge>
-                                        )}
+                                        {typeof item.hasReply === "boolean" &&
+                                            (item.hasReply ? (
+                                                <Badge size="xs" color="teal" variant="light">
+                                                    <FormattedMessage id="pages.messages.replied" />
+                                                </Badge>
+                                            ) : (
+                                                <Badge size="xs" color="orange" variant="light">
+                                                    <FormattedMessage id="pages.messages.awaitingReply" />
+                                                </Badge>
+                                            ))}
                                         {!item.receivedAt && (
                                             <Badge size="xs" color="red" variant="light">
                                                 <FormattedMessage id="pages.messages.notReceived" />
