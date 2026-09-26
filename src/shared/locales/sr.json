@@ -1040,6 +1040,36 @@
             "moderatorsHint": "Uloga ADMIN_VOLUNTEER: dužnici, slanja, svi izveštaji i po potrebi prihvatanje bilo kog izveštaja. Da bi dobili tvoj red «Na prijemu», imenuj moderatora za delegata prijema.",
             "moderatorsEmpty": "Još nema aktivnih moderatora"
         },
+        "leave": {
+            "title": "Odmor",
+            "description": "Zatražite odmor: odobreni dani ne ulaze u normu sati i ne povećavaju kašnjenje izveštaja.",
+            "requestTitle": "Novi zahtev",
+            "startDate": "Od",
+            "endDate": "Do",
+            "reason": "Razlog (opciono)",
+            "submit": "Pošalji",
+            "created": "Zahtev za odmor je poslat",
+            "requiredDates": "Unesite datume",
+            "endBeforeStart": "Datum završetka ne može biti pre početka",
+            "overtimeHint": "Banka prekovremenog rada za godinu: +{hours} h (informativno, ne blokira zahtev)",
+            "mineTitle": "Moji zahtevi",
+            "mineEmpty": "Još nema zahteva",
+            "pendingTitle": "Na odobrenju",
+            "pendingEmpty": "Nema zahteva na čekanju",
+            "accept": "Odobri",
+            "reject": "Odbij",
+            "rejectConfirm": "Potvrdi odbijanje",
+            "rejectReason": "Razlog odbijanja",
+            "cancel": "Otkaži",
+            "accepted": "Odmor je odobren",
+            "rejected": "Odmor je odbijen",
+            "status": {
+                "PENDING": "Na čekanju",
+                "ACCEPTED": "Odobren",
+                "REJECTED": "Odbijen",
+                "CANCELLED": "Otkazan"
+            }
+        },
         "resources": {
             "title": "Naši resursi",
             "description": "Linkovi ka sajtovima, kancelarijama, bankama fajlova i kursevima. Kustosi mogu da dodaju i uklone kartice.",
@@ -1220,7 +1250,8 @@
         "account-settings": "Podešavanja naloga",
         "activity": "Hronika",
         "resources": "Naši resursi",
-        "support": "Kontaktirajte podršku"
+        "support": "Kontaktirajte podršku",
+        "leave": "Odmor"
     },
     "error-boundary": {
         "title": "Nešto je pošlo po zlu",

@@ -1040,6 +1040,36 @@
             "moderatorsHint": "ADMIN_VOLUNTEER role: overdue lists, mailings, all reports, and accepting any report if needed. To get your «Pending acceptance» queue, appoint the moderator as an acceptance delegate.",
             "moderatorsEmpty": "No active moderators yet"
         },
+        "leave": {
+            "title": "Leave",
+            "description": "Request leave: accepted days do not count toward hour norms and do not increase report overdue streaks.",
+            "requestTitle": "New request",
+            "startDate": "From",
+            "endDate": "To",
+            "reason": "Reason (optional)",
+            "submit": "Submit",
+            "created": "Leave request submitted",
+            "requiredDates": "Enter dates",
+            "endBeforeStart": "End date cannot be before start date",
+            "overtimeHint": "Year overtime bank: +{hours} h (informational, does not block the request)",
+            "mineTitle": "My requests",
+            "mineEmpty": "No requests yet",
+            "pendingTitle": "Pending approval",
+            "pendingEmpty": "No pending requests",
+            "accept": "Accept",
+            "reject": "Reject",
+            "rejectConfirm": "Confirm rejection",
+            "rejectReason": "Rejection reason",
+            "cancel": "Cancel",
+            "accepted": "Leave accepted",
+            "rejected": "Leave rejected",
+            "status": {
+                "PENDING": "Pending",
+                "ACCEPTED": "Accepted",
+                "REJECTED": "Rejected",
+                "CANCELLED": "Cancelled"
+            }
+        },
         "resources": {
             "title": "Our resources",
             "description": "Links to sites, offices, file banks and courses. Curators can add and remove cards.",
@@ -1220,7 +1250,8 @@
         "account-settings": "Account settings",
         "activity": "Chronicle",
         "resources": "Our resources",
-        "support": "Contact support"
+        "support": "Contact support",
+        "leave": "Leave"
     },
     "error-boundary": {
         "title": "Something went wrong",
