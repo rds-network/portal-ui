@@ -77,6 +77,12 @@ export const LeavePage: React.FC = () => {
         enabled: canDecide,
     })
 
+    const { data: history = [], isLoading: historyLoading } = useQuery({
+        queryKey: ["leave-requests", "history"],
+        queryFn: () => LeaveRequestApiService.history(),
+        enabled: canDecide,
+    })
+
     const { data: heatmapByYear } = useQuery({
         queryKey: ["currentUserHeatmap", "leave-surplus"],
         queryFn: () => ReportHeatMapApiService.getCurrentUserHeatMap().then((response) => response.data),
@@ -151,10 +157,10 @@ export const LeavePage: React.FC = () => {
         },
     })
 
-    const renderItem = (item: LeaveRequestDto, decide = false) => (
+    const renderItem = (item: LeaveRequestDto, decide = false, withOwner = decide) => (
         <div className={classes.row} key={item.id}>
             <div className={classes.meta}>
-                {decide && (
+                {withOwner && (
                     <Text fw={600} size="sm">
                         {item.fullName || item.username}
                         {item.programCode ? ` · ${item.programCode}` : ""}
@@ -169,6 +175,17 @@ export const LeavePage: React.FC = () => {
                 <Text size="xs" className={classes.hint}>
                     {dayjs(item.createdAt).format("DD.MM.YYYY HH:mm")}
                 </Text>
+                {item.decidedAt && (
+                    <Text size="xs" className={classes.hint}>
+                        <FormattedMessage
+                            id="pages.leave.decidedBy"
+                            values={{
+                                date: dayjs(item.decidedAt).format("DD.MM.YYYY"),
+                                name: item.decidedBy || "",
+                            }}
+                        />
+                    </Text>
+                )}
             </div>
             <div className={classes.actions}>
                 <Badge color={STATUS_COLOR[item.status] || "gray"} variant="light">
@@ -275,6 +292,26 @@ export const LeavePage: React.FC = () => {
                         </Text>
                     ) : (
                         pending.map((item) => renderItem(item, true))
+                    )}
+                </div>
+            )}
+
+            {canDecide && (
+                <div className={classes.section}>
+                    <Title order={4}>
+                        <FormattedMessage id="pages.leave.historyTitle" />
+                    </Title>
+                    <Text size="sm" className={classes.hint}>
+                        <FormattedMessage id="pages.leave.historyDescription" />
+                    </Text>
+                    {historyLoading ? (
+                        <Loader size="sm" />
+                    ) : history.length === 0 ? (
+                        <Text size="sm" className={classes.hint}>
+                            <FormattedMessage id="pages.leave.historyEmpty" />
+                        </Text>
+                    ) : (
+                        history.map((item) => renderItem(item, false, true))
                     )}
                 </div>
             )}

@@ -561,7 +561,8 @@
             "delete": "Izbrišite izveštaj",
             "delete-submit": "Dodirnite ponovo da biste uklonili",
             "auto-report": "Izveštaj je automatski kreiran na osnovu podataka iz eksternog sistema",
-            "control-visa-required": "Potrebna je viza kontrole: {name}. Samo ta osoba može da prihvati ili odbije izveštaj."
+            "control-visa-required": "Potrebna je viza kontrole: {name}. Samo ta osoba može da prihvati ili odbije izveštaj.",
+            "assignment-saved": "Program izveštaja je ažuriran"
         },
         "edit-report": {
             "title": "Napravite novi izveštaj",
@@ -589,6 +590,8 @@
             "blocked-reason": "Razlog: {reason}",
             "control-title": "Pod kontrolom ste osobe {name}",
             "control-description": "Naručilac u svim zadacima biće {name} — samo on može da prihvati izveštaj.",
+            "assignment-title": "Program i projekat izveštaja",
+            "program-will-sync": "Pri čuvanju program izveštaja biće osvežen iz vašeg profila.",
             "required": "Obavezno",
             "min-letters": "Najmanje {count} znakova",
             "invalid-url": "Nevalidni format URL",
@@ -1108,6 +1111,10 @@
             "mineEmpty": "Još nema zahteva",
             "pendingTitle": "Na odobrenju",
             "pendingEmpty": "Nema zahteva na čekanju",
+            "historyTitle": "Istorija odmora",
+            "historyDescription": "Odobreni i odbijeni zahtevi — vidi se ko i kada odmara.",
+            "historyEmpty": "Još nema rešenih zahteva",
+            "decidedBy": "Odluka {date} · {name}",
             "accept": "Odobri",
             "reject": "Odbij",
             "rejectConfirm": "Potvrdi odbijanje",

@@ -17,6 +17,8 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useLocation, useNavigate, useParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
+import { ProgramSelectInline } from "src/pages/profile/select/ProgramSelect"
+import { ProjectSelectInline } from "src/pages/profile/select/ProjectSelect"
 import classes from "src/pages/reportEdit/EditReport.module.scss"
 import { defaultTask } from "src/pages/reportEdit/lib/defaults"
 import { TaskCard, TaskCardInterface } from "src/pages/reportEdit/task/TaskCard"
@@ -24,6 +26,7 @@ import { ReportApiService } from "src/shared/api/ReportApiService"
 import { reportBlockOf, reportControllerNameOf, reportControlOf } from "src/shared/api/user/UserApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { setDocumentTitleByLocale, setDocumentTitleByString } from "src/shared/hooks/useDocumentTitle"
+import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { useReportDraft } from "src/shared/hooks/useReportDraft"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 import { ReportStatus } from "src/shared/report/status"
@@ -51,6 +54,8 @@ export const EditReport = () => {
     const [isSending, setIsSending] = useState(false)
 
     const [confirmModalOpened, setConfirmModalOpened] = useState(false)
+    const [programCode, setProgramCode] = useState<string | null>(null)
+    const [projectCode, setProjectCode] = useState<string | null>(null)
 
     const { data: report, isFetching: isFetchingReport } = useQuery({
         queryKey: ["getReport", id],
@@ -102,6 +107,8 @@ export const EditReport = () => {
     useEffect(() => {
         if (editMode) {
             setTasks(report.tasks)
+            setProgramCode(report.program ?? null)
+            setProjectCode(report.project ?? null)
         }
     }, [report, editMode])
 
@@ -137,6 +144,14 @@ export const EditReport = () => {
             ),
         [myAssignments, currentUser?.username, tasks]
     )
+
+    const { visibleProjects } = useProgramProjectFilter(programCode, projectCode)
+
+    // Снимок программы в отчёте задаёт тот, кто его модерирует, автору же бэкенд подставит программу из профиля.
+    const canAssign = hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER])
+    const profileProgram = currentUser?.program?.code ?? null
+    const programWillSync =
+        editMode && !canAssign && currentUser?.username === report.user && (report.program ?? null) !== profileProgram
 
     const addAssignment = (title: string) => {
         setTasks((current) => {
@@ -215,7 +230,9 @@ export const EditReport = () => {
 
     const sendReport = () => {
         setIsSending(true)
-        const reportDto = editMode ? { tasks: tasks, id: report.id } : { tasks: tasks, id: uuid() }
+        const reportDto = editMode
+            ? { tasks: tasks, id: report.id, program: programCode ?? undefined, project: projectCode ?? undefined }
+            : { tasks: tasks, id: uuid() }
         const response = editMode ? ReportApiService.updateReport(reportDto) : ReportApiService.createReport(reportDto)
         response
             .then((r) => {
@@ -336,6 +353,34 @@ export const EditReport = () => {
                     <Text className={classes.description}>
                         <FormattedMessage id={locales.description} />
                     </Text>
+                    {editMode && canAssign && (
+                        <Flex direction="column" rowGap={4} mt="md">
+                            <Text size="sm" fw={500}>
+                                <FormattedMessage id={locales.assignmentTitle} />
+                            </Text>
+                            <ProgramSelectInline
+                                value={programCode}
+                                canEdit
+                                locale={intl.locale}
+                                onChange={(code) => {
+                                    setProgramCode(code)
+                                    setProjectCode(null)
+                                }}
+                            />
+                            <ProjectSelectInline
+                                value={projectCode}
+                                canEdit
+                                locale={intl.locale}
+                                onChange={setProjectCode}
+                                projectsOverride={visibleProjects}
+                            />
+                        </Flex>
+                    )}
+                    {programWillSync && (
+                        <Text size="xs" c="dimmed" mt="md">
+                            <FormattedMessage id={locales.programWillSync} />
+                        </Text>
+                    )}
                     <div className={classes.draftHint}>
                         <IconCircleCheck size={18} />
                         <Text size="xs">

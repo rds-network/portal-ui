@@ -26,4 +26,5 @@ export const locales = {
     deleteSubmit: "pages.report.delete-submit",
     autoReport: "pages.report.auto-report",
     controlVisaRequired: "pages.report.control-visa-required",
+    assignmentSaved: "pages.report.assignment-saved",
 }

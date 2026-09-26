@@ -13,7 +13,7 @@ import {
     IconWand,
     IconX,
 } from "@tabler/icons-react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import { useContext, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -21,14 +21,18 @@ import { useNavigate, useParams } from "react-router"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { useProjects } from "src/app/providers/ProjectsProvider"
 import { UserContext } from "src/app/providers/UserContext"
+import { ProgramSelectInline } from "src/pages/profile/select/ProgramSelect"
+import { ProjectSelectInline } from "src/pages/profile/select/ProjectSelect"
 import { locales } from "src/pages/report/lib/locales"
 import { ReportNote } from "src/pages/report/note/ReportNote"
 import { TaskCard } from "src/pages/report/task/TaskCard"
-import { ReportApiService } from "src/shared/api/ReportApiService"
+import { ReportApiService, updateReportAssignment } from "src/shared/api/ReportApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { reportControllerNameOf, reportControlOf, resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
+import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
+import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getReportStatusColor, ReportStatus } from "src/shared/report/status"
 import { getSpentTimeFromTasks } from "src/shared/report/timeSpent"
 import { EmailDrawer } from "src/shared/ui/emailModal/EmailDrawer"
@@ -44,8 +48,10 @@ export const ReportPage = () => {
     const { id } = useParams()
     const intl = useIntl()
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const { user: currentUser } = useContext(UserContext)
     const [logins, setLogins] = useState<string[]>([])
+    const [assignmentSaving, setAssignmentSaving] = useState(false)
 
     const programs = usePrograms()
     const projects = useProjects()
@@ -81,6 +87,7 @@ export const ReportPage = () => {
 
     const program = useMemo(() => programs.find((p) => p.code === report.program), [programs, report.program])
     const project = useMemo(() => projects.find((p) => p.code === report.project), [projects, report.project])
+    const { visibleProjects } = useProgramProjectFilter(report.program ?? null, report.project ?? null)
 
     const isCustomer = (report.tasks ?? []).some((task) => task.customer === currentUser?.username)
     const { data: delegates = [] } = useQuery({
@@ -121,6 +128,24 @@ export const ReportPage = () => {
         })
     }
 
+    // Программа в отчёте — снимок на момент сдачи, поэтому её правят прямо здесь: статус отчёта не меняется.
+    const onAssignmentChange = (programCode: string | null, projectCode: string | null) => {
+        setAssignmentSaving(true)
+        updateReportAssignment(report.id, { programCode, projectCode })
+            .then(() => {
+                queryClient.invalidateQueries({ queryKey: ["getReport", id] })
+                notifications.show(
+                    SuccessNotification(
+                        <Text size="sm">
+                            <FormattedMessage id={locales.assignmentSaved} />
+                        </Text>,
+                        null
+                    )
+                )
+            })
+            .finally(() => setAssignmentSaving(false))
+    }
+
     const isAcceptanceDelegate = delegates.some(
         (row) =>
             row.delegateUsername === currentUser?.username &&
@@ -144,6 +169,9 @@ export const ReportPage = () => {
         : hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
           isCustomer ||
           isAcceptanceDelegate
+    const canEditAssignment =
+        hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
+        canAcceptReport
 
     return (
         <Flex className={classes.root}>
@@ -230,13 +258,36 @@ export const ReportPage = () => {
                 <TextPropertyBox
                     name={locales.program}
                     value={
-                        program ? getLocalizedName(program, intl.locale) : <FormattedMessage id={locales.noProgram} />
+                        canEditAssignment ? (
+                            <ProgramSelectInline
+                                value={report.program ?? null}
+                                canEdit={!assignmentSaving}
+                                locale={intl.locale}
+                                onChange={(programCode) => onAssignmentChange(programCode, null)}
+                            />
+                        ) : program ? (
+                            getLocalizedName(program, intl.locale)
+                        ) : (
+                            <FormattedMessage id={locales.noProgram} />
+                        )
                     }
                 />
                 <TextPropertyBox
                     name={locales.project}
                     value={
-                        project ? getLocalizedName(project, intl.locale) : <FormattedMessage id={locales.noProject} />
+                        canEditAssignment ? (
+                            <ProjectSelectInline
+                                value={report.project ?? null}
+                                canEdit={!assignmentSaving}
+                                locale={intl.locale}
+                                onChange={(projectCode) => onAssignmentChange(report.program ?? null, projectCode)}
+                                projectsOverride={visibleProjects}
+                            />
+                        ) : project ? (
+                            getLocalizedName(project, intl.locale)
+                        ) : (
+                            <FormattedMessage id={locales.noProject} />
+                        )
                     }
                 />
                 {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && report.moderator && (

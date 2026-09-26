@@ -561,7 +561,8 @@
             "delete": "Delete report",
             "delete-submit": "Press again to delete",
             "auto-report": "Report created automatically based on data from an external system",
-            "control-visa-required": "Control approval required: {name}. Only this person can accept or reject the report."
+            "control-visa-required": "Control approval required: {name}. Only this person can accept or reject the report.",
+            "assignment-saved": "Report program updated"
         },
         "edit-report": {
             "title": "Create new report",
@@ -589,6 +590,8 @@
             "blocked-reason": "Reason: {reason}",
             "control-title": "You are under control of {name}",
             "control-description": "{name} will be the customer on every task — only they can accept the report.",
+            "assignment-title": "Report program and project",
+            "program-will-sync": "On save the report program will be refreshed from your profile.",
             "required": "Required",
             "min-letters": "Minimum {count} letters",
             "invalid-url": "Invalid URL format",
@@ -1108,6 +1111,10 @@
             "mineEmpty": "No requests yet",
             "pendingTitle": "Pending approval",
             "pendingEmpty": "No pending requests",
+            "historyTitle": "Leave history",
+            "historyDescription": "Accepted and rejected requests — who is away and when.",
+            "historyEmpty": "No decided requests yet",
+            "decidedBy": "Decided {date} · {name}",
             "accept": "Accept",
             "reject": "Reject",
             "rejectConfirm": "Confirm rejection",

@@ -15,4 +15,6 @@ export const locales = {
     blockedReason: "pages.edit-report.blocked-reason",
     controlTitle: "pages.edit-report.control-title",
     controlDescription: "pages.edit-report.control-description",
+    assignmentTitle: "pages.edit-report.assignment-title",
+    programWillSync: "pages.edit-report.program-will-sync",
 }
