@@ -1,6 +1,6 @@
-import { Badge, Button, Flex, Text, Title } from "@mantine/core"
+import { ActionIcon, Badge, Button, Flex, Text, Title } from "@mantine/core"
 import { DatePicker } from "@mantine/dates"
-import { IconChevronLeft, IconChevronRight, IconPlus } from "@tabler/icons-react"
+import { IconChevronLeft, IconChevronRight, IconPencil, IconPlus } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import React, { useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -20,9 +20,10 @@ type Props = {
     events: PortalEventDto[]
     canManage: boolean
     onAdd: () => void
+    onEdit: (event: PortalEventDto) => void
 }
 
-export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd }) => {
+export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, onEdit }) => {
     const intl = useIntl()
     const [month, setMonth] = useState<Date>(dayjs().startOf("month").toDate())
     const [selectedDay, setSelectedDay] = useState<Date | null>(dayjs().startOf("day").toDate())
@@ -174,17 +175,33 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd }
                                             </Text>
                                         </div>
                                         <div className={classes.eventBody}>
-                                            <Badge
-                                                color={EVENT_COLOR[event.type] || "gray"}
-                                                variant="light"
-                                                radius="md"
-                                                size="sm"
-                                            >
-                                                <FormattedMessage
-                                                    id={`pages.desktop.eventType.${event.type}`}
-                                                    defaultMessage={event.type}
-                                                />
-                                            </Badge>
+                                            <div className={classes.eventTop}>
+                                                <Badge
+                                                    color={EVENT_COLOR[event.type] || "gray"}
+                                                    variant="light"
+                                                    radius="md"
+                                                    size="sm"
+                                                >
+                                                    <FormattedMessage
+                                                        id={`pages.desktop.eventType.${event.type}`}
+                                                        defaultMessage={event.type}
+                                                    />
+                                                </Badge>
+                                                {canManage && (
+                                                    <ActionIcon
+                                                        variant="subtle"
+                                                        color="gray"
+                                                        size="sm"
+                                                        radius="md"
+                                                        aria-label={intl.formatMessage({
+                                                            id: "pages.desktop.editEvent",
+                                                        })}
+                                                        onClick={() => onEdit(event)}
+                                                    >
+                                                        <IconPencil size={14} />
+                                                    </ActionIcon>
+                                                )}
+                                            </div>
                                             <Text fw={650} mt={6}>
                                                 {event.title}
                                             </Text>

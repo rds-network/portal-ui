@@ -2,7 +2,7 @@ import { Badge, Button, Flex, Modal, Select, Text, Textarea, TextInput, Title } 
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { IconExternalLink, IconPlus } from "@tabler/icons-react"
+import { IconExternalLink } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useMemo, useState } from "react"
@@ -13,7 +13,12 @@ import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUse
 import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/reportsPersonal/lib/constants"
 import { defaultUser } from "src/pages/reports/lib/defaults"
 import { InboxApiService } from "src/shared/api/InboxApiService"
-import { PortalEventApiService, PortalEventType } from "src/shared/api/PortalEventApiService"
+import {
+    PortalEventApiService,
+    PortalEventDto,
+    PortalEventType,
+    PortalEventWriteRequest,
+} from "src/shared/api/PortalEventApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { fetchProjectFeed } from "src/shared/api/ProjectFeedApi"
 import { ReportApiService } from "src/shared/api/ReportApiService"
@@ -48,6 +53,7 @@ export const DesktopPage: React.FC = () => {
     const queryClient = useQueryClient()
     const { programs, projects } = useProgramProjectFilter(null, null)
     const [eventOpen, setEventOpen] = useState(false)
+    const [editingEventId, setEditingEventId] = useState<string | null>(null)
 
     const { data: curatorMe } = useQuery({
         queryKey: ["program-curators", "me"],
@@ -128,6 +134,58 @@ export const DesktopPage: React.FC = () => {
         },
     })
 
+    const closeEventModal = () => {
+        setEventOpen(false)
+        setEditingEventId(null)
+        eventForm.reset()
+    }
+
+    const openCreateEvent = () => {
+        setEditingEventId(null)
+        eventForm.setValues({
+            title: "",
+            description: "",
+            startsAt: null,
+            time: "12:00",
+            location: "",
+            type: "MEETING",
+            programCode: curatorMe?.programs?.[0] || "",
+        })
+        setEventOpen(true)
+    }
+
+    const openEditEvent = (event: PortalEventDto) => {
+        const start = dayjs(event.startsAt)
+        setEditingEventId(event.id)
+        eventForm.setValues({
+            title: event.title,
+            description: event.description || "",
+            startsAt: start.toDate(),
+            time: start.format("HH:mm"),
+            location: event.location || "",
+            type: event.type,
+            programCode: event.programCode || curatorMe?.programs?.[0] || "",
+        })
+        setEventOpen(true)
+    }
+
+    const buildEventPayload = (): PortalEventWriteRequest | null => {
+        const result = eventForm.validate()
+        if (result.hasErrors || !eventForm.values.startsAt) return null
+        return {
+            title: eventForm.values.title.trim(),
+            description: eventForm.values.description.trim() || null,
+            startsAt: dayjs(eventForm.values.startsAt)
+                .hour(Number((eventForm.values.time || "12:00").split(":")[0] || 12))
+                .minute(Number((eventForm.values.time || "12:00").split(":")[1] || 0))
+                .second(0)
+                .toISOString(),
+            location: normalizeEventLocation(eventForm.values.location) || null,
+            type: eventForm.values.type,
+            programCode: eventForm.values.programCode || curatorMe?.programs?.[0] || null,
+        }
+    }
+
     const { mutate: createEvent, isPending: creatingEvent } = useMutation({
         mutationFn: PortalEventApiService.create,
         onSuccess: () => {
@@ -139,8 +197,24 @@ export const DesktopPage: React.FC = () => {
                     null
                 )
             )
-            eventForm.reset()
-            setEventOpen(false)
+            closeEventModal()
+            queryClient.invalidateQueries({ queryKey: ["portal-events"] })
+        },
+    })
+
+    const { mutate: updateEvent, isPending: updatingEvent } = useMutation({
+        mutationFn: ({ id, payload }: { id: string; payload: PortalEventWriteRequest }) =>
+            PortalEventApiService.update(id, payload),
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.desktop.eventUpdated" />
+                    </Text>,
+                    null
+                )
+            )
+            closeEventModal()
             queryClient.invalidateQueries({ queryKey: ["portal-events"] })
         },
     })
@@ -314,7 +388,8 @@ export const DesktopPage: React.FC = () => {
                 <DesktopEventsPanel
                     events={events}
                     canManage={canManageEvents}
-                    onAdd={() => setEventOpen(true)}
+                    onAdd={openCreateEvent}
+                    onEdit={openEditEvent}
                 />
 
                 <section className={`${classes.card} ${classes.full}`}>
@@ -361,8 +436,12 @@ export const DesktopPage: React.FC = () => {
 
             <Modal
                 opened={eventOpen}
-                onClose={() => setEventOpen(false)}
-                title={<FormattedMessage id="pages.desktop.addEvent" />}
+                onClose={closeEventModal}
+                title={
+                    <FormattedMessage
+                        id={editingEventId ? "pages.desktop.editEvent" : "pages.desktop.addEvent"}
+                    />
+                }
             >
                 <Flex direction="column" gap="sm">
                     <TextInput
@@ -440,22 +519,15 @@ export const DesktopPage: React.FC = () => {
                         {...eventForm.getInputProps("description")}
                     />
                     <Button
-                        loading={creatingEvent}
+                        loading={creatingEvent || updatingEvent}
                         onClick={() => {
-                            const result = eventForm.validate()
-                            if (result.hasErrors || !eventForm.values.startsAt) return
-                            createEvent({
-                                title: eventForm.values.title.trim(),
-                                description: eventForm.values.description.trim() || null,
-                                startsAt: dayjs(eventForm.values.startsAt)
-                                    .hour(Number((eventForm.values.time || "12:00").split(":")[0] || 12))
-                                    .minute(Number((eventForm.values.time || "12:00").split(":")[1] || 0))
-                                    .second(0)
-                                    .toISOString(),
-                                location: normalizeEventLocation(eventForm.values.location) || null,
-                                type: eventForm.values.type,
-                                programCode: eventForm.values.programCode || curatorMe?.programs?.[0] || null,
-                            })
+                            const payload = buildEventPayload()
+                            if (!payload) return
+                            if (editingEventId) {
+                                updateEvent({ id: editingEventId, payload })
+                            } else {
+                                createEvent(payload)
+                            }
                         }}
                     >
                         <FormattedMessage id="pages.desktop.saveEvent" />
