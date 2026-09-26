@@ -1,8 +1,9 @@
 import { Select } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
 import { useQuery } from "@tanstack/react-query"
-import React, { ReactNode, useEffect, useMemo } from "react"
+import React, { ReactNode, useContext, useEffect, useMemo } from "react"
 import { useIntl } from "react-intl"
+import { UserContext } from "src/app/providers/UserContext"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 
@@ -16,19 +17,26 @@ type Props = {
 
 export const CuratorSelect: React.FC<Props> = ({ label, description, form, path, initialUsername }) => {
     const intl = useIntl()
+    const { user: currentUser } = useContext(UserContext)
     const { data: rows = [] } = useQuery({
         queryKey: ["program-curators", "approvers"],
         queryFn: () => ProgramCuratorApiService.approvers(),
     })
 
     const options = useMemo(() => {
+        const self = currentUser?.username?.toLowerCase()
         const byUser = new Map<
             string,
             { username: string; fullName: string; labels: string[] }
         >()
         rows.forEach((row) => {
+            if (self && row.username.toLowerCase() === self) return
             const program = getLocalizedName(
-                { nameRu: row.programNameRu, nameEn: row.programNameEn, nameSr: row.programNameSr },
+                {
+                    nameRu: row.programNameRu ?? undefined,
+                    nameEn: row.programNameEn ?? undefined,
+                    nameSr: row.programNameSr ?? undefined,
+                },
                 intl.locale
             )
             const roleLabel =
@@ -37,13 +45,15 @@ export const CuratorSelect: React.FC<Props> = ({ label, description, form, path,
                           { id: "pages.edit-report.task-customer-delegate-of" },
                           { name: row.curatorFullName || row.curatorUsername }
                       )
-                    : intl.formatMessage({ id: "pages.edit-report.task-customer-curator-role" })
+                    : row.role === "ADMIN"
+                      ? intl.formatMessage({ id: "pages.edit-report.task-customer-admin-role" })
+                      : intl.formatMessage({ id: "pages.edit-report.task-customer-curator-role" })
             const current = byUser.get(row.username) ?? {
                 username: row.username,
                 fullName: row.fullName,
                 labels: [],
             }
-            current.labels.push(`${program} (${roleLabel})`)
+            current.labels.push(program ? `${program} (${roleLabel})` : roleLabel)
             byUser.set(row.username, current)
         })
         return [...byUser.values()]
@@ -52,7 +62,7 @@ export const CuratorSelect: React.FC<Props> = ({ label, description, form, path,
                 value: item.username,
                 label: `${item.fullName} — ${[...new Set(item.labels)].join(", ")}`,
             }))
-    }, [rows, intl])
+    }, [rows, intl, currentUser?.username])
 
     useEffect(() => {
         if (form && path && initialUsername && !form.getValues()[path]) {

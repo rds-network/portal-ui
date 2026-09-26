@@ -125,6 +125,8 @@ export const OverdueReportsPage: React.FC = () => {
             setPreviewOpen(false)
             queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
             queryClient.invalidateQueries({ queryKey: ["report-overdue-notices"] })
+            queryClient.invalidateQueries({ queryKey: ["overdue-counts"] })
+            queryClient.invalidateQueries({ queryKey: ["overdue-warnings"] })
             queryClient.invalidateQueries({ queryKey: ["inbox"] })
             queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
         },

@@ -210,6 +210,17 @@ export const EditReport = () => {
             )
             return
         }
+        const selfLogin = currentUser?.username?.toLowerCase()
+        if (selfLogin && tasks.some((task) => task.customer?.toLowerCase() === selfLogin)) {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id={locales.customerCannotBeSelf} />
+                    </Text>
+                )
+            )
+            return
+        }
         if (!allTasksInOneWeek(tasks)) {
             notifications.show(
                 ErrorNotification(

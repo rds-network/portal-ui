@@ -34,11 +34,11 @@ export type ProgramCuratorDelegateWriteRequest = {
 export type ReportApproverDto = {
     username: string
     fullName: string
-    programCode: string
-    programNameRu: string
-    programNameEn: string
-    programNameSr: string
-    role: "CURATOR" | "DELEGATE" | string
+    programCode?: string | null
+    programNameRu?: string | null
+    programNameEn?: string | null
+    programNameSr?: string | null
+    role: "CURATOR" | "DELEGATE" | "ADMIN" | string
     curatorUsername?: string | null
     curatorFullName?: string | null
 }
