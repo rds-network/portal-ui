@@ -27,6 +27,7 @@ export const locales = {
     menuView: "pages.user-list.menu-view",
     menuContact: "pages.user-list.menu-contact",
     menuReports: "pages.user-list.menu-reports",
+    menuHeatmap: "pages.user-list.menu-heatmap",
     menuActivate: "pages.user-list.menu-activate",
     menuDeactivate: "pages.user-list.menu-deactivate",
     menuReportBlock: "pages.user-list.menu-report-block",

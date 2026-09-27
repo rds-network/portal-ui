@@ -8,6 +8,7 @@ import {
     IconHandStop,
     IconLock,
     IconLockOpen2,
+    IconMap,
     IconMessageCircle,
     IconPlayerPlay,
     IconShieldCheck,
@@ -134,6 +135,7 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
             )
             queryClient.invalidateQueries({ queryKey: ["searchUsers"] })
             queryClient.invalidateQueries({ queryKey: ["getInfo"] })
+            queryClient.invalidateQueries({ queryKey: ["controlled-by-me"] })
             onChanged?.(updated)
         },
     })
@@ -144,7 +146,7 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
             onOpen={() => setMenuOpened(true)}
             onClose={() => setMenuOpened(false)}
             shadow="md"
-            width={200}
+            width={220}
             closeOnItemClick={false}
         >
             <EmailDrawer
@@ -235,6 +237,14 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                     onClick={() => navigate(`/reports?login=${userDto.username}`)}
                 >
                     <FormattedMessage id={locales.menuReports} />
+                </Menu.Item>
+                <Menu.Item
+                    leftSection={<IconMap size={14} />}
+                    onClick={() =>
+                        navigate(`/volunteers/heatmap?search=${encodeURIComponent(userDto.username)}`)
+                    }
+                >
+                    <FormattedMessage id={locales.menuHeatmap} />
                 </Menu.Item>
                 <Menu.Divider />
 

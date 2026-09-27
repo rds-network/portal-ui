@@ -11,6 +11,7 @@ import { ApplicationBadgeApi } from "src/shared/api/applications/ApplicationBadg
 import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { UserAccountApiService } from "src/shared/api/user/UserApiService"
 
 export function NavItem({
     icon: Icon,
@@ -18,6 +19,7 @@ export function NavItem({
     link,
     showUnread,
     showApplications,
+    showControlled,
     curatorInbox,
 }: ItemGroupProps) {
     const location = useLocation()
@@ -48,6 +50,13 @@ export function NavItem({
         enabled: !!curatorInbox,
         refetchInterval: 60_000,
     })
+    const { data: controlled = [] } = useQuery({
+        queryKey: ["controlled-by-me"],
+        queryFn: () => UserAccountApiService.controlledByMe(),
+        enabled: !!showControlled,
+        refetchInterval: 60_000,
+    })
+    const controlledCount = controlled.length
 
     if (curatorInbox) {
         const ok =
@@ -73,6 +82,11 @@ export function NavItem({
         (curatorInbox && pendingReports > 0 && (
             <Badge size="xs" color="blue" className={classes.badge}>
                 {pendingReports > 99 ? "99+" : pendingReports}
+            </Badge>
+        )) ||
+        (showControlled && controlledCount > 0 && (
+            <Badge size="xs" color="teal" className={classes.badge}>
+                {controlledCount > 99 ? "99+" : controlledCount}
             </Badge>
         )) ||
         null

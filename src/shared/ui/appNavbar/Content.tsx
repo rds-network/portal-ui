@@ -19,6 +19,7 @@ import {
     IconAlertTriangle,
     IconBook,
     IconBeach,
+    IconShieldCheck,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -103,6 +104,14 @@ export const Content: NavSection[] = [
                 link: "/volunteers/heatmap",
                 roles: ["ADMIN_VOLUNTEER"],
                 showIfCurator: true,
+            },
+            {
+                label: "navbar.volunteers.controlled",
+                icon: IconShieldCheck,
+                link: "/volunteers/controlled",
+                roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
+                showIfCurator: true,
+                showControlled: true,
             },
             {
                 label: "navbar.reports.overdue",

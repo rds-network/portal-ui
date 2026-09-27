@@ -41,6 +41,18 @@ const unwrap = <T>(response: { status: number; data: T }): T => {
     return response.data
 }
 
+/**
+ * Дополнительные программы и «на контроле» — поверх сгенерированного клиента.
+ */
+export type SecondaryProgramsInfo = {
+    secondaryProgramCodes?: string[] | null
+}
+
+export const secondaryProgramCodesOf = (user: unknown): string[] => {
+    const codes = (user as SecondaryProgramsInfo | null)?.secondaryProgramCodes
+    return Array.isArray(codes) ? codes.filter((code): code is string => !!code) : []
+}
+
 export const UserAccountApiService = {
     async clearProgram(id: number): Promise<UserInfoDto> {
         return unwrap(await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/program`, { validateStatus: alive }))
@@ -79,6 +91,26 @@ export const UserAccountApiService = {
     async clearReportController(id: number): Promise<UserInfoDto> {
         return unwrap(
             await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/report-controller`, { validateStatus: alive })
+        )
+    },
+
+    async getSecondaryPrograms(id: number): Promise<string[]> {
+        return unwrap(
+            await RequestHttp.get<string[]>(`/user/account/${id}/secondary-programs`, { validateStatus: alive })
+        )
+    },
+
+    async setSecondaryPrograms(id: number, programCodes: string[]): Promise<string[]> {
+        return unwrap(
+            await RequestHttp.put<string[]>(`/user/account/${id}/secondary-programs`, programCodes, {
+                validateStatus: alive,
+            })
+        )
+    },
+
+    async controlledByMe(): Promise<UserInfoDto[]> {
+        return unwrap(
+            await RequestHttp.get<UserInfoDto[]>(`/user/account/controlled-by-me`, { validateStatus: alive })
         )
     },
 }

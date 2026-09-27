@@ -1,4 +1,4 @@
-import { Badge, Button, Container, Drawer, Flex, Select, Text, TextInput, Tooltip } from "@mantine/core"
+import { Anchor, Badge, Button, Container, Drawer, Flex, MultiSelect, Select, Text, TextInput, Tooltip } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
@@ -14,13 +14,15 @@ import {
     IconInfoCircle,
     IconMail,
     IconMapPin,
+    IconMap,
     IconPencil,
     IconPhone,
 } from "@tabler/icons-react"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { Link } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
@@ -32,6 +34,7 @@ import { CitiesApiService } from "src/shared/api/CitiesApiService"
 import {
     reportBlockOf,
     reportControllerNameOf,
+    secondaryProgramCodesOf,
     UserAccountApiService,
     UserApiService,
 } from "src/shared/api/user/UserApiService"
@@ -59,6 +62,7 @@ interface ProfileInfoProps {
 
 export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: ProfileInfoProps) => {
     const { user: currentUser, setUser } = useContext(UserContext)
+    const queryClient = useQueryClient()
     const [opened, { open, close }] = useDisclosure(false)
     const [mupOpened, { open: openMup, close: closeMup }] = useDisclosure(false)
     const intl = useIntl()
@@ -250,6 +254,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 setUser(data)
             }
             onUserInfoUpdate?.(data)
+            queryClient.invalidateQueries({ queryKey: ["controlled-by-me"] })
             notifications.show(
                 SuccessNotification(
                     <Text size="sm">
@@ -260,6 +265,43 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
             )
         },
         onError: () => {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.updateError" />
+                    </Text>
+                )
+            )
+        },
+    })
+
+    const secondaryFromUser = secondaryProgramCodesOf(userInfo)
+    const [selectedSecondary, setSelectedSecondary] = useState<string[]>(secondaryFromUser)
+
+    useEffect(() => {
+        setSelectedSecondary(secondaryFromUser)
+    }, [secondaryFromUser.join("|")])
+
+    const { mutateAsync: updateSecondaryPrograms, isPending: isUpdatingSecondary } = useMutation({
+        mutationFn: (codes: string[]) => UserAccountApiService.setSecondaryPrograms(userInfo!.id, codes),
+        onSuccess: async (codes) => {
+            setSelectedSecondary(codes)
+            const refreshed = await UserApiService.getInfo(userInfo!.username).then((r) => r.data)
+            if (userInfo?.username === currentUser?.username) {
+                setUser(refreshed)
+            }
+            onUserInfoUpdate?.(refreshed)
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.profileUpdated" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+        onError: () => {
+            setSelectedSecondary(secondaryFromUser)
             notifications.show(
                 ErrorNotification(
                     <Text size="sm">
@@ -329,6 +371,17 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
 
     const { programs, visiblePrograms, visibleProjects } = useProgramProjectFilter(selectedProgram, selectedProject)
 
+    const secondaryOptions = useMemo(
+        () =>
+            programs
+                .filter((program) => !programValue || program.code.toUpperCase() !== programValue.toUpperCase())
+                .map((program) => ({
+                    value: program.code,
+                    label: getLocalizedName(program, locale),
+                })),
+        [programs, programValue, locale]
+    )
+
     const reportBlock = reportBlockOf(userInfo)
     const reportBlockedByName = reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || ""
     const reportControllerName = reportControllerNameOf(userInfo)
@@ -340,6 +393,14 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const hasProgram = !!programValue
 
     const canEditProgram = isAdmin || (isOwnProfile && !hasProgram)
+    const canEditSecondary = isAdmin
+    const canOpenHeatmap =
+        hasPermission(currentUser, [
+            UserGroup.ADMIN,
+            UserGroup.ADMIN_SSO,
+            UserGroup.ADMIN_VOLUNTEER,
+            UserGroup.MAIN_VOLUNTEER,
+        ]) || !!curatorRows.some((row) => row.username.toLowerCase() === (currentUser?.username || "").toLowerCase())
 
     // Пользователи могут редактировать только свой проект или админы
     const canEditProject = isOwnProfile || isAdmin
@@ -489,6 +550,9 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 </Badge>
             )}
             <IDBadge id={userInfo.id} />
+            <Text size="sm" fw={500} mt={4}>
+                <FormattedMessage id="pages.profile.primaryProgram" />
+            </Text>
             <ProgramSelectInline
                 value={selectedProgram}
                 canEdit={canEditProgram}
@@ -496,6 +560,35 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 onChange={handleProgramChange}
                 programsOverride={visiblePrograms}
             />
+            <Text size="sm" fw={500} mt="xs">
+                <FormattedMessage id="pages.profile.secondaryPrograms" />
+            </Text>
+            {canEditSecondary ? (
+                <MultiSelect
+                    data={secondaryOptions}
+                    value={selectedSecondary}
+                    onChange={(codes) => {
+                        setSelectedSecondary(codes)
+                        void updateSecondaryPrograms(codes)
+                    }}
+                    searchable
+                    clearable
+                    disabled={isUpdatingSecondary}
+                    placeholder={intl.formatMessage({ id: "pages.profile.secondaryProgramsPlaceholder" })}
+                    mt={4}
+                />
+            ) : (
+                <Text size="sm" c="dimmed" mt={4}>
+                    {selectedSecondary.length
+                        ? selectedSecondary
+                              .map((code) => {
+                                  const program = programs.find((p) => p.code === code)
+                                  return program ? getLocalizedName(program, locale) : code
+                              })
+                              .join(", ")
+                        : "—"}
+                </Text>
+            )}
             <ProjectSelectInline
                 value={selectedProject}
                 canEdit={canEditProject}
@@ -503,6 +596,18 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 onChange={handleProjectChange}
                 projectsOverride={visibleProjects}
             />
+            {canOpenHeatmap && userInfo?.username && (
+                <Anchor
+                    component={Link}
+                    to={`/volunteers/heatmap?search=${encodeURIComponent(userInfo.username)}`}
+                    size="sm"
+                    mt="xs"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, width: "fit-content" }}
+                >
+                    <IconMap size={16} />
+                    <FormattedMessage id="pages.profile.openHeatmap" />
+                </Anchor>
+            )}
             {canManageReportControl && (
                 <Flex direction="column" gap={6} mt="xs">
                     <Text size="sm" fw={500}>

@@ -334,6 +334,13 @@
             "deleteConfirm": "Delete this conversation? Messages will be permanently removed.",
             "deleted": "Conversation deleted"
         },
+        "controlled": {
+            "title": "Under my control",
+            "subtitle": "Volunteers whose reports you accept as a forced report controller.",
+            "empty": "Nobody is under your control right now",
+            "openProfile": "Profile",
+            "openHeatmap": "Heat map"
+        },
         "overdue": {
             "title": "Missing reports",
             "description": "The list is who missed the last 5 weeks. Hours on the card are the year norm, same as the heat map. Overtime or no shortfall in those 5 weeks is left out. Then +1 / +2 / +3 weeks without a report.",
@@ -433,6 +440,10 @@
             "reportControlLabel": "Report control",
             "reportControlDescription": "This person becomes the customer on every task of the volunteer and accepts their reports.",
             "reportControlClear": "Remove control",
+            "primaryProgram": "Primary program",
+            "secondaryPrograms": "Additional programs",
+            "secondaryProgramsPlaceholder": "Select programs",
+            "openHeatmap": "Heat map",
             "props": {
                 "city": "City",
                 "postalCode": "Postal code",
@@ -750,6 +761,7 @@
             "menu-view": "View",
             "menu-contact": "Contact",
             "menu-reports": "Reports",
+            "menu-heatmap": "Heat map",
             "menu-activate": "Activate",
             "menu-deactivate": "Deactivate",
             "menu-report-block": "Put reporting on hold",
@@ -1309,7 +1321,8 @@
             "applications": "Applications",
             "statistics": "Statistics",
             "mintrud-report": "Mintrud report",
-            "curators": "Curators"
+            "curators": "Curators",
+            "controlled": "Under control"
         },
         "account-settings": "Account settings",
         "activity": "Chronicle",

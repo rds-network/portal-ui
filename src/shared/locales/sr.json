@@ -334,6 +334,13 @@
             "deleteConfirm": "Obrisati ovaj razgovor? Poruke će biti trajno uklonjene.",
             "deleted": "Razgovor je obrisan"
         },
+        "controlled": {
+            "title": "Na kontroli",
+            "subtitle": "Volonteri čije izveštaje primáte kao prinudni kontrolor.",
+            "empty": "Trenutno niko nije pod vašom kontrolom",
+            "openProfile": "Profil",
+            "openHeatmap": "Toplotna karta"
+        },
         "overdue": {
             "title": "Nedostavljeni izveštaji",
             "description": "Na listi su oni koji nisu zatvorili poslednjih 5 nedelja. Sati na kartici — norma za godinu, kao na toplotnoj karti. Prekovremeni rad ili bez manjka sati u 5 nedelja ne ulaze. Zatim +1 / +2 / +3 nedelje bez izveštaja.",
@@ -433,6 +440,10 @@
             "reportControlLabel": "Kontrola predaje",
             "reportControlDescription": "Ova osoba postaje naručilac u svim zadacima volontera i prihvata njegove izveštaje.",
             "reportControlClear": "Ukini kontrolu",
+            "primaryProgram": "Osnovni program",
+            "secondaryPrograms": "Dodatni programi",
+            "secondaryProgramsPlaceholder": "Izaberite programe",
+            "openHeatmap": "Toplotna karta",
             "props": {
                 "city": "Grad",
                 "postalCode": "Poštanski broj",
@@ -750,6 +761,7 @@
             "menu-view": "Pogledajte",
             "menu-contact": "Pisati",
             "menu-reports": "Izveštaji",
+            "menu-heatmap": "Toplotna karta",
             "menu-activate": "Aktiviraj",
             "menu-deactivate": "Deaktiviraj",
             "menu-report-block": "Postavi stop na predaju",
@@ -1309,7 +1321,8 @@
             "applications": "Aplikacije",
             "statistics": "Statistika",
             "mintrud-report": "izveštaj o volontiranju",
-            "curators": "Kustosi"
+            "curators": "Kustosi",
+            "controlled": "Na kontroli"
         },
         "account-settings": "Podešavanja naloga",
         "activity": "Hronika",
