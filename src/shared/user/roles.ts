@@ -20,6 +20,13 @@ export enum UserGroup {
     ADMIN_WP = "ADMIN_WP",
 }
 
+export const ANNOUNCEMENTS_ADMIN_ROLES = [
+    UserGroup.ADMIN,
+    UserGroup.ADMIN_VOLUNTEER,
+    UserGroup.ADMIN_SSO,
+    UserGroup.MAIN_VOLUNTEER,
+]
+
 export const hasPermission = (
     user: UserInfoDto | null,
     allowed: string[] | undefined | null = [],
