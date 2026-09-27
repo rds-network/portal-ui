@@ -333,7 +333,10 @@
             "delete": "Obriši",
             "deleteConfirm": "Obrisati ovaj razgovor? Poruke će biti trajno uklonjene.",
             "deleted": "Razgovor je obrisan",
-            "kindAccountDeactivated": "Deaktivacija"
+            "kindAccountDeactivated": "Deaktivacija",
+            "kindAccountStatusRequest": "Zahtev za aktivaciju",
+            "kindAccountStatusDecision": "Odluka o aktivaciji",
+            "kindAccountStatusChanged": "Promena statusa"
         },
         "controlled": {
             "title": "Na kontroli",
@@ -1301,6 +1304,42 @@
                 "citizenship": "Statistika po državljanstvu",
                 "cities": "Top {count} naselja"
             }
+        },
+        "account-status": {
+            "title": "Aktivacije",
+            "description": "Saglasnost za aktivaciju i deaktivaciju naloga.",
+            "pendingTitle": "Na saglasnosti",
+            "pendingEmpty": "Nema zahteva na čekanju",
+            "historyTitle": "Istorija promena",
+            "historyDescription": "Sve promene statusa: saglasnosti, direktne radnje i automatika.",
+            "historyEmpty": "Još nema zapisa",
+            "activate": "Aktivacija",
+            "deactivate": "Deaktivacija",
+            "becameActive": "Postao aktivan",
+            "becameInactive": "Postao neaktivan",
+            "requestedBy": "zatražio {name}",
+            "reason": "Razlog",
+            "decidedBy": "Odluka {date} · {name}",
+            "accept": "Odobri",
+            "reject": "Odbij",
+            "rejectConfirm": "Potvrdi odbijanje",
+            "rejectReason": "Razlog odbijanja",
+            "cancel": "Otkaži",
+            "approved": "Zahtev odobren",
+            "rejected": "Zahtev odbijen",
+            "sentForApproval": "Poslato na saglasnost",
+            "reasonPrompt": "Razlog (opciono)",
+            "status": {
+                "PENDING": "Na čekanju",
+                "APPROVED": "Odobren",
+                "REJECTED": "Odbijen"
+            },
+            "source": {
+                "REQUEST": "Po zahtevu",
+                "DIRECT": "Direktno",
+                "SCHEDULER": "Planer",
+                "SYNC": "Sinhronizacija"
+            }
         }
     },
     "errors": {
@@ -1331,7 +1370,8 @@
             "messages": "Poruke",
             "overdue": "Nedostavljeni izveštaji",
             "dissolution": "Na raskid",
-            "review": "Na prijemu"
+            "review": "Na prijemu",
+            "account-status": "Aktivacije"
         },
         "admin": "Administracija",
         "volunteers": {

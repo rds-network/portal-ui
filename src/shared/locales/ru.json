@@ -333,7 +333,10 @@
             "delete": "Удалить",
             "deleteConfirm": "Удалить эту переписку? Сообщения исчезнут безвозвратно.",
             "deleted": "Переписка удалена",
-            "kindAccountDeactivated": "Деактивация"
+            "kindAccountDeactivated": "Деактивация",
+            "kindAccountStatusRequest": "Запрос активации",
+            "kindAccountStatusDecision": "Решение по активации",
+            "kindAccountStatusChanged": "Смена статуса"
         },
         "controlled": {
             "title": "На контроле",
@@ -1301,6 +1304,42 @@
                 "citizenship": "Статистика по гражданству",
                 "cities": "Топ-{count} населённых пунктов"
             }
+        },
+        "account-status": {
+            "title": "Активации",
+            "description": "Согласование активации и деактивации учётных записей.",
+            "pendingTitle": "На согласовании",
+            "pendingEmpty": "Нет ожидающих запросов",
+            "historyTitle": "История изменений",
+            "historyDescription": "Все факты смены статуса: согласования, прямые действия и автоматика.",
+            "historyEmpty": "Пока нет записей",
+            "activate": "Активация",
+            "deactivate": "Деактивация",
+            "becameActive": "Стала активной",
+            "becameInactive": "Стала неактивной",
+            "requestedBy": "запросил {name}",
+            "reason": "Причина",
+            "decidedBy": "Решение {date} · {name}",
+            "accept": "Согласовать",
+            "reject": "Отклонить",
+            "rejectConfirm": "Подтвердить отказ",
+            "rejectReason": "Причина отказа",
+            "cancel": "Отмена",
+            "approved": "Запрос согласован",
+            "rejected": "Запрос отклонён",
+            "sentForApproval": "Отправлено на согласование",
+            "reasonPrompt": "Причина (необязательно)",
+            "status": {
+                "PENDING": "Ожидает",
+                "APPROVED": "Согласован",
+                "REJECTED": "Отклонён"
+            },
+            "source": {
+                "REQUEST": "По заявке",
+                "DIRECT": "Напрямую",
+                "SCHEDULER": "Планировщик",
+                "SYNC": "Синхронизация"
+            }
         }
     },
     "errors": {
@@ -1331,7 +1370,8 @@
             "messages": "Сообщения",
             "overdue": "Несдача отчётов",
             "dissolution": "На расторжение",
-            "review": "На приёмке"
+            "review": "На приёмке",
+            "account-status": "Активации"
         },
         "admin": "Администрирование",
         "volunteers": {

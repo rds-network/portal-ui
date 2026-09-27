@@ -19,6 +19,7 @@ import { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
+import { AccountStatusApiService } from "src/shared/api/AccountStatusApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import {
     reportBlockOf,
@@ -59,22 +60,49 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
 
     useEffect(() => setUserDto(user), [user])
 
-    const { isFetching: isActivating, refetch: activate } = useQuery({
-        enabled: false,
-        queryKey: ["activate"],
-        queryFn: () =>
-            UserApiService.activateAccount(userDto.id).then(() => {
-                window.location.reload()
-            }),
+    const { data: statusMeta } = useQuery({
+        queryKey: ["account-status-meta"],
+        queryFn: () => AccountStatusApiService.meta(),
+        enabled: !!currentUser,
+        staleTime: 5 * 60 * 1000,
     })
+    const isStatusApprover = !!statusMeta?.isAccountStatusApprover
 
-    const { isFetching: isDectivating, refetch: deactivate } = useQuery({
-        enabled: false,
-        queryKey: ["deactivate"],
-        queryFn: () =>
-            UserApiService.deactivateAccount(userDto.id).then(() => {
-                window.location.reload()
-            }),
+    const { mutate: changeActiveState, isPending: isChangingActive } = useMutation({
+        mutationFn: async (requestedActive: boolean) => {
+            if (isStatusApprover) {
+                if (requestedActive) {
+                    await UserApiService.activateAccount(userDto.id)
+                } else {
+                    await UserApiService.deactivateAccount(userDto.id)
+                }
+                return { pending: false as const }
+            }
+            const reason = window.prompt(intl.formatMessage({ id: "pages.account-status.reasonPrompt" }))
+            if (reason === null) return { pending: false as const, cancelled: true as const }
+            const result = await AccountStatusApiService.request({
+                accountId: userDto.id,
+                requestedActive,
+                reason: reason.trim() || null,
+            })
+            return { pending: result.pending, cancelled: false as const }
+        },
+        onSuccess: (result) => {
+            if (result.cancelled) return
+            if (result.pending) {
+                notifications.show(
+                    SuccessNotification(
+                        <Text size="sm">
+                            <FormattedMessage id="pages.account-status.sentForApproval" />
+                        </Text>,
+                        null
+                    )
+                )
+                setMenuOpened(false)
+                return
+            }
+            window.location.reload()
+        },
     })
 
     const { data: curatorMe } = useQuery({
@@ -313,18 +341,18 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                 {userDto.active && (
                     <Menu.Item
                         color="red"
-                        leftSection={isDectivating ? <Loader size={14} /> : <IconLock size={14} />}
-                        disabled={isActivating}
-                        onClick={() => deactivate()}
+                        leftSection={isChangingActive ? <Loader size={14} /> : <IconLock size={14} />}
+                        disabled={isChangingActive}
+                        onClick={() => changeActiveState(false)}
                     >
                         <FormattedMessage id={locales.menuDeactivate} />
                     </Menu.Item>
                 )}
                 {!userDto.active && (
                     <Menu.Item
-                        leftSection={isActivating ? <Loader size={14} /> : <IconLockOpen2 size={14} />}
-                        disabled={isDectivating}
-                        onClick={() => activate()}
+                        leftSection={isChangingActive ? <Loader size={14} /> : <IconLockOpen2 size={14} />}
+                        disabled={isChangingActive}
+                        onClick={() => changeActiveState(true)}
                     >
                         <FormattedMessage id={locales.menuActivate} />
                     </Menu.Item>

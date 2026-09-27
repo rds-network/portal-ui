@@ -29,6 +29,7 @@ const CuratorsPage = lazy(() => import("src/pages/curators/CuratorsPage"))
 const CuratorReportsPage = lazy(() => import("src/pages/reportsReview/CuratorReportsPage"))
 const LeavePage = lazy(() => import("src/pages/leave/LeavePage"))
 const ControlledVolunteersPage = lazy(() => import("src/pages/controlled/ControlledVolunteersPage"))
+const AccountStatusPage = lazy(() => import("src/pages/accountStatus/AccountStatusPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -126,6 +127,10 @@ export const routes: RouteProps[] = [
     {
         path: "/reports/dissolution",
         element: <DissolutionPage />,
+    },
+    {
+        path: "/reports/account-status",
+        element: <AccountStatusPage />,
     },
     {
         path: "/reports/review",

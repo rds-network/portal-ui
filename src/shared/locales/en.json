@@ -333,7 +333,10 @@
             "delete": "Delete",
             "deleteConfirm": "Delete this conversation? Messages will be permanently removed.",
             "deleted": "Conversation deleted",
-            "kindAccountDeactivated": "Deactivation"
+            "kindAccountDeactivated": "Deactivation",
+            "kindAccountStatusRequest": "Activation request",
+            "kindAccountStatusDecision": "Activation decision",
+            "kindAccountStatusChanged": "Status change"
         },
         "controlled": {
             "title": "Under my control",
@@ -1301,6 +1304,42 @@
                 "citizenship": "Citizenship status",
                 "cities": "Top {count} settlements"
             }
+        },
+        "account-status": {
+            "title": "Activations",
+            "description": "Approve account activation and deactivation.",
+            "pendingTitle": "Pending approval",
+            "pendingEmpty": "No pending requests",
+            "historyTitle": "Change history",
+            "historyDescription": "All status flips: approvals, direct actions, and automation.",
+            "historyEmpty": "No events yet",
+            "activate": "Activation",
+            "deactivate": "Deactivation",
+            "becameActive": "Became active",
+            "becameInactive": "Became inactive",
+            "requestedBy": "requested by {name}",
+            "reason": "Reason",
+            "decidedBy": "Decided {date} · {name}",
+            "accept": "Approve",
+            "reject": "Reject",
+            "rejectConfirm": "Confirm rejection",
+            "rejectReason": "Rejection reason",
+            "cancel": "Cancel",
+            "approved": "Request approved",
+            "rejected": "Request rejected",
+            "sentForApproval": "Sent for approval",
+            "reasonPrompt": "Reason (optional)",
+            "status": {
+                "PENDING": "Pending",
+                "APPROVED": "Approved",
+                "REJECTED": "Rejected"
+            },
+            "source": {
+                "REQUEST": "Request",
+                "DIRECT": "Direct",
+                "SCHEDULER": "Scheduler",
+                "SYNC": "Sync"
+            }
         }
     },
     "errors": {
@@ -1331,7 +1370,8 @@
             "messages": "Messages",
             "overdue": "Missing reports",
             "dissolution": "For termination",
-            "review": "For review"
+            "review": "For review",
+            "account-status": "Activations"
         },
         "admin": "Administration",
         "volunteers": {

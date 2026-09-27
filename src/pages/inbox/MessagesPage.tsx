@@ -22,6 +22,9 @@ const isMandatoryKind = (kind?: string | null) => {
         kind === "TASK" ||
         kind === "LEAVE_REQUEST" ||
         kind === "LEAVE_DECISION" ||
+        kind === "ACCOUNT_STATUS_REQUEST" ||
+        kind === "ACCOUNT_STATUS_DECISION" ||
+        kind === "ACCOUNT_STATUS_CHANGED" ||
         kind.startsWith("OVERDUE")
     )
 }
@@ -192,6 +195,21 @@ export const MessagesPage: React.FC = () => {
                     {item.kind === "ACCOUNT_DEACTIVATED" && (
                         <Badge size="xs" color="gray" variant="light">
                             <FormattedMessage id="pages.messages.kindAccountDeactivated" />
+                        </Badge>
+                    )}
+                    {item.kind === "ACCOUNT_STATUS_REQUEST" && (
+                        <Badge size="xs" color="yellow" variant="light">
+                            <FormattedMessage id="pages.messages.kindAccountStatusRequest" />
+                        </Badge>
+                    )}
+                    {item.kind === "ACCOUNT_STATUS_DECISION" && (
+                        <Badge size="xs" color="teal" variant="light">
+                            <FormattedMessage id="pages.messages.kindAccountStatusDecision" />
+                        </Badge>
+                    )}
+                    {item.kind === "ACCOUNT_STATUS_CHANGED" && (
+                        <Badge size="xs" color="gray" variant="light">
+                            <FormattedMessage id="pages.messages.kindAccountStatusChanged" />
                         </Badge>
                     )}
                     {mustAck && (

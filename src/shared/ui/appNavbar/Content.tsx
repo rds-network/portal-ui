@@ -21,6 +21,7 @@ import {
     IconBook,
     IconBeach,
     IconShieldCheck,
+    IconUserCheck,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -125,6 +126,13 @@ export const Content: NavSection[] = [
                 icon: IconFileOff,
                 link: "/reports/dissolution",
                 roles: ["ADMIN_VOLUNTEER"],
+            },
+            {
+                label: "navbar.reports.account-status",
+                icon: IconUserCheck,
+                link: "/reports/account-status",
+                roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO"],
+                showIfAccountStatusApprover: true,
             },
             {
                 label: "navbar.volunteers.applications",
