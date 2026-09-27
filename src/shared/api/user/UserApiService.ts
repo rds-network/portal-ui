@@ -36,6 +36,14 @@ export const reportControllerNameOf = (user: unknown): string => {
     return control.reportControllerFullName || control.reportControllerUsername || ""
 }
 
+/** Флаг «МУП уведомлён» — поля могут прийти раньше обновления сгенерированного клиента. */
+export type MupLetterInfo = {
+    mupLetterSentAt?: string | null
+    mupLetterReason?: string | null
+}
+
+export const mupLetterOf = (user: unknown): MupLetterInfo => (user as MupLetterInfo | null) ?? {}
+
 const alive = (status: number) => status === 200 || status === 404
 
 const unwrap = <T>(response: { status: number; data: T }): T => {

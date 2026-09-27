@@ -50,6 +50,7 @@ export const buildMupLetter = (input: {
 Датум рођења: ${birthDate}
 Држављанство: ${citizenship}
 Број пасоша: ${passport}
+Адреса: ${dash(input.address)}
 
 ${reasonBlock}
 

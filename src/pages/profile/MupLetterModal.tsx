@@ -21,6 +21,7 @@ type Props = {
     email?: string
     periodFrom?: string
     periodTo?: string
+    initialReason?: MupLetterReason
 }
 
 export const MupLetterModal: React.FC<Props> = ({
@@ -36,10 +37,11 @@ export const MupLetterModal: React.FC<Props> = ({
     email = "",
     periodFrom = "",
     periodTo = "",
+    initialReason = "NON_COMPLIANCE",
 }) => {
     const intl = useIntl()
     const queryClient = useQueryClient()
-    const [reason, setReason] = useState<MupLetterReason>("NON_COMPLIANCE")
+    const [reason, setReason] = useState<MupLetterReason>(initialReason)
     const fallback = useMemo(
         () =>
             buildMupLetter({
@@ -74,13 +76,14 @@ export const MupLetterModal: React.FC<Props> = ({
 
     useEffect(() => {
         if (!opened) {
-            setReason("NON_COMPLIANCE")
+            setReason(initialReason)
             return
         }
+        setReason(initialReason)
         setTo(fallback.to)
         setSubject(fallback.subject)
         setBody(fallback.body)
-    }, [fallback, opened])
+    }, [fallback, opened, initialReason])
 
     useEffect(() => {
         if (!draft?.subject || !draft.body) return
