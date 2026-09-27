@@ -1,0 +1,27 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.page;
+    max-width: 1100px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.url {
+    word-break: break-all;
+}

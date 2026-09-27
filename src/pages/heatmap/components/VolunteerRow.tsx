@@ -1,13 +1,21 @@
 import { Avatar, Badge, Box, Button, Checkbox, Flex, HoverCard, Text } from "@mantine/core"
+import { notifications } from "@mantine/notifications"
 import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
-import { IconCheckupList, IconMessage2Exclamation, IconUser } from "@tabler/icons-react"
+import { IconBell, IconCheckupList, IconMessage2Exclamation, IconUser, IconUserOff } from "@tabler/icons-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs, { Dayjs } from "dayjs"
 import React, { useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { useNavigate } from "react-router"
+import { heatmapReportsPath, rememberHeatmapReturn } from "src/pages/heatmap/lib/openWeekReports"
+import { InboxApiService } from "src/shared/api/InboxApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { getTicketBody } from "src/pages/heatmap/lib/ticket"
 import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
 import TicketModal from "src/shared/ui/ticketModal/TicketModal"
+import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import { formatContractEnd, hasActiveAssociatedContract, latestContractEnd } from "src/shared/utils/latestContractEnd"
 import { locales } from "../lib/locales"
 import classes from "./VolunteerReportHeatmap.module.scss"
 
@@ -22,7 +30,11 @@ interface VolunteerRowProps {
     year: number
     isSelected: boolean
     onVolunteerSelect: (volunteerId: number) => void
+    onNotifyVolunteer?: (username: string, name: string) => void
     startDate: Dayjs
+    warningCount?: number
+    canManageActions?: boolean
+    canOpenReports?: boolean
 }
 
 const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
@@ -31,9 +43,15 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
     year,
     isSelected,
     onVolunteerSelect,
+    onNotifyVolunteer,
     startDate,
+    warningCount = 0,
+    canManageActions = true,
+    canOpenReports = true,
 }) => {
     const intl = useIntl()
+    const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const [ticketDrawerOpen, setTicketDrawerOpen] = useState(false)
 
     // Map weekNumber -> weekInfo
@@ -43,7 +61,33 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         return map
     }, [volunteer.weeks])
 
-    const getProgramDescription = (): string => {
+    const { mutate: cancelWarning, isPending: cancelling } = useMutation({
+        mutationFn: () =>
+            InboxApiService.cancelOverdueWarning(volunteer.volunteerInfo.username, {
+                reason: "Снято администратором: отчёты не успели проверить",
+            }),
+        onSuccess: (result) => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage
+                            id={locales.cancelWarningDone}
+                            values={{ name: result.fullName, count: result.warningCount }}
+                        />
+                    </Text>,
+                    null
+                )
+            )
+            queryClient.invalidateQueries({ queryKey: ["overdue-counts"] })
+            queryClient.invalidateQueries({ queryKey: ["overdue-warnings"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue-notices"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox"] })
+            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
+        },
+    })
+
+    const programDescription = (() => {
         const program = volunteer.volunteerInfo.program
             ? getLocalizedName(volunteer.volunteerInfo.program, intl.locale)
             : null
@@ -57,7 +101,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         }
         if (program) return program
         return ""
-    }
+    })()
 
     const getVolunteerStatusColor = () => {
         if (volunteer.totalRequired == 0) return "gray"
@@ -74,6 +118,15 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
 
     const statusColor = getVolunteerStatusColor()
     const statusText = getVolunteerStatusText()
+    const contractUntil = formatContractEnd(latestContractEnd(volunteer.volunteerInfo.contracts))
+    const isAssociated = hasActiveAssociatedContract(volunteer.volunteerInfo.contracts)
+    const { data: curatorRows = [] } = useQuery({
+        queryKey: ["program-curators"],
+        queryFn: () => ProgramCuratorApiService.list(),
+    })
+    const isProgramCurator = curatorRows.some(
+        (row) => row.username.toLowerCase() === volunteer.volunteerInfo.username.toLowerCase()
+    )
 
     const getSquareColor = (weekNumber: number) => {
         const weekData = weekByNumber.get(weekNumber)
@@ -82,7 +135,9 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         const isCurrentYear = dayjs().year() == year
         const isCurrentWeek = dayjs().isBetween(weekData.weekStart, weekData.weekEnd, "day", "[]")
         const hasReports = weekData.hoursWorked > 0
+        const leaveDays = Number((weekData as { leaveDays?: number }).leaveDays ?? 0)
 
+        if (leaveDays > 0 && weekData.hoursRequired === 0) return "leave"
         if (weekData.hoursRequired === 0) return "na"
         if (isCurrentWeek && isCurrentYear && !hasReports) return "waiting"
         if (weekData.hoursWorked === 0) return "noReports"
@@ -122,10 +177,32 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
             week: intl.formatMessage({ id: locales.tooltipWeek }, { num: weekNumber }),
         }
 
+        if (color === "leave") return intl.formatMessage({ id: locales.tooltipLeave }, params)
         if (color === "na") return intl.formatMessage({ id: locales.tooltipNA }, params)
         if (color === "waiting") return intl.formatMessage({ id: locales.tooltipWaiting }, params)
 
         return getSquareTooltip(weekNumber)
+    }
+
+    const openWeekReports = (weekNumber: number, newTab = false) => {
+        if (!canOpenReports) return
+        const weekData = weekByNumber.get(weekNumber)
+        const info = weeks.find((w) => w.weekNumber === weekNumber)
+        const from = weekData?.weekStart
+            ? dayjs(weekData.weekStart).format("YYYY-MM-DD")
+            : info?.date.format("YYYY-MM-DD")
+        const to = weekData?.weekEnd
+            ? dayjs(weekData.weekEnd).format("YYYY-MM-DD")
+            : info?.date.add(6, "day").format("YYYY-MM-DD")
+        if (!from || !to) return
+        const url = heatmapReportsPath({
+            login: volunteer.volunteerInfo.username,
+            dateFrom: from,
+            dateTo: to,
+        })
+        rememberHeatmapReturn()
+        if (newTab) window.open(url, "_blank")
+        else navigate(url)
     }
 
     const ticketBodyHtml = useMemo(() => {
@@ -138,19 +215,26 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
 
     return (
         <div className={classes.volunteerRow}>
-            <TicketModal
-                opened={ticketDrawerOpen}
-                close={() => setTicketDrawerOpen(false)}
-                toUser={volunteer.volunteerInfo}
-                title="Запрос информации по отчётным часам"
-                body={ticketBodyHtml}
-                groupTarget={TicketGroupTarget.CURATOR} // по умолчанию назначаем на куратора
-            />
+            {canManageActions && (
+                <TicketModal
+                    opened={ticketDrawerOpen}
+                    close={() => setTicketDrawerOpen(false)}
+                    toUser={volunteer.volunteerInfo}
+                    title="Запрос информации по отчётным часам"
+                    body={ticketBodyHtml}
+                    groupTarget={TicketGroupTarget.CURATOR} // по умолчанию назначаем на куратора
+                />
+            )}
 
             <div className={classes.volunteerInfo}>
                 <div className={classes.volunteerHeader}>
                     <Flex align="center" gap="sm" style={{ minWidth: 0 }}>
-                        <Checkbox checked={isSelected} onChange={() => onVolunteerSelect(volunteer.volunteerInfo.id)} />
+                        {canManageActions && (
+                            <Checkbox
+                                checked={isSelected}
+                                onChange={() => onVolunteerSelect(volunteer.volunteerInfo.id)}
+                            />
+                        )}
 
                         <Flex align="center" gap="sm" style={{ minWidth: 0, cursor: "default" }}>
                             <Avatar
@@ -172,9 +256,44 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                             onClick={() => onVolunteerSelect(volunteer.volunteerInfo.id)}
                                         >
                                             {volunteer.volunteerInfo.fullName}
+                                            {isProgramCurator && (
+                                                <>
+                                                    {" · "}
+                                                    <Text span size="xs" c="teal">
+                                                        <FormattedMessage id="pages.heat-map.curator" />
+                                                    </Text>
+                                                </>
+                                            )}
                                         </Text>
+                                        {isAssociated && (
+                                            <Text size="xs" c="grape">
+                                                <FormattedMessage id={locales.associatedBadge} />
+                                                {" · "}
+                                                <FormattedMessage id={locales.associatedHint} />
+                                            </Text>
+                                        )}
+                                        {warningCount > 0 && (
+                                            <Text size="xs" c={warningCount >= 3 ? "red" : "orange"}>
+                                                <FormattedMessage id={locales.warnings} values={{ count: warningCount }} />
+                                                {warningCount >= 2 && (
+                                                    <>
+                                                        {" · "}
+                                                        <FormattedMessage id="pages.heat-map.watchlist" />
+                                                    </>
+                                                )}
+                                            </Text>
+                                        )}
                                         <Text size="xs" c="dimmed">
-                                            {getProgramDescription()}
+                                            {programDescription}
+                                            {contractUntil && (
+                                                <>
+                                                    {programDescription ? " • " : ""}
+                                                    <FormattedMessage
+                                                        id={locales.contractUntil}
+                                                        values={{ date: contractUntil }}
+                                                    />
+                                                </>
+                                            )}
                                         </Text>
                                     </div>
                                 </HoverCard.Target>
@@ -209,26 +328,58 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                                 <FormattedMessage id={locales.profile} />
                                             </Button>
 
+                                            {canOpenReports && (
+                                                <Button
+                                                    variant="outline"
+                                                    leftSection={<IconCheckupList size={16} />}
+                                                    onClick={() => {
+                                                        rememberHeatmapReturn()
+                                                        window.open(
+                                                            heatmapReportsPath({
+                                                                login: volunteer.volunteerInfo.username,
+                                                            }),
+                                                            "_blank"
+                                                        )
+                                                    }}
+                                                >
+                                                    <FormattedMessage id={locales.reports} />
+                                                </Button>
+                                            )}
+                                        </Flex>
+
+                                        {canManageActions && onNotifyVolunteer && (
                                             <Button
-                                                variant="outline"
-                                                leftSection={<IconCheckupList size={16} />}
+                                                variant="light"
+                                                leftSection={<IconBell size={16} />}
                                                 onClick={() =>
-                                                    window.open(
-                                                        `/reports?login=${volunteer.volunteerInfo.username}`,
-                                                        "_blank"
+                                                    onNotifyVolunteer(
+                                                        volunteer.volunteerInfo.username,
+                                                        volunteer.volunteerInfo.fullName
                                                     )
                                                 }
                                             >
-                                                <FormattedMessage id={locales.reports} />
+                                                <FormattedMessage id={locales.sendNotice} />
                                             </Button>
-                                        </Flex>
-
-                                        <Button
-                                            leftSection={<IconMessage2Exclamation size={16} />}
-                                            onClick={() => setTicketDrawerOpen(true)}
-                                        >
-                                            <FormattedMessage id={locales.ticket} />
-                                        </Button>
+                                        )}
+                                        {canManageActions && warningCount > 0 && (
+                                            <Button
+                                                variant="light"
+                                                color="orange"
+                                                leftSection={<IconUserOff size={16} />}
+                                                loading={cancelling}
+                                                onClick={() => cancelWarning()}
+                                            >
+                                                <FormattedMessage id={locales.cancelWarning} />
+                                            </Button>
+                                        )}
+                                        {canManageActions && (
+                                            <Button
+                                                leftSection={<IconMessage2Exclamation size={16} />}
+                                                onClick={() => setTicketDrawerOpen(true)}
+                                            >
+                                                <FormattedMessage id={locales.ticket} />
+                                            </Button>
+                                        )}
                                     </Flex>
                                 </HoverCard.Dropdown>
                             </HoverCard>
@@ -247,12 +398,35 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                         <HoverCard.Target>
                             <Box
                                 className={`${classes.weekSquare} ${classes[getSquareColor(week.weekNumber)]}`}
-                                style={{ cursor: "pointer" }}
+                                style={{ cursor: canOpenReports ? "pointer" : "default" }}
+                                title={
+                                    canOpenReports
+                                        ? intl.formatMessage({ id: locales.openWeek })
+                                        : getSquareInfoLabel(week.weekNumber)
+                                }
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    openWeekReports(week.weekNumber)
+                                }}
+                                onDoubleClick={(e) => {
+                                    e.stopPropagation()
+                                    openWeekReports(week.weekNumber)
+                                }}
                             />
                         </HoverCard.Target>
 
                         <HoverCard.Dropdown>
                             <Text size="xs">{getSquareInfoLabel(week.weekNumber)}</Text>
+                            {canOpenReports && (
+                                <Button
+                                    size="xs"
+                                    mt={8}
+                                    fullWidth
+                                    onClick={() => openWeekReports(week.weekNumber)}
+                                >
+                                    <FormattedMessage id={locales.openWeek} />
+                                </Button>
+                            )}
                         </HoverCard.Dropdown>
                     </HoverCard>
                 ))}

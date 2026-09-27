@@ -6,6 +6,7 @@ import { NavbarContext } from "src/app/providers/NavbarProvider"
 import { useDesktop } from "src/shared/hooks/useDesktop"
 import classes from "src/shared/ui/appHeader/AppHeader.module.scss"
 import { Link } from "react-router"
+import { AnnouncementBanner } from "src/shared/ui/announcements/AnnouncementBanner"
 import { AnnouncementBell } from "src/shared/ui/announcements/AnnouncementBell"
 import { LocaleSwitcher } from "src/shared/ui/locale/LocaleSwitcher"
 import { ThemeSwitcher } from "src/shared/ui/theme/ThemeSwitcher"
@@ -44,6 +45,7 @@ export const AppHeader = () => {
                     <AnnouncementBell />
                 </Group>
             </Group>
+            <AnnouncementBanner />
         </>
     )
 }

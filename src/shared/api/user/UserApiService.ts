@@ -6,6 +6,125 @@ import { SimpleRequestHttp } from "src/shared/http/SimpleRequestHttp"
 
 export const UserApiService = new UserApi(undefined, undefined, RequestHttp)
 
+/**
+ * Поля стопа на сдачу отчётов приходят с бэкенда раньше, чем их подхватит сгенерированный клиент.
+ */
+export type ReportBlockInfo = {
+    reportBlocked?: boolean
+    reportBlockedAt?: string | null
+    reportBlockedBy?: string | null
+    reportBlockedByFullName?: string | null
+    reportBlockedReason?: string | null
+}
+
+export const reportBlockOf = (user: unknown): ReportBlockInfo => (user as ReportBlockInfo | null) ?? {}
+
+/**
+ * Принудительный контроль сдачи отчётов — тоже ещё не в сгенерированном клиенте.
+ */
+export type ReportControlInfo = {
+    reportControllerUsername?: string | null
+    reportControllerFullName?: string | null
+    reportControllerReason?: string | null
+    reportControllerAt?: string | null
+}
+
+export const reportControlOf = (user: unknown): ReportControlInfo => (user as ReportControlInfo | null) ?? {}
+
+export const reportControllerNameOf = (user: unknown): string => {
+    const control = reportControlOf(user)
+    return control.reportControllerFullName || control.reportControllerUsername || ""
+}
+
+/** Флаг «МУП уведомлён» — поля могут прийти раньше обновления сгенерированного клиента. */
+export type MupLetterInfo = {
+    mupLetterSentAt?: string | null
+    mupLetterReason?: string | null
+}
+
+export const mupLetterOf = (user: unknown): MupLetterInfo => (user as MupLetterInfo | null) ?? {}
+
+const alive = (status: number) => status === 200 || status === 404
+
+const unwrap = <T>(response: { status: number; data: T }): T => {
+    if (response.status === 404) throw new Error("API ещё не на сервере")
+    return response.data
+}
+
+/**
+ * Дополнительные программы и «на контроле» — поверх сгенерированного клиента.
+ */
+export type SecondaryProgramsInfo = {
+    secondaryProgramCodes?: string[] | null
+}
+
+export const secondaryProgramCodesOf = (user: unknown): string[] => {
+    const codes = (user as SecondaryProgramsInfo | null)?.secondaryProgramCodes
+    return Array.isArray(codes) ? codes.filter((code): code is string => !!code) : []
+}
+
+export const UserAccountApiService = {
+    async clearProgram(id: number): Promise<UserInfoDto> {
+        return unwrap(await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/program`, { validateStatus: alive }))
+    },
+
+    async clearProject(id: number): Promise<UserInfoDto> {
+        return unwrap(await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/project`, { validateStatus: alive }))
+    },
+
+    async setReportBlock(id: number, reason?: string | null): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.post<UserInfoDto>(
+                `/user/account/${id}/report-block`,
+                { reason: reason?.trim() || null },
+                { validateStatus: alive }
+            )
+        )
+    },
+
+    async clearReportBlock(id: number): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/report-block`, { validateStatus: alive })
+        )
+    },
+
+    async setReportController(id: number, username: string, reason?: string | null): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.put<UserInfoDto>(
+                `/user/account/${id}/report-controller`,
+                { username, reason: reason?.trim() || null },
+                { validateStatus: alive }
+            )
+        )
+    },
+
+    async clearReportController(id: number): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/report-controller`, { validateStatus: alive })
+        )
+    },
+
+    async getSecondaryPrograms(id: number): Promise<string[]> {
+        return unwrap(
+            await RequestHttp.get<string[]>(`/user/account/${id}/secondary-programs`, { validateStatus: alive })
+        )
+    },
+
+    async setSecondaryPrograms(id: number, programCodes: string[]): Promise<string[]> {
+        return unwrap(
+            await RequestHttp.put<string[]>(`/user/account/${id}/secondary-programs`, programCodes, {
+                validateStatus: alive,
+            })
+        )
+    },
+
+    async controlledByMe(): Promise<UserInfoDto[]> {
+        return unwrap(
+            await RequestHttp.get<UserInfoDto[]>(`/user/account/controlled-by-me`, { validateStatus: alive })
+        )
+    },
+}
+
 export const resolveUsers = (logins: (string | null | undefined)[]) => {
     const filtered = Array.from(new Set(logins.filter((x): x is string => !!x))).sort()
 
