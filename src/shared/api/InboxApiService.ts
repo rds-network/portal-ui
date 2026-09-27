@@ -200,16 +200,6 @@ export const InboxApiService = {
         return response.data ?? {}
     },
 
-    async notifyOverdue(exclude: string[] = []): Promise<OverdueNotifyResultDto> {
-        const response = await RequestHttp.post<OverdueNotifyResultDto>(
-            "/report-overdue/notify",
-            { exclude },
-            { validateStatus: alive }
-        )
-        if (response.status !== 200) return { sent: 0, recipients: [] }
-        return response.data ?? { sent: 0, recipients: [] }
-    },
-
     async overdueNotices(): Promise<OverdueNoticePersonDto[]> {
         const response = await RequestHttp.get<OverdueNoticePersonDto[]>("/report-overdue/notices", {
             validateStatus: alive,

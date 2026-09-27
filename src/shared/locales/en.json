@@ -347,7 +347,7 @@
         },
         "overdue": {
             "title": "Missing reports",
-            "description": "The list is who missed the last 5 weeks. Hours on the card are the year norm, same as the heat map. Overtime or no shortfall in those 5 weeks is left out. Then +1 / +2 / +3 weeks without a report.",
+            "description": "Decision list: who missed the last 5 weeks. Hours on the card are the year norm, same as the heat map. Overtime or no shortfall in those 5 weeks is left out. Then +1 / +2 / +3 weeks without a report. Reprimands are issued manually from the profile («Issue reprimand»).",
             "total": "In the list: {count}",
             "notify": "Send notices now",
             "sent": "Sent: {count}",
@@ -369,15 +369,15 @@
             "skip": "In this send",
             "skipHint": "Everyone is selected. Untick people you do not want to notify.",
             "warnings": "Warnings: {count} of 3",
-            "warningsHint": "After the mailing, people are marked. A repeat overdue puts them on a preliminary blacklist for termination. At 3 notices a letter goes to MUP.",
-            "notified": "notified {count}/3",
+            "warningsHint": "No auto mailing. Decide on a reprimand manually from the volunteer profile («Issue reprimand»). Badges show reprimands already issued.",
+            "notified": "reprimand {count}/3",
             "watchlist": "blacklist",
-            "export": "Export notified people",
+            "export": "Export ledger",
             "excluded": "Excluded from mailing: {count}",
             "cancelWarning": "Cancel reprimand",
             "cancelWarningAll": "Cancel all",
             "cancelWarningDone": "Reprimand cancelled. Remaining {count}/3",
-            "cancelWarningHint": "Removes a mistaken notice and messages the volunteer. Red weeks clear after reports are accepted.",
+            "cancelWarningHint": "Removes a mistaken reprimand and messages the volunteer. Red weeks clear after reports are accepted.",
             "openProfile": "Profile"
         },
         "dissolution": {
