@@ -77,11 +77,6 @@ export const OverdueReportsPage: React.FC = () => {
         queryFn: () => InboxApiService.overdue(),
     })
 
-    const { data: deactivated = [], isLoading: deactivatedLoading } = useQuery({
-        queryKey: ["report-overdue-deactivated"],
-        queryFn: () => InboxApiService.deactivatedActiveContract(),
-    })
-
     useEffect(() => {
         const known = new Set(items.map((item) => item.username))
         setExcluded((prev) => new Set([...prev].filter((username) => known.has(username))))
@@ -170,10 +165,6 @@ export const OverdueReportsPage: React.FC = () => {
 
     const openHeatmap = (username: string) => {
         navigate(`/volunteers/heatmap?search=${encodeURIComponent(username)}`)
-    }
-
-    const openProfile = (username: string) => {
-        navigate(`/profile/${encodeURIComponent(username)}`)
     }
 
     const toggleExclude = (username: string) => {
@@ -430,87 +421,6 @@ export const OverdueReportsPage: React.FC = () => {
                                             title={`${dayjs(week.weekStart).format("DD.MM.YYYY")}: ${week.hoursWorked}/${week.hoursRequired}`}
                                         />
                                     ))}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </Card>
-
-            <Card withBorder p="md" radius="lg">
-                <div>
-                    <Title order={4}>
-                        <FormattedMessage id="pages.overdue.deactivatedTitle" />
-                    </Title>
-                    <Text size="sm" c="dimmed" mt={4}>
-                        <FormattedMessage id="pages.overdue.deactivatedHint" />
-                    </Text>
-                    <Text size="sm" mt={6}>
-                        <FormattedMessage id="pages.overdue.deactivatedTotal" values={{ count: deactivated.length }} />
-                    </Text>
-                </div>
-                {deactivatedLoading && deactivated.length === 0 ? (
-                    <Flex align="center" gap="sm" py="lg">
-                        <Loader size="sm" />
-                        <Text c="dimmed">
-                            <FormattedMessage id="pages.overdue.loading" />
-                        </Text>
-                    </Flex>
-                ) : deactivated.length === 0 ? (
-                    <Text c="dimmed" mt="md">
-                        <FormattedMessage id="pages.overdue.deactivatedEmpty" />
-                    </Text>
-                ) : (
-                    <div style={{ marginTop: "0.75rem" }}>
-                        {deactivated.map((item) => (
-                            <div
-                                key={item.accountId}
-                                className={classes.row}
-                                style={{ cursor: "pointer" }}
-                                onClick={() => openProfile(item.username)}
-                            >
-                                <div className={classes.meta}>
-                                    <div className={classes.person}>
-                                        <Text fw={600}>{item.fullName}</Text>
-                                        <Text size="xs" c="dimmed">
-                                            {item.program || item.username}
-                                            {item.contractType ? ` · ${item.contractType}` : ""}
-                                            {formatContractEnd(item.contractEnd) && (
-                                                <>
-                                                    {" · "}
-                                                    <FormattedMessage
-                                                        id="pages.overdue.contract"
-                                                        values={{ date: formatContractEnd(item.contractEnd) }}
-                                                    />
-                                                </>
-                                            )}
-                                        </Text>
-                                        {item.deactivatedReason && (
-                                            <Text size="xs" c="orange" mt={4}>
-                                                <FormattedMessage
-                                                    id="pages.overdue.deactivatedReason"
-                                                    values={{ reason: item.deactivatedReason }}
-                                                />
-                                            </Text>
-                                        )}
-                                    </div>
-                                    <div className={classes.stats}>
-                                        <div className={classes.statDate}>
-                                            {formatContractEnd(item.contractEnd) || "—"}
-                                        </div>
-                                        <div className={classes.statAction}>
-                                            <Button
-                                                size="compact-xs"
-                                                variant="light"
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    openProfile(item.username)
-                                                }}
-                                            >
-                                                <FormattedMessage id="pages.overdue.openProfile" />
-                                            </Button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         ))}

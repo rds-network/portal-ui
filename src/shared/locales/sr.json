@@ -375,12 +375,18 @@
             "cancelWarningAll": "Poništi sve",
             "cancelWarningDone": "Kazna poništena. Ostalo {count}/3",
             "cancelWarningHint": "Skida pogrešno obaveštenje i šalje poruku volonteru. Crvene nedelje nestaju posle prihvatanja izveštaja.",
-            "deactivatedTitle": "Deaktivirani, ugovor još važi",
-            "deactivatedHint": "Nalozi isključeni ručno, a ugovor još nije istekao. Ne ulaze u slanje za kašnjenje izveštaja.",
-            "deactivatedEmpty": "Trenutno nema takvih",
-            "deactivatedTotal": "U grupi: {count}",
-            "deactivatedReason": "razlog: {reason}",
             "openProfile": "Profil"
+        },
+        "dissolution": {
+            "title": "Na raskid",
+            "description": "Deaktivirani volonteri sa još važećim ugovorom. Pismo za MUP otvara se ručno — nema automatskog slanja.",
+            "total": "Na listi: {count}",
+            "empty": "Trenutno nema takvih",
+            "loading": "Učitava se lista…",
+            "contract": "ugovor do {date}",
+            "reason": "razlog: {reason}",
+            "openProfile": "Profil",
+            "mupLetter": "Pismo MUP"
         },
         "activity": {
             "title": "Hronika",
@@ -1324,6 +1330,7 @@
             "tasks": "Zadaci",
             "messages": "Poruke",
             "overdue": "Nedostavljeni izveštaji",
+            "dissolution": "Na raskid",
             "review": "Na prijemu"
         },
         "admin": "Administracija",

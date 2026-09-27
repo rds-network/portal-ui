@@ -17,6 +17,7 @@ import {
     IconUsersGroup,
     IconChartBar,
     IconAlertTriangle,
+    IconFileOff,
     IconBook,
     IconBeach,
     IconShieldCheck,
@@ -117,6 +118,12 @@ export const Content: NavSection[] = [
                 label: "navbar.reports.overdue",
                 icon: IconAlertTriangle,
                 link: "/reports/overdue",
+                roles: ["ADMIN_VOLUNTEER"],
+            },
+            {
+                label: "navbar.reports.dissolution",
+                icon: IconFileOff,
+                link: "/reports/dissolution",
                 roles: ["ADMIN_VOLUNTEER"],
             },
             {

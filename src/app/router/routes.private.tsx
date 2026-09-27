@@ -22,6 +22,7 @@ const AnnouncementsAdminPage = lazy(() => import("src/pages/announcements/Announ
 const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
 const MessagesPage = lazy(() => import("src/pages/inbox/MessagesPage"))
 const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPage"))
+const DissolutionPage = lazy(() => import("src/pages/dissolution/DissolutionPage"))
 const ResourcesPage = lazy(() => import("src/pages/resources/ResourcesPage"))
 const ActivityPage = lazy(() => import("src/pages/activity/ActivityPage"))
 const CuratorsPage = lazy(() => import("src/pages/curators/CuratorsPage"))
@@ -121,6 +122,10 @@ export const routes: RouteProps[] = [
     {
         path: "/reports/overdue",
         element: <OverdueReportsPage />,
+    },
+    {
+        path: "/reports/dissolution",
+        element: <DissolutionPage />,
     },
     {
         path: "/reports/review",

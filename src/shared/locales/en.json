@@ -375,12 +375,18 @@
             "cancelWarningAll": "Cancel all",
             "cancelWarningDone": "Reprimand cancelled. Remaining {count}/3",
             "cancelWarningHint": "Removes a mistaken notice and messages the volunteer. Red weeks clear after reports are accepted.",
-            "deactivatedTitle": "Deactivated, contract still valid",
-            "deactivatedHint": "Accounts turned off manually while the contract has not ended yet. They are not in the overdue mailing.",
-            "deactivatedEmpty": "None right now",
-            "deactivatedTotal": "In this group: {count}",
-            "deactivatedReason": "reason: {reason}",
             "openProfile": "Profile"
+        },
+        "dissolution": {
+            "title": "For termination",
+            "description": "Deactivated volunteers whose contract is still valid. Open the MUP letter yourself — nothing is sent automatically.",
+            "total": "In the list: {count}",
+            "empty": "None right now",
+            "loading": "Loading the list…",
+            "contract": "contract until {date}",
+            "reason": "reason: {reason}",
+            "openProfile": "Profile",
+            "mupLetter": "MUP letter"
         },
         "activity": {
             "title": "Chronicle",
@@ -1324,6 +1330,7 @@
             "tasks": "Tasks",
             "messages": "Messages",
             "overdue": "Missing reports",
+            "dissolution": "For termination",
             "review": "For review"
         },
         "admin": "Administration",
