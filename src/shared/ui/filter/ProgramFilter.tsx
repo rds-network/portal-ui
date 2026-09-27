@@ -1,20 +1,32 @@
 import { Select } from "@mantine/core"
+import { ProgramDto } from "@rds-network/portal-api-axios"
+import { ReactNode, useRef, useState } from "react"
 import { useIntl } from "react-intl"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { locales } from "./lib/locales"
-import { useState, useRef } from "react"
-import { ProgramDto } from "@rds-network/portal-api-axios"
 
 interface ProgramFilterProps {
     value: string | null
     onChange: (program: string | null) => void
     className?: string
     placeholder?: string
+    label?: ReactNode
     programsOverride?: ProgramDto[]
+    includeNoProgram?: boolean
+    clearable?: boolean
 }
 
-export function ProgramFilter({ value, onChange, className, placeholder, programsOverride }: ProgramFilterProps) {
+export function ProgramFilter({
+    value,
+    onChange,
+    className,
+    placeholder,
+    label,
+    programsOverride,
+    includeNoProgram = true,
+    clearable = true,
+}: ProgramFilterProps) {
     const allPrograms = usePrograms()
     const programs = programsOverride ?? allPrograms
     const intl = useIntl()
@@ -22,7 +34,9 @@ export function ProgramFilter({ value, onChange, className, placeholder, program
     const selectRef = useRef<HTMLInputElement>(null)
 
     const programOptions = [
-        { value: "NO_PROGRAM", label: intl.formatMessage({ id: locales.noProgram }) },
+        ...(includeNoProgram
+            ? [{ value: "NO_PROGRAM", label: intl.formatMessage({ id: locales.noProgram }) }]
+            : []),
         ...programs.map((program) => ({
             value: program.code.toUpperCase(),
             label: getLocalizedName(program, intl.locale),
@@ -36,11 +50,13 @@ export function ProgramFilter({ value, onChange, className, placeholder, program
     return (
         <Select
             ref={selectRef}
+            label={label}
             data={programOptions}
             value={value}
             onChange={handleChange}
             placeholder={placeholder || intl.formatMessage({ id: locales.filterByProgram })}
-            clearable
+            clearable={clearable}
+            searchable
             maxDropdownHeight={400}
             searchValue={search}
             onSearchChange={setSearch}

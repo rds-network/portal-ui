@@ -24,8 +24,8 @@ import {
     getTaskDisplayName,
     hasTaskTranslation,
 } from "src/shared/taskTranslation/lib/taskTranslation"
+import { CuratorSelect } from "src/shared/ui/curatorSelect/CuratorSelect"
 import { FileUploader, FileUploaderInterface } from "src/shared/ui/fileUploader/FileUploader"
-import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { z } from "zod"
 import classes from "./TaskCard.module.scss"
 
@@ -34,6 +34,9 @@ interface TaskCardProps {
     index: number
     deletable: boolean
     editMode?: boolean
+    /** Логин принудительного контролёра: заказчик зафиксирован и менять его нельзя. */
+    lockedCustomer?: string | null
+    lockedCustomerName?: string
     onChange: (id: string, updatedTask: TaskDto) => void
     onDelete: (id: string) => void
 }
@@ -66,7 +69,7 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
             .or(z.literal("")),
         timeSpent: z.number(requiredMessage).min(1),
         date: z.date(requiredMessage),
-        customer: z.string().optional(),
+        customer: z.string(requiredMessage).min(1, requiredMessage),
     })
 
     const fileUploaderRef = createRef<FileUploaderInterface>()
@@ -102,7 +105,7 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
             result: props.task.result ? props.task.result : "",
             timeSpent: props.task.timeSpent ? props.task.timeSpent / 60 : null,
             date: props.task.date ? dayjs(props.task.date).toDate() : null,
-            customer: props.task.customer,
+            customer: props.lockedCustomer || props.task.customer,
         },
         onValuesChange: () => {
             if (editMode) return
@@ -141,6 +144,12 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
             setUploadedFiles(props.task.files)
         }
     }, [])
+
+    useEffect(() => {
+        if (props.lockedCustomer && form.getValues().customer !== props.lockedCustomer) {
+            form.setFieldValue("customer", props.lockedCustomer)
+        }
+    }, [props.lockedCustomer])
 
     useEffect(() => {
         if (!editMode) {
@@ -242,13 +251,22 @@ export const TaskCard = forwardRef<TaskCardInterface, TaskCardProps>((props, ref
                 description={<FormattedMessage id={locales.resultDescription} />}
                 leftSection={<IconLink size={18} />}
             />
-            <UserSearch
-                form={form}
-                path="customer"
-                label={<FormattedMessage id={locales.customer} />}
-                description={<FormattedMessage id={locales.customerDescription} />}
-                initialSearch={props.task.customer ? props.task.customer : undefined}
-            />
+            {props.lockedCustomer ? (
+                <TextInput
+                    disabled
+                    value={props.lockedCustomerName || props.lockedCustomer}
+                    label={<FormattedMessage id={locales.customer} />}
+                    description={<FormattedMessage id={locales.customerLocked} />}
+                />
+            ) : (
+                <CuratorSelect
+                    form={form}
+                    path="customer"
+                    label={<FormattedMessage id={locales.customer} />}
+                    description={<FormattedMessage id={locales.customerDescription} />}
+                    initialUsername={props.task.customer}
+                />
+            )}
             <FileUploader
                 maxFiles={15}
                 maxSize={5}

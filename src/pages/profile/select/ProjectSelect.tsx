@@ -17,7 +17,7 @@ export function ProjectSelectInline({
     value: string | null | undefined
     canEdit: boolean
     type?: "default" | "button"
-    onChange: (project: string) => void
+    onChange: (project: string | null) => void
     locale: string
     projectsOverride?: ProjectDto[]
 }) {
@@ -42,13 +42,12 @@ export function ProjectSelectInline({
                     data={projectOptions}
                     value={value || null}
                     onChange={(val) => {
-                        if (val) {
-                            onChange(val)
-                            setIsEditing(false)
-                        }
+                        onChange(val)
+                        setIsEditing(false)
                     }}
                     onBlur={() => setIsEditing(false)}
                     autoFocus
+                    clearable
                     style={{ width: 180 }}
                     placeholder={intl.formatMessage({ id: "pages.profile.selectProject" })}
                     dropdownOpened={isDropdownOpened}

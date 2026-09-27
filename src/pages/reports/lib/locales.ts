@@ -1,5 +1,7 @@
 export const locales = {
     title: "pages.report-list.title",
+    titleWeek: "pages.report-list.title-week",
+    backHeatmap: "pages.report-list.back-heatmap",
     volunteer: "pages.report-list.volunteer",
     creationDate: "pages.report-list.creation-date",
     weeks: "pages.report-list.weeks",
@@ -20,4 +22,7 @@ export const locales = {
     projectFilterNotSelected: "pages.report-list.project-filter-not-selected",
     noProgram: "pages.user-list.no-program",
     noProject: "pages.user-list.no-project",
+    digestTitle: "pages.report-list.digest-title",
+    weekShort: "pages.report-list.week-short",
+    moderatorShort: "pages.report.moderator-short",
 }

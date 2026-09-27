@@ -1,0 +1,79 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.page;
+    max-width: 960px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.person {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.personMain {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.curatorBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid light-dark(#e5e7eb, var(--mantine-color-dark-4));
+    &:first-of-type {
+        border-top: 0;
+        padding-top: 0;
+    }
+}
+
+.delegate {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-left: 8px;
+}
+
+.delegateForm {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.moderators {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.moderator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    text-align: left;
+    color: inherit;
+    min-width: 0;
+
+    &:hover {
+        background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+    }
+}

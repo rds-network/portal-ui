@@ -1,7 +1,5 @@
 @use "../../app/styles/surfaces" as s;
 
-$table-min-width: 58rem;
-
 .root {
     @include s.page;
     flex-direction: column;
@@ -15,6 +13,19 @@ $table-min-width: 58rem;
 
 .title {
     @include s.title;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    color: var(--portal-muted);
+    font-size: 13px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
 }
 
 .filters {
@@ -41,62 +52,11 @@ $table-min-width: 58rem;
     min-width: 12rem;
 }
 
-.table {
+.cardList {
     width: 100%;
-    min-width: $table-min-width;
-    table-layout: auto;
-}
-
-.row {
-    transition: transform 0.2s ease;
-
-    &:hover {
-        cursor: pointer;
-        transform: scale(1.02);
-    }
-}
-
-.avatar {
-    &:hover {
-        cursor: pointer;
-    }
-}
-
-.columnVolunteer {
-    width: 12rem;
-    padding: 0.3rem;
-}
-
-.columnDate {
-    width: 12rem;
-}
-
-.columnWeeks {
-    width: 8rem;
-}
-
-.columnTimeSpent {
-    width: 8rem;
-}
-
-.columnStatus {
-    width: 8rem;
-}
-
-.columnProgram {
-    width: 10rem;
-}
-
-.columnProject {
-    width: 10rem;
-}
-
-.columnStats {
-    width: 10rem;
-}
-
-.stats {
-    font-size: small;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .pagination {
@@ -136,79 +96,4 @@ $table-min-width: 58rem;
     row-gap: 1rem;
     align-items: center;
     justify-content: center;
-}
-
-.mobileList {
-    width: 100%;
-    row-gap: 0.5rem;
-}
-
-.mobileCard {
-    width: 100%;
-    flex-direction: column;
-    row-gap: 0.5rem;
-    padding: 0.75rem;
-    border-radius: var(--mantine-spacing-xs);
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
-    box-shadow: 0 0 0.3rem 0.1rem light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
-    transition: transform 0.2s ease;
-
-    &:hover {
-        cursor: pointer;
-        transform: scale(1.02);
-    }
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        padding: 1rem;
-        row-gap: 0.75rem;
-    }
-
-    & {
-        @include s.glass;
-        padding: 24px;
-        min-width: 0;
-        max-width: 100%;
-    }
-}
-
-.reportHeader {
-    width: 100%;
-    flex-direction: column;
-    row-gap: 0.25rem;
-}
-
-.reportBody {
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        column-gap: 1rem;
-    }
-}
-
-.reportLeft {
-    flex: 1;
-    flex-direction: column;
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        row-gap: 0;
-    }
-
-    @media (max-width: 1023px) {
-        row-gap: 1rem;
-    }
-}
-
-.reportRight {
-    flex: 1;
-    flex-direction: column;
-
-    @media (min-width: 1024px) and (max-width: 1439px) {
-        row-gap: 0;
-    }
-
-    @media (max-width: 1023px) {
-        row-gap: 1rem;
-    }
 }

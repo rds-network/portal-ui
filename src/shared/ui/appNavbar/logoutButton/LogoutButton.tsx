@@ -1,4 +1,4 @@
-import { Box, Group, ThemeIcon, UnstyledButton } from "@mantine/core"
+import { UnstyledButton } from "@mantine/core"
 import { IconLogout } from "@tabler/icons-react"
 import React from "react"
 import { FormattedMessage } from "react-intl"
@@ -9,19 +9,13 @@ export const LogoutButton = () => {
     const navigate = useNavigate()
 
     return (
-        <>
-            <UnstyledButton className={classes.container} onClick={() => navigate("/logout")}>
-                <Group justify="space-between">
-                    <Box className={classes.button}>
-                        <ThemeIcon variant="light" size="lg" color="red" radius="md">
-                            <IconLogout width={18} height={18} />
-                        </ThemeIcon>
-                        <Box ml="md">
-                            <FormattedMessage id="common.buttons.logout" />
-                        </Box>
-                    </Box>
-                </Group>
-            </UnstyledButton>
-        </>
+        <UnstyledButton className={classes.item} onClick={() => navigate("/logout")}>
+            <span className={classes.icon}>
+                <IconLogout width={18} height={18} stroke={1.6} />
+            </span>
+            <span className={classes.label}>
+                <FormattedMessage id="common.buttons.logout" />
+            </span>
+        </UnstyledButton>
     )
 }

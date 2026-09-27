@@ -1,14 +1,32 @@
 @use "../../app/styles/surfaces" as s;
+
+.page {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    @media (min-width: 80.01em) {
+        height: 100%;
+    }
+}
+
 .root {
     @include s.page;
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 16px;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding-bottom: 0;
 }
 .header {
     justify-content: space-between;
     gap: 20px;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 .title {
     @include s.title;
@@ -32,13 +50,18 @@
 .content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 310px;
-    align-items: start;
+    align-items: stretch;
     gap: 24px;
     width: 100%;
+    flex: 1;
+    min-height: 0;
 }
 .reports {
     @include s.glass;
     min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
     flex-direction: column;
     padding: 24px;
     gap: 20px;
@@ -65,7 +88,10 @@
 .reportsList {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
 }
 .report {
     display: grid;
@@ -150,8 +176,31 @@
     }
 }
 @media (max-width: 80em) {
+    .root {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        min-height: 0;
+    }
+
     .content {
         grid-template-columns: minmax(0, 1fr);
+        flex: none;
+        min-height: 0;
+        height: auto;
+        align-items: start;
+    }
+
+    .reports {
+        height: auto;
+        overflow: visible;
+        min-height: 0;
+    }
+
+    .reportsList {
+        flex: none;
+        overflow: visible;
+        min-height: 0;
     }
 }
 @media (max-width: 36em) {

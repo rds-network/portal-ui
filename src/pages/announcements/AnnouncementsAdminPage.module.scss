@@ -11,3 +11,9 @@
 .editorCard {
     overflow: visible;
 }
+
+.historyItem {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid light-dark(#e5e7eb, var(--portal-border));
+}

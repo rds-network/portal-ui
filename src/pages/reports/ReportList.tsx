@@ -1,6 +1,6 @@
-import { Avatar, Button, Collapse, Flex, Pagination, Table, Text } from "@mantine/core"
-import { PageRequest, ReportDto, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
-import { IconClock, IconFile, IconFilterEdit, IconFilterOff, IconListCheck, IconUfo } from "@tabler/icons-react"
+import { Anchor, Badge, Button, Collapse, Flex, Pagination, Text } from "@mantine/core"
+import { PageRequest, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
+import { IconArrowLeft, IconFilterEdit, IconFilterOff, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
@@ -11,37 +11,33 @@ import { ReportApiService } from "src/shared/api/ReportApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
-import { getSpentTimeFromReport } from "src/shared/report/timeSpent"
 import { ReportStatusSelect } from "src/shared/ui/select/ReportStatusSelect"
 import { NO_PROGRAM_CODE, NO_PROJECT_CODE } from "src/shared/constants/Shared"
-import { Badge, useComputedColorScheme } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
-import { getReportStatusColor } from "src/shared/report/status"
 import { ProgramFilter, ProjectFilter } from "src/shared/ui/filter"
-import { PropertyBox } from "src/shared/ui/propertyBox/PropertyBox"
-import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { WeekPicker } from "src/shared/ui/weekPicker/WeekPicker"
-import { hasPermission } from "src/shared/user/roles"
+import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
 import { defaultFilter, defaultPage, defaultPageResponse, defaultUser } from "./lib/defaults"
 import { locales } from "./lib/locales"
 import { allowedRoles } from "./lib/roles"
+import { heatmapReturnPath } from "src/pages/heatmap/lib/openWeekReports"
+import { WeekDigest } from "./WeekDigest"
 import classes from "./ReportList.module.scss"
 
 export const ReportList = () => {
-    setDocumentTitleByLocale(locales.title)
-
     const [searchParams, setSearchParams] = useSearchParams()
+    const fromHeatmap = searchParams.get("from") === "heatmap"
+    setDocumentTitleByLocale(fromHeatmap ? locales.titleWeek : locales.title)
     const loginParam = searchParams.get("login")
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
     const intl = useIntl()
 
     const isMobile = useMediaQuery("(max-width: 1360px)")
-    const isTablet = useMediaQuery("(min-width: 1024px) and (max-width: 1439px)")
-    const colorScheme = useComputedColorScheme("light")
 
     const [resetKey, setResetKey] = useState(0)
     const [filtersOpened, setFiltersOpened] = useState(false)
@@ -147,6 +143,10 @@ export const ReportList = () => {
             params.set("page", userPageNumber.toString())
         }
 
+        if (searchParams.get("from") === "heatmap") {
+            params.set("from", "heatmap")
+        }
+
         setSearchParams(params)
     }
 
@@ -232,11 +232,32 @@ export const ReportList = () => {
         const set = new Set<string>()
         for (const r of reports) {
             if (r.user) set.add(r.user)
+            if (r.moderator) set.add(r.moderator)
         }
         return Array.from(set).sort()
     }, [reports])
 
     const { data: users = {} } = resolveUsers(logins)
+
+    const weekSelected = Boolean(filter.dateFrom && filter.dateTo)
+    const { data: digestReports = [] } = useQuery({
+        queryKey: ["weekDigest", filter, selectedProgram, selectedProject],
+        enabled: weekSelected,
+        queryFn: () => {
+            let project: string | null = null
+            if (selectedProject) {
+                project = selectedProject === NO_PROJECT_CODE ? "" : selectedProject
+            }
+            return ReportApiService.getReports(
+                { pageNumber: 0, pageSize: 300, sort: ["createTime;desc"] },
+                {
+                    ...filter,
+                    program: selectedProgram === NO_PROGRAM_CODE ? "" : selectedProgram,
+                    project,
+                }
+            ).then((r) => r.data.content || [])
+        },
+    })
 
     const onUserSelected = (selectedUser: UserInfoDto | null) => {
         const newFilter = { ...filter, login: selectedUser?.username || null }
@@ -302,280 +323,51 @@ export const ReportList = () => {
         updateUrlParams(resetFilter, null, null, 0)
     }
 
-    const rows = reports.map((report) => {
-        const creator = users[report.user!!] || defaultUser(report.user!!)
-        const program = programs.find((p) => p.code === report.program)
-        const project = projects.find((p) => p.code === report.project)
-        const createTime = dayjs(report.createTime).format("DD MMM YYYY HH:mm")
-        const timeSpent = getSpentTimeFromReport(report, intl)
-        const filesCount = getReportFilesCount(report)
-        return (
-            <Table.Tr
-                key={report.id}
-                className={classes.row}
-                onClick={() => {
-                    localStorage.setItem("reportListState", window.location.search)
-                    navigate(`/report/${report.id}`)
-                }}
-            >
-                <Table.Td>
-                    <Text>{createTime}</Text>
-                </Table.Td>
-                <Table.Td>
-                    <Flex columnGap={8} align="center" className={classes.columnVolunteer}>
-                        <Avatar size={24} src={creator.avatar?.link} name={creator.fullName} />
-                        <Text truncate="end">{creator.fullName}</Text>
-                    </Flex>
-                </Table.Td>
-                <Table.Td>
-                    <Text>{report.week}</Text>
-                </Table.Td>
-                <Table.Td>
-                    <Text>{timeSpent}</Text>
-                </Table.Td>
-                <Table.Td>
-                    <Text>
-                        <FormattedMessage id={`common.report-status.${report.status}`} />
-                    </Text>
-                </Table.Td>
-                <Table.Td>
-                    <Text
-                        c={
-                            program
-                                ? undefined
-                                : colorScheme === "dark"
-                                  ? "var(--mantine-color-gray-light-color)"
-                                  : "dimmed"
-                        }
-                    >
-                        {program ? getLocalizedName(program, intl.locale) : <FormattedMessage id={locales.noProgram} />}
-                    </Text>
-                </Table.Td>
-                <Table.Td>
-                    <Text
-                        c={
-                            project
-                                ? undefined
-                                : colorScheme === "dark"
-                                  ? "var(--mantine-color-gray-light-color)"
-                                  : "dimmed"
-                        }
-                    >
-                        {project ? getLocalizedName(project, intl.locale) : <FormattedMessage id={locales.noProject} />}
-                    </Text>
-                </Table.Td>
-                <Table.Td>
-                    <Flex direction="column" justify="center">
-                        <Flex columnGap={8} align="center">
-                            <IconListCheck size={14} />
-                            <Text className={classes.stats}>
-                                <FormattedMessage id={locales.taskCount} values={{ count: report.tasks.length }} />
-                            </Text>
-                        </Flex>
-                        {filesCount != 0 && (
-                            <Flex columnGap={8} align="center">
-                                <IconFile size={14} />
-                                <Text className={classes.stats}>
-                                    <FormattedMessage id={locales.filesCount} values={{ count: filesCount }} />
-                                </Text>
-                            </Flex>
-                        )}
-                    </Flex>
-                </Table.Td>
-            </Table.Tr>
-        )
-    })
-
     const cards = reports.map((report) => {
         const creator = users[report.user!!] || defaultUser(report.user!!)
         const program = programs.find((p) => p.code === report.program)
         const project = projects.find((p) => p.code === report.project)
-        const createTime = dayjs(report.createTime).format("DD MMM YYYY")
-        const timeSpent = getSpentTimeFromReport(report, intl)
-        const filesCount = getReportFilesCount(report)
         return (
-            <Flex
+            <ReportCard
                 key={report.id}
-                className={classes.mobileCard}
-                onClick={() => {
+                report={report}
+                creator={creator}
+                moderator={report.moderator ? users[report.moderator] || defaultUser(report.moderator) : null}
+                programName={
+                    program
+                        ? getLocalizedName(program, intl.locale)
+                        : intl.formatMessage({ id: locales.noProgram })
+                }
+                projectName={
+                    project
+                        ? getLocalizedName(project, intl.locale)
+                        : intl.formatMessage({ id: locales.noProject })
+                }
+                currentUser={user}
+                onOpen={() => {
                     localStorage.setItem("reportListState", window.location.search)
                     navigate(`/report/${report.id}`)
                 }}
-            >
-                {isTablet ? (
-                    // Планшетная версия с подписями
-                    <>
-                        <Flex className={classes.reportBody}>
-                            <Flex className={classes.reportLeft}>
-                                <TextPropertyBox
-                                    name={locales.volunteer}
-                                    value={creator.fullName}
-                                    icon={<Avatar size={20} src={creator.avatar?.link} name={creator.fullName} />}
-                                />
-                            </Flex>
-                            <Flex className={classes.reportRight}>
-                                <TextPropertyBox name={locales.creationDate} value={createTime} />
-                            </Flex>
-                        </Flex>
-                        <Flex className={classes.reportBody}>
-                            <Flex className={classes.reportLeft}>
-                                <PropertyBox
-                                    name={locales.status}
-                                    value={
-                                        <Badge color={getReportStatusColor(report.status)} radius="md" variant="light">
-                                            <FormattedMessage id={`common.report-status.${report.status}`} />
-                                        </Badge>
-                                    }
-                                />
-                            </Flex>
-                            <Flex className={classes.reportRight}>
-                                <TextPropertyBox
-                                    name={locales.tasks}
-                                    value={report.tasks.length}
-                                    icon={<IconListCheck size={16} />}
-                                />
-                            </Flex>
-                        </Flex>
-                        <Flex className={classes.reportBody}>
-                            <Flex className={classes.reportLeft}>
-                                <TextPropertyBox
-                                    name={locales.timeSpent}
-                                    value={timeSpent}
-                                    icon={<IconClock size={16} />}
-                                />
-                            </Flex>
-                            <Flex className={classes.reportRight}>
-                                <TextPropertyBox name={locales.weeks} value={report.week} />
-                            </Flex>
-                        </Flex>
-                        <Flex className={classes.reportBody}>
-                            <Flex className={classes.reportLeft}>
-                                <TextPropertyBox
-                                    name={locales.program}
-                                    value={
-                                        program ? (
-                                            getLocalizedName(program, intl.locale)
-                                        ) : (
-                                            <FormattedMessage id={locales.noProgram} />
-                                        )
-                                    }
-                                    valueColor={
-                                        program
-                                            ? undefined
-                                            : colorScheme === "dark"
-                                              ? "var(--mantine-color-gray-light-color)"
-                                              : "dimmed"
-                                    }
-                                />
-                            </Flex>
-                            <Flex className={classes.reportRight}>
-                                <TextPropertyBox
-                                    name={locales.project}
-                                    value={
-                                        project ? (
-                                            getLocalizedName(project, intl.locale)
-                                        ) : (
-                                            <FormattedMessage id={locales.noProject} />
-                                        )
-                                    }
-                                    valueColor={
-                                        project
-                                            ? undefined
-                                            : colorScheme === "dark"
-                                              ? "var(--mantine-color-gray-light-color)"
-                                              : "dimmed"
-                                    }
-                                />
-                            </Flex>
-                        </Flex>
-                        {filesCount !== 0 && (
-                            <Flex className={classes.reportBody}>
-                                <Flex className={classes.reportLeft}>
-                                    <TextPropertyBox
-                                        name={locales.files}
-                                        value={filesCount}
-                                        icon={<IconFile size={16} />}
-                                    />
-                                </Flex>
-                                <Flex className={classes.reportRight}>{/* Пустое место для симметрии */}</Flex>
-                            </Flex>
-                        )}
-                    </>
-                ) : (
-                    // Мобильная версия без подписей
-                    <>
-                        <Flex className={classes.reportHeader}>
-                            <Text size="xs" c="dimmed" className={classes.dateCorner}>
-                                {createTime}
-                            </Text>
-                            <Flex align="center" gap={8} style={{ flex: 1 }}>
-                                <Avatar size={24} src={creator.avatar?.link} name={creator.fullName} />
-                                <Text fw={500} style={{ flex: 1 }}>
-                                    {creator.fullName}
-                                </Text>
-                                <Text size="sm" c="dimmed">
-                                    {report.week}
-                                </Text>
-                            </Flex>
-                        </Flex>
-                        <Flex className={classes.reportBody}>
-                            <Badge color={getReportStatusColor(report.status)} radius="md" variant="light">
-                                <FormattedMessage id={`common.report-status.${report.status}`} />
-                            </Badge>
-                            {filesCount !== 0 && (
-                                <Flex align="center" gap={4}>
-                                    <IconFile size={14} />
-                                    <Text size="sm" c="dimmed">
-                                        {filesCount}
-                                    </Text>
-                                </Flex>
-                            )}
-                        </Flex>
-                        <Flex className={classes.reportBody}>
-                            <Text
-                                size="sm"
-                                c={
-                                    program
-                                        ? undefined
-                                        : colorScheme === "dark"
-                                          ? "var(--mantine-color-gray-light-color)"
-                                          : "dimmed"
-                                }
-                            >
-                                {program ? (
-                                    getLocalizedName(program, intl.locale)
-                                ) : (
-                                    <FormattedMessage id={locales.noProgram} />
-                                )}
-                            </Text>
-                            <Text
-                                size="sm"
-                                c={
-                                    project
-                                        ? undefined
-                                        : colorScheme === "dark"
-                                          ? "var(--mantine-color-gray-light-color)"
-                                          : "dimmed"
-                                }
-                            >
-                                {project ? (
-                                    getLocalizedName(project, intl.locale)
-                                ) : (
-                                    <FormattedMessage id={locales.noProject} />
-                                )}
-                            </Text>
-                        </Flex>
-                    </>
-                )}
-            </Flex>
+            />
         )
     })
 
     return (
         <Flex className={classes.root}>
             <Flex direction="column" gap={24} miw={0}>
+                {fromHeatmap && (
+                    <Anchor
+                        component="button"
+                        type="button"
+                        className={classes.backLink}
+                        onClick={() => navigate(heatmapReturnPath())}
+                    >
+                        <IconArrowLeft size={16} />
+                        <FormattedMessage id={locales.backHeatmap} />
+                    </Anchor>
+                )}
                 <Text className={classes.title}>
-                    <FormattedMessage id={locales.title} />
+                    <FormattedMessage id={fromHeatmap ? locales.titleWeek : locales.title} />
                 </Text>
                 <div ref={listStartRef} />
                 {isMobile ? (
@@ -751,41 +543,18 @@ export const ReportList = () => {
                         </Flex>
                     </Flex>
                 )}
-                {isMobile ? (
-                    <Flex direction="column" rowGap={8} className={classes.mobileList}>
-                        {cards}
-                    </Flex>
-                ) : (
-                    <Table stickyHeader highlightOnHover className={classes.table}>
-                        <Table.Thead>
-                            <Table.Tr>
-                                <Table.Th className={classes.columnDate}>
-                                    <FormattedMessage id={locales.creationDate} />
-                                </Table.Th>
-                                <Table.Th className={classes.columnVolunteer}>
-                                    <FormattedMessage id={locales.volunteer} />
-                                </Table.Th>
-                                <Table.Th className={classes.columnWeeks}>
-                                    <FormattedMessage id={locales.weeks} />
-                                </Table.Th>
-                                <Table.Th className={classes.columnTimeSpent}>
-                                    <FormattedMessage id={locales.timeSpent} />
-                                </Table.Th>
-                                <Table.Th className={classes.columnStatus}>
-                                    <FormattedMessage id={locales.status} />
-                                </Table.Th>
-                                <Table.Th className={classes.columnProgram}>
-                                    <FormattedMessage id={locales.program} />
-                                </Table.Th>
-                                <Table.Th className={classes.columnProject}>
-                                    <FormattedMessage id={locales.project} />
-                                </Table.Th>
-                                <Table.Th className={classes.columnStats}></Table.Th>
-                            </Table.Tr>
-                        </Table.Thead>
-                        <Table.Tbody>{rows}</Table.Tbody>
-                    </Table>
+                {weekSelected && digestReports.length > 0 && (
+                    <WeekDigest
+                        reports={digestReports}
+                        programs={programs}
+                        users={users}
+                        dateFrom={filter.dateFrom || ""}
+                        dateTo={filter.dateTo || ""}
+                    />
                 )}
+                <Flex direction="column" className={classes.cardList}>
+                    {cards}
+                </Flex>
                 {page.totalElements == 0 && (
                     <Flex className={classes.emptyState}>
                         <IconUfo size={48} />
@@ -816,14 +585,6 @@ export const ReportList = () => {
             )}
         </Flex>
     )
-}
-
-const getReportFilesCount = (report: ReportDto): number => {
-    let count = 0
-    report.tasks.forEach((task) => {
-        count += task.files?.length || 0
-    })
-    return count
 }
 
 export default ReportList

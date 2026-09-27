@@ -16,4 +16,5 @@ export const locales = {
     minLetters: "pages.edit-report.min-letters",
     invalidUrl: "pages.edit-report.invalid-url",
     serbianTaskViewLabel: "pages.report.serbian-task-view",
+    customerLocked: "pages.edit-report.task-customer-locked",
 }

@@ -1,13 +1,15 @@
-import { Anchor, Badge, Button, Flex, Text, Title } from "@mantine/core"
+import { Alert, Anchor, Badge, Button, Flex, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { TaskDto } from "@rds-network/portal-api-axios"
 import {
+    IconAlertTriangle,
     IconArrowLeft,
     IconCircleCheck,
     IconChevronRight,
     IconNotes,
     IconDeviceFloppy,
     IconPlus,
+    IconShieldCheck,
 } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -15,11 +17,16 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useLocation, useNavigate, useParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
+import { ProgramSelectInline } from "src/pages/profile/select/ProgramSelect"
+import { ProjectSelectInline } from "src/pages/profile/select/ProjectSelect"
 import classes from "src/pages/reportEdit/EditReport.module.scss"
 import { defaultTask } from "src/pages/reportEdit/lib/defaults"
 import { TaskCard, TaskCardInterface } from "src/pages/reportEdit/task/TaskCard"
 import { ReportApiService } from "src/shared/api/ReportApiService"
+import { reportBlockOf, reportControllerNameOf, reportControlOf } from "src/shared/api/user/UserApiService"
+import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { setDocumentTitleByLocale, setDocumentTitleByString } from "src/shared/hooks/useDocumentTitle"
+import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { useReportDraft } from "src/shared/hooks/useReportDraft"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 import { ReportStatus } from "src/shared/report/status"
@@ -47,6 +54,8 @@ export const EditReport = () => {
     const [isSending, setIsSending] = useState(false)
 
     const [confirmModalOpened, setConfirmModalOpened] = useState(false)
+    const [programCode, setProgramCode] = useState<string | null>(null)
+    const [projectCode, setProjectCode] = useState<string | null>(null)
 
     const { data: report, isFetching: isFetchingReport } = useQuery({
         queryKey: ["getReport", id],
@@ -98,8 +107,60 @@ export const EditReport = () => {
     useEffect(() => {
         if (editMode) {
             setTasks(report.tasks)
+            setProgramCode(report.program ?? null)
+            setProjectCode(report.project ?? null)
         }
     }, [report, editMode])
+
+    useEffect(() => {
+        if (editMode) return
+        const taskName = new URLSearchParams(location.search).get("task")?.trim()
+        if (!taskName) return
+        setTasks((current) => {
+            if (current.some((task) => (task.name || "").trim() === taskName)) return current
+            const blank = current.length === 1 && !(current[0].name || "").trim()
+            if (blank) return [{ ...current[0], name: taskName }]
+            return [...current, { ...defaultTask, id: uuid(), name: taskName }]
+        })
+    }, [editMode, location.search, setTasks])
+
+    const reportBlock = reportBlockOf(currentUser)
+    const controllerLogin = reportControlOf(currentUser).reportControllerUsername || null
+    const controllerName = reportControllerNameOf(currentUser)
+
+    const { data: myAssignments = [] } = useQuery({
+        queryKey: ["work-assignments"],
+        enabled: !editMode,
+        queryFn: () => WorkAssignmentApiService.list(),
+    })
+
+    const openAssignments = useMemo(
+        () =>
+            myAssignments.filter(
+                (item) =>
+                    item.status !== "DONE" &&
+                    (!item.assignee || item.assignee === currentUser?.username) &&
+                    !tasks.some((task) => (task.name || "").trim() === item.title.trim())
+            ),
+        [myAssignments, currentUser?.username, tasks]
+    )
+
+    const { visibleProjects } = useProgramProjectFilter(programCode, projectCode)
+
+    // Снимок программы в отчёте задаёт тот, кто его модерирует, автору же бэкенд подставит программу из профиля.
+    const canAssign = hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER])
+    const profileProgram = currentUser?.program?.code ?? null
+    const programWillSync =
+        editMode && !canAssign && currentUser?.username === report.user && (report.program ?? null) !== profileProgram
+
+    const addAssignment = (title: string) => {
+        setTasks((current) => {
+            if (current.some((task) => (task.name || "").trim() === title.trim())) return current
+            const blank = current.length === 1 && !(current[0].name || "").trim()
+            if (blank) return [{ ...current[0], name: title }]
+            return [...current, { ...defaultTask, id: uuid(), name: title }]
+        })
+    }
 
     if (editMode) {
         if (!id) {
@@ -135,6 +196,30 @@ export const EditReport = () => {
                     tasks[i] = cardRef.current.getValues()
                 }
             }
+            if (controllerLogin) {
+                tasks[i] = { ...tasks[i], customer: controllerLogin }
+            }
+        }
+        if (tasks.some((task) => !task.customer)) {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id={locales.customerRequired} />
+                    </Text>
+                )
+            )
+            return
+        }
+        const selfLogin = currentUser?.username?.toLowerCase()
+        if (selfLogin && tasks.some((task) => task.customer?.toLowerCase() === selfLogin)) {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id={locales.customerCannotBeSelf} />
+                    </Text>
+                )
+            )
+            return
         }
         if (!allTasksInOneWeek(tasks)) {
             notifications.show(
@@ -156,7 +241,9 @@ export const EditReport = () => {
 
     const sendReport = () => {
         setIsSending(true)
-        const reportDto = editMode ? { tasks: tasks, id: report.id } : { tasks: tasks, id: uuid() }
+        const reportDto = editMode
+            ? { tasks: tasks, id: report.id, program: programCode ?? undefined, project: projectCode ?? undefined }
+            : { tasks: tasks, id: uuid() }
         const response = editMode ? ReportApiService.updateReport(reportDto) : ReportApiService.createReport(reportDto)
         response
             .then((r) => {
@@ -179,9 +266,57 @@ export const EditReport = () => {
                     <FormattedMessage id={editMode ? locales.titleEdit : locales.title} />
                 </Title>
             </div>
+            {reportBlock.reportBlocked && (
+                <Alert
+                    color="red"
+                    icon={<IconAlertTriangle size={18} />}
+                    title={<FormattedMessage id={locales.blockedTitle} />}
+                >
+                    <FormattedMessage
+                        id={locales.blockedDescription}
+                        values={{
+                            name: reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || "",
+                        }}
+                    />
+                    {reportBlock.reportBlockedReason && (
+                        <Text size="sm" mt={6}>
+                            <FormattedMessage
+                                id={locales.blockedReason}
+                                values={{ reason: reportBlock.reportBlockedReason }}
+                            />
+                        </Text>
+                    )}
+                </Alert>
+            )}
+            {!!controllerName && (
+                <Alert
+                    color="teal"
+                    icon={<IconShieldCheck size={18} />}
+                    title={<FormattedMessage id={locales.controlTitle} values={{ name: controllerName }} />}
+                >
+                    <FormattedMessage id={locales.controlDescription} values={{ name: controllerName }} />
+                </Alert>
+            )}
             <div className={classes.workspace}>
                 <div className={classes.taskContainer}>
                     <Flex direction="column" rowGap={24}>
+                        {!editMode && openAssignments.length > 0 && (
+                            <Flex wrap="wrap" gap={8} align="center">
+                                <Text size="sm" c="dimmed">
+                                    <FormattedMessage id="pages.tasks.open" />
+                                </Text>
+                                {openAssignments.map((item) => (
+                                    <Button
+                                        key={item.id}
+                                        size="xs"
+                                        variant="light"
+                                        onClick={() => addAssignment(item.title)}
+                                    >
+                                        <FormattedMessage id="pages.tasks.add" />: {item.title}
+                                    </Button>
+                                ))}
+                            </Flex>
+                        )}
                         {tasks
                             .sort((t1, t2) => {
                                 return dayjs(t1.date).diff(t2.date)
@@ -198,6 +333,8 @@ export const EditReport = () => {
                                         index={index}
                                         deletable={tasks.length > 1}
                                         editMode={editMode}
+                                        lockedCustomer={controllerLogin}
+                                        lockedCustomerName={controllerName}
                                         onChange={handleTaskChange}
                                         onDelete={handleTaskDelete}
                                     />
@@ -227,6 +364,34 @@ export const EditReport = () => {
                     <Text className={classes.description}>
                         <FormattedMessage id={locales.description} />
                     </Text>
+                    {editMode && canAssign && (
+                        <Flex direction="column" rowGap={4} mt="md">
+                            <Text size="sm" fw={500}>
+                                <FormattedMessage id={locales.assignmentTitle} />
+                            </Text>
+                            <ProgramSelectInline
+                                value={programCode}
+                                canEdit
+                                locale={intl.locale}
+                                onChange={(code) => {
+                                    setProgramCode(code)
+                                    setProjectCode(null)
+                                }}
+                            />
+                            <ProjectSelectInline
+                                value={projectCode}
+                                canEdit
+                                locale={intl.locale}
+                                onChange={setProjectCode}
+                                projectsOverride={visibleProjects}
+                            />
+                        </Flex>
+                    )}
+                    {programWillSync && (
+                        <Text size="xs" c="dimmed" mt="md">
+                            <FormattedMessage id={locales.programWillSync} />
+                        </Text>
+                    )}
                     <div className={classes.draftHint}>
                         <IconCircleCheck size={18} />
                         <Text size="xs">
@@ -239,7 +404,7 @@ export const EditReport = () => {
                         rightSection={editMode ? <IconDeviceFloppy size={18} /> : <IconChevronRight size={18} />}
                         onClick={onSend}
                         loading={isSending}
-                        disabled={isSending}
+                        disabled={isSending || !!reportBlock.reportBlocked}
                     >
                         <FormattedMessage id={editMode ? locales.saveButton : locales.sendButton} />
                     </Button>

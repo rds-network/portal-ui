@@ -61,13 +61,18 @@
 .weeksRow {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(9, minmax(0, 1fr));
-    gap: 5px;
+    grid-template-columns: repeat(18, minmax(0, 1fr));
+    gap: 3px;
+}
+@media (min-width: 80em) {
+    .weeksRow {
+        grid-template-columns: repeat(auto-fill, minmax(14px, 1fr));
+    }
 }
 .weekSquare {
     min-width: 0;
     aspect-ratio: 1;
-    border-radius: 7px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -83,7 +88,7 @@
 }
 .weekNumber {
     color: white;
-    font-size: 12px;
+    font-size: 9px;
 }
 .noReports {
     background: #ad5860;
@@ -99,6 +104,9 @@
 }
 .overtimeReports {
     background: #25566a;
+}
+.leave {
+    background: var(--mantine-color-green-6);
 }
 .na {
     background: light-dark(#dfe7e8, #3a515a);
@@ -127,3 +135,94 @@
         padding: 20px;
     }
 }
+
+.compactRoot {
+    @include s.glass;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.compactTop {
+    gap: 10px;
+}
+
+.compactTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.compactLegend {
+    gap: 8px 14px;
+}
+
+.compactStrip {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.compactWeekHeaders,
+.compactWeekSquares {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9px, 1fr));
+    gap: 1px;
+    min-width: max(100%, calc(var(--weeks, 39) * 10px));
+}
+
+.compactWeekHeaders {
+    margin-bottom: 2px;
+
+    :global(.mantine-Text-root) {
+        font-size: 8px !important;
+        line-height: 1;
+    }
+}
+
+.compactSquare {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 2px;
+    cursor: default;
+    transition: transform 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+        transform: scale(1.2);
+    }
+}
+
+.compactRoot {
+    .noReports {
+        background: var(--mantine-color-red-6);
+    }
+    .partialReports {
+        background: var(--mantine-color-blue-2);
+    }
+    .fullReports {
+        background: var(--mantine-color-blue-5);
+    }
+    .overtimeReports {
+        background: var(--mantine-color-blue-9);
+    }
+    .leave {
+        background: var(--mantine-color-green-6);
+    }
+    .na {
+        background: var(--mantine-color-gray-4);
+        border: 1px solid var(--mantine-color-gray-5);
+    }
+    .waiting {
+        background: light-dark(#fff, var(--mantine-color-dark-6));
+        border: 1px solid var(--mantine-color-gray-5);
+    }
+    .legendSquare {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+    }
+}
+

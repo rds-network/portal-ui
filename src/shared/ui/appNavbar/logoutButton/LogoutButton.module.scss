@@ -1,16 +1,35 @@
-.container {
+.item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 10px;
+    color: #d4a0a0;
+    font-size: 14px;
     font-weight: 500;
-    display: block;
-    color: #b8ced2;
-    font-size: var(--mantine-font-size-sm);
-
-    @mixin hover {
-        background-color: #ffffff0a;
-        color: #edf5f4;
+    transition:
+        background 160ms ease,
+        color 160ms ease;
+    &:hover {
+        background: #ffffff0d;
+        color: #ffd0d0;
     }
 }
 
-.button {
-    display: flex;
+.icon {
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    background: #5c2a2a55;
+    color: #f0a0a0;
+}
+
+.label {
+    flex: 1;
+    text-align: left;
 }

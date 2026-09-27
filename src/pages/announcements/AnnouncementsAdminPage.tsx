@@ -1,10 +1,11 @@
-import { Button, Card, Flex, Select, Text, TextInput, Title } from "@mantine/core"
+import { Badge, Button, Card, Flex, Select, Text, TextInput, Title } from "@mantine/core"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
-import { AnnouncementAudience, AnnouncementCreateRequest } from "@rds-network/portal-api-axios"
-import { IconSend } from "@tabler/icons-react"
+import { AnnouncementAudience } from "@rds-network/portal-api-axios"
+import { IconSend, IconTrash } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import dayjs from "dayjs"
 import Highlight from "@tiptap/extension-highlight"
 import SubScript from "@tiptap/extension-subscript"
 import Superscript from "@tiptap/extension-superscript"
@@ -12,39 +13,41 @@ import TextAlign from "@tiptap/extension-text-align"
 import Underline from "@tiptap/extension-underline"
 import { useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
-import React, { useContext, useEffect, useMemo } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { AnnouncementApiService } from "src/shared/api/AnnouncementApiService"
+import { AnnouncementExtraApi, AnnouncementManageDto } from "src/shared/api/AnnouncementApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
+import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
+import { hasPermission } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
 import classes from "./AnnouncementsAdminPage.module.scss"
-import { hasAccess } from "src/pages/heatmap/lib/roles"
+
+const ADMIN_ROLES = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"]
+
+type AudienceChoice = AnnouncementAudience | "USER"
 
 type AnnouncementFormValues = {
     title: string
     body: string
-    audience: AnnouncementAudience
+    audience: AudienceChoice
     programCode: string | null
+    username: string | null
+    placement: "bell" | "banner"
 }
 
 export const AnnouncementsAdminPage: React.FC = () => {
     const { user } = useContext(UserContext)
+    const navigate = useNavigate()
     const intl = useIntl()
     const queryClient = useQueryClient()
-    const navigate = useNavigate()
 
     setDocumentTitleByLocale("pages.announcements.admin.title")
-
-    useEffect(() => {
-        if (!hasAccess(user)) {
-            navigate("/unauthorized", { replace: true })
-        }
-    }, [user, navigate])
 
     const requiredMessage = { message: intl.formatMessage({ id: "pages.announcements.admin.required" }) }
     const minMessage = (count: number) => intl.formatMessage({ id: "pages.user-list.min-letters" }, { count })
@@ -56,15 +59,34 @@ export const AnnouncementsAdminPage: React.FC = () => {
                 .object({
                     title: z.string(requiredMessage).trim().min(3, minMessage(3)).max(200, maxMessage(200)),
                     body: z.string(requiredMessage).trim().min(1, requiredMessage).max(10000, maxMessage(10000)),
-                    audience: z.enum([AnnouncementAudience.All, AnnouncementAudience.Program], requiredMessage),
+                    audience: z.enum(
+                        [AnnouncementAudience.All, AnnouncementAudience.Program, "USER"],
+                        requiredMessage
+                    ),
                     programCode: z.string().nullable(),
+                    username: z.string().nullable(),
+                    placement: z.enum(["bell", "banner"]),
                 })
                 .superRefine((values, ctx) => {
+                    if (values.placement === "banner" && values.audience === "USER") {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            path: ["audience"],
+                            message: intl.formatMessage({ id: "pages.announcements.admin.bannerNoPerson" }),
+                        })
+                    }
                     if (values.audience === AnnouncementAudience.Program && !values.programCode) {
                         ctx.addIssue({
                             code: z.ZodIssueCode.custom,
                             path: ["programCode"],
                             message: intl.formatMessage({ id: "pages.announcements.admin.emptyProgram" }),
+                        })
+                    }
+                    if (values.audience === "USER" && !values.username) {
+                        ctx.addIssue({
+                            code: z.ZodIssueCode.custom,
+                            path: ["username"],
+                            message: intl.formatMessage({ id: "pages.announcements.admin.emptyPerson" }),
                         })
                     }
                 }),
@@ -77,9 +99,35 @@ export const AnnouncementsAdminPage: React.FC = () => {
             body: "",
             audience: AnnouncementAudience.All,
             programCode: null,
+            username: null,
+            placement: "bell",
         },
         validate: zodResolver(validationSchema),
     })
+
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
+    const isManager = hasPermission(user, ADMIN_ROLES)
+    const curatorPrograms = curatorMe?.programs || []
+    const isCuratorOnly = !isManager && !!curatorMe?.curator
+
+    useEffect(() => {
+        if (!user || curatorMe === undefined) return
+        if (!isManager && !curatorMe.curator) {
+            navigate("/unauthorized", { replace: true })
+        }
+    }, [user, isManager, curatorMe, navigate])
+
+    useEffect(() => {
+        if (!isCuratorOnly) return
+        form.setFieldValue("audience", AnnouncementAudience.Program)
+        if (curatorPrograms.length === 1) {
+            form.setFieldValue("programCode", curatorPrograms[0])
+        }
+    }, [isCuratorOnly, curatorPrograms.join(",")])
 
     const { data: programs = [] } = useQuery({
         queryKey: ["programs"],
@@ -88,16 +136,66 @@ export const AnnouncementsAdminPage: React.FC = () => {
 
     const programOptions = useMemo(
         () =>
-            programs.map((program) => ({
-                value: program.code,
-                label: getLocalizedName(program, intl.locale) || program.code,
-            })),
-        [programs, intl.locale]
+            programs
+                .filter((program) => !isCuratorOnly || curatorPrograms.includes(program.code))
+                .map((program) => ({
+                    value: program.code,
+                    label: getLocalizedName(program, intl.locale) || program.code,
+                })),
+        [programs, intl.locale, isCuratorOnly, curatorPrograms]
     )
 
+    const [person, setPerson] = useState<string | null>(null)
+
+    const { data: history = [], isFetching: historyLoading } = useQuery({
+        queryKey: ["announcements", "manage"],
+        queryFn: () => AnnouncementExtraApi.listManage(),
+        enabled: isManager,
+    })
+
+    const { mutate: removeAnnouncement, isPending: removing } = useMutation({
+        mutationFn: (id: string) => AnnouncementExtraApi.remove(id),
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.announcements.admin.history.deleted" />
+                    </Text>,
+                    null
+                )
+            )
+            queryClient.invalidateQueries({ queryKey: ["announcements"] })
+        },
+    })
+
+    const confirmRemove = (id: string) => {
+        if (!window.confirm(intl.formatMessage({ id: "pages.announcements.admin.history.deleteConfirm" }))) return
+        removeAnnouncement(id)
+    }
+
+    const audienceLabel = (item: AnnouncementManageDto) => {
+        if (item.audience === "PROGRAM") {
+            const program = programs.find((candidate) => candidate.code === item.programCode)
+            const name = (program && getLocalizedName(program, intl.locale)) || item.programCode
+            return `${intl.formatMessage({ id: "pages.announcements.admin.audience.program" })}: ${name}`
+        }
+        if (item.audience === "USER") {
+            return `${intl.formatMessage({ id: "pages.announcements.admin.audience.person" })}: ${item.targetUsername}`
+        }
+        return intl.formatMessage({ id: "pages.announcements.admin.audience.all" })
+    }
+
     const { mutate: publish, isPending } = useMutation({
-        mutationFn: (payload: AnnouncementCreateRequest) =>
-            AnnouncementApiService.createAnnouncement(payload).then((r) => r.data),
+        mutationFn: async (values: AnnouncementFormValues) => {
+            return AnnouncementExtraApi.publish({
+                title: values.title.trim(),
+                body: values.body.trim(),
+                audience: values.audience,
+                programCode: values.audience === AnnouncementAudience.Program ? values.programCode : null,
+                username: values.audience === "USER" ? values.username : null,
+                banner: values.placement === "banner",
+            })
+        },
     })
 
     const editor = useEditor(
@@ -123,10 +221,8 @@ export const AnnouncementsAdminPage: React.FC = () => {
     const onPublish = form.onSubmit((values) => {
         publish(
             {
-                title: values.title.trim(),
-                body: values.body.trim(),
-                audience: values.audience,
-                programCode: values.audience === AnnouncementAudience.Program ? values.programCode : null,
+                ...values,
+                username: person,
             },
             {
                 onSuccess: () => {
@@ -139,8 +235,11 @@ export const AnnouncementsAdminPage: React.FC = () => {
                         )
                     )
                     form.reset()
+                    setPerson(null)
                     editor?.commands.clearContent()
                     queryClient.invalidateQueries({ queryKey: ["announcements"] })
+                    queryClient.invalidateQueries({ queryKey: ["inbox"] })
+                    queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
                 },
             }
         )
@@ -213,28 +312,78 @@ export const AnnouncementsAdminPage: React.FC = () => {
                         </Flex>
 
                         <Select
-                            label={<FormattedMessage id="pages.announcements.admin.fields.audience" />}
+                            label={<FormattedMessage id="pages.announcements.admin.fields.placement" />}
                             data={[
                                 {
-                                    value: AnnouncementAudience.All,
-                                    label: intl.formatMessage({ id: "pages.announcements.admin.audience.all" }),
+                                    value: "bell",
+                                    label: intl.formatMessage({ id: "pages.announcements.admin.placement.bell" }),
                                 },
+                                {
+                                    value: "banner",
+                                    label: intl.formatMessage({ id: "pages.announcements.admin.placement.banner" }),
+                                },
+                            ]}
+                            {...form.getInputProps("placement")}
+                            onChange={(value) => {
+                                form.setFieldValue("placement", value === "banner" ? "banner" : "bell")
+                                if (value === "banner" && form.values.audience === "USER") {
+                                    form.setFieldValue("audience", AnnouncementAudience.All)
+                                    form.setFieldValue("username", null)
+                                    setPerson(null)
+                                }
+                            }}
+                        />
+                        <Select
+                            label={<FormattedMessage id="pages.announcements.admin.fields.audience" />}
+                            data={[
+                                ...(!isCuratorOnly
+                                    ? [
+                                          {
+                                              value: AnnouncementAudience.All,
+                                              label: intl.formatMessage({
+                                                  id: "pages.announcements.admin.audience.all",
+                                              }),
+                                          },
+                                      ]
+                                    : []),
                                 {
                                     value: AnnouncementAudience.Program,
                                     label: intl.formatMessage({ id: "pages.announcements.admin.audience.program" }),
                                 },
+                                ...(!isCuratorOnly && form.values.placement !== "banner"
+                                    ? [
+                                          {
+                                              value: "USER",
+                                              label: intl.formatMessage({
+                                                  id: "pages.announcements.admin.audience.person",
+                                              }),
+                                          },
+                                      ]
+                                    : []),
                             ]}
                             {...form.getInputProps("audience")}
                             onChange={(value) => {
-                                form.setFieldValue(
-                                    "audience",
-                                    (value as AnnouncementAudience) || AnnouncementAudience.All
-                                )
+                                form.setFieldValue("audience", (value as AudienceChoice) || AnnouncementAudience.All)
                                 if (value !== AnnouncementAudience.Program) {
                                     form.setFieldValue("programCode", null)
                                 }
+                                if (value !== "USER") {
+                                    form.setFieldValue("username", null)
+                                    setPerson(null)
+                                }
                             }}
                         />
+                        {form.values.audience === "USER" && (
+                            <UserSearch
+                                key="announce-person"
+                                label={<FormattedMessage id="pages.announcements.admin.fields.person" />}
+                                onUserChange={(picked) => {
+                                    const login = picked?.username ?? null
+                                    setPerson(login)
+                                    form.setFieldValue("username", login)
+                                }}
+                            />
+                        )}
                         {form.values.audience === AnnouncementAudience.Program && (
                             <Select
                                 label={<FormattedMessage id="pages.announcements.admin.fields.program" />}
@@ -252,6 +401,71 @@ export const AnnouncementsAdminPage: React.FC = () => {
                     </Flex>
                 </form>
             </Card>
+
+            {isManager && (
+                <Card withBorder p="lg">
+                    <Title order={3} mb={4}>
+                        <FormattedMessage id="pages.announcements.admin.history.title" />
+                    </Title>
+                    <Text c="dimmed" size="sm" mb="md">
+                        <FormattedMessage id="pages.announcements.admin.history.description" />
+                    </Text>
+
+                    {history.length === 0 ? (
+                        <Text c="dimmed" size="sm">
+                            <FormattedMessage
+                                id={
+                                    historyLoading
+                                        ? "pages.announcements.admin.history.loading"
+                                        : "pages.announcements.admin.history.empty"
+                                }
+                            />
+                        </Text>
+                    ) : (
+                        <Flex direction="column" gap="sm">
+                            {history.map((item) => (
+                                <Flex key={item.id} className={classes.historyItem} gap="md" align="flex-start">
+                                    <Flex direction="column" gap={4} miw={0} style={{ flex: 1 }}>
+                                        <Text fw={600} size="sm">
+                                            {item.title}
+                                        </Text>
+                                        <Flex gap={8} wrap="wrap" align="center">
+                                            <Badge variant="light" radius="sm">
+                                                {intl.formatMessage({
+                                                    id: item.banner
+                                                        ? "pages.announcements.admin.placement.banner"
+                                                        : "pages.announcements.admin.placement.bell",
+                                                })}
+                                            </Badge>
+                                            <Text size="xs" c="dimmed">
+                                                {audienceLabel(item)}
+                                            </Text>
+                                            <Text size="xs" c="dimmed">
+                                                {dayjs(item.createTime).format("DD.MM.YYYY HH:mm")}
+                                            </Text>
+                                            {item.createdBy && (
+                                                <Text size="xs" c="dimmed">
+                                                    {item.createdBy}
+                                                </Text>
+                                            )}
+                                        </Flex>
+                                    </Flex>
+                                    <Button
+                                        variant="light"
+                                        color="red"
+                                        size="compact-sm"
+                                        leftSection={<IconTrash size={14} />}
+                                        loading={removing}
+                                        onClick={() => confirmRemove(item.id)}
+                                    >
+                                        <FormattedMessage id="pages.announcements.admin.history.delete" />
+                                    </Button>
+                                </Flex>
+                            ))}
+                        </Flex>
+                    )}
+                </Card>
+            )}
         </Flex>
     )
 }
