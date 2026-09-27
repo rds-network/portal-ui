@@ -27,9 +27,22 @@ export type LeaveRequestRejectRequest = {
     reason?: string | null
 }
 
+export type LeaveRequestMetaDto = {
+    approverUsername: string
+    isLeaveApprover: boolean
+}
+
 const alive = (status: number) => status === 200 || status === 201 || status === 404 || status >= 500
 
 export const LeaveRequestApiService = {
+    async meta(): Promise<LeaveRequestMetaDto | null> {
+        const response = await RequestHttp.get<LeaveRequestMetaDto>("/leave-requests/meta", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return null
+        return response.data ?? null
+    },
+
     async create(payload: LeaveRequestCreateRequest): Promise<LeaveRequestDto> {
         const response = await RequestHttp.post<LeaveRequestDto>("/leave-requests", payload, {
             validateStatus: (status) => status === 200 || status === 201 || status === 404,

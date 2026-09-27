@@ -13,14 +13,10 @@ import {
     LeaveRequestDto,
     LeaveRequestStatus,
 } from "src/shared/api/LeaveRequestApiService"
-import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { ReportHeatMapApiService } from "src/shared/api/ReportHeatMapApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
-import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./LeavePage.module.scss"
-
-const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
 
 const STATUS_COLOR: Record<LeaveRequestStatus, string> = {
     PENDING: "yellow",
@@ -41,12 +37,13 @@ export const LeavePage: React.FC = () => {
 
     setDocumentTitleByLocale("pages.leave.title")
 
-    const { data: curatorMe } = useQuery({
-        queryKey: ["program-curators", "me"],
-        queryFn: () => ProgramCuratorApiService.me(),
+    const { data: leaveMeta } = useQuery({
+        queryKey: ["leave-requests", "meta"],
+        queryFn: () => LeaveRequestApiService.meta(),
         enabled: !!user,
+        staleTime: 5 * 60 * 1000,
     })
-    const canDecide = !!curatorMe?.curator || hasPermission(user, MANAGERS)
+    const canDecide = !!leaveMeta?.isLeaveApprover
 
     const form = useForm({
         initialValues: {
