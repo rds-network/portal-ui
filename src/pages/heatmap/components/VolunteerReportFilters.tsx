@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Input, Paper, Select, Text } from "@mantine/core"
-import { ProgramDto, ProjectDto } from "@russian-rs/portal-api-axios"
+import { ProgramDto, ProjectDto } from "@rds-network/portal-api-axios"
 import { IconCalendarWeek, IconFilter, IconSearch, IconX } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import React from "react"
@@ -20,6 +20,8 @@ interface VolunteerReportFiltersProps {
     onReset: () => void
     programsOverride?: ProgramDto[]
     projectsOverride?: ProjectDto[]
+    includeNoProgram?: boolean
+    programClearable?: boolean
 }
 
 export const VolunteerReportFilters: React.FC<VolunteerReportFiltersProps> = ({
@@ -34,6 +36,8 @@ export const VolunteerReportFilters: React.FC<VolunteerReportFiltersProps> = ({
     onReset,
     programsOverride,
     projectsOverride,
+    includeNoProgram = true,
+    programClearable = true,
 }) => {
     const intl = useIntl()
     const hasActiveFilters = search || selectedProgram || selectedProject || year !== dayjs().year().toString()
@@ -75,6 +79,8 @@ export const VolunteerReportFilters: React.FC<VolunteerReportFiltersProps> = ({
                             onChange={onProgramChange}
                             placeholder={intl.formatMessage({ id: locales.program })}
                             programsOverride={programsOverride}
+                            includeNoProgram={includeNoProgram}
+                            clearable={programClearable}
                         />
                     </Box>
                     <Box className={classes.filterItem}>

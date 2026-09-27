@@ -1,15 +1,21 @@
 import { createContext, useContext } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ProgramDto } from "@russian-rs/portal-api-axios"
+import { ProgramDto, ProgramsApi } from "@rds-network/portal-api-axios"
 import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 
-const ProgramsContext = createContext<ProgramDto[]>([])
+export const ProgramsContext = createContext<ProgramDto[]>([])
 
-export function ProgramsProvider({ children }: { children: React.ReactNode }) {
+export function ProgramsProvider({
+    children,
+    apiService = ProgramsApiService,
+}: {
+    children: React.ReactNode
+    apiService?: ProgramsApi
+}) {
     const { data } = useQuery<ProgramDto[]>({
         queryKey: ["programs"],
         queryFn: async () => {
-            const response = await ProgramsApiService.getPrograms()
+            const response = await apiService.getPrograms()
             return response.data
         },
         staleTime: Infinity,

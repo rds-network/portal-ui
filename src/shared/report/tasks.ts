@@ -1,4 +1,4 @@
-import { TaskDto } from "@russian-rs/portal-api-axios"
+import { TaskDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 
 export const allTasksInOneWeek = (tasks: TaskDto[]): boolean => {

@@ -1,9 +1,9 @@
-import { Badge, Button, Container, Drawer, Flex, Modal, Select, Text, TextInput, Tooltip } from "@mantine/core"
+import { Anchor, Badge, Button, Container, Drawer, Flex, Modal, MultiSelect, Select, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import { GenderEnumDto, UserInfoDto, UserInfoUpdateRequest } from "@russian-rs/portal-api-axios"
+import { GenderEnumDto, UserInfoDto, UserInfoUpdateRequest } from "@rds-network/portal-api-axios"
 import {
     IconBrandTelegram,
     IconBuildings,
@@ -14,19 +14,33 @@ import {
     IconInfoCircle,
     IconMail,
     IconMapPin,
+    IconMap,
     IconIdBadge,
     IconPencil,
     IconPhone,
 } from "@tabler/icons-react"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { Link } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
+import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
-import { UserApiService } from "src/shared/api/user/UserApiService"
+import { InboxApiService } from "src/shared/api/InboxApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { CitiesApiService } from "src/shared/api/CitiesApiService"
+import {
+    reportBlockOf,
+    reportControllerNameOf,
+    reportControlOf,
+    secondaryProgramCodesOf,
+    UserAccountApiService,
+    UserApiService,
+} from "src/shared/api/user/UserApiService"
+import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { Locale } from "src/shared/constants/Locales"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
@@ -35,6 +49,7 @@ import { CitySelect } from "src/shared/ui/citySelect/CitySelect"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getFullAddress } from "src/shared/utils/getFullAddress"
+import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
 import { ProgramSelectInline } from "../select/ProgramSelect"
 import { ProjectSelectInline } from "../select/ProjectSelect"
@@ -50,17 +65,44 @@ interface ProfileInfoProps {
 
 export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: ProfileInfoProps) => {
     const { user: currentUser, setUser } = useContext(UserContext)
+    const queryClient = useQueryClient()
     const [opened, { open, close }] = useDisclosure(false)
     const [idCardOpened, { open: openIDCard, close: closeIDCard }] = useDisclosure(false)
+    const [mupOpened, { open: openMup, close: closeMup }] = useDisclosure(false)
+    const [controlModalOpen, setControlModalOpen] = useState(false)
+    const [controllerLogin, setControllerLogin] = useState<string | null>(null)
+    const [controlReason, setControlReason] = useState("")
     const intl = useIntl()
     const locale = intl.locale as Locale
+
+    const { data: cities = [] } = useQuery({
+        queryKey: ["cities"],
+        queryFn: () => CitiesApiService.getCities().then((response) => response.data),
+    })
+
+    const { data: warningCount = 0 } = useQuery({
+        queryKey: ["overdue-warnings", userInfo?.username],
+        queryFn: () => InboxApiService.overdueWarnings(userInfo!.username),
+        enabled: !!userInfo?.username && !!showSensitiveData,
+    })
+
+    const { data: curatorRows = [] } = useQuery({
+        queryKey: ["program-curators"],
+        queryFn: () => ProgramCuratorApiService.list(),
+        enabled: !!userInfo?.username,
+    })
+    const curatorPrograms = curatorRows
+        .filter((row) => row.username.toLowerCase() === (userInfo?.username || "").toLowerCase())
+        .map((row) => getLocalizedName({ nameRu: row.programNameRu, nameEn: row.programNameEn, nameSr: row.programNameSr }, locale))
 
     const validationSchema = z.object({
         city: z
             .string()
-            .min(2, intl.formatMessage({ id: "pages.profile.validation.minLetters" }, { count: 2 }))
             .max(100, intl.formatMessage({ id: "pages.profile.validation.maxLetters" }, { count: 100 }))
-            .optional()
+            .refine(
+                (val) => !val || !cities.length || cities.some((c) => c.name === val || c.nameCyrillic === val),
+                intl.formatMessage({ id: "pages.profile.validation.cityNotInList" })
+            )
             .or(z.literal("")),
         postalCode: z
             .string()
@@ -175,7 +217,8 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     })
 
     const { mutateAsync: updateProgram } = useMutation({
-        mutationFn: async (program: string) => {
+        mutationFn: async (program: string | null) => {
+            if (!program) return UserAccountApiService.clearProgram(userInfo.id)
             const response = await UserApiService.setProgram(userInfo.id, program)
             return response.data
         },
@@ -208,8 +251,80 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         },
     })
 
+    const { mutate: updateReportController, isPending: isUpdatingController } = useMutation({
+        mutationFn: async (payload: { login: string | null; reason?: string }) =>
+            payload.login === null
+                ? UserAccountApiService.clearReportController(userInfo.id)
+                : UserAccountApiService.setReportController(userInfo.id, payload.login, payload.reason),
+        onSuccess: (data) => {
+            if (userInfo?.username === currentUser?.username) {
+                setUser(data)
+            }
+            onUserInfoUpdate?.(data)
+            setControlModalOpen(false)
+            setControllerLogin(null)
+            setControlReason("")
+            queryClient.invalidateQueries({ queryKey: ["controlled-by-me"] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.profileUpdated" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+        onError: () => {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.updateError" />
+                    </Text>
+                )
+            )
+        },
+    })
+
+    const secondaryFromUser = secondaryProgramCodesOf(userInfo)
+    const [selectedSecondary, setSelectedSecondary] = useState<string[]>(secondaryFromUser)
+
+    useEffect(() => {
+        setSelectedSecondary(secondaryFromUser)
+    }, [secondaryFromUser.join("|")])
+
+    const { mutateAsync: updateSecondaryPrograms, isPending: isUpdatingSecondary } = useMutation({
+        mutationFn: (codes: string[]) => UserAccountApiService.setSecondaryPrograms(userInfo!.id, codes),
+        onSuccess: async (codes) => {
+            setSelectedSecondary(codes)
+            const refreshed = await UserApiService.getInfo(userInfo!.username).then((r) => r.data)
+            if (userInfo?.username === currentUser?.username) {
+                setUser(refreshed)
+            }
+            onUserInfoUpdate?.(refreshed)
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.profileUpdated" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+        onError: () => {
+            setSelectedSecondary(secondaryFromUser)
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.updateError" />
+                    </Text>
+                )
+            )
+        },
+    })
+
     const { mutateAsync: updateProject } = useMutation({
-        mutationFn: async (project: string) => {
+        mutationFn: async (project: string | null) => {
+            if (!project) return UserAccountApiService.clearProject(userInfo.id)
             const response = await UserApiService.setProject(userInfo.id, project)
             return response.data
         },
@@ -266,6 +381,25 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
 
     const { programs, visiblePrograms, visibleProjects } = useProgramProjectFilter(selectedProgram, selectedProject)
 
+    const secondaryOptions = useMemo(
+        () =>
+            programs
+                .filter((program) => !programValue || program.code.toUpperCase() !== programValue.toUpperCase())
+                .map((program) => ({
+                    value: program.code,
+                    label: getLocalizedName(program, locale),
+                })),
+        [programs, programValue, locale]
+    )
+
+    const reportBlock = reportBlockOf(userInfo)
+    const reportBlockedByName = reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || ""
+    const reportControllerName = reportControllerNameOf(userInfo)
+    const reportControl = reportControlOf(userInfo)
+    const reportControllerAtLabel = reportControl.reportControllerAt
+        ? dayjs(reportControl.reportControllerAt).format("DD.MM.YYYY HH:mm")
+        : ""
+
     // Админы могут редактировать программы всем (включая себя)
     // Обычные пользователи могут установить программу только если у них ее еще нет
     const isAdmin = hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])
@@ -273,6 +407,14 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const hasProgram = !!programValue
 
     const canEditProgram = isAdmin || (isOwnProfile && !hasProgram)
+    const canEditSecondary = isAdmin
+    const canOpenHeatmap =
+        hasPermission(currentUser, [
+            UserGroup.ADMIN,
+            UserGroup.ADMIN_SSO,
+            UserGroup.ADMIN_VOLUNTEER,
+            UserGroup.MAIN_VOLUNTEER,
+        ]) || !!curatorRows.some((row) => row.username.toLowerCase() === (currentUser?.username || "").toLowerCase())
 
     // Пользователи могут редактировать только свой проект или админы
     const canEditProject = isOwnProfile || isAdmin
@@ -280,7 +422,37 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     // Разрешаем менять пол своему профилю и админам
     const canEditGender = isAdmin || isOwnProfile
 
-    const handleProgramChange = async (programCode: string) => {
+    // Контроль назначают менеджеры и куратор программы волонтера — точную проверку делает бэкенд.
+    const isCuratorOfThisProgram = curatorRows.some(
+        (row) =>
+            row.username.toLowerCase() === (currentUser?.username || "").toLowerCase() &&
+            !!programValue &&
+            row.programCode.toUpperCase() === programValue.toUpperCase()
+    )
+    const canManageReportControl =
+        !!showSensitiveData &&
+        !isOwnProfile &&
+        (hasPermission(currentUser, [
+            UserGroup.ADMIN,
+            UserGroup.ADMIN_SSO,
+            UserGroup.ADMIN_VOLUNTEER,
+            UserGroup.MAIN_VOLUNTEER,
+        ]) ||
+            isCuratorOfThisProgram)
+    const mupCitizenship =
+        (
+            userInfo as UserInfoDto & {
+                residencePermits?: { nationality?: string }[]
+            }
+        )?.residencePermits?.find((permit) => permit.nationality)?.nationality || ""
+    const latestContractStart = userInfo?.contracts
+        ?.map((contract) => contract.startDate)
+        .filter((value): value is string => !!value)
+        .sort()
+        .at(-1)
+    const mupPeriodFrom = latestContractStart ? dayjs(latestContractStart).format("DD.MM.YYYY") : ""
+
+    const handleProgramChange = async (programCode: string | null) => {
         if (isSyncing) return
 
         const prevProgram = selectedProgram
@@ -296,7 +468,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         }
     }
 
-    const handleProjectChange = async (projectCode: string) => {
+    const handleProjectChange = async (projectCode: string | null) => {
         if (isSyncing) return
 
         const prevProject = selectedProject
@@ -336,14 +508,82 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             <FormattedMessage id="pages.profile.deactivated" />
                         </Badge>
                     )}
+                    {warningCount > 0 && (
+                        <Tooltip label={<FormattedMessage id="pages.profile.warningsHint" />}>
+                            <Badge color={warningCount >= 3 ? "red" : "orange"} radius="md" variant="light">
+                                <FormattedMessage id="pages.profile.warnings" values={{ count: warningCount }} />
+                            </Badge>
+                        </Tooltip>
+                    )}
+                    {warningCount >= 2 && (
+                        <Badge color="dark" radius="md">
+                            <FormattedMessage id="pages.profile.watchlist" />
+                        </Badge>
+                    )}
+                    {reportBlock.reportBlocked && (
+                        <Tooltip
+                            multiline
+                            w={320}
+                            label={
+                                reportBlock.reportBlockedReason || (
+                                    <FormattedMessage id="pages.profile.reportBlockedHint" />
+                                )
+                            }
+                        >
+                            <Badge color="red" radius="md" variant="filled">
+                                <FormattedMessage
+                                    id="pages.profile.reportBlocked"
+                                    values={{ name: reportBlockedByName }}
+                                />
+                            </Badge>
+                        </Tooltip>
+                    )}
+                    {!!reportControllerName && (
+                        <Flex direction="column" gap={2}>
+                            <Tooltip
+                                multiline
+                                w={320}
+                                label={
+                                    reportControl.reportControllerReason || (
+                                        <FormattedMessage id="pages.profile.reportControlHint" />
+                                    )
+                                }
+                            >
+                                <Badge color="teal" radius="md" variant="filled">
+                                    <FormattedMessage
+                                        id="pages.profile.reportControl"
+                                        values={{ name: reportControllerName }}
+                                    />
+                                </Badge>
+                            </Tooltip>
+                            {(reportControl.reportControllerReason || reportControllerAtLabel) && (
+                                <Text size="xs" c="dimmed" maw={280}>
+                                    {reportControl.reportControllerReason}
+                                    {reportControl.reportControllerReason && reportControllerAtLabel ? " · " : ""}
+                                    {reportControllerAtLabel}
+                                </Text>
+                            )}
+                        </Flex>
+                    )}
 
                     {showSensitiveData && userInfo?.id !== currentUser?.id && (
-                        <UserMenu user={userInfo} type="profile" />
+                        <UserMenu user={userInfo} type="profile" onChanged={onUserInfoUpdate} />
                     )}
                 </Flex>
             </Flex>
             <Text className={classes.userName}>{userInfo?.fullName}</Text>
+            {curatorPrograms.length > 0 && (
+                <Badge color="teal" radius="md" variant="light" mt={6} w="fit-content">
+                    <FormattedMessage
+                        id="pages.profile.curator"
+                        values={{ programs: curatorPrograms.join(", ") }}
+                    />
+                </Badge>
+            )}
             <IDBadge id={userInfo.id} />
+            <Text size="sm" fw={500} mt={4}>
+                <FormattedMessage id="pages.profile.primaryProgram" />
+            </Text>
             <ProgramSelectInline
                 value={selectedProgram}
                 canEdit={canEditProgram}
@@ -351,6 +591,35 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 onChange={handleProgramChange}
                 programsOverride={visiblePrograms}
             />
+            <Text size="sm" fw={500} mt="xs">
+                <FormattedMessage id="pages.profile.secondaryPrograms" />
+            </Text>
+            {canEditSecondary ? (
+                <MultiSelect
+                    data={secondaryOptions}
+                    value={selectedSecondary}
+                    onChange={(codes) => {
+                        setSelectedSecondary(codes)
+                        void updateSecondaryPrograms(codes)
+                    }}
+                    searchable
+                    clearable
+                    disabled={isUpdatingSecondary}
+                    placeholder={intl.formatMessage({ id: "pages.profile.secondaryProgramsPlaceholder" })}
+                    mt={4}
+                />
+            ) : (
+                <Text size="sm" c="dimmed" mt={4}>
+                    {selectedSecondary.length
+                        ? selectedSecondary
+                              .map((code) => {
+                                  const program = programs.find((p) => p.code === code)
+                                  return program ? getLocalizedName(program, locale) : code
+                              })
+                              .join(", ")
+                        : "—"}
+                </Text>
+            )}
             <ProjectSelectInline
                 value={selectedProject}
                 canEdit={canEditProject}
@@ -358,6 +627,97 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 onChange={handleProjectChange}
                 projectsOverride={visibleProjects}
             />
+            {canOpenHeatmap && userInfo?.username && (
+                <Anchor
+                    component={Link}
+                    to={`/volunteers/heatmap?search=${encodeURIComponent(userInfo.username)}`}
+                    size="sm"
+                    mt="xs"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, width: "fit-content" }}
+                >
+                    <IconMap size={16} />
+                    <FormattedMessage id="pages.profile.openHeatmap" />
+                </Anchor>
+            )}
+            {canManageReportControl && (
+                <Flex direction="column" gap={6} mt="xs">
+                    <Text size="sm" fw={500}>
+                        <FormattedMessage id="pages.profile.reportControlLabel" />
+                    </Text>
+                    {reportControllerName ? (
+                        <Flex direction="column" gap={4}>
+                            <Flex align="center" gap={8} wrap="wrap">
+                                <Badge color="teal" radius="md" variant="light">
+                                    {reportControllerName}
+                                </Badge>
+                                <Button
+                                    size="compact-xs"
+                                    variant="subtle"
+                                    color="red"
+                                    loading={isUpdatingController}
+                                    onClick={() => updateReportController({ login: null })}
+                                >
+                                    <FormattedMessage id="pages.profile.reportControlClear" />
+                                </Button>
+                            </Flex>
+                            {(reportControl.reportControllerReason || reportControllerAtLabel) && (
+                                <Text size="xs" c="dimmed">
+                                    {reportControl.reportControllerReason}
+                                    {reportControl.reportControllerReason && reportControllerAtLabel ? " · " : ""}
+                                    {reportControllerAtLabel}
+                                </Text>
+                            )}
+                        </Flex>
+                    ) : (
+                        <Button
+                            size="compact-sm"
+                            variant="light"
+                            color="teal"
+                            onClick={() => setControlModalOpen(true)}
+                        >
+                            <FormattedMessage id="pages.profile.reportControlAssign" />
+                        </Button>
+                    )}
+                    <Modal
+                        centered
+                        opened={controlModalOpen}
+                        onClose={() => setControlModalOpen(false)}
+                        title={<FormattedMessage id="pages.profile.reportControlLabel" />}
+                    >
+                        <Text size="sm" c="dimmed">
+                            <FormattedMessage id="pages.profile.reportControlDescription" />
+                        </Text>
+                        <UserSearch
+                            label={<FormattedMessage id="pages.profile.reportControlLabel" />}
+                            onUserChange={(picked) => setControllerLogin(picked?.username ?? null)}
+                        />
+                        <Textarea
+                            mt="md"
+                            minRows={3}
+                            maxRows={6}
+                            value={controlReason}
+                            placeholder={intl.formatMessage({ id: "pages.profile.reportControlReasonPlaceholder" })}
+                            onChange={(event) => setControlReason(event.currentTarget.value)}
+                        />
+                        <Flex mt="md" gap="sm" justify="flex-end">
+                            <Button variant="outline" onClick={() => setControlModalOpen(false)}>
+                                <FormattedMessage id="pages.user-list.report-block-cancel" />
+                            </Button>
+                            <Button
+                                color="teal"
+                                disabled={!controllerLogin}
+                                loading={isUpdatingController}
+                                onClick={() =>
+                                    controllerLogin &&
+                                    updateReportController({ login: controllerLogin, reason: controlReason })
+                                }
+                            >
+                                <FormattedMessage id="pages.user-list.report-controller-submit" />
+                            </Button>
+                        </Flex>
+                    </Modal>
+                </Flex>
+            )}
             <Container className={commonClasses.divider} />
             <TextPropertyBox
                 name={"pages.profile.props.address"}
@@ -436,6 +796,31 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     <FormattedMessage id={"pages.profile.buttons.edit"} />
                 </Button>
             )}
+            {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO]) &&
+                userInfo?.username && (
+                    <>
+                        <Button
+                            onClick={openMup}
+                            className={classes.button}
+                            variant="outline"
+                            rightSection={<IconMail size={14} />}
+                        >
+                            <FormattedMessage id="pages.mup.open" />
+                        </Button>
+                        <MupLetterModal
+                            opened={mupOpened}
+                            close={closeMup}
+                            username={userInfo.username}
+                            fullName={userInfo.fullName || ""}
+                            birthDate={userInfo.birthDate ? dayjs(userInfo.birthDate).format("DD.MM.YYYY") : ""}
+                            citizenship={mupCitizenship}
+                            address={getFullAddress(userInfo.postalCode, userInfo.city, userInfo.address)}
+                            phone={userInfo.phone || ""}
+                            email={userInfo.email || ""}
+                            periodFrom={mupPeriodFrom}
+                        />
+                    </>
+                )}
             <Modal
                 opened={idCardOpened}
                 onClose={closeIDCard}

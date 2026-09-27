@@ -1,0 +1,40 @@
+.banner {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    z-index: 199;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 32px;
+    background: #fef3c7;
+    border-bottom: 1px solid #fcd34d;
+    color: #78350f;
+}
+
+.body {
+    p {
+        margin: 4px 0 0;
+    }
+}
+
+.hint {
+    margin-top: 8px;
+    font-weight: 600;
+    color: #92400e;
+}
+
+.close {
+    flex-shrink: 0;
+    background: #f59e0b !important;
+    color: #78350f !important;
+}
+
+@media (max-width: 64em) {
+    .banner {
+        top: 72px;
+        padding: 10px 18px;
+    }
+}

@@ -1,7 +1,7 @@
 import { Button, Drawer, Flex, Loader, Pill, Text, Textarea, TextInput } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
-import { FileInfoDto } from "@russian-rs/portal-api-axios"
+import { FileInfoDto } from "@rds-network/portal-api-axios"
 import { IconMailForward } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import Highlight from "@tiptap/extension-highlight"

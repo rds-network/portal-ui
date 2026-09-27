@@ -1,19 +1,12 @@
+@use "../../../app/styles/surfaces" as s;
+
 $table-width: 100%;
 
 .root {
-    padding: 1rem 1rem 2rem 2rem;
+    @include s.page;
     flex-direction: column;
-    row-gap: 1rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+    gap: 24px;
     overflow-x: auto;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: 0.5rem;
-    }
-
-    @media (max-width: 1439px) and (min-width: 1024px) {
-        padding: 1rem 0.5rem 2rem 1rem;
-    }
 }
 
 .loader {
@@ -22,13 +15,7 @@ $table-width: 100%;
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        font-size: x-large;
-        text-align: center;
-    }
+    @include s.title;
 }
 
 .reportContainer {
@@ -48,7 +35,7 @@ $table-width: 100%;
     padding: 1rem 1.5rem;
     border-radius: 0.75rem;
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: all 0.25s ease;
     gap: 1rem;
     width: fit-content;
@@ -56,11 +43,23 @@ $table-width: 100%;
     &:hover {
         background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-5));
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         cursor: pointer;
     }
-}
 
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
+        min-height: 92px;
+        &:hover {
+            background: var(--portal-solid);
+            box-shadow: var(--portal-shadow);
+        }
+    }
+}
 
 .reportName {
     font-size: 1.2rem;
@@ -72,4 +71,3 @@ $table-width: 100%;
     width: 1.5rem;
     height: 1.5rem;
 }
-

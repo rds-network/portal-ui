@@ -1,5 +1,5 @@
 import { Button, Flex, Textarea } from "@mantine/core"
-import { IconChevronRight } from "@tabler/icons-react"
+import { IconSend2 } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
 import { useState } from "react"
 import { useIntl } from "react-intl"
@@ -55,6 +55,8 @@ export const AddApplicationNote = ({ applicationId, onNoteAdded }: AddApplicatio
                     id: "pages.applications.add-note",
                 })}
                 autosize={true}
+                minRows={2}
+                maxRows={6}
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 onKeyDown={handleKeyPress}
@@ -62,12 +64,14 @@ export const AddApplicationNote = ({ applicationId, onNoteAdded }: AddApplicatio
             />
 
             <Button
+                className={classes.sendButton}
+                aria-label={intl.formatMessage({ id: "pages.applications.add-note" })}
                 onClick={handleSave}
                 loading={addNoteMutation.isPending}
                 disabled={!noteText.trim() || addNoteMutation.isPending}
                 size="sm"
             >
-                <IconChevronRight />
+                <IconSend2 size={16} />
             </Button>
         </Flex>
     )

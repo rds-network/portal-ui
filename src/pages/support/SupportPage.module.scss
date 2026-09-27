@@ -1,15 +1,31 @@
-.root {
-    padding: 1rem 1rem 2rem 2rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-    row-gap: 1rem;
-    min-height: 100%;
+@use "../../app/styles/surfaces" as s;
 
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: 0.5rem;
-    }
+.root {
+    @include s.page;
+    gap: 24px;
+    min-height: 100%;
 }
 
 .card {
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
     border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+.root {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+    align-items: start;
+    min-height: 0;
+}
+@media (max-width: 75em) {
+    .root {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }

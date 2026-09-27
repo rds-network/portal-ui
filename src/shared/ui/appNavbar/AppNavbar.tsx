@@ -1,4 +1,4 @@
-import { AppShell, Group, ScrollArea, Transition } from "@mantine/core"
+import { AppShell, Drawer, Group, ScrollArea } from "@mantine/core"
 import React, { useContext, useEffect, useMemo } from "react"
 import { NavbarContext } from "src/app/providers/NavbarProvider"
 import { UserContext } from "src/app/providers/UserContext"
@@ -7,10 +7,13 @@ import classes from "src/shared/ui/appNavbar/AppNavbar.module.scss"
 import { Content } from "src/shared/ui/appNavbar/Content"
 import { LogoutButton } from "src/shared/ui/appNavbar/logoutButton/LogoutButton"
 import { UserButton } from "src/shared/ui/appNavbar/userButton/UserButton"
-import { LocaleSwitcher } from "src/shared/ui/locale/LocaleSwitcher"
-import { ThemeSwitcher } from "src/shared/ui/theme/ThemeSwitcher"
+import { FormattedMessage } from "react-intl"
 import { hasPermission } from "src/shared/user/roles"
-import { LinksGroup } from "./links/NavbarLinksGroup"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { AccountStatusApiService } from "src/shared/api/AccountStatusApiService"
+import { useQuery } from "@tanstack/react-query"
+import { NavItem } from "./links/NavbarLinksGroup"
+import linkClasses from "./links/NavbarLinksGroup.module.scss"
 import { useLocation } from "react-router"
 
 export interface ItemProps {
@@ -18,6 +21,8 @@ export interface ItemProps {
     link: string
     roles?: string[]
     hideFrom?: string[]
+    curatorInbox?: boolean
+    showIfCurator?: boolean
 }
 
 export interface ItemGroupProps {
@@ -27,6 +32,12 @@ export interface ItemGroupProps {
     items?: ItemProps[]
     link?: string
     roles?: string[]
+    showUnread?: boolean
+    showApplications?: boolean
+    showControlled?: boolean
+    showIfCurator?: boolean
+    showIfAccountStatusApprover?: boolean
+    curatorInbox?: boolean
 }
 
 export const AppNavbar = React.memo(function AppNavbar() {
@@ -37,45 +48,79 @@ export const AppNavbar = React.memo(function AppNavbar() {
     const location = useLocation()
 
     useEffect(() => {
-        setMenuOpened(isDesktop)
-    }, [isDesktop])
-
-    // Close navbar on route change for mobile view
-    useEffect(() => {
-        if (!isDesktop) {
-            setMenuOpened(false)
-        }
+        setMenuOpened(false)
     }, [location.pathname, isDesktop, setMenuOpened])
 
-    const items = useMemo(() => {
-        return Content.filter((item) => hasPermission(user, item.roles)).map((item) => (
-            <LinksGroup {...item} key={item.label} />
-        ))
-    }, [user])
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!user,
+    })
 
-    return (
-        <Transition mounted={menuOpened} transition="scale-x" timingFunction="ease">
-            {(styles) => (
-                <AppShell.Navbar style={styles} className={classes.appShellNavbar}>
-                    <nav className={classes.navbar}>
-                        <div className={classes.header}>
-                            <UserButton />
-                        </div>
+    const { data: accountStatusMeta } = useQuery({
+        queryKey: ["account-status-meta"],
+        queryFn: () => AccountStatusApiService.meta(),
+        enabled: !!user,
+        staleTime: 5 * 60 * 1000,
+    })
 
-                        <ScrollArea className={classes.links}>
-                            <div className={classes.linksInner}>{items}</div>
-                        </ScrollArea>
+    const sections = useMemo(() => {
+        return Content.map((section) => {
+            const items = section.items.filter(
+                (item) =>
+                    item.curatorInbox ||
+                    hasPermission(user, item.roles) ||
+                    (item.showIfCurator && curatorMe?.curator) ||
+                    (item.showIfAccountStatusApprover && accountStatusMeta?.isAccountStatusApprover)
+            )
+            if (items.length === 0) return null
+            return (
+                <div className={linkClasses.section} key={section.label}>
+                    <p className={linkClasses.sectionTitle}>
+                        <FormattedMessage id={section.label} />
+                    </p>
+                    {items.map((item) => (
+                        <NavItem {...item} key={item.label} />
+                    ))}
+                </div>
+            )
+        })
+    }, [user, curatorMe?.curator, accountStatusMeta?.isAccountStatusApprover])
 
-                        <Group className={classes.footer} justify="space-between">
-                            <LogoutButton />
-                            <Group justify="flex-end">
-                                <LocaleSwitcher />
-                                <ThemeSwitcher />
-                            </Group>
-                        </Group>
-                    </nav>
-                </AppShell.Navbar>
-            )}
-        </Transition>
+    const navigation = (
+        <nav id="portal-navigation" className={classes.navbar}>
+            <div className={classes.header}>
+                <UserButton />
+            </div>
+
+            <ScrollArea className={classes.links} type="hover" offsetScrollbars={false}>
+                <div className={classes.linksInner}>{sections}</div>
+            </ScrollArea>
+
+            <Group className={classes.footer} justify="space-between">
+                <LogoutButton />
+            </Group>
+        </nav>
     )
+
+    if (!isDesktop) {
+        return (
+            <Drawer
+                opened={menuOpened}
+                onClose={() => setMenuOpened(false)}
+                title={<FormattedMessage id="design.navigation" />}
+                size={310}
+                classNames={{
+                    body: classes.mobileBody,
+                    content: classes.mobileContent,
+                    header: classes.mobileHeader,
+                    close: classes.mobileClose,
+                }}
+            >
+                {navigation}
+            </Drawer>
+        )
+    }
+
+    return <AppShell.Navbar className={classes.appShellNavbar}>{navigation}</AppShell.Navbar>
 })

@@ -3,7 +3,7 @@ import { useIntl } from "react-intl"
 import { useProjects } from "src/app/providers/ProjectsProvider"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { locales } from "./lib/locales"
-import { ProjectDto } from "@russian-rs/portal-api-axios"
+import { ProjectDto } from "@rds-network/portal-api-axios"
 
 interface ProjectFilterProps {
     value: string | null

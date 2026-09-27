@@ -1,5 +1,5 @@
 import React, { useContext, useMemo, useState, useEffect } from "react"
-import { Flex, Text, Table, NumberInput, Card, Group, Button } from "@mantine/core"
+import { Flex, Text, Table, Select, Card, Group, Button } from "@mantine/core"
 import { useIntl, FormattedMessage } from "react-intl"
 import { useQuery } from "@tanstack/react-query"
 import { useSearchParams, useNavigate } from "react-router"
@@ -8,13 +8,15 @@ import { UserContext } from "src/app/providers/UserContext"
 import { hasPermission } from "src/shared/user/roles"
 import { locales } from "../lib/locales"
 import { allowedRoles } from "../lib/roles"
-import CustomLoader from "src/shared/ui/loading/CustomLoader"
 import { StatisticsApiService } from "src/shared/api/StatisticsApiService"
-import type { ProgramStatItem, Statistics } from "@russian-rs/portal-api-axios"
+import type { CityStatistics, ProgramStatItem, Statistics } from "@rds-network/portal-api-axios"
 import classes from "./MintrudReport.module.scss"
 import { FinalUsersChart, VolunteersCharts } from "./MintrudCharts"
+import CityStats from "./CityStats"
 import { IconListCheck } from "@tabler/icons-react"
 import generateMintrudReport from "src/shared/docs/mintrud-report"
+
+const MIN_YEAR = 2023
 
 export default function MintrudReport() {
     setDocumentTitleByLocale(locales.titleMintrud)
@@ -30,7 +32,9 @@ export default function MintrudReport() {
     const [searchParams, setSearchParams] = useSearchParams()
     const currentYear = new Date().getFullYear()
     const urlYear = parseInt(searchParams.get("year") || String(currentYear), 10)
-    const [year, setYear] = useState<number>(isNaN(urlYear) ? currentYear : urlYear)
+    const [year, setYear] = useState<number>(
+        isNaN(urlYear) ? currentYear : Math.min(Math.max(urlYear, MIN_YEAR), currentYear)
+    )
 
     useEffect(() => {
         const params = new URLSearchParams(searchParams)
@@ -38,10 +42,17 @@ export default function MintrudReport() {
         setSearchParams(params, { replace: true })
     }, [year])
 
-    const { data: stats, isFetching } = useQuery<Statistics>({
+    const { data: stats, isFetching: isFetchingStats } = useQuery<Statistics>({
         queryKey: ["mintrudStatistics", year],
         queryFn: () => StatisticsApiService.getStatistics(year).then((r) => r.data),
     })
+
+    const { data: cityStats, isFetching: isFetchingCities } = useQuery<CityStatistics>({
+        queryKey: ["cityStatistics", year],
+        queryFn: () => StatisticsApiService.getCityStatistics(year).then((r) => r.data),
+    })
+
+    const isFetching = isFetchingStats || isFetchingCities
 
     const fmtInt = (n: number | null | undefined) =>
         new Intl.NumberFormat(intl.locale, { maximumFractionDigits: 0 }).format(Number(n ?? 0))
@@ -89,12 +100,15 @@ export default function MintrudReport() {
 
     const otherDisplayValue = (stats?.finalUsersStatistics?.totalCount ?? 0) - totalNonOther
 
+    // Select, а не NumberInput: числовое поле отдаёт промежуточное значение ввода («999») в onChange
+    // до blur, и запросы уходят с ним; clampBehavior="strict" это лечит, но обрезает год с первой
+    // же набранной цифры, поэтому набрать «2024» становится нельзя
+    const yearOptions = Array.from({ length: currentYear - MIN_YEAR + 1 }, (_, i) => String(currentYear - i))
+
     return (
         <Flex direction="column">
-            <CustomLoader visible={isFetching} className={classes.loader} />
-
             <Flex className={classes.root} direction="column" gap={16}>
-                <Text className={classes.title} variant="gradient">
+                <Text className={classes.title}>
                     <FormattedMessage id={locales.titleMintrud} />
                 </Text>
 
@@ -103,21 +117,18 @@ export default function MintrudReport() {
                     <Text size="sm" c="dimmed">
                         <FormattedMessage id={locales.yearLabel} />
                     </Text>
-                    <NumberInput
-                        value={year}
-                        onChange={(v) => setYear(Number(v) || currentYear)}
-                        min={2023}
-                        max={currentYear}
-                        step={1}
-                        allowDecimal={false}
-                        allowNegative={false}
+                    <Select
+                        value={String(year)}
+                        onChange={(v) => v && setYear(Number(v))}
+                        data={yearOptions}
+                        allowDeselect={false}
                         w={120}
                         disabled={isFetching}
                     />
                 </Group>
 
                 {/* Итоги */}
-                <Group mt="xs">
+                <div className={classes.totals}>
                     <Card withBorder radius="md" p="md">
                         <Text size="xs" c="dimmed">
                             <FormattedMessage id={locales.totalVolunteers} />
@@ -135,13 +146,13 @@ export default function MintrudReport() {
                             {fmtHours(totalHours)}
                         </Text>
                     </Card>
-                </Group>
+                </div>
 
                 {/* По программам */}
                 <Text mt="md" fw={600}>
                     <FormattedMessage id={locales.programStats} />
                 </Text>
-                <Table withColumnBorders striped highlightOnHover>
+                <Table className={classes.table} withColumnBorders striped highlightOnHover>
                     <Table.Thead>
                         <Table.Tr>
                             <Table.Th>
@@ -190,6 +201,8 @@ export default function MintrudReport() {
                     <FormattedMessage id={locales.finalUsersStats} />
                 </Text>
                 <FinalUsersChart stats={stats} />
+
+                {stats && <CityStats data={cityStats} />}
 
                 {/* Кнопка генерации PDF */}
                 <Button

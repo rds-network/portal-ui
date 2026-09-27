@@ -1,0 +1,13 @@
+.root {
+    min-width: 0;
+}
+.metadata {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.body {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+}

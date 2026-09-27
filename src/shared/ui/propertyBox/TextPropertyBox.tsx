@@ -33,21 +33,21 @@ export const TextPropertyBox = ({
                 : undefined
 
     return (
-        <Flex direction="column" className={className}>
+        <Flex direction="column" className={className} miw={0} maw="100%">
             <Text c="dimmed" size="xs" ta={textAlign} ms={justify === "flex-end" ? "auto" : ""}>
                 <FormattedMessage id={name} />
             </Text>
             {icon ? (
-                <Flex align="center" mt={4} gap="xs" justify={justify}>
-                    {icon}
+                <Flex align="center" mt={4} gap="xs" justify={justify} miw={0}>
+                    <Flex style={{ flexShrink: 0 }}>{icon}</Flex>
                     {href ? (
-                        <Anchor href={href} target="_blank" style={{ maxWidth: "90%" }}>
+                        <Anchor href={href} target="_blank" miw={0} style={{ overflowWrap: "anywhere" }}>
                             <Text truncate="end" style={{ maxWidth: "100%" }} size="sm" c={valueColor}>
                                 {value}
                             </Text>
                         </Anchor>
                     ) : (
-                        <Text size="sm" c={valueColor}>
+                        <Text size="sm" c={valueColor} style={{ overflowWrap: "anywhere" }}>
                             {value}
                         </Text>
                     )}

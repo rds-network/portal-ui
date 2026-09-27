@@ -29,6 +29,8 @@ export const locales = {
     residenceRequired: "pages.applications.view.residence-required",
     residenceNotRequired: "pages.applications.view.residence-not-required",
 
+    program: "pages.applications.view.program",
+    project: "pages.applications.view.project",
     occupation: "pages.applications.view.occupation",
     experience: "pages.applications.view.experience",
     noExperience: "pages.applications.view.no-experience",

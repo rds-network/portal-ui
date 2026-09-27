@@ -27,6 +27,17 @@ const setLocale = (locale: Locale) => {
     window.location.reload()
 }
 
+/** Block Chrome/Google auto-translate — it mangles our ru/sr/en UI strings. */
+const applyNoTranslate = (locale: Locale) => {
+    const html = document.documentElement
+    html.lang = locale
+    html.translate = false
+    html.classList.add("notranslate")
+    html.setAttribute("translate", "no")
+    document.body?.classList.add("notranslate")
+    document.body?.setAttribute("translate", "no")
+}
+
 interface LocaleContextType {
     locale: Locale
     setLocale: (locale: Locale) => void
@@ -51,6 +62,7 @@ export const LanguageContextProvider = ({ children }: { children?: ReactNode }) 
 
     useEffect(() => {
         dayjs.locale(selectedLocale)
+        applyNoTranslate(selectedLocale)
     }, [])
 
     return (

@@ -13,7 +13,7 @@ import {
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { ApplicationDto, GenderEnumDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, GenderEnumDto } from "@rds-network/portal-api-axios"
 import {
     IconAlertCircle,
     IconAt,
@@ -56,7 +56,6 @@ export const Form = () => {
     const [residence, setResidence] = useState("REQUIRED")
     const [experience, setExperience] = useState(false)
     const [formError, setFormError] = useState<string | null>(null)
-
     const fieldRequired = { message: intl.formatMessage({ id: locales.required }) }
     const selectCityList = { message: intl.formatMessage({ id: locales.selectCityList }) }
     const invalidSymbols = intl.formatMessage({ id: locales.invalidSymbols })
@@ -92,10 +91,11 @@ export const Form = () => {
             .max(20, maxMessage(20)),
         citizenship: z.string(fieldRequired).min(2, minMessage(2)).max(100, maxMessage(100)),
         telegram: z
-            .string(fieldRequired)
+            .string()
             .regex(/^[a-zA-Z][a-zA-Z0-9_]*$/, invalidSymbols)
-            .min(5, minMessage(3))
-            .max(32, maxMessage(32)),
+            .min(5, minMessage(5))
+            .max(32, maxMessage(32))
+            .optional(),
         enterDate: location == "IN" ? z.date(fieldRequired) : z.date().optional(),
         city:
             location == "IN"
@@ -224,7 +224,7 @@ export const Form = () => {
         <Flex className={classes.innerFlex}>
             <DateInput
                 label={<FormattedMessage id={locales.enterDate} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 valueFormat="DD MMMM YYYY"
                 maxDate={new Date()}
@@ -245,7 +245,7 @@ export const Form = () => {
             />
             <TextInput
                 label={<FormattedMessage id={locales.postalCode} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconMailPin size={16} />}
@@ -262,7 +262,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.address} />}
                 description={<FormattedMessage id={locales.addressDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconMap2 size={16} />}
@@ -273,7 +273,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.phone} />}
                 description={<FormattedMessage id={locales.phoneDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconPhone size={16} />}
@@ -287,35 +287,35 @@ export const Form = () => {
     const residenceArea = (
         <Flex className={classes.innerFlex} style={{ display: residence == "REQUIRED" ? "flex" : "none" }}>
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement1} />}
                 key={form.key("agreement1")}
                 {...form.getInputProps("agreement1")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement2} />}
                 key={form.key("agreement2")}
                 {...form.getInputProps("agreement2")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement3} />}
                 key={form.key("agreement3")}
                 {...form.getInputProps("agreement3")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement4} />}
                 key={form.key("agreement4")}
                 {...form.getInputProps("agreement4")}
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.agreement5} />}
                 key={form.key("agreement5")}
                 {...form.getInputProps("agreement5")}
@@ -331,7 +331,7 @@ export const Form = () => {
             </Text>
             <TextInput
                 label={<FormattedMessage id={locales.email} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconAt size={16} />}
@@ -342,7 +342,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.name} />}
                 description={<FormattedMessage id={locales.nameDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconSignature size={16} />}
@@ -353,7 +353,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.patronymic} />}
                 description={<FormattedMessage id={locales.patronymicDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 key={form.key("patronymic")}
                 {...form.getInputProps("patronymic")}
@@ -361,7 +361,7 @@ export const Form = () => {
             />
             <DateInput
                 label={<FormattedMessage id={locales.birthDate} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 defaultLevel="decade"
@@ -376,7 +376,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.passport} />}
                 description={<FormattedMessage id={locales.passportDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconEPassport size={16} />}
@@ -386,7 +386,7 @@ export const Form = () => {
             />
             <TextInput
                 label={<FormattedMessage id={locales.citizenship} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconWorld size={16} />}
@@ -397,9 +397,8 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.telegram} />}
                 description={<FormattedMessage id={locales.telegramDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
-                withAsterisk
                 leftSection={<IconBrandTelegram size={16} />}
                 key={form.key("telegram")}
                 {...form.getInputProps("telegram")}
@@ -407,7 +406,7 @@ export const Form = () => {
             />
             <SegmentedControl
                 fullWidth
-                radius={0}
+                radius="md"
                 value={location}
                 onChange={(v) => setLocation(v)}
                 data={[
@@ -422,7 +421,7 @@ export const Form = () => {
             {location == "IN" && addressArea}
             <SegmentedControl
                 fullWidth
-                radius={0}
+                radius="md"
                 value={residence}
                 onChange={(v) => setResidence(v)}
                 data={[
@@ -479,7 +478,7 @@ export const Form = () => {
             </Radio.Group>
             <TextInput
                 label={<FormattedMessage id={locales.occupation} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconBriefcase size={16} />}
@@ -488,7 +487,7 @@ export const Form = () => {
                 disabled={isFetching}
             />
             <Checkbox
-                radius={0}
+                radius="md"
                 label={<FormattedMessage id={locales.checkExperience} />}
                 onChange={(e) => setExperience(e.currentTarget.checked)}
                 disabled={isFetching}
@@ -496,7 +495,7 @@ export const Form = () => {
             {experience && (
                 <Textarea
                     label={<FormattedMessage id={locales.experience} />}
-                    radius={0}
+                    radius="md"
                     autosize
                     minRows={4}
                     withAsterisk
@@ -508,7 +507,7 @@ export const Form = () => {
             <TextInput
                 label={<FormattedMessage id={locales.languages} />}
                 description={<FormattedMessage id={locales.languagesDescription} />}
-                radius={0}
+                radius="md"
                 className={classes.input}
                 withAsterisk
                 leftSection={<IconLanguageHiragana size={16} />}
@@ -519,7 +518,7 @@ export const Form = () => {
             <Textarea
                 label={<FormattedMessage id={locales.skills} />}
                 description={<FormattedMessage id={locales.skillsDescription} />}
-                radius={0}
+                radius="md"
                 autosize
                 minRows={2}
                 withAsterisk
@@ -529,7 +528,7 @@ export const Form = () => {
             />
             <Textarea
                 label={<FormattedMessage id={locales.goal} />}
-                radius={0}
+                radius="md"
                 autosize
                 minRows={4}
                 withAsterisk
@@ -539,7 +538,7 @@ export const Form = () => {
             />
             <Textarea
                 label={<FormattedMessage id={locales.bio} />}
-                radius={0}
+                radius="md"
                 autosize
                 minRows={4}
                 withAsterisk

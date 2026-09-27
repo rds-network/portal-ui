@@ -1,42 +1,50 @@
+@use "../../app/styles/surfaces" as s;
+
 .root {
-    padding: 1rem 1rem 2rem 2rem;
+    @include s.page;
     flex-direction: column;
-    row-gap: 1rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+    gap: 24px;
     overflow-x: auto;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        padding: 0.5rem;
-    }
-
-    @media (max-width: 1439px) and (min-width: 1024px) {
-        padding: 1rem 0.5rem 2rem 1rem;
-    }
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        font-size: x-large;
-        text-align: center;
-    }
+    @include s.title;
 }
 
 .statsCard {
     background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
     border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
 }
 
 .heatmapCard {
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
     border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
 }
 
 .tableCard {
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
     border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
 }
 
 .actionButtons {
@@ -53,5 +61,3 @@
         width: 100%;
     }
 }
-
-

@@ -25,16 +25,16 @@ export const CitySelect = ({ onChange, value, ...props }: AutocompleteProps) => 
 
     const handleChange = useCallback(
         (newValue: string) => {
+            setSearch(newValue)
             if (!cities.length) return
 
-            setSearch(newValue)
             const city = cities.find((c) => c.name === newValue || c.nameCyrillic === newValue)
 
             if (city) {
                 onChange?.(city.name)
                 skipSearchRef.current = true
             } else {
-                onChange?.("")
+                onChange?.(newValue)
             }
         },
         [cities, onChange]
@@ -48,8 +48,8 @@ export const CitySelect = ({ onChange, value, ...props }: AutocompleteProps) => 
             return
         }
 
-        handleChange(value)
-    }, [value, search, handleChange])
+        setSearch(value)
+    }, [value, search])
 
     return (
         <Autocomplete

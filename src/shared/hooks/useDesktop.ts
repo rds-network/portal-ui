@@ -1,7 +1,7 @@
 import { useMediaQuery } from "@mantine/hooks"
 
 export const useDesktop = () => {
-    const isDesktop = useMediaQuery("(min-width: 36em)", true, {
+    const isDesktop = useMediaQuery("(min-width: 64.0625em)", true, {
         getInitialValueInEffect: false,
     })
 

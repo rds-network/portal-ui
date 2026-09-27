@@ -20,6 +20,7 @@ import { queryClient } from "src/shared/constants/Query"
 import { AppShell } from "src/shared/ui/appShell/AppShell"
 import { theme } from "src/shared/ui/theme/CustomMantineTheme"
 import classes from "./styles/root.module.scss"
+import "./styles/design.scss"
 
 /**
  * Root component

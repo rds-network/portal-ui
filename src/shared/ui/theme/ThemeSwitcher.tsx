@@ -37,7 +37,7 @@ export const ThemeSwitcher = () => {
                 variant="light"
                 color={getColor(computedColorScheme)}
                 size="lg"
-                radius={0}
+                radius="md"
                 aria-label="Switch color scheme"
                 onClick={switchColorScheme}
             >

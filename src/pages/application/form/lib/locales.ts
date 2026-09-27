@@ -61,6 +61,13 @@ export const locales = {
 
     occupation: "pages.application.form.occupation",
 
+    program: "pages.application.form.program",
+    programDescription: "pages.application.form.program-description",
+    programPlaceholder: "pages.application.form.program-placeholder",
+    project: "pages.application.form.project",
+    projectDescription: "pages.application.form.project-description",
+    projectPlaceholder: "pages.application.form.project-placeholder",
+
     checkExperience: "pages.application.form.check-experience",
     experience: "pages.application.form.experience",
 

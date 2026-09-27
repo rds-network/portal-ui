@@ -2,7 +2,7 @@ import { Button, Flex, Popover, Text } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
-import { ApplicationDto, ContractDto, ContractTypeEnum } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, ContractDto, ContractTypeEnum } from "@rds-network/portal-api-axios"
 import { IconCalendarMonth, IconCalendarOff, IconDeviceFloppy, IconPencil, IconPlus } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { useState } from "react"
@@ -19,9 +19,10 @@ interface ContractEditModalProps {
     application: ApplicationDto
     onChange?: (contractDto: ContractDto) => void
     className?: string
+    disabled?: boolean
 }
 
-export const ContractDate = ({ application, onChange, className }: ContractEditModalProps) => {
+export const ContractDate = ({ application, onChange, className, disabled }: ContractEditModalProps) => {
     const intl = useIntl()
     const [opened, { close, toggle }] = useDisclosure(false)
 
@@ -52,7 +53,7 @@ export const ContractDate = ({ application, onChange, className }: ContractEditM
             contractType: contract.type,
         },
         onValuesChange: (values, previous) => {
-            const currentContract = contract
+            const currentContract = { ...contract }
             if (values["contractUntil"]) {
                 currentContract.endDate = dayjs(values["contractUntil"]).format(DEFAULT_DATE_FORMAT)
             }
@@ -91,12 +92,14 @@ export const ContractDate = ({ application, onChange, className }: ContractEditM
                     color={application.contract ? "blue" : "gray"}
                     onClick={toggle}
                     className={className}
-                    disabled={isApplicationCompleted}
+                    disabled={disabled || isApplicationCompleted}
                     size="xs"
                     h={28}
                     px="sm"
                 >
-                    {application.contract && <Text size="sm">{dayjs(contract.startDate).format("DD MMM YYYY")}</Text>}
+                    {application.contract && (
+                        <Text size="sm">{dayjs(application.contract.startDate).format("DD MMM YYYY")}</Text>
+                    )}
                     {!application.contract && (
                         <Text size="sm">
                             <FormattedMessage id={locales.add} />
@@ -140,6 +143,7 @@ export const ContractDate = ({ application, onChange, className }: ContractEditM
                             size="xs"
                             className={classes.button}
                             onClick={onUpdate}
+                            disabled={disabled}
                             leftSection={<IconDeviceFloppy size={16} />}
                         >
                             <FormattedMessage id={locales.save} />

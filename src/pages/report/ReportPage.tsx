@@ -1,18 +1,19 @@
 import { ActionIcon, Alert, Anchor, Avatar, Badge, Button, Flex, Loader, Text, Textarea } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { ReportDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { ReportDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import {
     IconCalendar,
     IconCheck,
     IconClock,
     IconMail,
     IconPencil,
+    IconShieldCheck,
     IconTrash,
     IconUserStar,
     IconWand,
     IconX,
 } from "@tabler/icons-react"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import { useContext, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -20,13 +21,18 @@ import { useNavigate, useParams } from "react-router"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { useProjects } from "src/app/providers/ProjectsProvider"
 import { UserContext } from "src/app/providers/UserContext"
+import { ProgramSelectInline } from "src/pages/profile/select/ProgramSelect"
+import { ProjectSelectInline } from "src/pages/profile/select/ProjectSelect"
 import { locales } from "src/pages/report/lib/locales"
 import { ReportNote } from "src/pages/report/note/ReportNote"
 import { TaskCard } from "src/pages/report/task/TaskCard"
-import { ReportApiService } from "src/shared/api/ReportApiService"
-import { resolveUsers } from "src/shared/api/user/UserApiService"
+import { ReportApiService, updateReportAssignment } from "src/shared/api/ReportApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { reportControllerNameOf, reportControlOf, resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
+import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
+import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getReportStatusColor, ReportStatus } from "src/shared/report/status"
 import { getSpentTimeFromTasks } from "src/shared/report/timeSpent"
 import { EmailDrawer } from "src/shared/ui/emailModal/EmailDrawer"
@@ -42,8 +48,10 @@ export const ReportPage = () => {
     const { id } = useParams()
     const intl = useIntl()
     const navigate = useNavigate()
+    const queryClient = useQueryClient()
     const { user: currentUser } = useContext(UserContext)
     const [logins, setLogins] = useState<string[]>([])
+    const [assignmentSaving, setAssignmentSaving] = useState(false)
 
     const programs = usePrograms()
     const projects = useProjects()
@@ -79,6 +87,14 @@ export const ReportPage = () => {
 
     const program = useMemo(() => programs.find((p) => p.code === report.program), [programs, report.program])
     const project = useMemo(() => projects.find((p) => p.code === report.project), [projects, report.project])
+    const { visibleProjects } = useProgramProjectFilter(report.program ?? null, report.project ?? null)
+
+    const isCustomer = (report.tasks ?? []).some((task) => task.customer === currentUser?.username)
+    const { data: delegates = [] } = useQuery({
+        queryKey: ["program-curators", "delegates"],
+        queryFn: () => ProgramCuratorApiService.delegates(),
+        enabled: !!currentUser && !isCustomer,
+    })
 
     if (isFetchingReport || isFetchingUsers) {
         return (
@@ -111,6 +127,51 @@ export const ReportPage = () => {
             navigate(`/reports?login=${report.user}`)
         })
     }
+
+    // Программа в отчёте — снимок на момент сдачи, поэтому её правят прямо здесь: статус отчёта не меняется.
+    const onAssignmentChange = (programCode: string | null, projectCode: string | null) => {
+        setAssignmentSaving(true)
+        updateReportAssignment(report.id, { programCode, projectCode })
+            .then(() => {
+                queryClient.invalidateQueries({ queryKey: ["getReport", id] })
+                notifications.show(
+                    SuccessNotification(
+                        <Text size="sm">
+                            <FormattedMessage id={locales.assignmentSaved} />
+                        </Text>,
+                        null
+                    )
+                )
+            })
+            .finally(() => setAssignmentSaving(false))
+    }
+
+    const isAcceptanceDelegate = delegates.some(
+        (row) =>
+            row.delegateUsername === currentUser?.username &&
+            (report.tasks ?? []).some((task) => task.customer === row.curatorUsername) &&
+            (!report.program || row.programCode === report.program)
+    )
+    // Принудительный контроль — строгая виза: модератор и куратор программы принять не могут.
+    const authorController = reportControlOf(users[report.user || ""]).reportControllerUsername || null
+    const authorControllerName = reportControllerNameOf(users[report.user || ""])
+    const isAuthorController = authorController?.toLowerCase() === currentUser?.username?.toLowerCase()
+    const isControllerDelegate = delegates.some(
+        (row) =>
+            row.delegateUsername === currentUser?.username &&
+            row.curatorUsername.toLowerCase() === (authorController || "").toLowerCase() &&
+            (!report.program || row.programCode === report.program)
+    )
+    const canAcceptReport = authorController
+        ? isAuthorController ||
+          isControllerDelegate ||
+          hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO])
+        : hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
+          isCustomer ||
+          isAcceptanceDelegate
+    const canEditAssignment =
+        hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
+        canAcceptReport
 
     return (
         <Flex className={classes.root}>
@@ -197,13 +258,36 @@ export const ReportPage = () => {
                 <TextPropertyBox
                     name={locales.program}
                     value={
-                        program ? getLocalizedName(program, intl.locale) : <FormattedMessage id={locales.noProgram} />
+                        canEditAssignment ? (
+                            <ProgramSelectInline
+                                value={report.program ?? null}
+                                canEdit={!assignmentSaving}
+                                locale={intl.locale}
+                                onChange={(programCode) => onAssignmentChange(programCode, null)}
+                            />
+                        ) : program ? (
+                            getLocalizedName(program, intl.locale)
+                        ) : (
+                            <FormattedMessage id={locales.noProgram} />
+                        )
                     }
                 />
                 <TextPropertyBox
                     name={locales.project}
                     value={
-                        project ? getLocalizedName(project, intl.locale) : <FormattedMessage id={locales.noProject} />
+                        canEditAssignment ? (
+                            <ProjectSelectInline
+                                value={report.project ?? null}
+                                canEdit={!assignmentSaving}
+                                locale={intl.locale}
+                                onChange={(projectCode) => onAssignmentChange(report.program ?? null, projectCode)}
+                                projectsOverride={visibleProjects}
+                            />
+                        ) : project ? (
+                            getLocalizedName(project, intl.locale)
+                        ) : (
+                            <FormattedMessage id={locales.noProject} />
+                        )
                     }
                 />
                 {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && report.moderator && (
@@ -243,7 +327,12 @@ export const ReportPage = () => {
                         <TaskCard task={task} users={users} key={task.id} />
                     ))}
             </Flex>
-            {report.status == ReportStatus.CREATED && hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && (
+            {report.status == ReportStatus.CREATED && !canAcceptReport && !!authorControllerName && (
+                <Alert variant="light" color="teal" icon={<IconShieldCheck size={16} />}>
+                    <FormattedMessage id={locales.controlVisaRequired} values={{ name: authorControllerName }} />
+                </Alert>
+            )}
+            {report.status == ReportStatus.CREATED && canAcceptReport && (
                 <Flex direction="column" rowGap="sm">
                     <Textarea
                         className={classes.comment}

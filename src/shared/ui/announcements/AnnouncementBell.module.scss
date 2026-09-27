@@ -1,0 +1,35 @@
+.button {
+    padding-inline: 8px;
+}
+
+.bellBadge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    pointer-events: none;
+}
+
+.itemUnread {
+    border: 1px solid light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-8));
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    background: light-dark(var(--mantine-color-blue-0), rgba(34, 139, 230, 0.08));
+}
+
+.itemRead {
+    border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+}
+
+.itemRead,
+.itemUnread {
+    border-radius: 16px;
+    padding: 16px;
+    overflow-wrap: anywhere;
+    :global(.mantine-Badge-root) {
+        flex-shrink: 0;
+    }
+}

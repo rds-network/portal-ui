@@ -1,6 +1,7 @@
 import { lazy } from "react"
-import { RouteProps } from "react-router"
+import { Navigate, RouteProps } from "react-router"
 
+const DesktopPage = lazy(() => import("src/pages/desktop/DesktopPage"))
 const Logout = lazy(() => import("src/pages/logout/Logout"))
 const Profile = lazy(() => import("src/pages/profile/Profile"))
 const Report = lazy(() => import("src/pages/report/ReportPage"))
@@ -13,11 +14,22 @@ const ApplicationForm = lazy(() => import("src/pages/application/form/Form"))
 const ApplicationStatusView = lazy(() => import("src/pages/application/view/ViewStatus"))
 const ApplicationList = lazy(() => import("src/pages/applications/Applications"))
 const ApplicationView = lazy(() => import("src/pages/applications/view/ApplicationView"))
-const CleaningHowTo = lazy(() => import("src/pages/cleaning/CleaningHowTo"))
 const ReportingGuide = lazy(() => import("src/pages/reporting/ReportingGuide"))
 const VolunteerReports = lazy(() => import("src/pages/volunteers/reports/VolunteerReports"))
 const VolunteerHeatmapPage = lazy(() => import("src/pages/heatmap/VolunteerHeatmapPage"))
 const SupportPage = lazy(() => import("src/pages/support/SupportPage"))
+const AnnouncementsAdminPage = lazy(() => import("src/pages/announcements/AnnouncementsAdminPage"))
+const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
+const MessagesPage = lazy(() => import("src/pages/inbox/MessagesPage"))
+const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPage"))
+const DissolutionPage = lazy(() => import("src/pages/dissolution/DissolutionPage"))
+const ResourcesPage = lazy(() => import("src/pages/resources/ResourcesPage"))
+const ActivityPage = lazy(() => import("src/pages/activity/ActivityPage"))
+const CuratorsPage = lazy(() => import("src/pages/curators/CuratorsPage"))
+const CuratorReportsPage = lazy(() => import("src/pages/reportsReview/CuratorReportsPage"))
+const LeavePage = lazy(() => import("src/pages/leave/LeavePage"))
+const ControlledVolunteersPage = lazy(() => import("src/pages/controlled/ControlledVolunteersPage"))
+const AccountStatusPage = lazy(() => import("src/pages/accountStatus/AccountStatusPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -78,7 +90,7 @@ export const routes: RouteProps[] = [
     },
     {
         path: "/cleaning-how-to",
-        element: <CleaningHowTo />,
+        element: <Navigate to="/reporting-guide" replace />,
     },
     {
         path: "/reporting-guide",
@@ -89,11 +101,59 @@ export const routes: RouteProps[] = [
         element: <VolunteerHeatmapPage />,
     },
     {
+        path: "/volunteers/controlled",
+        element: <ControlledVolunteersPage />,
+    },
+    {
         path: "/support",
         element: <SupportPage />,
     },
     {
+        path: "/announcements/admin",
+        element: <AnnouncementsAdminPage />,
+    },
+    {
+        path: "/tasks",
+        element: <WorkTasksPage />,
+    },
+    {
+        path: "/messages",
+        element: <MessagesPage />,
+    },
+    {
+        path: "/reports/overdue",
+        element: <OverdueReportsPage />,
+    },
+    {
+        path: "/reports/dissolution",
+        element: <DissolutionPage />,
+    },
+    {
+        path: "/reports/account-status",
+        element: <AccountStatusPage />,
+    },
+    {
+        path: "/reports/review",
+        element: <CuratorReportsPage />,
+    },
+    {
+        path: "/resources",
+        element: <ResourcesPage />,
+    },
+    {
+        path: "/activity",
+        element: <ActivityPage />,
+    },
+    {
+        path: "/curators",
+        element: <CuratorsPage />,
+    },
+    {
+        path: "/leave",
+        element: <LeavePage />,
+    },
+    {
         path: "/",
-        element: <MyReports />,
+        element: <DesktopPage />,
     },
 ]

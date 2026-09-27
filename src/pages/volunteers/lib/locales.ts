@@ -33,9 +33,16 @@ export const locales = {
     total: "pages.mintrud.total",
     empty: "pages.mintrud.empty",
 
+    cityStats: "pages.mintrud.cities.city-stats",
+    city: "pages.mintrud.cities.city",
+    cityOther: "pages.mintrud.cities.city-other",
+    byCities: "pages.mintrud.cities.by-cities",
+    withoutCity: "pages.mintrud.cities.without-city",
+
     ageStatsTitle: "pages.mintrud.charts.age",
     genderStatsTitle: "pages.mintrud.charts.gender",
     citizenshipStatsTitle: "pages.mintrud.charts.citizenship",
+    cityStatsTitle: "pages.mintrud.charts.cities",
 
     statGroups: {
         SOCIJALNA_ZASTITA: "pages.mintrud.statGroups.SOCIJALNA_ZASTITA",

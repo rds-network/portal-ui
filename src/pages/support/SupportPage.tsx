@@ -1,6 +1,6 @@
 import { Alert, Button, Card, Flex, Loader, Pill, Select, Text } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { FileInfoDto } from "@russian-rs/portal-api-axios"
+import { FileInfoDto } from "@rds-network/portal-api-axios"
 import { IconLifebuoy } from "@tabler/icons-react"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import parse from "html-react-parser"

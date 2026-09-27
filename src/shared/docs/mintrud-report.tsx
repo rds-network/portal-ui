@@ -1,7 +1,7 @@
 import { PDFDocument, PDFFont, PDFForm, TextAlignment } from "pdf-lib"
 import { saveAs } from "file-saver"
 import fontkit from "@pdf-lib/fontkit"
-import { Statistics } from "@russian-rs/portal-api-axios"
+import { Statistics } from "@rds-network/portal-api-axios"
 import { FIELDS } from "src/shared/constants/Mintrud-fields"
 import { MONTSERRAT_BOLD_BOLD } from "src/shared/docs/fonts/Montserrat-Bold-bold"
 import { MONTSERRAT_MEDIUM_NORMAL } from "src/shared/docs/fonts/Montserrat-Medium-normal"

@@ -1,12 +1,11 @@
-import { Menu } from "@mantine/core"
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
+import { ActionIcon, Menu } from "@mantine/core"
+import { ApplicationDto } from "@rds-network/portal-api-axios"
 import { IconDotsVertical, IconEye, IconMail } from "@tabler/icons-react"
 import { useState } from "react"
-import { FormattedMessage } from "react-intl"
+import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { applicationTemplates } from "src/shared/email/templates"
 import { EmailDrawer } from "src/shared/ui/emailModal/EmailDrawer"
-import classes from "./ApplicationMenu.module.scss"
 import { locales } from "./lib/locales"
 
 interface ApplicationMenuProps {
@@ -14,6 +13,7 @@ interface ApplicationMenuProps {
 }
 
 export const ApplicationMenu = (props: ApplicationMenuProps) => {
+    const intl = useIntl()
     const [emailDrawerOpen, setEmailDrawerOpen] = useState<boolean>(false)
     const navigate = useNavigate()
 
@@ -28,7 +28,17 @@ export const ApplicationMenu = (props: ApplicationMenuProps) => {
             />
 
             <Menu.Target>
-                <IconDotsVertical size={16} className={classes.dots} />
+                <ActionIcon
+                    variant="subtle"
+                    color="gray"
+                    size={24}
+                    aria-label={intl.formatMessage({
+                        id: "pages.applications.menu.actions",
+                        defaultMessage: "Действия с заявкой",
+                    })}
+                >
+                    <IconDotsVertical size={16} aria-hidden="true" />
+                </ActionIcon>
             </Menu.Target>
 
             <Menu.Dropdown>

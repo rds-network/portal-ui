@@ -1,16 +1,23 @@
-import { ApplicationDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, OfficialGroupDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import { jsPDF as JsPdf } from "jspdf"
 import { MONTSERRAT_BOLD_BOLD } from "src/shared/docs/fonts/Montserrat-Bold-bold"
 import { MONTSERRAT_MEDIUM_NORMAL } from "src/shared/docs/fonts/Montserrat-Medium-normal"
 import { getFullAddress } from "src/shared/utils/getFullAddress"
+import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
+import { notifications } from "@mantine/notifications"
 
-export default function generateContractPdf(application: ApplicationDto) {
+export default function generateContractPdf(
+    application: ApplicationDto,
+    officialProgramDto: OfficialGroupDto | undefined
+) {
     const fullName = errorIfEmpty("Name", application.name)
     const birthDate = dayjs(errorIfEmpty("Birth date", application.birthDate)).format("DD.MM.YYYY")
     const passport = errorIfEmpty("Passport", application.passport)
     const phone = errorIfEmpty("Phone", application.phone)
     const email = errorIfEmpty("Email", application.email)
+    const officialProgram = errorIfEmpty("Official Program", officialProgramDto?.nameSr)
+
     const address = getFullAddress(
         errorIfEmpty("Postal code", application.postalCode),
         errorIfEmpty("City", application.city),
@@ -251,14 +258,13 @@ export default function generateContractPdf(application: ApplicationDto) {
         4
     )
 
-    //     writeWrapped(
-    //         `1.4. У тренутку закључења овог уговора, волонтер је примарно укључен у програм:_______________
-    // „ИСТРАЖИВАЧ ТЕЛЕКОМУНИКАЦИЈА“
-    //
-    // 1.5. Промена програма или обима активности врши се без измене овог уговора, путем интерне евиденције или анекса, у складу са програмом волонтирања.`,
-    //         BODY_PT,
-    //         4
-    //     )
+    writeWrapped(
+        `1.4. У тренутку закључења овог уговора, волонтер је примарно укључен у програм: „${officialProgram}“
+
+    1.5. Промена програма или обима активности врши се без измене овог уговора, путем интерне евиденције или анекса, у складу са програмом волонтирања.`,
+        BODY_PT,
+        4
+    )
 
     writeHeading("ЧЛАН 2. РОК ТРАЈАЊА УГОВОРА")
     writeInlineBold("2.1. Овај Уговор подразумева континуирано, **дугорочно волонтирање**.", BODY_PT, 1)
@@ -384,14 +390,19 @@ export default function generateContractPdf(application: ApplicationDto) {
         2
     )
 
+    writeHeading("ЧЛАН 7. ПРИЛОЗИ УГОВОРА")
+    writeWrapped(
+        `7.1. Прилог 1 – Изјава – упитник (заявление – анкета), попуњен и потписан од стране волонтера, чини саставни и нераздвојни део овог уговора и има исту правну снагу као и основни текст уговора.
+
+7.2. Прилог 2 – Програм волонтерских активности у интересу Републике Србије чини саставни и нераздвојни део овог уговора и на основу њега се утврђује садржај и обим волонтерских активности.`,
+        BODY_PT,
+        6
+    )
+
     ensureSpace(25)
 
     pdf.setFontSize(SMALL_PT)
     setBody()
-    pdf.text("Прилог 1. из тачке 4.2.1. члана 4 овог уговора", MARGIN_X, y)
-    y += lineHeightMm(SMALL_PT) + 4
-    pdf.text("ПРИЛОГ У УГОВОРУ О ВОЛОНТИРАЊУ", MARGIN_X, y)
-    y += lineHeightMm(SMALL_PT) + 4
 
     const dividerX = pageWidth / 2
     const colGap = 6
@@ -573,7 +584,9 @@ function writeInlineBoldAt(
 
 function errorIfEmpty(name: string, str: string | null | undefined): string {
     if (str == null || str === "") {
-        alert(name + " is empty")
+        notifications.show(
+            ErrorNotification(`${name} is empty`, "Please fill in all required fields before generating the PDF.")
+        )
         throw new Error(name + " is empty")
     }
     return str

@@ -1,77 +1,133 @@
-import { Anchor, Box, Collapse, Group, rem, ThemeIcon, UnstyledButton } from "@mantine/core"
-import { IconChevronRight } from "@tabler/icons-react"
-import React, { useContext, useState } from "react"
+import { Badge, rem, UnstyledButton } from "@mantine/core"
+import React, { useContext } from "react"
 import { FormattedMessage } from "react-intl"
 import { UserContext } from "src/app/providers/UserContext"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 import classes from "src/shared/ui/appNavbar/links/NavbarLinksGroup.module.scss"
 import { hasPermission } from "src/shared/user/roles"
-import { Link } from "react-router"
+import { useQuery } from "@tanstack/react-query"
+import { Link, useLocation } from "react-router"
+import { ApplicationBadgeApi } from "src/shared/api/applications/ApplicationBadgeApi"
+import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
+import { InboxApiService } from "src/shared/api/InboxApiService"
+import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { UserAccountApiService } from "src/shared/api/user/UserApiService"
 
-export function LinksGroup({ icon: Icon, label, initiallyOpened, items, link, roles }: ItemGroupProps) {
-    const hasChildren = Array.isArray(items)
+export function NavItem({
+    icon: Icon,
+    label,
+    link,
+    showUnread,
+    showApplications,
+    showControlled,
+    curatorInbox,
+}: ItemGroupProps) {
+    const location = useLocation()
     const { user } = useContext(UserContext)
-    const [opened, setOpened] = useState(initiallyOpened || false)
+    const isActive = !!link && location.pathname === link
     const isExternal = link?.startsWith("http://") || link?.startsWith("https://")
 
-    const children = (hasChildren ? items : [])
-        ?.filter((item) => hasPermission(user, item.roles, item.hideFrom))
-        .map((item) => {
-            const isExternal = item.link?.startsWith("http://") || item.link?.startsWith("https://")
-            return isExternal ? (
-                <Anchor className={classes.link} href={item.link} key={item.label}>
-                    <FormattedMessage id={item.label} />
-                </Anchor>
-            ) : (
-                <Anchor component={Link} className={classes.link} to={item.link} key={item.label}>
-                    <FormattedMessage id={item.label} />
-                </Anchor>
-            )
-        })
+    const { data: unread = 0 } = useQuery({
+        queryKey: ["inbox-unread"],
+        queryFn: () => InboxApiService.unreadCount(),
+        enabled: !!showUnread,
+        refetchInterval: 60_000,
+    })
+    const { data: openApplications = 0 } = useQuery({
+        queryKey: ["applications-open-count"],
+        queryFn: () => ApplicationBadgeApi.openCount(),
+        enabled: !!showApplications,
+        refetchInterval: 60_000,
+    })
+    const { data: curatorMe } = useQuery({
+        queryKey: ["program-curators", "me"],
+        queryFn: () => ProgramCuratorApiService.me(),
+        enabled: !!curatorInbox,
+    })
+    const { data: pendingReports = 0 } = useQuery({
+        queryKey: ["customer-reports-pending"],
+        queryFn: () => CustomerReportApiService.pendingCount(),
+        enabled: !!curatorInbox,
+        refetchInterval: 60_000,
+    })
+    const { data: controlled = [] } = useQuery({
+        queryKey: ["controlled-by-me"],
+        queryFn: () => UserAccountApiService.controlledByMe(),
+        enabled: !!showControlled,
+        refetchInterval: 60_000,
+    })
+    const controlledCount = controlled.length
 
-    const controlContent = (
-        <Group justify="space-between" gap={0}>
-            <Box style={{ display: "flex", alignItems: "center" }}>
-                <ThemeIcon variant="light" size={30}>
-                    <Icon style={{ width: rem(18), height: rem(18) }} />
-                </ThemeIcon>
-                <Box ml="md">
-                    <FormattedMessage id={label} />
-                </Box>
-            </Box>
-            {hasChildren && (
-                <IconChevronRight
-                    className={classes.chevron}
-                    style={{
-                        transform: opened ? "rotate(-90deg)" : "none",
-                    }}
-                />
-            )}
-        </Group>
-    )
+    if (curatorInbox) {
+        const ok =
+            !!curatorMe?.curator ||
+            hasPermission(user, ["ADMIN", "ADMIN_VOLUNTEER", "MAIN_VOLUNTEER"]) ||
+            pendingReports > 0
+        if (!ok) return null
+    }
 
-    return (
+    if (!link || !Icon) return null
+
+    const badge =
+        (showUnread && unread > 0 && (
+            <Badge size="xs" color="blue" className={classes.badge}>
+                {unread > 99 ? "99+" : unread}
+            </Badge>
+        )) ||
+        (showApplications && openApplications > 0 && (
+            <Badge size="xs" color="blue" className={classes.badge}>
+                {openApplications > 99 ? "99+" : openApplications}
+            </Badge>
+        )) ||
+        (curatorInbox && pendingReports > 0 && (
+            <Badge size="xs" color="blue" className={classes.badge}>
+                {pendingReports > 99 ? "99+" : pendingReports}
+            </Badge>
+        )) ||
+        (showControlled && controlledCount > 0 && (
+            <Badge size="xs" color="teal" className={classes.badge}>
+                {controlledCount > 99 ? "99+" : controlledCount}
+            </Badge>
+        )) ||
+        null
+
+    const body = (
         <>
-            {hasChildren || !link ? (
-                <UnstyledButton onClick={() => setOpened((o) => !o)} className={classes.control} component="button">
-                    {controlContent}
-                </UnstyledButton>
-            ) : isExternal ? (
-                <UnstyledButton
-                    className={classes.control}
-                    component="a"
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    {controlContent}
-                </UnstyledButton>
-            ) : (
-                <UnstyledButton className={classes.control} component={Link} to={link}>
-                    {controlContent}
-                </UnstyledButton>
-            )}
-            {hasChildren ? <Collapse in={opened}>{children}</Collapse> : null}
+            <span className={classes.icon}>
+                <Icon style={{ width: rem(18), height: rem(18) }} stroke={1.6} />
+            </span>
+            <span className={classes.label}>
+                <FormattedMessage id={label} />
+            </span>
+            {badge}
         </>
     )
+
+    if (isExternal) {
+        return (
+            <UnstyledButton
+                className={classes.item}
+                component="a"
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                {body}
+            </UnstyledButton>
+        )
+    }
+
+    return (
+        <UnstyledButton
+            className={classes.item}
+            component={Link}
+            to={link}
+            aria-current={isActive ? "page" : undefined}
+        >
+            {body}
+        </UnstyledButton>
+    )
 }
+
+/** @deprecated — use NavItem */
+export const LinksGroup = NavItem
