@@ -776,15 +776,17 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     className={classes.propertyBox}
                 />
             )}
-            <Button
-                onClick={openIDCard}
-                className={classes.button}
-                variant="light"
-                color="teal"
-                rightSection={<IconIdBadge size={14} />}
-            >
-                <FormattedMessage id={"pages.profile.buttons.idCard"} />
-            </Button>
+            {userInfo.active && (
+                <Button
+                    onClick={openIDCard}
+                    className={classes.button}
+                    variant="light"
+                    color="teal"
+                    rightSection={<IconIdBadge size={14} />}
+                >
+                    <FormattedMessage id={"pages.profile.buttons.idCard"} />
+                </Button>
+            )}
             {(userInfo?.id === currentUser?.id ||
                 hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])) && (
                 <Button
