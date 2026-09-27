@@ -76,6 +76,16 @@ export type ReportOverdueDto = {
     body?: string | null
 }
 
+export type DeactivatedActiveContractDto = {
+    accountId: number
+    username: string
+    fullName: string
+    program?: string | null
+    contractEnd?: string | null
+    contractType?: string | null
+    deactivatedReason?: string | null
+}
+
 export type OverdueNoticePersonDto = {
     username: string
     fullName: string
@@ -146,6 +156,15 @@ export const InboxApiService = {
 
     async overdue(): Promise<ReportOverdueDto[]> {
         const response = await RequestHttp.get<ReportOverdueDto[]>("/report-overdue", { validateStatus: alive })
+        if (response.status !== 200) return []
+        return response.data ?? []
+    },
+
+    async deactivatedActiveContract(): Promise<DeactivatedActiveContractDto[]> {
+        const response = await RequestHttp.get<DeactivatedActiveContractDto[]>(
+            "/report-overdue/deactivated-active-contract",
+            { validateStatus: alive }
+        )
         if (response.status !== 200) return []
         return response.data ?? []
     },

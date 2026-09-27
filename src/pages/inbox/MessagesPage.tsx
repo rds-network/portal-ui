@@ -189,6 +189,11 @@ export const MessagesPage: React.FC = () => {
                     {item.subject}
                 </Text>
                 <Flex gap={6} wrap="wrap" mt={8}>
+                    {item.kind === "ACCOUNT_DEACTIVATED" && (
+                        <Badge size="xs" color="gray" variant="light">
+                            <FormattedMessage id="pages.messages.kindAccountDeactivated" />
+                        </Badge>
+                    )}
                     {mustAck && (
                         <Badge size="xs" color="orange" variant="filled">
                             <FormattedMessage id="pages.messages.needsAck" />

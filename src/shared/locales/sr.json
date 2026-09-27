@@ -332,7 +332,8 @@
             "ackBlock": "Ima {count} obaveštenja bez potvrde. Kliknite Primljeno, inače je ostali portal zaključan.",
             "delete": "Obriši",
             "deleteConfirm": "Obrisati ovaj razgovor? Poruke će biti trajno uklonjene.",
-            "deleted": "Razgovor je obrisan"
+            "deleted": "Razgovor je obrisan",
+            "kindAccountDeactivated": "Deaktivacija"
         },
         "controlled": {
             "title": "Na kontroli",
@@ -373,7 +374,13 @@
             "cancelWarning": "Poništi kaznu",
             "cancelWarningAll": "Poništi sve",
             "cancelWarningDone": "Kazna poništena. Ostalo {count}/3",
-            "cancelWarningHint": "Skida pogrešno obaveštenje i šalje poruku volonteru. Crvene nedelje nestaju posle prihvatanja izveštaja."
+            "cancelWarningHint": "Skida pogrešno obaveštenje i šalje poruku volonteru. Crvene nedelje nestaju posle prihvatanja izveštaja.",
+            "deactivatedTitle": "Deaktivirani, ugovor još važi",
+            "deactivatedHint": "Nalozi isključeni ručno, a ugovor još nije istekao. Ne ulaze u slanje za kašnjenje izveštaja.",
+            "deactivatedEmpty": "Trenutno nema takvih",
+            "deactivatedTotal": "U grupi: {count}",
+            "deactivatedReason": "razlog: {reason}",
+            "openProfile": "Profil"
         },
         "activity": {
             "title": "Hronika",
