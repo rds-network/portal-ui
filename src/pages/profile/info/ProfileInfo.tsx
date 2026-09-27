@@ -36,6 +36,7 @@ import {
     reportBlockOf,
     reportControllerNameOf,
     reportControlOf,
+    mupLetterOf,
     secondaryProgramCodesOf,
     UserAccountApiService,
     UserApiService,
@@ -72,6 +73,8 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const [controlModalOpen, setControlModalOpen] = useState(false)
     const [controllerLogin, setControllerLogin] = useState<string | null>(null)
     const [controlReason, setControlReason] = useState("")
+    const [warningModalOpen, setWarningModalOpen] = useState(false)
+    const [warningReason, setWarningReason] = useState("")
     const intl = useIntl()
     const locale = intl.locale as Locale
 
@@ -84,6 +87,29 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         queryKey: ["overdue-warnings", userInfo?.username],
         queryFn: () => InboxApiService.overdueWarnings(userInfo!.username),
         enabled: !!userInfo?.username && !!showSensitiveData,
+    })
+
+    const { mutate: issueWarning, isPending: issuingWarning } = useMutation({
+        mutationFn: () =>
+            InboxApiService.issueOverdueWarning(userInfo!.username, {
+                reason: warningReason.trim() || undefined,
+            }),
+        onSuccess: (result) => {
+            setWarningModalOpen(false)
+            setWarningReason("")
+            queryClient.invalidateQueries({ queryKey: ["overdue-warnings", userInfo?.username] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage
+                            id="pages.profile.issueWarningDone"
+                            values={{ count: result.warningCount }}
+                        />
+                    </Text>,
+                    null
+                )
+            )
+        },
     })
 
     const { data: curatorRows = [] } = useQuery({
@@ -396,6 +422,10 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const reportBlockedByName = reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || ""
     const reportControllerName = reportControllerNameOf(userInfo)
     const reportControl = reportControlOf(userInfo)
+    const mupLetter = mupLetterOf(userInfo)
+    const mupLetterSentLabel = mupLetter.mupLetterSentAt
+        ? dayjs(mupLetter.mupLetterSentAt).format("DD.MM.YYYY")
+        : ""
     const reportControllerAtLabel = reportControl.reportControllerAt
         ? dayjs(reportControl.reportControllerAt).format("DD.MM.YYYY HH:mm")
         : ""
@@ -506,6 +536,14 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     {!userInfo?.active && (
                         <Badge color="red" radius="md" variant="light">
                             <FormattedMessage id="pages.profile.deactivated" />
+                        </Badge>
+                    )}
+                    {mupLetterSentLabel && (
+                        <Badge color="grape" radius="md" variant="light">
+                            <FormattedMessage
+                                id="pages.profile.mupNotified"
+                                values={{ date: mupLetterSentLabel }}
+                            />
                         </Badge>
                     )}
                     {warningCount > 0 && (
@@ -821,6 +859,48 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             email={userInfo.email || ""}
                             periodFrom={mupPeriodFrom}
                         />
+                    </>
+                )}
+            {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER, UserGroup.ADMIN]) &&
+                userInfo?.username &&
+                !isOwnProfile &&
+                warningCount < 3 && (
+                    <>
+                        <Button
+                            onClick={() => setWarningModalOpen(true)}
+                            className={classes.button}
+                            variant="outline"
+                            color="orange"
+                        >
+                            <FormattedMessage
+                                id="pages.profile.issueWarning"
+                                values={{ count: warningCount }}
+                            />
+                        </Button>
+                        <Modal
+                            opened={warningModalOpen}
+                            onClose={() => setWarningModalOpen(false)}
+                            title={<FormattedMessage id="pages.profile.issueWarningTitle" />}
+                            centered
+                        >
+                            <Flex direction="column" gap="sm">
+                                <Text size="sm">
+                                    <FormattedMessage
+                                        id="pages.profile.issueWarningHint"
+                                        values={{ next: warningCount + 1 }}
+                                    />
+                                </Text>
+                                <Textarea
+                                    label={<FormattedMessage id="pages.profile.issueWarningReason" />}
+                                    minRows={2}
+                                    value={warningReason}
+                                    onChange={(e) => setWarningReason(e.currentTarget.value)}
+                                />
+                                <Button loading={issuingWarning} color="orange" onClick={() => issueWarning()}>
+                                    <FormattedMessage id="pages.profile.issueWarningConfirm" />
+                                </Button>
+                            </Flex>
+                        </Modal>
                     </>
                 )}
             <Modal
