@@ -75,6 +75,7 @@ export const DissolutionRequestsPage: React.FC = () => {
 
     const invalidate = () => {
         queryClient.invalidateQueries({ queryKey: ["dissolution-requests"] })
+        queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
     }
 
     const { mutate: create, isPending: creating } = useMutation({
