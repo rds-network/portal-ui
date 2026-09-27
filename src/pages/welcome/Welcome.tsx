@@ -4,7 +4,6 @@ import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { locale } from "src/pages/welcome/lib/locale"
 import image from "src/pages/welcome/resources/image.svg"
-import { Dots } from "src/pages/welcome/ui/Dots"
 import classes from "src/pages/welcome/Welcome.module.scss"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 
@@ -14,12 +13,6 @@ export const Welcome = () => {
 
     return (
         <Flex className={classes.rootFlex} align="center">
-            <Dots className={classes.dots} style={{ left: 0, top: 0 }} />
-            <Dots className={classes.dots} style={{ left: 0, top: 140 }} />
-            <Dots className={classes.dots} style={{ left: 60, top: 140 }} />
-            <Dots className={classes.dots} style={{ right: 0, top: 60 }} />
-            <Dots className={classes.dots} style={{ right: 60, top: 240 }} />
-            <Dots className={classes.dots} style={{ right: 20, top: 400 }} />
             <ScrollArea className={classes.contentFlex}>
                 <Flex align="center">
                     <Container>
@@ -65,12 +58,12 @@ export const Welcome = () => {
 
                                 <Group className={classes.controlGroup}>
                                     <Button
-                                        radius={0}
-                                        color="blue"
+                                        radius="md"
+                                        color="ocean"
                                         className={classes.control}
                                         rightSection={<IconLogin2 size={18} />}
                                         onClick={() => navigate(`/login`)}
-                                        variant="light"
+                                        variant="filled"
                                     >
                                         <Flex className={classes.login}>
                                             <FormattedMessage id={locale.buttonLogin} />
@@ -78,7 +71,7 @@ export const Welcome = () => {
                                     </Button>
                                     <Button
                                         variant="default"
-                                        radius={0}
+                                        radius="md"
                                         className={classes.control}
                                         onClick={() => navigate("/application")}
                                     >
@@ -86,7 +79,9 @@ export const Welcome = () => {
                                     </Button>
                                 </Group>
                             </Flex>
-                            <Image src={image} className={classes.image} />
+                            <div className={classes.artwork}>
+                                <Image src={image} className={classes.image} alt="" />
+                            </div>
                         </Flex>
                     </Container>
                 </Flex>

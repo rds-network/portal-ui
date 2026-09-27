@@ -1,5 +1,5 @@
 import { ActionIcon, Button, Flex, Image, Modal, SimpleGrid, Text } from "@mantine/core"
-import { ResidencePermitDto, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { ResidencePermitDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconChevronLeft, IconChevronRight, IconId, IconPencil } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { useContext, useEffect, useState } from "react"

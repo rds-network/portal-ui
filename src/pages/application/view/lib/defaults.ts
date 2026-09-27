@@ -1,4 +1,4 @@
-import { ApplicationStatusDto } from "@russian-rs/portal-api-axios"
+import { ApplicationStatusDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
 

@@ -4,7 +4,7 @@ import {
     PageResponse,
     UserCreateRequest,
     UserSearchFilter,
-} from "@russian-rs/portal-api-axios"
+} from "@rds-network/portal-api-axios"
 import { v4 as uuid } from "uuid"
 
 export const defaultPage: PageRequest = {
@@ -14,7 +14,7 @@ export const defaultPage: PageRequest = {
 }
 
 export const defaultFilter: UserSearchFilter = {
-    onlyInactive: false,
+    onlyActive: true,
 }
 
 export const defaultPageResponse: PageResponse = {

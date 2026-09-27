@@ -1,0 +1,331 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.glass;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+}
+
+.calendarCard {
+    border: 1px solid var(--portal-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--portal-solid);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.calendarHead {
+    padding: 6px 8px;
+    background: var(--portal-accent-soft);
+    border-bottom: 1px solid var(--portal-border);
+    flex-shrink: 0;
+}
+
+.calendarHeadTitle {
+    color: var(--portal-ink);
+}
+
+.calendarSub {
+    color: var(--portal-muted);
+    margin-top: 0;
+    line-height: 1.25;
+    font-size: 10px !important;
+}
+
+.calendarBody {
+    padding: 4px 6px 6px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.monthNav {
+    appearance: none;
+    border: 1px solid var(--portal-border);
+    background: var(--portal-surface);
+    border-radius: 6px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--portal-ink);
+    flex-shrink: 0;
+
+    &:hover {
+        border-color: var(--portal-accent);
+        background: var(--portal-accent-soft);
+    }
+}
+
+.monthLabel {
+    text-transform: capitalize;
+    font-size: 11px;
+    color: var(--portal-ink);
+    line-height: 1.2;
+}
+
+.months {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    flex: 1;
+    min-height: 0;
+    align-content: start;
+}
+
+.picker {
+    width: 100%;
+    min-width: 0;
+
+    :global(.mantine-DatePicker-calendarHeader),
+    :global(.mantine-CalendarHeader-calendarHeader) {
+        display: none;
+    }
+
+    :global(.mantine-DatePicker-month) {
+        width: 100%;
+    }
+
+    :global(.mantine-DatePicker-monthCell),
+    :global(.mantine-DatePicker-day),
+    :global(.mantine-Day-day) {
+        width: 100%;
+        height: 20px;
+        min-height: 20px;
+        min-width: 0;
+        font-size: 10px;
+        line-height: 1;
+        padding: 0;
+    }
+
+    :global(.mantine-DatePicker-weekdaysRow),
+    :global(.mantine-DatePicker-monthThead) {
+        th {
+            padding: 0 0 1px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+    }
+
+    :global(.mantine-DatePicker-monthRow) td {
+        padding: 0;
+    }
+
+    :global(.mantine-DatePicker-levelsGroup) {
+        justify-content: center;
+    }
+}
+
+.dayCell {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    min-height: 18px;
+}
+
+.dayNum {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.dayHasEvent .dayNum {
+    background: var(--portal-accent);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--portal-accent) 25%, transparent);
+}
+
+.dayWithEvent {
+    font-weight: 700;
+}
+
+.listPane {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.listTitle {
+    color: var(--portal-ink);
+    flex-shrink: 0;
+}
+
+.listScroll {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-gutter: stable;
+}
+
+.eventCard {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 6px;
+    padding: 6px 8px;
+    border: 1px solid var(--portal-border);
+    border-radius: 10px;
+    background: var(--portal-solid);
+    flex-shrink: 0;
+}
+
+.eventNew {
+    animation: eventNewPulse 2.4s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+        border-color: color-mix(in srgb, var(--portal-accent) 55%, var(--portal-border));
+    }
+}
+
+@keyframes eventNewPulse {
+    0%,
+    100% {
+        border-color: color-mix(in srgb, var(--portal-accent) 35%, var(--portal-border));
+        background: var(--portal-solid);
+        box-shadow: none;
+    }
+    50% {
+        border-color: color-mix(in srgb, var(--portal-accent) 70%, transparent);
+        background: color-mix(in srgb, var(--portal-accent) 8%, var(--portal-solid));
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--portal-accent) 18%, transparent);
+    }
+}
+
+.eventWhen {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+    padding-top: 1px;
+}
+
+.eventDay {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--portal-ink);
+}
+
+.eventMonth {
+    font-size: 9px;
+    font-weight: 650;
+    text-transform: lowercase;
+    color: var(--portal-ink);
+}
+
+.eventTime {
+    font-size: 10px;
+    color: var(--portal-muted);
+    margin-top: 2px;
+}
+
+.eventBody {
+    min-width: 0;
+}
+
+.eventTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+}
+
+.eventTitle {
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.25;
+    margin-top: 2px;
+    color: var(--portal-ink);
+}
+
+.eventMeta {
+    font-size: 10px;
+    color: var(--portal-muted);
+    line-height: 1.25;
+    margin-top: 1px;
+}
+
+.mapLink {
+    display: inline-block;
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--portal-accent);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.empty {
+    color: var(--portal-muted);
+    font-size: 12px;
+    padding: 4px 0;
+}
+
+@media (max-width: 60em) {
+    .root {
+        height: auto;
+        max-height: 520px;
+    }
+
+    .layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .months {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .calendarCard {
+        max-height: 280px;
+    }
+}

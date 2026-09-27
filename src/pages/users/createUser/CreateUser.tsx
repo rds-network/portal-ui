@@ -1,9 +1,9 @@
-import { Button, Drawer, Flex, Loader, Text, TextInput } from "@mantine/core"
+import { Button, Drawer, Flex, Loader, MantineSize, Text, TextInput } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import { UserCreateRequest } from "@russian-rs/portal-api-axios"
+import { UserCreateRequest } from "@rds-network/portal-api-axios"
 import { IconAt, IconCalendarMonth, IconCalendarOff, IconUser, IconUserPlus } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -18,7 +18,15 @@ import { ContractTypeSelect } from "src/shared/ui/contractTypeSelect/ContractTyp
 import { z } from "zod"
 import classes from "./CreateUser.module.scss"
 
-export const CreateUser = () => {
+export const CreateUser = ({
+    withLabel = false,
+    className,
+    size,
+}: {
+    withLabel?: boolean
+    className?: string
+    size?: MantineSize
+}) => {
     const intl = useIntl()
     const [opened, { open, close }] = useDisclosure(false)
     const [request, setRequest] = useState<UserCreateRequest>(defaultCreateRequest)
@@ -123,7 +131,7 @@ export const CreateUser = () => {
         <>
             <Drawer opened={opened} onClose={close} title={<FormattedMessage id={locales.newUser} />}>
                 <Flex direction="column" rowGap={8}>
-                    <Flex columnGap={8}>
+                    <Flex className={classes.fieldRow} columnGap={8}>
                         <TextInput
                             withAsterisk
                             className={classes.name}
@@ -156,7 +164,7 @@ export const CreateUser = () => {
                     <Text c="dimmed" size="sm" mt="md">
                         <FormattedMessage id={locales.contractInfo} />
                     </Text>
-                    <Flex columnGap={8}>
+                    <Flex className={classes.fieldRow} columnGap={8}>
                         <DateInput
                             withAsterisk
                             valueFormat="DD MMM YYYY"
@@ -187,7 +195,17 @@ export const CreateUser = () => {
                     </Button>
                 </Flex>
             </Drawer>
-            <Button variant="transparent" leftSection={<IconUserPlus size={16} />} onClick={open}></Button>
+            <Button
+                variant={withLabel ? "filled" : "transparent"}
+                size={size || (withLabel ? "md" : "sm")}
+                radius="md"
+                leftSection={<IconUserPlus size={18} aria-hidden="true" />}
+                aria-label={intl.formatMessage({ id: locales.addUser, defaultMessage: "Добавить пользователя" })}
+                className={className}
+                onClick={open}
+            >
+                {withLabel && <FormattedMessage id={locales.addUser} defaultMessage="Добавить пользователя" />}
+            </Button>
         </>
     )
 }

@@ -1,0 +1,52 @@
+.reportCard {
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding: 16px 20px;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 16px;
+    border: 1px solid light-dark(#e5e7eb, var(--portal-border));
+    background: light-dark(#fff, var(--portal-surface));
+    box-shadow: none;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+
+    &:hover {
+        background: light-dark(#eef2ff, color-mix(in srgb, var(--portal-surface) 86%, white));
+        border-color: light-dark(#c7d2fe, var(--portal-border));
+    }
+}
+
+.cardTop {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.cardHeader {
+    width: 100%;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.taskPreview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid light-dark(#e5e7eb, var(--portal-border));
+}
+
+.taskLine {
+    font-size: 12px;
+    line-height: 1.45;
+    color: light-dark(#374151, inherit);
+    white-space: pre-wrap;
+}

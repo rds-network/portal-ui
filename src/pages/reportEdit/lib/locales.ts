@@ -9,4 +9,13 @@ export const locales = {
     confirmTitle: "pages.edit-report.confirm-title",
     confirmDescription: "pages.edit-report.confirm-description",
     differentWeeks: "pages.edit-report.different-weeks-alert",
+    customerRequired: "pages.edit-report.customer-required",
+    customerCannotBeSelf: "pages.edit-report.customer-cannot-be-self",
+    blockedTitle: "pages.edit-report.blocked-title",
+    blockedDescription: "pages.edit-report.blocked-description",
+    blockedReason: "pages.edit-report.blocked-reason",
+    controlTitle: "pages.edit-report.control-title",
+    controlDescription: "pages.edit-report.control-description",
+    assignmentTitle: "pages.edit-report.assignment-title",
+    programWillSync: "pages.edit-report.program-will-sync",
 }

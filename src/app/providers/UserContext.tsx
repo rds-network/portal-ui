@@ -1,4 +1,4 @@
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 import React, { createContext, ReactNode, useEffect, useState } from "react"
 import { LAST_LOGIN, USER } from "src/shared/constants/Storage"
 import { defaultFunction } from "src/shared/lib/defaultFunction"

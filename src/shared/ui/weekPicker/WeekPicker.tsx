@@ -81,6 +81,7 @@ export const WeekPicker = (props: WeekPickerProps) => {
                         <FormattedMessage id="common.week-picker.label" />
                     </Text>
                     <Input
+                        size="sm"
                         className={`${classes.input} ${props.className}`}
                         component="button"
                         pointer

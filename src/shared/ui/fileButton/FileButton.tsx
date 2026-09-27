@@ -1,6 +1,6 @@
 import { Button, ButtonVariant, MantineColor, MantineSize, Text } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { FileInfoDto } from "@russian-rs/portal-api-axios"
+import { FileInfoDto } from "@rds-network/portal-api-axios"
 import { IconDownload } from "@tabler/icons-react"
 import React, { useState } from "react"
 import { FormattedMessage } from "react-intl"

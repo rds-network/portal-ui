@@ -1,0 +1,34 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.glass;
+    padding: 16px 18px;
+    border-radius: 16px;
+    min-width: 0;
+}
+
+.chipButton {
+    display: inline-flex;
+    border-radius: 10px;
+
+    &[data-active] .chip {
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--mantine-primary-color-filled) 35%, transparent);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--mantine-primary-color-filled);
+        outline-offset: 2px;
+    }
+}
+
+.chip {
+    cursor: pointer;
+    text-transform: none;
+    font-weight: 600;
+    max-width: 100%;
+    height: auto;
+    min-height: 32px;
+    white-space: normal;
+    line-height: 1.3;
+    padding-block: 6px;
+}

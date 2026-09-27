@@ -1,6 +1,6 @@
 import { CloseButton, Combobox, Flex, Input, InputBase, useCombobox } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
-import { ContractTypeEnum } from "@russian-rs/portal-api-axios"
+import { ContractTypeEnum } from "@rds-network/portal-api-axios"
 import { IconContract } from "@tabler/icons-react"
 import React, { ReactNode, useEffect, useState } from "react"
 import { FormattedMessage } from "react-intl"

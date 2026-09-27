@@ -11,8 +11,8 @@ export const LoginButton = () => {
         <>
             <Button
                 variant="light"
-                color="blue"
-                radius={0}
+                color="ocean"
+                radius="md"
                 rightSection={<IconLogin2 size={18} />}
                 onClick={() => navigate("/login")}
             >

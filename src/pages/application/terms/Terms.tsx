@@ -60,7 +60,7 @@ export const Terms = ({ onAccepted }: TermsProps) => {
                     className={classes.button}
                     disabled={!accepted}
                     variant="light"
-                    radius={0}
+                    radius="md"
                     onClick={() => onAccepted()}
                 >
                     <FormattedMessage id={locales.buttonApplication} />

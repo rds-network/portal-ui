@@ -1,6 +1,6 @@
 import { Accordion, Button, Drawer, Flex, Group, Image, Modal, Text } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { ResidencePermitDto } from "@russian-rs/portal-api-axios"
+import { ResidencePermitDto } from "@rds-network/portal-api-axios"
 import { IconEye, IconPlus } from "@tabler/icons-react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"

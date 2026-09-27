@@ -1,47 +1,32 @@
 .icon {
-    width: 3rem;
-    height: 3rem;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
     stroke-width: 1.5;
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        width: 6rem;
-        height: 6rem;
-    }
 }
-
 .iconAccept {
-    color: var(--mantine-color-blue-6);
+    color: var(--portal-accent);
 }
-
 .iconReject {
     color: var(--mantine-color-red-6);
 }
-
 .iconIdle {
-    color: var(--mantine-color-dimmed);
+    color: var(--portal-accent);
 }
-
 .description {
-    text-align: center;
+    text-align: left;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    row-gap: 0.5rem;
+    gap: 6px;
+    min-width: 0;
 }
-
 .title {
-    font-size: large;
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        font-size: medium;
-    }
+    font-size: 15px;
+    line-height: 1.5;
 }
-
 .subTitle {
-    font-size: small;
-    color: var(--mantine-color-dimmed);
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        font-size: x-small;
-    }
+    font-size: 13px;
+    color: var(--portal-muted);
+    line-height: 1.5;
 }

@@ -9,16 +9,17 @@ import { locales } from "src/pages/users/lib/locales"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import React, { useEffect, useState } from "react"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
-import { UserInfoDto } from "@russian-rs/portal-api-axios"
+import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { NavigateFunction } from "react-router"
 import { IDBadge } from "src/shared/ui/badges/IDBadge"
+import { reportBlockOf, reportControllerNameOf } from "src/shared/api/user/UserApiService"
 
 type Props = {
     user: UserInfoDto
     canEditProgram: () => boolean
     canEditProject: (targetUserId: number) => boolean
-    updateUserProgram: (variables: { userId: string; program: string }) => Promise<any> | void
-    updateUserProject: (variables: { userId: string; project: string }) => Promise<any> | void
+    updateUserProgram: (variables: { userId: string; program: string | null }) => Promise<any> | void
+    updateUserProject: (variables: { userId: string; project: string | null }) => Promise<any> | void
     intl: IntlShape
     navigate: NavigateFunction
     setDrawerOpened: (open: boolean) => void
@@ -63,7 +64,7 @@ export const UserRow = ({
         }
     }, [selectedProgram, selectedProject, programs])
 
-    const handleProgramChange = async (program: string) => {
+    const handleProgramChange = async (program: string | null) => {
         if (isSyncing) return
 
         const prevProgram = selectedProgram
@@ -79,7 +80,7 @@ export const UserRow = ({
         }
     }
 
-    const handleProjectChange = async (project: string) => {
+    const handleProjectChange = async (project: string | null) => {
         if (isSyncing) return
 
         const prevProject = selectedProject
@@ -91,6 +92,8 @@ export const UserRow = ({
             setSelectedProject(prevProject)
         }
     }
+
+    const controllerName = reportControllerNameOf(user)
 
     const lastContract =
         Array.isArray(user.contracts) && user.contracts.length > 0
@@ -112,13 +115,8 @@ export const UserRow = ({
         >
             <Table.Td>
                 <Flex columnGap={16} align="center" className={classes.columnName}>
-                    <Avatar
-                        size={36}
-                        src={user.avatar?.link}
-                        name={user.fullName}
-                        className={classes.avatar}
-                    />
-                    <Flex direction="column">
+                    <Avatar size={36} src={user.avatar?.link} name={user.fullName} className={classes.avatar} />
+                    <Flex direction="column" miw={0}>
                         <Text truncate="end">{user.fullName}</Text>
                         <Text size="sm" c="dimmed" truncate="end">
                             {user.email}
@@ -177,10 +175,20 @@ export const UserRow = ({
                 </Button>
             </Table.Td>
             <Table.Td>
-                <Flex align="center" justify="end">
+                <Flex align="center" justify="end" gap={6} wrap="wrap">
                     {!user.active && (
                         <Badge color="red" radius="md" variant="light">
                             <FormattedMessage id={locales.deactivated} />
+                        </Badge>
+                    )}
+                    {reportBlockOf(user).reportBlocked && (
+                        <Badge color="red" radius="md" variant="filled">
+                            <FormattedMessage id={locales.reportBlockedShort} />
+                        </Badge>
+                    )}
+                    {controllerName && (
+                        <Badge color="teal" radius="md" variant="light">
+                            <FormattedMessage id={locales.reportControllerBadge} values={{ name: controllerName }} />
                         </Badge>
                     )}
                     <div className={classes.menuWrapper} onClick={(e) => e.stopPropagation()}>

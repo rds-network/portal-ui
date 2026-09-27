@@ -4,7 +4,9 @@ import { defineConfig, HttpProxy } from "vite"
 import { Mode, plugin as markDownPlugin } from "vite-plugin-markdown"
 
 // const apiTarget = "http://localhost:8081"
-const apiTarget = process.env.AUTHENTIK_BASE_URL ? `${process.env.AUTHENTIK_BASE_URL}/api` : "http://localhost:8081"
+const apiTarget = process.env.PORTAL_BACKEND_BASE_URL
+    ? `${process.env.PORTAL_BACKEND_BASE_URL}/api`
+    : "http://localhost:8081"
 
 export default defineConfig(({ mode }) => {
     return {

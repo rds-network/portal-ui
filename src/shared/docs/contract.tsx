@@ -1,4 +1,4 @@
-import { ApplicationDto, OfficialGroupDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, OfficialGroupDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import { jsPDF as JsPdf } from "jspdf"
 import { MONTSERRAT_BOLD_BOLD } from "src/shared/docs/fonts/Montserrat-Bold-bold"

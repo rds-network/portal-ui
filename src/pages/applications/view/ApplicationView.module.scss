@@ -1,62 +1,69 @@
-$width: 36rem;
+@use "../../../app/styles/surfaces" as s;
 
 .root {
-    width: 100%;
-    padding: 2rem;
+    @include s.page;
     flex-direction: column;
-    row-gap: 1rem;
-
-    @media (max-width: $mantine-breakpoint-sm) {
-        padding: 1rem;
-    }
+    gap: 24px;
 }
 
 .wrapContainer {
+    display: grid;
     width: 100%;
-    flex-wrap: wrap;
-    gap: 1rem;
+    max-width: 1280px;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px;
+    align-items: start;
+    @media (max-width: 75em) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.sidebar {
+    min-width: 0;
 }
 
 .info {
-    width: $width;
+    width: 100%;
 
     @media (max-width: $mantine-breakpoint-sm) {
         width: 100%;
+    }
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
     }
 }
 
 .controls {
-    width: 16rem;
+    width: 100%;
 
     @media (max-width: $mantine-breakpoint-sm) {
         width: 100%;
     }
-}
 
-.title {
-    font-size: large;
-    font-weight: bold;
-
-    @media (max-width: $mantine-breakpoint-sm) {
-        font-size: large;
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
     }
 }
 
+.title {
+    @include s.title;
+}
+
 .statusSelect {
-    width: 16rem;
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
-    border-radius: 0.5rem;
-    border-style: solid;
-    border-width: 1px;
-    border-color: light-dark(var(--mantine-color-blue-9), var(--mantine-color-white));
+    width: 100%;
+    min-width: 0;
 }
 
 .contractDate {
     width: 100%;
     justify-content: start;
-    border-style: solid;
-    border-width: 1px;
-    border-color: light-dark(var(--mantine-color-blue-9), var(--mantine-color-white));
 }
 
 .contractGenerate {
@@ -74,6 +81,7 @@ $width: 36rem;
 .name {
     font-size: x-large;
     font-weight: bold;
+    overflow-wrap: anywhere;
 }
 
 .fields {
@@ -92,11 +100,35 @@ $width: 36rem;
 }
 
 .notes {
-    width: $width;
+    width: 100%;
     flex-direction: column;
     gap: 1rem;
 
     @media (max-width: $mantine-breakpoint-sm) {
         width: 100%;
     }
+
+    & {
+        @include s.glass;
+        padding: 24px;
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+.statusControl {
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+.statusField {
+    flex: 1;
+    min-width: 0;
+}
+
+.controls > div,
+.controlField > div,
+.controlField > div > div {
+    width: 100%;
+    min-width: 0;
 }

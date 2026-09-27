@@ -2,7 +2,7 @@ import { Button, Drawer, Flex, Radio, Select, TextInput, Tooltip } from "@mantin
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { ApplicationDto, GenderEnumDto } from "@russian-rs/portal-api-axios"
+import { ApplicationDto, GenderEnumDto } from "@rds-network/portal-api-axios"
 import {
     IconAt,
     IconBrandTelegram,
@@ -125,7 +125,7 @@ export const ApplicationEditDrawer = ({
             .max(200, intl.formatMessage({ id: "pages.profile.validation.maxLetters" }, { count: 200 }))
             .optional()
             .or(z.literal("")),
-        program: z.string().min(1, intl.formatMessage({ id: "pages.application.form.required" })),
+        program: z.string().optional(),
         project: z.string().optional(),
     })
 
@@ -148,7 +148,10 @@ export const ApplicationEditDrawer = ({
         validate: zodResolver(validationSchema),
     })
 
-    const { programs, visibleProjects } = useProgramProjectFilter(form.values.program || null, form.values.project || null)
+    const { programs, visibleProjects } = useProgramProjectFilter(
+        form.values.program || null,
+        form.values.project || null
+    )
 
     const programOptions = programs.map((program) => ({
         value: program.code,
@@ -160,9 +163,10 @@ export const ApplicationEditDrawer = ({
     }))
 
     const { mutate: updateApplication, isPending } = useMutation({
+        mutationKey: ["writeApplication"],
         mutationFn: async (data: Partial<ApplicationDto>) => {
             const response = await PrivateApplicationApiService.updateApplication({
-                ...application,
+                id: application.id,
                 ...data,
             })
             return response.data
@@ -227,7 +231,8 @@ export const ApplicationEditDrawer = ({
         form.setFieldValue("program", program ?? "")
 
         const selectedProgramDto = programs.find((p) => p.code === program)
-        const projectAvailable = form.values.project && (selectedProgramDto?.projectCodes ?? []).includes(form.values.project)
+        const projectAvailable =
+            form.values.project && (selectedProgramDto?.projectCodes ?? []).includes(form.values.project)
         if (!projectAvailable) {
             form.setFieldValue("project", "")
         }
@@ -313,8 +318,8 @@ export const ApplicationEditDrawer = ({
                     <Select
                         label={<FormattedMessage id="pages.applications.view.program" />}
                         placeholder={intl.formatMessage({ id: "pages.application.form.program-placeholder" })}
-                        withAsterisk
                         searchable
+                        clearable
                         data={programOptions}
                         value={form.values.program || null}
                         error={form.errors.program}

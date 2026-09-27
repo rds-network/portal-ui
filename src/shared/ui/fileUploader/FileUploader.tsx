@@ -1,7 +1,7 @@
 import { Flex, Text } from "@mantine/core"
 import { Dropzone, FileWithPath } from "@mantine/dropzone"
 import { notifications } from "@mantine/notifications"
-import { FileInfoDto } from "@russian-rs/portal-api-axios"
+import { FileInfoDto } from "@rds-network/portal-api-axios"
 import { IconFiles, IconUpload, IconX } from "@tabler/icons-react"
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react"
 import { ErrorCode, FileRejection } from "react-dropzone-esm"

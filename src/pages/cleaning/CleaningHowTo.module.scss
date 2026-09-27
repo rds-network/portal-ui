@@ -1,19 +1,25 @@
+@use "../../app/styles/surfaces" as s;
+
 .root {
-    padding: 1rem 2rem;
+    @include s.page;
     flex-direction: column;
-    row-gap: 1rem;
-    box-sizing: border-box;
-    width: 100%;
-    max-width: 1440px;
-    margin: 0 auto;
+    gap: 24px;
+    max-width: 1200px;
+
+    & {
+        @include s.glass;
+        width: calc(100% - 2 * var(--portal-page-padding));
+        padding: var(--portal-page-padding);
+        margin: var(--portal-page-top-gap) var(--portal-page-padding) var(--portal-page-padding);
+    }
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
+    @include s.title;
 }
 
 .markdown {
+    @include s.prose;
     display: block;
     width: 100%;
 
@@ -35,7 +41,9 @@
     }
 
     :global(p.img-row > img) {
-        width: 49%;
+        width: 0;
+        flex: 1;
+        min-width: 0;
         max-width: 49%;
         margin: 0;
     }
@@ -54,12 +62,6 @@
     :global(.warn) {
         color: #d7263d;
         font-weight: 700;
-    }
-
-    :global(h1),
-    :global(h2),
-    :global(h3) {
-        margin-top: 1.5rem;
     }
 
     :global(p) {

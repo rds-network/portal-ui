@@ -1,4 +1,4 @@
-import { TaskDto } from "@russian-rs/portal-api-axios"
+import { TaskDto } from "@rds-network/portal-api-axios"
 import { useEffect, useState } from "react"
 import { defaultTask } from "src/pages/reportEdit/lib/defaults"
 

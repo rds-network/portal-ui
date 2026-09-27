@@ -1,4 +1,4 @@
-import { PageRequest, PageResponse, ReportFilter, UserInfoDto } from "@russian-rs/portal-api-axios"
+import { PageRequest, PageResponse, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
 
 export const defaultPage: PageRequest = {
     pageNumber: 0,

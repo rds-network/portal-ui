@@ -1,0 +1,73 @@
+@mixin page {
+    width: 100%;
+    min-width: 0;
+    padding: var(--portal-page-padding);
+    padding-top: var(--portal-page-top-gap);
+    background: transparent;
+    animation: portal-enter 350ms ease both;
+}
+
+@mixin glass {
+    background: var(--portal-surface);
+    border: 1px solid var(--portal-border);
+    border-radius: var(--portal-radius);
+    box-shadow: var(--portal-shadow);
+    backdrop-filter: blur(18px);
+}
+
+@mixin title {
+    font-size: clamp(26px, 2.6vw, 38px);
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -0.045em;
+    color: var(--portal-ink);
+    text-align: left;
+}
+
+@mixin prose {
+    overflow-wrap: anywhere;
+    line-height: 1.7;
+    h1 {
+        @include title;
+        margin: 0 0 24px;
+    }
+    h2 {
+        font-size: clamp(20px, 2vw, 26px);
+        line-height: 1.35;
+        margin: 32px 0 16px;
+        letter-spacing: -0.025em;
+    }
+    h3 {
+        font-size: 18px;
+        line-height: 1.4;
+        margin: 24px 0 12px;
+    }
+    p {
+        margin: 0 0 16px;
+    }
+    ul,
+    ol {
+        padding-left: 24px;
+        margin: 0 0 20px;
+    }
+    li {
+        margin-block: 6px;
+    }
+    a {
+        color: var(--portal-accent);
+        text-underline-offset: 3px;
+    }
+    hr {
+        border: 0;
+        border-top: 1px solid var(--portal-border);
+        margin-block: 28px;
+    }
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 16px;
+    }
+    > :last-child {
+        margin-bottom: 0;
+    }
+}

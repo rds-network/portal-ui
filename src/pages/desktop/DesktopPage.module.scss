@@ -1,0 +1,231 @@
+@use "../../app/styles/surfaces" as s;
+
+.root {
+    @include s.page;
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--portal-accent);
+}
+
+.title {
+    @include s.title;
+    margin: 2px 0 0;
+    font-size: clamp(22px, 2.4vw, 28px);
+}
+
+.subtitle {
+    color: var(--portal-muted);
+    font-size: 13px;
+    margin-top: 2px;
+}
+
+.grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 10px;
+    align-items: stretch;
+}
+
+.card {
+    @include s.glass;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.cardTitle {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.cardLink {
+    font-size: 12px;
+    color: var(--portal-accent);
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reportsCard {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.messagesCard {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.tasksCard {
+    grid-column: 2;
+    grid-row: 3;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.listScroll {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 2px;
+    scrollbar-gutter: stable;
+}
+
+.row {
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding: 8px 10px;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    border-radius: 12px;
+    border: 1px solid var(--portal-border);
+    background: var(--portal-solid);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+
+    &:hover {
+        background: var(--portal-subtle);
+        border-color: var(--portal-accent);
+    }
+}
+
+.rowNew {
+    animation: taskNewPulse 2.4s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+        border-color: color-mix(in srgb, var(--portal-accent) 55%, var(--portal-border));
+    }
+}
+
+@keyframes taskNewPulse {
+    0%,
+    100% {
+        border-color: color-mix(in srgb, var(--portal-accent) 35%, var(--portal-border));
+        background: var(--portal-solid);
+        box-shadow: none;
+    }
+    50% {
+        border-color: color-mix(in srgb, var(--portal-accent) 70%, transparent);
+        background: color-mix(in srgb, var(--portal-accent) 8%, var(--portal-solid));
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--portal-accent) 18%, transparent);
+    }
+}
+
+.rowBody {
+    min-width: 0;
+    flex: 1;
+}
+
+.rowMeta {
+    font-size: 11px;
+    color: var(--portal-muted);
+}
+
+.empty {
+    color: var(--portal-muted);
+    font-size: 13px;
+    padding: 4px 0;
+}
+
+.heatmap {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-height: 0;
+}
+
+.eventsSlot {
+    grid-column: 1;
+    grid-row: 3;
+    min-height: 0;
+}
+
+@media (max-width: 60em) {
+    .root {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+    }
+
+    .grid {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        flex: none;
+    }
+
+    .heatmap,
+    .reportsCard,
+    .messagesCard,
+    .eventsSlot,
+    .tasksCard {
+        grid-column: auto;
+        grid-row: auto;
+    }
+
+    .messagesCard,
+    .tasksCard {
+        min-height: 200px;
+    }
+}

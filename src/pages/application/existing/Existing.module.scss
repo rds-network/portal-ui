@@ -1,16 +1,12 @@
+@use "../../../app/styles/surfaces" as s;
+
 .root {
-    padding: 1rem;
-    row-gap: 1rem;
+    @include s.page;
     flex-direction: column;
-    height: calc(100dvh - var(--mantine-spacing-md) * 6);
+    gap: 24px;
+    min-height: 65vh;
 }
 
 .title {
-    font-size: xx-large;
-    font-weight: bolder;
-    text-align: center;
-
-    @media (max-width: $mantine-breakpoint-sm) {
-        font-size: large;
-    }
+    @include s.title;
 }

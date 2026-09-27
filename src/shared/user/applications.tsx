@@ -57,6 +57,8 @@ export const getApplicationStatusColor = (status: string): MantineColor | undefi
             return "cyan"
         case ApplicationStatus.CLARIFICATION:
             return "orange"
+        case ApplicationStatus.PAUSED:
+            return "yellow"
         case ApplicationStatus.DONE:
             return "green"
         case ApplicationStatus.DENY:

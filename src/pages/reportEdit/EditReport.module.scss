@@ -1,46 +1,92 @@
+@use "../../app/styles/surfaces" as s;
 .root {
-    padding: var(--mantine-spacing-xl);
-    padding-top: var(--mantine-spacing-sm);
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        padding: var(--mantine-spacing-md);
-    }
+    @include s.page;
 }
-
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+    color: var(--portal-muted);
+    font-size: 13px;
+}
+.header {
+    margin: 20px 0 28px;
+}
 .title {
-    font-weight: bold;
-    font-size: xx-large;
-    color: light-dark(var(--mantine-color-dark-5), var(--mantine-color-white));
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        font-size: x-large;
-    }
+    @include s.title;
 }
-
-.description {
-    color: light-dark(var(--mantine-color-dark-3), var(--mantine-color-dark-0));
-    max-width: 38rem;
-    font-size: small;
-    margin-bottom: var(--mantine-spacing-md);
-
-    @media (max-width: $mantine-breakpoint-xs) {
-        max-width: 100%;
-        font-size: small;
-    }
+.workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    align-items: start;
+    gap: 24px;
+    width: 100%;
+    max-width: 1240px;
 }
-
 .taskContainer {
-    width: 36rem;
-
-    @media (max-width: $mantine-breakpoint-md) {
-        width: 100%;
+    min-width: 0;
+}
+.summary {
+    @include s.glass;
+    position: sticky;
+    top: 20px;
+    padding: 24px;
+}
+.summaryHeading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    svg {
+        color: var(--portal-accent);
     }
 }
-
+.description {
+    color: var(--portal-muted);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 18px 0;
+}
+.draftHint {
+    display: flex;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--portal-border);
+    margin-bottom: 20px;
+    color: var(--portal-muted);
+    svg {
+        flex-shrink: 0;
+        color: var(--portal-accent);
+    }
+}
+.guideLink {
+    display: block;
+    margin-top: 16px;
+    font-size: 13px;
+    text-align: center;
+    color: var(--portal-muted);
+}
 .buttonAddTask {
-    transition: transform 0.2s;
-
-    &:hover {
-        transform: scale(1.1);
+    width: 100%;
+    height: 52px;
+    margin-top: 20px;
+    border: 1px dashed var(--portal-accent);
+    background: var(--portal-subtle);
+}
+@media (max-width: 80em) {
+    .workspace {
+        grid-template-columns: minmax(0, 1fr) 240px;
+        gap: 18px;
+    }
+    .summary {
+        padding: 20px;
+    }
+}
+@media (max-width: 70em) {
+    .workspace {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .summary {
+        position: static;
     }
 }
