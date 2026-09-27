@@ -1,4 +1,15 @@
 @use "../../app/styles/surfaces" as s;
+
+.page {
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    @media (min-width: 80.01em) {
+        height: 100%;
+    }
+}
+
 .root {
     @include s.page;
     display: flex;
@@ -165,8 +176,31 @@
     }
 }
 @media (max-width: 80em) {
+    .root {
+        height: auto;
+        max-height: none;
+        overflow: visible;
+        min-height: 0;
+    }
+
     .content {
         grid-template-columns: minmax(0, 1fr);
+        flex: none;
+        min-height: 0;
+        height: auto;
+        align-items: start;
+    }
+
+    .reports {
+        height: auto;
+        overflow: visible;
+        min-height: 0;
+    }
+
+    .reportsList {
+        flex: none;
+        overflow: visible;
+        min-height: 0;
     }
 }
 @media (max-width: 36em) {

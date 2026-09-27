@@ -38,4 +38,11 @@
         inset: calc(72px + var(--portal-banner-height, 0px)) 0 34px;
         padding: 0;
     }
+
+    .appShellMainScroll {
+        :global(.mantine-ScrollArea-viewport > div) {
+            height: auto !important;
+            min-height: 100% !important;
+        }
+    }
 }

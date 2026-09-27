@@ -62,7 +62,7 @@ export const CuratorReportsPage: React.FC = () => {
     })
 
     return (
-        <Flex direction="column" style={{ height: "100%" }}>
+        <Flex direction="column" className={classes.page}>
             <Flex className={classes.root}>
                 <Flex className={classes.header} align="center">
                     <div>
