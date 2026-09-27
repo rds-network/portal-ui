@@ -319,6 +319,9 @@ export const VolunteerHeatmapPage: React.FC = () => {
                 <Text size="xl" fw={700}>
                     <FormattedMessage id={locales.title} />
                 </Text>
+                <Text size="sm" c="dimmed">
+                    <FormattedMessage id={locales.description} />
+                </Text>
 
                 <VolunteerReportFilters
                     search={search}

@@ -55,6 +55,7 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
     const [blockReason, setBlockReason] = useState("")
     const [controlModalOpen, setControlModalOpen] = useState<boolean>(false)
     const [controllerLogin, setControllerLogin] = useState<string | null>(null)
+    const [controlReason, setControlReason] = useState("")
 
     useEffect(() => setUserDto(user), [user])
 
@@ -116,14 +117,15 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
     })
 
     const { mutate: changeReportController, isPending: isChangingReportController } = useMutation({
-        mutationFn: (login: string | null) =>
-            login === null
+        mutationFn: (payload: { login: string | null; reason?: string }) =>
+            payload.login === null
                 ? UserAccountApiService.clearReportController(userDto.id)
-                : UserAccountApiService.setReportController(userDto.id, login),
+                : UserAccountApiService.setReportController(userDto.id, payload.login, payload.reason),
         onSuccess: (updated) => {
             setUserDto(updated)
             setControlModalOpen(false)
             setControllerLogin(null)
+            setControlReason("")
             setMenuOpened(false)
             notifications.show(
                 SuccessNotification(
@@ -193,6 +195,14 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                     label={<FormattedMessage id={locales.reportControllerLabel} />}
                     onUserChange={(picked) => setControllerLogin(picked?.username ?? null)}
                 />
+                <Textarea
+                    mt="md"
+                    minRows={3}
+                    maxRows={6}
+                    value={controlReason}
+                    placeholder={intl.formatMessage({ id: locales.reportControllerReasonPlaceholder })}
+                    onChange={(event) => setControlReason(event.currentTarget.value)}
+                />
                 <Flex mt="md" gap="sm" justify="flex-end">
                     <Button variant="outline" onClick={() => setControlModalOpen(false)}>
                         <FormattedMessage id={locales.reportBlockCancel} />
@@ -201,7 +211,10 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                         color="teal"
                         disabled={!controllerLogin}
                         loading={isChangingReportController}
-                        onClick={() => controllerLogin && changeReportController(controllerLogin)}
+                        onClick={() =>
+                            controllerLogin &&
+                            changeReportController({ login: controllerLogin, reason: controlReason })
+                        }
                     >
                         <FormattedMessage id={locales.reportControllerSubmit} />
                     </Button>
@@ -292,7 +305,7 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                             isChangingReportController ? <Loader size={14} /> : <IconShieldOff size={14} />
                         }
                         disabled={isChangingReportController}
-                        onClick={() => changeReportController(null)}
+                        onClick={() => changeReportController({ login: null })}
                     >
                         <FormattedMessage id={locales.menuReportControllerClear} />
                     </Menu.Item>

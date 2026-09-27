@@ -3,6 +3,7 @@ import { notifications } from "@mantine/notifications"
 import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconMap, IconShieldOff, IconUser } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import dayjs from "dayjs"
 import React, { useContext, useEffect } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
@@ -10,6 +11,7 @@ import { UserContext } from "src/app/providers/UserContext"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import {
     reportControllerNameOf,
+    reportControlOf,
     UserAccountApiService,
 } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -85,7 +87,12 @@ export const ControlledVolunteersPage: React.FC = () => {
             )}
 
             <Flex direction="column" gap="sm">
-                {items.map((item: UserInfoDto) => (
+                {items.map((item: UserInfoDto) => {
+                    const control = reportControlOf(item)
+                    const controllerAt = control.reportControllerAt
+                        ? dayjs(control.reportControllerAt).format("DD.MM.YYYY HH:mm")
+                        : ""
+                    return (
                     <Card key={item.id} withBorder padding="md" radius="md" className={classes.card}>
                         <Flex justify="space-between" align="flex-start" gap="md" wrap="wrap">
                             <div>
@@ -101,6 +108,13 @@ export const ControlledVolunteersPage: React.FC = () => {
                                             values={{ name: reportControllerNameOf(item) }}
                                         />
                                     </Badge>
+                                )}
+                                {(control.reportControllerReason || controllerAt) && (
+                                    <Text size="xs" c="dimmed" mt={4}>
+                                        {control.reportControllerReason}
+                                        {control.reportControllerReason && controllerAt ? " · " : ""}
+                                        {controllerAt}
+                                    </Text>
                                 )}
                             </div>
                             <Flex gap="xs" wrap="wrap">
@@ -137,7 +151,8 @@ export const ControlledVolunteersPage: React.FC = () => {
                             </Flex>
                         </Flex>
                     </Card>
-                ))}
+                    )
+                })}
             </Flex>
         </Flex>
     )

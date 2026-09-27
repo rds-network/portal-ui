@@ -43,6 +43,7 @@ export const locales = {
     reportControllerLabel: "pages.user-list.report-controller-label",
     reportControllerBadge: "pages.user-list.report-controller-badge",
     reportControllerSubmit: "pages.user-list.report-controller-submit",
+    reportControllerReasonPlaceholder: "pages.user-list.report-controller-reason-placeholder",
     empty: "pages.user-list.empty",
     required: "pages.user-list.required",
     minLetters: "pages.user-list.min-letters",

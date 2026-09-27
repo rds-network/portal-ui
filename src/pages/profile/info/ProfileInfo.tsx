@@ -1,4 +1,4 @@
-import { Anchor, Badge, Button, Container, Drawer, Flex, MultiSelect, Select, Text, TextInput, Tooltip } from "@mantine/core"
+import { Anchor, Badge, Button, Container, Drawer, Flex, Modal, MultiSelect, Select, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
@@ -34,6 +34,7 @@ import { CitiesApiService } from "src/shared/api/CitiesApiService"
 import {
     reportBlockOf,
     reportControllerNameOf,
+    reportControlOf,
     secondaryProgramCodesOf,
     UserAccountApiService,
     UserApiService,
@@ -65,6 +66,9 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const queryClient = useQueryClient()
     const [opened, { open, close }] = useDisclosure(false)
     const [mupOpened, { open: openMup, close: closeMup }] = useDisclosure(false)
+    const [controlModalOpen, setControlModalOpen] = useState(false)
+    const [controllerLogin, setControllerLogin] = useState<string | null>(null)
+    const [controlReason, setControlReason] = useState("")
     const intl = useIntl()
     const locale = intl.locale as Locale
 
@@ -245,15 +249,18 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     })
 
     const { mutate: updateReportController, isPending: isUpdatingController } = useMutation({
-        mutationFn: async (login: string | null) =>
-            login === null
+        mutationFn: async (payload: { login: string | null; reason?: string }) =>
+            payload.login === null
                 ? UserAccountApiService.clearReportController(userInfo.id)
-                : UserAccountApiService.setReportController(userInfo.id, login),
+                : UserAccountApiService.setReportController(userInfo.id, payload.login, payload.reason),
         onSuccess: (data) => {
             if (userInfo?.username === currentUser?.username) {
                 setUser(data)
             }
             onUserInfoUpdate?.(data)
+            setControlModalOpen(false)
+            setControllerLogin(null)
+            setControlReason("")
             queryClient.invalidateQueries({ queryKey: ["controlled-by-me"] })
             notifications.show(
                 SuccessNotification(
@@ -385,6 +392,10 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const reportBlock = reportBlockOf(userInfo)
     const reportBlockedByName = reportBlock.reportBlockedByFullName || reportBlock.reportBlockedBy || ""
     const reportControllerName = reportControllerNameOf(userInfo)
+    const reportControl = reportControlOf(userInfo)
+    const reportControllerAtLabel = reportControl.reportControllerAt
+        ? dayjs(reportControl.reportControllerAt).format("DD.MM.YYYY HH:mm")
+        : ""
 
     // Админы могут редактировать программы всем (включая себя)
     // Обычные пользователи могут установить программу только если у них ее еще нет
@@ -525,14 +536,31 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         </Tooltip>
                     )}
                     {!!reportControllerName && (
-                        <Tooltip multiline w={320} label={<FormattedMessage id="pages.profile.reportControlHint" />}>
-                            <Badge color="teal" radius="md" variant="filled">
-                                <FormattedMessage
-                                    id="pages.profile.reportControl"
-                                    values={{ name: reportControllerName }}
-                                />
-                            </Badge>
-                        </Tooltip>
+                        <Flex direction="column" gap={2}>
+                            <Tooltip
+                                multiline
+                                w={320}
+                                label={
+                                    reportControl.reportControllerReason || (
+                                        <FormattedMessage id="pages.profile.reportControlHint" />
+                                    )
+                                }
+                            >
+                                <Badge color="teal" radius="md" variant="filled">
+                                    <FormattedMessage
+                                        id="pages.profile.reportControl"
+                                        values={{ name: reportControllerName }}
+                                    />
+                                </Badge>
+                            </Tooltip>
+                            {(reportControl.reportControllerReason || reportControllerAtLabel) && (
+                                <Text size="xs" c="dimmed" maw={280}>
+                                    {reportControl.reportControllerReason}
+                                    {reportControl.reportControllerReason && reportControllerAtLabel ? " · " : ""}
+                                    {reportControllerAtLabel}
+                                </Text>
+                            )}
+                        </Flex>
                     )}
 
                     {showSensitiveData && userInfo?.id !== currentUser?.id && (
@@ -614,28 +642,77 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         <FormattedMessage id="pages.profile.reportControlLabel" />
                     </Text>
                     {reportControllerName ? (
-                        <Flex align="center" gap={8} wrap="wrap">
-                            <Badge color="teal" radius="md" variant="light">
-                                {reportControllerName}
-                            </Badge>
-                            <Button
-                                size="compact-xs"
-                                variant="subtle"
-                                color="red"
-                                loading={isUpdatingController}
-                                onClick={() => updateReportController(null)}
-                            >
-                                <FormattedMessage id="pages.profile.reportControlClear" />
-                            </Button>
+                        <Flex direction="column" gap={4}>
+                            <Flex align="center" gap={8} wrap="wrap">
+                                <Badge color="teal" radius="md" variant="light">
+                                    {reportControllerName}
+                                </Badge>
+                                <Button
+                                    size="compact-xs"
+                                    variant="subtle"
+                                    color="red"
+                                    loading={isUpdatingController}
+                                    onClick={() => updateReportController({ login: null })}
+                                >
+                                    <FormattedMessage id="pages.profile.reportControlClear" />
+                                </Button>
+                            </Flex>
+                            {(reportControl.reportControllerReason || reportControllerAtLabel) && (
+                                <Text size="xs" c="dimmed">
+                                    {reportControl.reportControllerReason}
+                                    {reportControl.reportControllerReason && reportControllerAtLabel ? " · " : ""}
+                                    {reportControllerAtLabel}
+                                </Text>
+                            )}
                         </Flex>
                     ) : (
-                        <UserSearch
-                            description={<FormattedMessage id="pages.profile.reportControlDescription" />}
-                            onUserChange={(picked) => {
-                                if (picked?.username) updateReportController(picked.username)
-                            }}
-                        />
+                        <Button
+                            size="compact-sm"
+                            variant="light"
+                            color="teal"
+                            onClick={() => setControlModalOpen(true)}
+                        >
+                            <FormattedMessage id="pages.profile.reportControlAssign" />
+                        </Button>
                     )}
+                    <Modal
+                        centered
+                        opened={controlModalOpen}
+                        onClose={() => setControlModalOpen(false)}
+                        title={<FormattedMessage id="pages.profile.reportControlLabel" />}
+                    >
+                        <Text size="sm" c="dimmed">
+                            <FormattedMessage id="pages.profile.reportControlDescription" />
+                        </Text>
+                        <UserSearch
+                            label={<FormattedMessage id="pages.profile.reportControlLabel" />}
+                            onUserChange={(picked) => setControllerLogin(picked?.username ?? null)}
+                        />
+                        <Textarea
+                            mt="md"
+                            minRows={3}
+                            maxRows={6}
+                            value={controlReason}
+                            placeholder={intl.formatMessage({ id: "pages.profile.reportControlReasonPlaceholder" })}
+                            onChange={(event) => setControlReason(event.currentTarget.value)}
+                        />
+                        <Flex mt="md" gap="sm" justify="flex-end">
+                            <Button variant="outline" onClick={() => setControlModalOpen(false)}>
+                                <FormattedMessage id="pages.user-list.report-block-cancel" />
+                            </Button>
+                            <Button
+                                color="teal"
+                                disabled={!controllerLogin}
+                                loading={isUpdatingController}
+                                onClick={() =>
+                                    controllerLogin &&
+                                    updateReportController({ login: controllerLogin, reason: controlReason })
+                                }
+                            >
+                                <FormattedMessage id="pages.user-list.report-controller-submit" />
+                            </Button>
+                        </Flex>
+                    </Modal>
                 </Flex>
             )}
             <Container className={commonClasses.divider} />

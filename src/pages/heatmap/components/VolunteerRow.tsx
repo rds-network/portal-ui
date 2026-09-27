@@ -15,7 +15,7 @@ import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
 import TicketModal from "src/shared/ui/ticketModal/TicketModal"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
-import { formatContractEnd, latestContractEnd } from "src/shared/utils/latestContractEnd"
+import { formatContractEnd, hasActiveAssociatedContract, latestContractEnd } from "src/shared/utils/latestContractEnd"
 import { locales } from "../lib/locales"
 import classes from "./VolunteerReportHeatmap.module.scss"
 
@@ -119,6 +119,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
     const statusColor = getVolunteerStatusColor()
     const statusText = getVolunteerStatusText()
     const contractUntil = formatContractEnd(latestContractEnd(volunteer.volunteerInfo.contracts))
+    const isAssociated = hasActiveAssociatedContract(volunteer.volunteerInfo.contracts)
     const { data: curatorRows = [] } = useQuery({
         queryKey: ["program-curators"],
         queryFn: () => ProgramCuratorApiService.list(),
@@ -264,6 +265,13 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                                 </>
                                             )}
                                         </Text>
+                                        {isAssociated && (
+                                            <Text size="xs" c="grape">
+                                                <FormattedMessage id={locales.associatedBadge} />
+                                                {" · "}
+                                                <FormattedMessage id={locales.associatedHint} />
+                                            </Text>
+                                        )}
                                         {warningCount > 0 && (
                                             <Text size="xs" c={warningCount >= 3 ? "red" : "orange"}>
                                                 <FormattedMessage id={locales.warnings} values={{ count: warningCount }} />

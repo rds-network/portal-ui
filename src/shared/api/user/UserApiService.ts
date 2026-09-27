@@ -25,6 +25,8 @@ export const reportBlockOf = (user: unknown): ReportBlockInfo => (user as Report
 export type ReportControlInfo = {
     reportControllerUsername?: string | null
     reportControllerFullName?: string | null
+    reportControllerReason?: string | null
+    reportControllerAt?: string | null
 }
 
 export const reportControlOf = (user: unknown): ReportControlInfo => (user as ReportControlInfo | null) ?? {}
@@ -78,11 +80,11 @@ export const UserAccountApiService = {
         )
     },
 
-    async setReportController(id: number, username: string): Promise<UserInfoDto> {
+    async setReportController(id: number, username: string, reason?: string | null): Promise<UserInfoDto> {
         return unwrap(
             await RequestHttp.put<UserInfoDto>(
                 `/user/account/${id}/report-controller`,
-                { username },
+                { username, reason: reason?.trim() || null },
                 { validateStatus: alive }
             )
         )
