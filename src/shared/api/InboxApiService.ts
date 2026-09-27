@@ -84,6 +84,7 @@ export type DeactivatedActiveContractDto = {
     contractEnd?: string | null
     contractType?: string | null
     deactivatedReason?: string | null
+    mupLetterSentAt?: string | null
 }
 
 export type OverdueNoticePersonDto = {
@@ -223,6 +224,17 @@ export const InboxApiService = {
     ): Promise<OverdueNoticePersonDto> {
         const response = await RequestHttp.post<OverdueNoticePersonDto>(
             `/report-overdue/warnings/${encodeURIComponent(username)}/cancel`,
+            payload
+        )
+        return response.data
+    },
+
+    async issueOverdueWarning(
+        username: string,
+        payload: { reason?: string } = {}
+    ): Promise<OverdueNoticePersonDto> {
+        const response = await RequestHttp.post<OverdueNoticePersonDto>(
+            `/report-overdue/warnings/${encodeURIComponent(username)}`,
             payload
         )
         return response.data

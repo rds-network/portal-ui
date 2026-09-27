@@ -62,6 +62,11 @@ export const Content: NavSection[] = [
                 link: "/leave",
             },
             {
+                label: "navbar.dissolutionRequests",
+                icon: IconFileOff,
+                link: "/dissolution-requests",
+            },
+            {
                 label: "navbar.reports.review",
                 icon: IconClipboardCheck,
                 link: "/reports/review",

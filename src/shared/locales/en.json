@@ -389,7 +389,9 @@
             "contract": "contract until {date}",
             "reason": "reason: {reason}",
             "openProfile": "Profile",
-            "mupLetter": "MUP letter"
+            "mupLetter": "MUP letter",
+            "mupNotified": "MUP notified · {date}",
+            "pendingRequests": "Termination requests"
         },
         "activity": {
             "title": "Chronicle",
@@ -447,6 +449,13 @@
             "deactivated": "Deactivated",
             "warnings": "Missing-report warnings: {count} of 3",
             "warningsHint": "After an overdue mailing the person is marked. A repeat overdue puts them on a preliminary blacklist for termination.",
+            "mupNotified": "MUP notified · {date}",
+            "issueWarning": "Issue reprimand ({count}/3)",
+            "issueWarningTitle": "Issue reprimand",
+            "issueWarningHint": "This will be reprimand {next} of 3. The volunteer gets an inbox notice.",
+            "issueWarningReason": "Reason (optional)",
+            "issueWarningConfirm": "Issue",
+            "issueWarningDone": "Reprimand issued: {count}/3",
             "watchlist": "blacklist",
             "curator": "Curator: {programs}",
             "reportBlocked": "Report submission on hold: {name}",
@@ -1133,6 +1142,40 @@
             "moderatorsHint": "ADMIN_VOLUNTEER role: overdue lists, mailings, all reports, and accepting any report if needed. To get your «Pending acceptance» queue, appoint the moderator as an acceptance delegate.",
             "moderatorsEmpty": "No active moderators yet"
         },
+        "dissolutionRequests": {
+            "title": "Early termination request",
+            "description": "Submit a request for early contract termination. After approval, an admin sends the MUP letter manually.",
+            "requestTitle": "New request",
+            "fromDate": "From date",
+            "fromDateValue": "from {date}",
+            "reason": "Reason",
+            "submit": "Submit",
+            "created": "Request submitted",
+            "requiredDate": "Date is required",
+            "requiredReason": "Reason is required",
+            "mineTitle": "My requests",
+            "mineEmpty": "No requests yet",
+            "pendingTitle": "Pending approval",
+            "pendingEmpty": "No pending requests",
+            "historyTitle": "History",
+            "historyEmpty": "No decided requests yet",
+            "decidedBy": "Decided {date} · {name}",
+            "accept": "Accept",
+            "reject": "Reject",
+            "rejectConfirm": "Confirm rejection",
+            "rejectReason": "Rejection reason",
+            "cancel": "Cancel",
+            "cancelRequest": "Withdraw",
+            "accepted": "Request accepted — send the MUP letter manually",
+            "rejected": "Request rejected",
+            "cancelled": "Request withdrawn",
+            "status": {
+                "PENDING": "Pending",
+                "ACCEPTED": "Accepted",
+                "REJECTED": "Rejected",
+                "CANCELLED": "Cancelled"
+            }
+        },
         "leave": {
             "title": "Leave",
             "description": "Request leave: accepted days do not count toward hour norms and do not increase report overdue streaks.",
@@ -1387,7 +1430,8 @@
         "activity": "Chronicle",
         "resources": "Our resources",
         "support": "Contact support",
-        "leave": "Leave"
+        "leave": "Leave",
+        "dissolutionRequests": "Termination request"
     },
     "error-boundary": {
         "title": "Something went wrong",

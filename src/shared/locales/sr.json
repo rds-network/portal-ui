@@ -389,7 +389,9 @@
             "contract": "ugovor do {date}",
             "reason": "razlog: {reason}",
             "openProfile": "Profil",
-            "mupLetter": "Pismo MUP"
+            "mupLetter": "Pismo MUP",
+            "mupNotified": "MUP obavešten · {date}",
+            "pendingRequests": "Zahtevi za raskid"
         },
         "activity": {
             "title": "Hronika",
@@ -447,6 +449,13 @@
             "deactivated": "Deaktiviran",
             "warnings": "Upozorenja o izveštajima: {count} od 3",
             "warningsHint": "Posle slanja o nedostavljanju osoba se označava. Ponovno kašnjenje ide na preliminarnu crnu listu za raskid.",
+            "mupNotified": "MUP obavešten · {date}",
+            "issueWarning": "Izreci kaznu ({count}/3)",
+            "issueWarningTitle": "Izreci kaznu",
+            "issueWarningHint": "Biće izrečena kazna {next} od 3. Volonter dobija obaveštenje u sandučetu.",
+            "issueWarningReason": "Razlog (opciono)",
+            "issueWarningConfirm": "Izreci",
+            "issueWarningDone": "Kazna izrečena: {count}/3",
             "watchlist": "crna lista",
             "curator": "Kustos: {programs}",
             "reportBlocked": "Stop na predaju izveštaja: {name}",
@@ -1133,6 +1142,40 @@
             "moderatorsHint": "Uloga ADMIN_VOLUNTEER: dužnici, slanja, svi izveštaji i po potrebi prihvatanje bilo kog izveštaja. Da bi dobili tvoj red «Na prijemu», imenuj moderatora za delegata prijema.",
             "moderatorsEmpty": "Još nema aktivnih moderatora"
         },
+        "dissolutionRequests": {
+            "title": "Zahtev za raskid",
+            "description": "Podnesite zahtev za prevremeni raskid ugovora. Pismo MUP-u posle saglasnosti šalje administrator ručno.",
+            "requestTitle": "Novi zahtev",
+            "fromDate": "Od datuma",
+            "fromDateValue": "od {date}",
+            "reason": "Razlog",
+            "submit": "Pošalji",
+            "created": "Zahtev poslat",
+            "requiredDate": "Unesite datum",
+            "requiredReason": "Unesite razlog",
+            "mineTitle": "Moji zahtevi",
+            "mineEmpty": "Još nema zahteva",
+            "pendingTitle": "Na saglasnosti",
+            "pendingEmpty": "Nema zahteva na čekanju",
+            "historyTitle": "Istorija",
+            "historyEmpty": "Još nema rešenih zahteva",
+            "decidedBy": "Odluka {date} · {name}",
+            "accept": "Prihvati",
+            "reject": "Odbij",
+            "rejectConfirm": "Potvrdi odbijanje",
+            "rejectReason": "Razlog odbijanja",
+            "cancel": "Otkaži",
+            "cancelRequest": "Povuci",
+            "accepted": "Zahtev prihvaćen — pošaljite pismo MUP-u ručno",
+            "rejected": "Zahtev odbijen",
+            "cancelled": "Zahtev povučen",
+            "status": {
+                "PENDING": "Na čekanju",
+                "ACCEPTED": "Prihvaćeno",
+                "REJECTED": "Odbijeno",
+                "CANCELLED": "Povučen"
+            }
+        },
         "leave": {
             "title": "Odmor",
             "description": "Zatražite odmor: odobreni dani ne ulaze u normu sati i ne povećavaju kašnjenje izveštaja.",
@@ -1387,7 +1430,8 @@
         "activity": "Hronika",
         "resources": "Naši resursi",
         "support": "Kontaktirajte podršku",
-        "leave": "Odmor"
+        "leave": "Odmor",
+        "dissolutionRequests": "Zahtev za raskid"
     },
     "error-boundary": {
         "title": "Nešto je pošlo po zlu",
