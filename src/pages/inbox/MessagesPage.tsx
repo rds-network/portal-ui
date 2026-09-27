@@ -15,6 +15,17 @@ import classes from "./MessagesPage.module.scss"
 
 const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]
 
+const isMandatoryKind = (kind?: string | null) => {
+    if (!kind) return false
+    return (
+        kind === "MANUAL" ||
+        kind === "TASK" ||
+        kind === "LEAVE_REQUEST" ||
+        kind === "LEAVE_DECISION" ||
+        kind.startsWith("OVERDUE")
+    )
+}
+
 const formatSeen = (value?: string | null) => (value ? dayjs(value).format("DD.MM HH:mm") : null)
 
 const personOf = (item: InboxThreadDto) => {
@@ -30,11 +41,18 @@ const personOf = (item: InboxThreadDto) => {
     }
 }
 
+const threadRank = (item: InboxThreadDto) => {
+    if (item.needsAck) return 0
+    if (isMandatoryKind(item.kind) && !item.receivedAt) return 1
+    if (item.unread) return 2
+    if (item.hasReply) return 4
+    return 3
+}
+
 const sortThreads = (threads: InboxThreadDto[]) =>
     [...threads].sort((a, b) => {
-        if (a.needsAck !== b.needsAck) return a.needsAck ? -1 : 1
-        if (a.unread !== b.unread) return a.unread ? -1 : 1
-        if (!!a.hasReply !== !!b.hasReply) return a.hasReply ? 1 : -1
+        const rankDiff = threadRank(a) - threadRank(b)
+        if (rankDiff !== 0) return rankDiff
         const aTime = dayjs(a.lastMessageTime || a.createTime).valueOf()
         const bTime = dayjs(b.lastMessageTime || b.createTime).valueOf()
         return bTime - aTime
@@ -64,10 +82,22 @@ export const MessagesPage: React.FC = () => {
     })
 
     const sortedThreads = useMemo(() => sortThreads(threads), [threads])
+    const mandatoryThreads = useMemo(() => sortedThreads.filter((item) => item.needsAck), [sortedThreads])
+    const otherThreads = useMemo(() => sortedThreads.filter((item) => !item.needsAck), [sortedThreads])
 
     useEffect(() => {
-        if (isMobile || selectedId || sortedThreads.length === 0) return
-        setSelectedId(sortedThreads[0].id)
+        if (sortedThreads.length === 0) return
+        const firstMandatory = sortedThreads.find((item) => item.needsAck)
+        if (firstMandatory) {
+            const selectedIsMandatory = sortedThreads.some((item) => item.id === selectedId && item.needsAck)
+            if (!selectedIsMandatory) {
+                setSelectedId(firstMandatory.id)
+            }
+            return
+        }
+        if (!isMobile && !selectedId) {
+            setSelectedId(sortedThreads[0].id)
+        }
     }, [isMobile, selectedId, sortedThreads])
 
     const { data: thread } = useQuery({
@@ -128,6 +158,77 @@ export const MessagesPage: React.FC = () => {
         return item.heatmapUser || item.counterpart || user?.username || null
     }
 
+    const renderThreadItem = (item: InboxThreadDto) => {
+        const person = personOf(item)
+        const time = dayjs(item.lastMessageTime || item.createTime).format("DD.MM HH:mm")
+        const mustAck = !!item.needsAck
+        return (
+            <button
+                key={item.id}
+                type="button"
+                className={[
+                    classes.item,
+                    selectedId === item.id ? classes.itemActive : "",
+                    item.unread ? classes.itemUnread : "",
+                    item.hasReply ? classes.itemReplied : "",
+                    mustAck ? classes.itemNeedsAck : "",
+                ]
+                    .filter(Boolean)
+                    .join(" ")}
+                onClick={() => openThread(item)}
+            >
+                <Flex justify="space-between" gap="sm" align="flex-start">
+                    <Text className={classes.person} lineClamp={1}>
+                        {person.name}
+                    </Text>
+                    <Text size="xs" c="dimmed" className={classes.time}>
+                        {time}
+                    </Text>
+                </Flex>
+                <Text size="sm" c="dimmed" lineClamp={1} mt={2}>
+                    {item.subject}
+                </Text>
+                <Flex gap={6} wrap="wrap" mt={8}>
+                    {mustAck && (
+                        <Badge size="xs" color="orange" variant="filled">
+                            <FormattedMessage id="pages.messages.needsAck" />
+                        </Badge>
+                    )}
+                    {item.unread && (
+                        <Badge size="xs" color="blue" variant="filled">
+                            <FormattedMessage id="pages.messages.new" />
+                        </Badge>
+                    )}
+                    {typeof item.hasReply === "boolean" &&
+                        (item.hasReply ? (
+                            <Badge size="xs" color="teal" variant="light">
+                                <FormattedMessage id="pages.messages.replied" />
+                            </Badge>
+                        ) : (
+                            <Badge size="xs" color="orange" variant="light">
+                                <FormattedMessage id="pages.messages.awaitingReply" />
+                            </Badge>
+                        ))}
+                    {(mustAck || (isMandatoryKind(item.kind) && !item.receivedAt)) && (
+                        <Badge size="xs" color="red" variant="light">
+                            <FormattedMessage id="pages.messages.notReceived" />
+                        </Badge>
+                    )}
+                </Flex>
+                {item.hasReply && item.lastAuthorName && (
+                    <Text size="xs" c="dimmed" mt={6} lineClamp={1}>
+                        <FormattedMessage id="pages.messages.lastFrom" values={{ name: item.lastAuthorName }} />
+                    </Text>
+                )}
+                {item.lastBody && (
+                    <Text size="sm" className={classes.preview} lineClamp={2} mt={4}>
+                        {item.lastBody}
+                    </Text>
+                )}
+            </button>
+        )
+    }
+
     return (
         <Flex className={classes.root} direction={isMobile ? "column" : "row"} gap="lg">
             {showList && (
@@ -151,72 +252,15 @@ export const MessagesPage: React.FC = () => {
                                 <FormattedMessage id="pages.messages.empty" />
                             </Text>
                         )}
-                        {sortedThreads.map((item) => {
-                            const person = personOf(item)
-                            const time = dayjs(item.lastMessageTime || item.createTime).format("DD.MM HH:mm")
-                            return (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    className={[
-                                        classes.item,
-                                        selectedId === item.id ? classes.itemActive : "",
-                                        item.unread ? classes.itemUnread : "",
-                                        item.hasReply ? classes.itemReplied : "",
-                                    ]
-                                        .filter(Boolean)
-                                        .join(" ")}
-                                    onClick={() => openThread(item)}
-                                >
-                                    <Flex justify="space-between" gap="sm" align="flex-start">
-                                        <Text className={classes.person} lineClamp={1}>
-                                            {person.name}
-                                        </Text>
-                                        <Text size="xs" c="dimmed" className={classes.time}>
-                                            {time}
-                                        </Text>
-                                    </Flex>
-                                    <Text size="sm" c="dimmed" lineClamp={1} mt={2}>
-                                        {item.subject}
-                                    </Text>
-                                    <Flex gap={6} wrap="wrap" mt={8}>
-                                        {item.unread && (
-                                            <Badge size="xs" color="blue" variant="filled">
-                                                <FormattedMessage id="pages.messages.new" />
-                                            </Badge>
-                                        )}
-                                        {typeof item.hasReply === "boolean" &&
-                                            (item.hasReply ? (
-                                                <Badge size="xs" color="teal" variant="light">
-                                                    <FormattedMessage id="pages.messages.replied" />
-                                                </Badge>
-                                            ) : (
-                                                <Badge size="xs" color="orange" variant="light">
-                                                    <FormattedMessage id="pages.messages.awaitingReply" />
-                                                </Badge>
-                                            ))}
-                                        {!item.receivedAt && (
-                                            <Badge size="xs" color="red" variant="light">
-                                                <FormattedMessage id="pages.messages.notReceived" />
-                                            </Badge>
-                                        )}
-                                    </Flex>
-                                    {item.hasReply && item.lastAuthorName && (
-                                        <Text size="xs" c="dimmed" mt={6} lineClamp={1}>
-                                            <FormattedMessage
-                                                id="pages.messages.lastFrom"
-                                                values={{ name: item.lastAuthorName }}
-                                            />
-                                        </Text>
-                                    )}
-                                    {item.lastBody && (
-                                        <Text size="sm" className={classes.preview} lineClamp={2} mt={4}>
-                                            {item.lastBody}
-                                        </Text>
-                                    )}
-                                </button>
-                            )
-                        })}
+                        {mandatoryThreads.length > 0 && (
+                            <div className={classes.mandatoryBlock}>
+                                <Text className={classes.mandatoryTitle}>
+                                    <FormattedMessage id="pages.messages.mandatorySection" />
+                                </Text>
+                                {mandatoryThreads.map(renderThreadItem)}
+                            </div>
+                        )}
+                        {otherThreads.map(renderThreadItem)}
                     </div>
                 </div>
             )}
@@ -300,9 +344,19 @@ export const MessagesPage: React.FC = () => {
                                     )}
                                 </Text>
                                 {thread.needsAck && (
-                                    <Button mt="sm" color="orange" loading={acking} onClick={() => ack()}>
-                                        <FormattedMessage id="pages.messages.ack" />
-                                    </Button>
+                                    <Alert color="orange" mt="md" className={classes.ackAlert}>
+                                        <FormattedMessage id="pages.messages.ackHint" />
+                                        <Button
+                                            fullWidth
+                                            size="md"
+                                            mt="sm"
+                                            color="orange"
+                                            loading={acking}
+                                            onClick={() => ack()}
+                                        >
+                                            <FormattedMessage id="pages.messages.ack" />
+                                        </Button>
+                                    </Alert>
                                 )}
                             </div>
                             <div className={classes.messages}>

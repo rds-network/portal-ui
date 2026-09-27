@@ -71,6 +71,34 @@
     opacity: 1;
 }
 
+.itemNeedsAck {
+    border-color: var(--mantine-color-orange-5);
+    border-left: 4px solid var(--mantine-color-orange-6);
+    background: light-dark(#fff7ed, color-mix(in srgb, var(--mantine-color-dark-6) 82%, #9a3412));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--mantine-color-orange-5) 35%, transparent);
+}
+
+.mandatoryBlock {
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed light-dark(#fdba74, var(--mantine-color-dark-3));
+}
+
+.mandatoryTitle {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mantine-color-orange-7);
+    margin: 0 0 8px;
+}
+
+.ackAlert {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
 .person {
     font-weight: 700;
     font-size: 14px;
