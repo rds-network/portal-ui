@@ -7,6 +7,7 @@ import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService, OverdueNoticePersonDto, OverdueWeekDto, ReportOverdueDto } from "src/shared/api/InboxApiService"
+import { UserAccountApiService } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
@@ -113,6 +114,19 @@ export const OverdueReportsPage: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ["overdue-warnings"] })
             queryClient.invalidateQueries({ queryKey: ["inbox"] })
             queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
+        },
+    })
+
+    const { mutate: toggleDissolutionQueue, isPending: togglingQueue } = useMutation({
+        mutationFn: (item: ReportOverdueDto) => {
+            if (!item.accountId) throw new Error("accountId missing")
+            return item.dissolutionQueuedAt
+                ? UserAccountApiService.dequeueDissolution(item.accountId)
+                : UserAccountApiService.enqueueDissolution(item.accountId)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
         },
     })
 
@@ -239,6 +253,11 @@ export const OverdueReportsPage: React.FC = () => {
                                                     <FormattedMessage id="pages.overdue.watchlist" />
                                                 </Badge>
                                             )}
+                                            {item.dissolutionQueuedAt && (
+                                                <Badge size="sm" color="orange" variant="light">
+                                                    <FormattedMessage id="pages.overdue.dissolutionQueued" />
+                                                </Badge>
+                                            )}
                                         </Group>
                                         <Text size="xs" c="dimmed">
                                             {item.program || item.username}
@@ -294,20 +313,42 @@ export const OverdueReportsPage: React.FC = () => {
                                                 : "—"}
                                         </div>
                                         <div className={classes.statAction}>
-                                            {(item.warningCount ?? 0) > 0 ? (
-                                                <Button
-                                                    size="compact-xs"
-                                                    variant="light"
-                                                    color="orange"
-                                                    loading={cancelling}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation()
-                                                        cancelWarning(item.username)
-                                                    }}
-                                                >
-                                                    <FormattedMessage id="pages.overdue.cancelWarning" />
-                                                </Button>
-                                            ) : null}
+                                            <Group gap={4} justify="flex-end" wrap="nowrap">
+                                                {item.accountId ? (
+                                                    <Button
+                                                        size="compact-xs"
+                                                        variant={item.dissolutionQueuedAt ? "subtle" : "outline"}
+                                                        color="orange"
+                                                        loading={togglingQueue}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            toggleDissolutionQueue(item)
+                                                        }}
+                                                    >
+                                                        <FormattedMessage
+                                                            id={
+                                                                item.dissolutionQueuedAt
+                                                                    ? "pages.overdue.dissolutionDequeue"
+                                                                    : "pages.overdue.dissolutionEnqueue"
+                                                            }
+                                                        />
+                                                    </Button>
+                                                ) : null}
+                                                {(item.warningCount ?? 0) > 0 ? (
+                                                    <Button
+                                                        size="compact-xs"
+                                                        variant="light"
+                                                        color="orange"
+                                                        loading={cancelling}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            cancelWarning(item.username)
+                                                        }}
+                                                    >
+                                                        <FormattedMessage id="pages.overdue.cancelWarning" />
+                                                    </Button>
+                                                ) : null}
+                                            </Group>
                                         </div>
                                     </div>
                                 </div>

@@ -44,6 +44,15 @@ export type MupLetterInfo = {
 
 export const mupLetterOf = (user: unknown): MupLetterInfo => (user as MupLetterInfo | null) ?? {}
 
+/** Очередь на расторжение — поля могут прийти раньше обновления сгенерированного клиента. */
+export type DissolutionQueueInfo = {
+    dissolutionQueuedAt?: string | null
+    dissolutionQueuedBy?: string | null
+}
+
+export const dissolutionQueueOf = (user: unknown): DissolutionQueueInfo =>
+    (user as DissolutionQueueInfo | null) ?? {}
+
 const alive = (status: number) => status === 200 || status === 404
 
 const unwrap = <T>(response: { status: number; data: T }): T => {
@@ -101,6 +110,22 @@ export const UserAccountApiService = {
     async clearReportController(id: number): Promise<UserInfoDto> {
         return unwrap(
             await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/report-controller`, { validateStatus: alive })
+        )
+    },
+
+    async enqueueDissolution(id: number, reason?: string | null): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.post<UserInfoDto>(
+                `/user/account/${id}/dissolution-queue`,
+                { reason: reason?.trim() || null },
+                { validateStatus: alive }
+            )
+        )
+    },
+
+    async dequeueDissolution(id: number): Promise<UserInfoDto> {
+        return unwrap(
+            await RequestHttp.delete<UserInfoDto>(`/user/account/${id}/dissolution-queue`, { validateStatus: alive })
         )
     },
 

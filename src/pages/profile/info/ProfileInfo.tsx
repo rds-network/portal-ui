@@ -36,6 +36,7 @@ import {
     reportControllerNameOf,
     reportControlOf,
     mupLetterOf,
+    dissolutionQueueOf,
     secondaryProgramCodesOf,
     UserAccountApiService,
     UserApiService,
@@ -102,6 +103,42 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             id="pages.profile.issueWarningDone"
                             values={{ count: result.warningCount }}
                         />
+                    </Text>,
+                    null
+                )
+            )
+        },
+    })
+
+    const { mutate: enqueueDissolution, isPending: enqueueingDissolution } = useMutation({
+        mutationFn: () => UserAccountApiService.enqueueDissolution(userInfo!.id),
+        onSuccess: (updated) => {
+            onUserInfoUpdate?.(updated)
+            queryClient.invalidateQueries({ queryKey: ["getInfo", userInfo?.username] })
+            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.dissolutionQueuedDone" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+    })
+
+    const { mutate: dequeueDissolution, isPending: dequeueingDissolution } = useMutation({
+        mutationFn: () => UserAccountApiService.dequeueDissolution(userInfo!.id),
+        onSuccess: (updated) => {
+            onUserInfoUpdate?.(updated)
+            queryClient.invalidateQueries({ queryKey: ["getInfo", userInfo?.username] })
+            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.dissolutionDequeuedDone" />
                     </Text>,
                     null
                 )
@@ -423,6 +460,11 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const mupLetterSentLabel = mupLetter.mupLetterSentAt
         ? dayjs(mupLetter.mupLetterSentAt).format("DD.MM.YYYY")
         : ""
+    const dissolutionQueue = dissolutionQueueOf(userInfo)
+    const dissolutionQueued = !!dissolutionQueue.dissolutionQueuedAt
+    const dissolutionQueuedLabel = dissolutionQueue.dissolutionQueuedAt
+        ? dayjs(dissolutionQueue.dissolutionQueuedAt).format("DD.MM.YYYY")
+        : ""
     const reportControllerAtLabel = reportControl.reportControllerAt
         ? dayjs(reportControl.reportControllerAt).format("DD.MM.YYYY HH:mm")
         : ""
@@ -540,6 +582,14 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             <FormattedMessage
                                 id="pages.profile.mupNotified"
                                 values={{ date: mupLetterSentLabel }}
+                            />
+                        </Badge>
+                    )}
+                    {dissolutionQueued && !mupLetterSentLabel && (
+                        <Badge color="orange" radius="md" variant="light">
+                            <FormattedMessage
+                                id="pages.profile.dissolutionQueued"
+                                values={{ date: dissolutionQueuedLabel }}
                             />
                         </Badge>
                     )}
@@ -847,6 +897,36 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         />
                     </>
                 )}
+            {hasPermission(currentUser, [
+                UserGroup.ADMIN_VOLUNTEER,
+                UserGroup.MAIN_VOLUNTEER,
+                UserGroup.ADMIN,
+                UserGroup.ADMIN_SSO,
+            ]) &&
+                userInfo?.id &&
+                !isOwnProfile &&
+                !mupLetterSentLabel &&
+                (dissolutionQueued ? (
+                    <Button
+                        onClick={() => dequeueDissolution()}
+                        className={classes.button}
+                        variant="outline"
+                        color="gray"
+                        loading={dequeueingDissolution}
+                    >
+                        <FormattedMessage id="pages.profile.dissolutionDequeue" />
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={() => enqueueDissolution()}
+                        className={classes.button}
+                        variant="outline"
+                        color="orange"
+                        loading={enqueueingDissolution}
+                    >
+                        <FormattedMessage id="pages.profile.dissolutionEnqueue" />
+                    </Button>
+                ))}
             {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER, UserGroup.ADMIN]) &&
                 userInfo?.username &&
                 !isOwnProfile &&

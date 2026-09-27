@@ -74,6 +74,8 @@ export type ReportOverdueDto = {
     watchlist?: boolean
     subject?: string | null
     body?: string | null
+    accountId?: number | null
+    dissolutionQueuedAt?: string | null
 }
 
 export type DeactivatedActiveContractDto = {
@@ -85,6 +87,19 @@ export type DeactivatedActiveContractDto = {
     contractType?: string | null
     deactivatedReason?: string | null
     mupLetterSentAt?: string | null
+}
+
+export type DissolutionQueueDto = {
+    accountId: number
+    username: string
+    fullName: string
+    program?: string | null
+    contractEnd?: string | null
+    contractType?: string | null
+    active: boolean
+    dissolutionQueuedAt?: string | null
+    dissolutionQueuedBy?: string | null
+    dissolutionQueueReason?: string | null
 }
 
 export type OverdueNoticePersonDto = {
@@ -164,6 +179,15 @@ export const InboxApiService = {
     async deactivatedActiveContract(): Promise<DeactivatedActiveContractDto[]> {
         const response = await RequestHttp.get<DeactivatedActiveContractDto[]>(
             "/report-overdue/deactivated-active-contract",
+            { validateStatus: alive }
+        )
+        if (response.status !== 200) return []
+        return response.data ?? []
+    },
+
+    async dissolutionQueue(): Promise<DissolutionQueueDto[]> {
+        const response = await RequestHttp.get<DissolutionQueueDto[]>(
+            "/report-overdue/dissolution-queue",
             { validateStatus: alive }
         )
         if (response.status !== 200) return []
