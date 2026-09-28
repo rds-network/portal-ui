@@ -4,6 +4,7 @@ import { LAST_LOGIN, USER } from "src/shared/constants/Storage"
 import { defaultFunction } from "src/shared/lib/defaultFunction"
 import { SimpleLocalStorageService } from "src/shared/localStorage/SimpleLocalStorageService"
 import { LoadingScreen } from "src/shared/ui/loading/LoadingScreen"
+import { UserApiService } from "src/shared/api/user/UserApiService"
 
 interface UserContextType {
     user: UserInfoDto | null
@@ -22,33 +23,53 @@ export const UserContext = createContext<UserContextType>(defaultContextValue)
 export const UserContextProvider = ({ children }: { children?: ReactNode }) => {
     const [user, setUser] = useState<UserInfoDto | null>(null)
     const [loading, setLoading] = useState(true)
+    const [hydrated, setHydrated] = useState(false)
 
     /**
-     * Checks if user stored in localStorage was updated recently and retrieves it.
-     * Otherwise, not setting user in context
+     * Hydrate from localStorage for a fast first paint, then refresh from
+     * getCurrentAccount so impersonation/effective groups are never stale.
      */
     useEffect(() => {
+        let cancelled = false
+        let localUser: UserInfoDto | null = null
         let userExpired = true
-        let lastLogin = new Date(SimpleLocalStorageService.getItem(LAST_LOGIN))
-        if (lastLogin) {
-            const current = new Date()
-            const diffInMs = Math.abs(current.getTime() - lastLogin.getTime())
-            const diffInMinutes = Math.floor(diffInMs / 1000 / 60)
+        const lastLoginRaw = SimpleLocalStorageService.getItem(LAST_LOGIN)
+        const lastLogin = lastLoginRaw ? new Date(lastLoginRaw) : null
+        if (lastLogin && !Number.isNaN(lastLogin.getTime())) {
+            const diffInMinutes = Math.floor(Math.abs(Date.now() - lastLogin.getTime()) / 1000 / 60)
             userExpired = diffInMinutes >= SESSION_DURATION
         }
         if (!userExpired) {
-            let localUser = SimpleLocalStorageService.getItem(USER)
-            if (localUser) {
+            localUser = SimpleLocalStorageService.getItem(USER) || null
+            if (localUser && !cancelled) {
                 setUser(localUser)
             }
         }
-        setLoading(false)
+
+        UserApiService.getCurrentAccount()
+            .then((res) => {
+                if (!cancelled) setUser(res.data)
+            })
+            .catch(() => {
+                // Not authenticated / network — keep local hydrate or null
+            })
+            .finally(() => {
+                if (!cancelled) {
+                    setHydrated(true)
+                    setLoading(false)
+                }
+            })
+
+        return () => {
+            cancelled = true
+        }
     }, [])
 
     useEffect(() => {
+        if (!hydrated) return
         SimpleLocalStorageService.setItem(USER, user)
         SimpleLocalStorageService.setItem(LAST_LOGIN, new Date())
-    }, [user])
+    }, [user, hydrated])
 
     if (loading) {
         return <LoadingScreen />

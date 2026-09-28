@@ -1,4 +1,4 @@
-import { Badge, Button, Flex, Modal, Select, Text, Textarea, TextInput, Title } from "@mantine/core"
+import { Badge, Button, Flex, Modal, Select, Text, Textarea, TextInput, Title, Avatar } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
@@ -241,6 +241,60 @@ export const DesktopPage: React.FC = () => {
                     <CurrentUserHeatmap compact />
                 </section>
 
+                <section className={`${classes.card} ${classes.tasksCard}`}>
+                    <div className={classes.cardHeader}>
+                        <Title order={2} className={classes.cardTitle}>
+                            <FormattedMessage id="pages.desktop.tasks" />
+                        </Title>
+                        <Link className={classes.cardLink} to="/tasks">
+                            <FormattedMessage id="pages.desktop.openBoard" />
+                        </Link>
+                    </div>
+                    <div className={classes.listScroll}>
+                        {myTasks.length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage id="pages.desktop.tasksEmpty" />
+                            </Text>
+                        )}
+                        {myTasks.map((task) => {
+                            const status = String(task.status).toUpperCase()
+                            const isNew =
+                                status === "TODO" || dayjs().diff(dayjs(task.createTime), "hour") < 48
+                            return (
+                                <button
+                                    key={task.id}
+                                    type="button"
+                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
+                                    onClick={() => navigate("/tasks")}
+                                >
+                                    <div className={classes.rowBody}>
+                                        <Text fw={600} lineClamp={1}>
+                                            {task.title}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                            {task.customerName || task.customer || "—"}
+                                            {task.dueDate
+                                                ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
+                                                : ""}
+                                        </Text>
+                                    </div>
+                                    <Badge
+                                        color={STATUS_COLOR[status] || "gray"}
+                                        variant="light"
+                                        radius="md"
+                                        size="sm"
+                                    >
+                                        <FormattedMessage
+                                            id={`pages.tasks.status.${status}`}
+                                            defaultMessage={String(task.status)}
+                                        />
+                                    </Badge>
+                                </button>
+                            )
+                        })}
+                    </div>
+                </section>
+
                 <section className={`${classes.card} ${classes.reportsCard}`}>
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
@@ -290,6 +344,15 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
+                <div className={classes.eventsSlot}>
+                    <DesktopEventsPanel
+                        events={events}
+                        canManage={canManageEvents}
+                        onAdd={openCreateEvent}
+                        onEdit={openEditEvent}
+                    />
+                </div>
+
                 <section className={`${classes.card} ${classes.messagesCard}`}>
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
@@ -305,88 +368,35 @@ export const DesktopPage: React.FC = () => {
                                 <FormattedMessage id="pages.messages.empty" />
                             </Text>
                         )}
-                        {recentMessages.map((item) => (
-                            <button
-                                key={item.id}
-                                type="button"
-                                className={classes.row}
-                                onClick={() => navigate("/messages")}
-                            >
-                                <div className={classes.rowBody}>
-                                    <Text fw={item.unread ? 700 : 500} lineClamp={1}>
-                                        {item.subject}
-                                    </Text>
-                                    <Text className={classes.rowMeta} lineClamp={1}>
-                                        {item.lastBody || item.counterpartName || item.counterpart || "—"}
-                                    </Text>
-                                </div>
-                                {item.unread && (
-                                    <Badge color="ocean" variant="filled" radius="md" size="sm">
-                                        <FormattedMessage id="pages.messages.new" />
-                                    </Badge>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                <div className={classes.eventsSlot}>
-                    <DesktopEventsPanel
-                        events={events}
-                        canManage={canManageEvents}
-                        onAdd={openCreateEvent}
-                        onEdit={openEditEvent}
-                    />
-                </div>
-
-                <section className={`${classes.card} ${classes.tasksCard}`}>
-                    <div className={classes.cardHeader}>
-                        <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.tasks" />
-                        </Title>
-                        <Link className={classes.cardLink} to="/tasks">
-                            <FormattedMessage id="pages.desktop.openBoard" />
-                        </Link>
-                    </div>
-                    <div className={classes.listScroll}>
-                        {myTasks.length === 0 && (
-                            <Text className={classes.empty}>
-                                <FormattedMessage id="pages.desktop.tasksEmpty" />
-                            </Text>
-                        )}
-                        {myTasks.map((task) => {
-                            const status = String(task.status).toUpperCase()
-                            const isNew =
-                                status === "TODO" || dayjs().diff(dayjs(task.createTime), "hour") < 48
+                        {recentMessages.map((item) => {
+                            const name =
+                                item.counterpartName ||
+                                item.recipientName ||
+                                item.counterpart ||
+                                item.recipient ||
+                                item.createdBy ||
+                                "—"
                             return (
                                 <button
-                                    key={task.id}
+                                    key={item.id}
                                     type="button"
-                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
-                                    onClick={() => navigate("/tasks")}
+                                    className={classes.row}
+                                    onClick={() => navigate("/messages")}
                                 >
+                                    <Avatar radius="xl" size={34} color="initials" name={name} />
                                     <div className={classes.rowBody}>
-                                        <Text fw={600} lineClamp={1}>
-                                            {task.title}
+                                        <Text fw={item.unread ? 700 : 500} lineClamp={1}>
+                                            {item.subject}
                                         </Text>
                                         <Text className={classes.rowMeta} lineClamp={1}>
-                                            {task.customerName || task.customer || "—"}
-                                            {task.dueDate
-                                                ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
-                                                : ""}
+                                            {item.lastBody || name}
                                         </Text>
                                     </div>
-                                    <Badge
-                                        color={STATUS_COLOR[status] || "gray"}
-                                        variant="light"
-                                        radius="md"
-                                        size="sm"
-                                    >
-                                        <FormattedMessage
-                                            id={`pages.tasks.status.${status}`}
-                                            defaultMessage={String(task.status)}
-                                        />
-                                    </Badge>
+                                    {item.unread && (
+                                        <Badge color="ocean" variant="filled" radius="md" size="sm">
+                                            <FormattedMessage id="pages.messages.new" />
+                                        </Badge>
+                                    )}
                                 </button>
                             )
                         })}

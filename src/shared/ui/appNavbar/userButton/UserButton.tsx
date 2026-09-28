@@ -4,8 +4,24 @@ import { useContext } from "react"
 import { UserContext } from "src/app/providers/UserContext"
 import classes from "./UserButton.module.scss"
 
-export function UserButton() {
+export function UserButton({ compact = false }: { compact?: boolean }) {
     const { user } = useContext(UserContext)
+
+    if (compact) {
+        return (
+            <UnstyledButton
+                className={`${classes.user} ${classes.userCompact}`}
+                component="a"
+                href={`/profile/${user?.username}`}
+                title={user?.fullName || undefined}
+            >
+                <Avatar src={user?.avatar?.link} radius="md" size={32} color="initials" name={user?.fullName} />
+                <Text size="sm" fw={500} truncate="end" className={classes.compactName}>
+                    {user?.fullName}
+                </Text>
+            </UnstyledButton>
+        )
+    }
 
     return (
         <UnstyledButton className={classes.user} component="a" href={`/profile/${user?.username}`}>
