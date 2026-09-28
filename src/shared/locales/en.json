@@ -328,7 +328,16 @@
             "createError": "Could not create the chat",
             "program": "Program",
             "programPlaceholder": "Select a program",
-            "noProgramsLeft": "Every program already has a chat"
+            "noProgramsLeft": "Every program already has a chat",
+            "onlineCount": "online {count}",
+            "pasteClipboard": "Paste from clipboard",
+            "pasteDenied": "Clipboard access denied",
+            "attachImage": "Attach image",
+            "removeImage": "Remove",
+            "imageUploadError": "Could not upload the image",
+            "soundOn": "ICQ sound",
+            "soundOff": "ICQ sound",
+            "mentionHint": "Mention"
         },
         "messages": {
             "title": "Messages",

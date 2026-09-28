@@ -328,7 +328,16 @@
             "createError": "Не удалось создать чат",
             "program": "Программа",
             "programPlaceholder": "Выберите программу",
-            "noProgramsLeft": "Для всех программ уже есть чаты"
+            "noProgramsLeft": "Для всех программ уже есть чаты",
+            "onlineCount": "в сети {count}",
+            "pasteClipboard": "Вставить из буфера",
+            "pasteDenied": "Нет доступа к буферу обмена",
+            "attachImage": "Прикрепить изображение",
+            "removeImage": "Убрать",
+            "imageUploadError": "Не удалось загрузить изображение",
+            "soundOn": "Аська",
+            "soundOff": "Аська",
+            "mentionHint": "Упомянуть"
         },
         "messages": {
             "title": "Сообщения",

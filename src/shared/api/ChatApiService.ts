@@ -23,6 +23,7 @@ export type ChatMessageDto = {
     authorUsername: string
     authorFullName?: string | null
     body: string
+    imageUrl?: string | null
     createdAt: string
     mine: boolean
 }
@@ -31,6 +32,9 @@ export type ChatMemberDto = {
     username: string
     fullName: string
     programCode?: string | null
+    lastSeenAt?: string | null
+    online?: boolean
+    seenLabel?: string | null
 }
 
 const alive = (status: number) => status === 200 || status === 201 || status === 404 || status >= 500
@@ -56,8 +60,14 @@ export const ChatApiService = {
         return response.data ?? []
     },
 
-    async sendMessage(roomId: string, body: string): Promise<ChatMessageDto> {
-        const response = await RequestHttp.post<ChatMessageDto>(`/chat/rooms/${roomId}/messages`, { body })
+    async sendMessage(
+        roomId: string,
+        payload: { body?: string; imageUrl?: string | null }
+    ): Promise<ChatMessageDto> {
+        const response = await RequestHttp.post<ChatMessageDto>(`/chat/rooms/${roomId}/messages`, {
+            body: payload.body ?? "",
+            imageUrl: payload.imageUrl || undefined,
+        })
         return response.data
     },
 
@@ -67,5 +77,9 @@ export const ChatApiService = {
         })
         if (response.status !== 200) return []
         return response.data ?? []
+    },
+
+    async presence(): Promise<void> {
+        await RequestHttp.post("/chat/presence", null, { validateStatus: alive })
     },
 }

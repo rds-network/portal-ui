@@ -328,7 +328,16 @@
             "createError": "Nije moguće napraviti čet",
             "program": "Program",
             "programPlaceholder": "Izaberite program",
-            "noProgramsLeft": "Za sve programe već postoje četovi"
+            "noProgramsLeft": "Za sve programe već postoje četovi",
+            "onlineCount": "na mreži {count}",
+            "pasteClipboard": "Ubaci iz clipboarda",
+            "pasteDenied": "Nema pristupa clipboardu",
+            "attachImage": "Priloži sliku",
+            "removeImage": "Ukloni",
+            "imageUploadError": "Nije moguće otpremiti sliku",
+            "soundOn": "ICQ zvuk",
+            "soundOff": "ICQ zvuk",
+            "mentionHint": "Pomeni"
         },
         "messages": {
             "title": "Poruke",
