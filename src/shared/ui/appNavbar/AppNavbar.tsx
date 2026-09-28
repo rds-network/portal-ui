@@ -1,4 +1,4 @@
-import { AppShell, Drawer, Group, ScrollArea } from "@mantine/core"
+import { Drawer, Group, ScrollArea } from "@mantine/core"
 import React, { useContext, useEffect, useMemo } from "react"
 import { NavbarContext } from "src/app/providers/NavbarProvider"
 import { UserContext } from "src/app/providers/UserContext"
@@ -70,19 +70,45 @@ export const AppNavbar = React.memo(function AppNavbar() {
         queryKey: ["impersonation-status"],
         queryFn: () => ImpersonationApiService.status(),
         enabled: !!user,
-        staleTime: 5 * 60 * 1000,
+        staleTime: 30_000,
+        refetchOnWindowFocus: true,
     })
+
+    // Effective account groups drive nav. Privileged ops stay hidden while impersonating.
+    const navUser = user
+    const impersonating = !!impersonation?.active
+    const canShowPrivilegedOps = !impersonating && !!impersonation?.canImpersonate
+
+    const itemVisible = (item: ItemGroupProps) => {
+        if (item.showIfPrivilegedOps && impersonating) return false
+        return (
+            !!item.curatorInbox ||
+            hasPermission(navUser, item.roles) ||
+            (!!item.showIfCurator && !!curatorMe?.curator) ||
+            (!!item.showIfAccountStatusApprover && !!accountStatusMeta?.isAccountStatusApprover) ||
+            (!!item.showIfPrivilegedOps && canShowPrivilegedOps)
+        )
+    }
+
+    const flatItems = useMemo(() => {
+        const items: ItemGroupProps[] = []
+        for (const section of Content) {
+            for (const item of section.items) {
+                if (itemVisible(item)) items.push(item)
+            }
+        }
+        return items
+    }, [
+        navUser,
+        curatorMe?.curator,
+        accountStatusMeta?.isAccountStatusApprover,
+        canShowPrivilegedOps,
+        impersonating,
+    ])
 
     const sections = useMemo(() => {
         return Content.map((section) => {
-            const items = section.items.filter(
-                (item) =>
-                    item.curatorInbox ||
-                    hasPermission(user, item.roles) ||
-                    (item.showIfCurator && curatorMe?.curator) ||
-                    (item.showIfAccountStatusApprover && accountStatusMeta?.isAccountStatusApprover) ||
-                    (item.showIfPrivilegedOps && impersonation?.canImpersonate)
-            )
+            const items = section.items.filter(itemVisible)
             if (items.length === 0) return null
             return (
                 <div className={linkClasses.section} key={section.label}>
@@ -95,9 +121,15 @@ export const AppNavbar = React.memo(function AppNavbar() {
                 </div>
             )
         })
-    }, [user, curatorMe?.curator, accountStatusMeta?.isAccountStatusApprover, impersonation?.canImpersonate])
+    }, [
+        navUser,
+        curatorMe?.curator,
+        accountStatusMeta?.isAccountStatusApprover,
+        canShowPrivilegedOps,
+        impersonating,
+    ])
 
-    const navigation = (
+    const drawerNavigation = (
         <nav id="portal-navigation" className={classes.navbar}>
             <div className={classes.header}>
                 <UserButton />
@@ -127,10 +159,24 @@ export const AppNavbar = React.memo(function AppNavbar() {
                     close: classes.mobileClose,
                 }}
             >
-                {navigation}
+                {drawerNavigation}
             </Drawer>
         )
     }
 
-    return <AppShell.Navbar className={classes.appShellNavbar}>{navigation}</AppShell.Navbar>
+    return (
+        <nav id="portal-navigation" className={classes.topNav} aria-label="portal">
+            <div className={classes.topNavInner}>
+                <div className={classes.topNavLinks}>
+                    {flatItems.map((item) => (
+                        <NavItem {...item} key={item.label} flat />
+                    ))}
+                </div>
+                <div className={classes.topNavUser}>
+                    <UserButton compact />
+                    <LogoutButton compact />
+                </div>
+            </div>
+        </nav>
+    )
 })

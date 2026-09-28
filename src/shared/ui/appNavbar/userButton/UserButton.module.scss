@@ -10,9 +10,31 @@
         background: #ffffff08;
     }
 }
+.userCompact {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    max-width: 180px;
+    padding: 4px 8px;
+    color: inherit;
+    border-radius: 10px;
+    &:hover {
+        background: color-mix(in srgb, var(--portal-ink) 6%, transparent);
+    }
+}
+.compactName {
+    min-width: 0;
+}
 .chevron {
     flex-shrink: 0;
     width: 14px;
     height: 14px;
     color: #a8bfd3;
+}
+
+@media (max-width: 70em) {
+    .compactName {
+        display: none;
+    }
 }

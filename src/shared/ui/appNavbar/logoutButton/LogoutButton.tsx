@@ -5,17 +5,23 @@ import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import classes from "./LogoutButton.module.scss"
 
-export const LogoutButton = () => {
+export const LogoutButton = ({ compact = false }: { compact?: boolean } = {}) => {
     const navigate = useNavigate()
 
     return (
-        <UnstyledButton className={classes.item} onClick={() => navigate("/logout")}>
+        <UnstyledButton
+            className={compact ? `${classes.item} ${classes.itemCompact}` : classes.item}
+            onClick={() => navigate("/logout")}
+            title="Logout"
+        >
             <span className={classes.icon}>
                 <IconLogout width={18} height={18} stroke={1.6} />
             </span>
-            <span className={classes.label}>
-                <FormattedMessage id="common.buttons.logout" />
-            </span>
+            {!compact && (
+                <span className={classes.label}>
+                    <FormattedMessage id="common.buttons.logout" />
+                </span>
+            )}
         </UnstyledButton>
     )
 }

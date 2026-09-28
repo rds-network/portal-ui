@@ -13,6 +13,8 @@ import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { UserAccountApiService } from "src/shared/api/user/UserApiService"
 
+type NavItemProps = ItemGroupProps & { flat?: boolean }
+
 export function NavItem({
     icon: Icon,
     label,
@@ -21,7 +23,8 @@ export function NavItem({
     showApplications,
     showControlled,
     curatorInbox,
-}: ItemGroupProps) {
+    flat,
+}: NavItemProps) {
     const location = useLocation()
     const { user } = useContext(UserContext)
     const isActive = !!link && location.pathname === link
@@ -93,9 +96,11 @@ export function NavItem({
 
     const body = (
         <>
-            <span className={classes.icon}>
-                <Icon style={{ width: rem(18), height: rem(18) }} stroke={1.6} />
-            </span>
+            {!flat && (
+                <span className={classes.icon}>
+                    <Icon style={{ width: rem(18), height: rem(18) }} stroke={1.6} />
+                </span>
+            )}
             <span className={classes.label}>
                 <FormattedMessage id={label} />
             </span>
@@ -103,10 +108,12 @@ export function NavItem({
         </>
     )
 
+    const className = flat ? `${classes.item} ${classes.itemFlat}` : classes.item
+
     if (isExternal) {
         return (
             <UnstyledButton
-                className={classes.item}
+                className={className}
                 component="a"
                 href={link}
                 target="_blank"
@@ -119,7 +126,7 @@ export function NavItem({
 
     return (
         <UnstyledButton
-            className={classes.item}
+            className={className}
             component={Link}
             to={link}
             aria-current={isActive ? "page" : undefined}

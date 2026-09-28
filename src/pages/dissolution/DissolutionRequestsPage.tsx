@@ -13,13 +13,9 @@ import {
     DissolutionRequestDto,
     DissolutionRequestStatus,
 } from "src/shared/api/DissolutionRequestApiService"
-import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
-import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "../leave/LeavePage.module.scss"
-
-const MANAGERS = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
 
 const STATUS_COLOR: Record<DissolutionRequestStatus, string> = {
     PENDING: "yellow",
@@ -37,12 +33,13 @@ export const DissolutionRequestsPage: React.FC = () => {
 
     setDocumentTitleByLocale("pages.dissolutionRequests.title")
 
-    const { data: curatorMe } = useQuery({
-        queryKey: ["program-curators", "me"],
-        queryFn: () => ProgramCuratorApiService.me(),
+    const { data: dissolutionMeta } = useQuery({
+        queryKey: ["dissolution-requests", "meta"],
+        queryFn: () => DissolutionRequestApiService.meta(),
         enabled: !!user,
+        staleTime: 5 * 60 * 1000,
     })
-    const canDecide = !!curatorMe?.curator || hasPermission(user, MANAGERS)
+    const canDecide = !!dissolutionMeta?.isDissolutionApprover
 
     const form = useForm({
         initialValues: {

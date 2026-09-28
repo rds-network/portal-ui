@@ -96,20 +96,20 @@
 }
 
 .reportsCard {
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 2;
 }
 
 .messagesCard {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     min-height: 0;
     overflow: hidden;
 }
 
 .tasksCard {
-    grid-column: 2;
-    grid-row: 3;
+    grid-column: 1;
+    grid-row: 2;
     min-height: 0;
     overflow: hidden;
 }
@@ -216,10 +216,10 @@
     }
 
     .heatmap,
+    .tasksCard,
     .reportsCard,
-    .messagesCard,
     .eventsSlot,
-    .tasksCard {
+    .messagesCard {
         grid-column: auto;
         grid-row: auto;
     }
