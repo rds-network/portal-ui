@@ -22,6 +22,7 @@ import {
     IconBeach,
     IconShieldCheck,
     IconUserCheck,
+    IconDoorOff,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -176,6 +177,13 @@ export const Content: NavSection[] = [
                 icon: IconHistory,
                 link: "/activity",
                 roles: ["ADMIN", "ADMIN_SSO"],
+            },
+            {
+                label: "navbar.maintenance",
+                icon: IconDoorOff,
+                link: "/settings/maintenance",
+                roles: ["ADMIN_SSO"],
+                showIfPrivilegedOps: true,
             },
         ],
     },

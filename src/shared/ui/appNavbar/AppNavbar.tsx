@@ -11,6 +11,7 @@ import { FormattedMessage } from "react-intl"
 import { hasPermission } from "src/shared/user/roles"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { AccountStatusApiService } from "src/shared/api/AccountStatusApiService"
+import { ImpersonationApiService } from "src/shared/api/ImpersonationApiService"
 import { useQuery } from "@tanstack/react-query"
 import { NavItem } from "./links/NavbarLinksGroup"
 import linkClasses from "./links/NavbarLinksGroup.module.scss"
@@ -37,6 +38,7 @@ export interface ItemGroupProps {
     showControlled?: boolean
     showIfCurator?: boolean
     showIfAccountStatusApprover?: boolean
+    showIfPrivilegedOps?: boolean
     curatorInbox?: boolean
 }
 
@@ -64,6 +66,13 @@ export const AppNavbar = React.memo(function AppNavbar() {
         staleTime: 5 * 60 * 1000,
     })
 
+    const { data: impersonation } = useQuery({
+        queryKey: ["impersonation-status"],
+        queryFn: () => ImpersonationApiService.status(),
+        enabled: !!user,
+        staleTime: 5 * 60 * 1000,
+    })
+
     const sections = useMemo(() => {
         return Content.map((section) => {
             const items = section.items.filter(
@@ -71,7 +80,8 @@ export const AppNavbar = React.memo(function AppNavbar() {
                     item.curatorInbox ||
                     hasPermission(user, item.roles) ||
                     (item.showIfCurator && curatorMe?.curator) ||
-                    (item.showIfAccountStatusApprover && accountStatusMeta?.isAccountStatusApprover)
+                    (item.showIfAccountStatusApprover && accountStatusMeta?.isAccountStatusApprover) ||
+                    (item.showIfPrivilegedOps && impersonation?.canImpersonate)
             )
             if (items.length === 0) return null
             return (
@@ -85,7 +95,7 @@ export const AppNavbar = React.memo(function AppNavbar() {
                 </div>
             )
         })
-    }, [user, curatorMe?.curator, accountStatusMeta?.isAccountStatusApprover])
+    }, [user, curatorMe?.curator, accountStatusMeta?.isAccountStatusApprover, impersonation?.canImpersonate])
 
     const navigation = (
         <nav id="portal-navigation" className={classes.navbar}>

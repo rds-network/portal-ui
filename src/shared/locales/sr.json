@@ -416,6 +416,23 @@
             "onlineEmpty": "Nema aktivnosti u poslednjih 10 minuta",
             "onlineYou": "(vi)"
         },
+        "maintenance": {
+            "title": "Zatvaranje portala",
+            "hint": "Privremena zabrana za sve osim ADMIN_SSO i odobravaoca. Zaobilazak tajnim linkom ili posle privilegovane prijave.",
+            "enabled": "Portal zatvoren",
+            "headline": "Naslov",
+            "body": "Tekst",
+            "launchAt": "Datum otvaranja",
+            "launchHelp": "Opciono — odbrojavanje na stranici",
+            "regen": "Generiši novi bypass token",
+            "bypassLink": "Link za zaobilazak",
+            "copy": "Kopiraj link",
+            "copied": "Link kopiran",
+            "noToken": "Token se pojavi posle uključivanja ili regeneracije",
+            "save": "Sačuvaj",
+            "saved": "Podešavanja sačuvana",
+            "loadError": "Neuspešno učitavanje"
+        },
         "mup": {
             "title": "Pismo MUP-u Srbije",
             "open": "Obaveštenje MUP-u",
@@ -806,6 +823,7 @@
             "menu-contact": "Pisati",
             "menu-reports": "Izveštaji",
             "menu-heatmap": "Toplotna karta",
+            "menu-impersonate": "Pogledaj kao volonter",
             "menu-activate": "Aktiviraj",
             "menu-deactivate": "Deaktiviraj",
             "menu-report-block": "Postavi stop na predaju",
@@ -1443,10 +1461,26 @@
         },
         "account-settings": "Podešavanja naloga",
         "activity": "Hronika",
+        "maintenance": "Zatvaranje portala",
         "resources": "Naši resursi",
         "support": "Kontaktirajte podršku",
         "leave": "Odmor",
         "dissolutionRequests": "Zahtev za raskid"
+    },
+    "impersonation": {
+        "banner": "Gledate kao {name}",
+        "exit": "Izađi iz režima"
+    },
+    "maintenance": {
+        "defaultHeadline": "Svratite kasnije",
+        "defaultBody": "Portal je privremeno zatvoren. Pokušajte malo kasnije.",
+        "countdownLabel": "Otvaranje",
+        "countdownNone": "Datum otvaranja biće objavljen naknadno",
+        "countdownDone": "Uskoro",
+        "countdownD": "d",
+        "countdownH": "č",
+        "countdownM": "m",
+        "countdownS": "s"
     },
     "error-boundary": {
         "title": "Nešto je pošlo po zlu",

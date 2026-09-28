@@ -18,6 +18,8 @@ import { UserContextProvider } from "src/app/providers/UserContext"
 import RootRouter from "src/app/router/RootRouter"
 import { queryClient } from "src/shared/constants/Query"
 import { AppShell } from "src/shared/ui/appShell/AppShell"
+import { ImpersonationBanner } from "src/shared/ui/impersonation/ImpersonationBanner"
+import { MaintenanceGate } from "src/shared/ui/maintenance/MaintenanceGate"
 import { theme } from "src/shared/ui/theme/CustomMantineTheme"
 import classes from "./styles/root.module.scss"
 import "./styles/design.scss"
@@ -39,12 +41,15 @@ export const Root = () => {
                 <CsrfContextProvider>
                     <LanguageContextProvider>
                         <UserContextProvider>
-                            <AppShell>
-                                <ErrorBoundary>
-                                    <Notifications className={classes.notifications} />
-                                    <RootRouter />
-                                </ErrorBoundary>
-                            </AppShell>
+                            <MaintenanceGate>
+                                <ImpersonationBanner />
+                                <AppShell>
+                                    <ErrorBoundary>
+                                        <Notifications className={classes.notifications} />
+                                        <RootRouter />
+                                    </ErrorBoundary>
+                                </AppShell>
+                            </MaintenanceGate>
                         </UserContextProvider>
                     </LanguageContextProvider>
                 </CsrfContextProvider>

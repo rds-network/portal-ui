@@ -13,6 +13,7 @@ import {
     IconPlayerPlay,
     IconShieldCheck,
     IconShieldOff,
+    IconUserSearch,
 } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useContext, useEffect, useState } from "react"
@@ -20,6 +21,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { AccountStatusApiService } from "src/shared/api/AccountStatusApiService"
+import { ImpersonationApiService } from "src/shared/api/ImpersonationApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import {
     reportBlockOf,
@@ -47,7 +49,7 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
     const navigate = useNavigate()
     const intl = useIntl()
     const queryClient = useQueryClient()
-    const { user: currentUser } = useContext(UserContext)
+    const { user: currentUser, setUser } = useContext(UserContext)
 
     const [userDto, setUserDto] = useState(user)
     const [menuOpened, setMenuOpened] = useState<boolean>(false)
@@ -67,6 +69,32 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
         staleTime: 5 * 60 * 1000,
     })
     const isStatusApprover = !!statusMeta?.isAccountStatusApprover
+
+    const { data: impersonation } = useQuery({
+        queryKey: ["impersonation-status"],
+        queryFn: () => ImpersonationApiService.status(),
+        enabled: !!currentUser,
+        staleTime: 5 * 60 * 1000,
+    })
+    const canImpersonate =
+        !!impersonation?.canImpersonate &&
+        !impersonation.active &&
+        userDto.username.toLowerCase() !== (impersonation.realUsername ?? currentUser?.username ?? "").toLowerCase() &&
+        !(userDto.groups ?? []).includes(UserGroup.ADMIN_SSO)
+
+    const { mutate: startImpersonation, isPending: isStartingImpersonation } = useMutation({
+        mutationFn: async () => {
+            await ImpersonationApiService.start(userDto.username)
+            const account = await UserApiService.getCurrentAccount()
+            setUser(account.data)
+            await queryClient.invalidateQueries()
+            return account.data
+        },
+        onSuccess: () => {
+            setMenuOpened(false)
+            window.location.assign("/")
+        },
+    })
 
     const { mutate: changeActiveState, isPending: isChangingActive } = useMutation({
         mutationFn: async (requestedActive: boolean) => {
@@ -287,6 +315,15 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                 >
                     <FormattedMessage id={locales.menuHeatmap} />
                 </Menu.Item>
+                {canImpersonate && (
+                    <Menu.Item
+                        leftSection={isStartingImpersonation ? <Loader size={14} /> : <IconUserSearch size={14} />}
+                        disabled={isStartingImpersonation}
+                        onClick={() => startImpersonation()}
+                    >
+                        <FormattedMessage id={locales.menuImpersonate} />
+                    </Menu.Item>
+                )}
                 <Menu.Divider />
 
                 <Menu.Label>

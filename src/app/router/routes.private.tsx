@@ -31,6 +31,7 @@ const LeavePage = lazy(() => import("src/pages/leave/LeavePage"))
 const DissolutionRequestsPage = lazy(() => import("src/pages/dissolution/DissolutionRequestsPage"))
 const ControlledVolunteersPage = lazy(() => import("src/pages/controlled/ControlledVolunteersPage"))
 const AccountStatusPage = lazy(() => import("src/pages/accountStatus/AccountStatusPage"))
+const MaintenanceSettingsPage = lazy(() => import("src/pages/maintenance/MaintenanceSettingsPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -144,6 +145,10 @@ export const routes: RouteProps[] = [
     {
         path: "/activity",
         element: <ActivityPage />,
+    },
+    {
+        path: "/settings/maintenance",
+        element: <MaintenanceSettingsPage />,
     },
     {
         path: "/curators",

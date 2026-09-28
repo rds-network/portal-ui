@@ -416,6 +416,23 @@
             "onlineEmpty": "No activity in the last 10 minutes",
             "onlineYou": "(you)"
         },
+        "maintenance": {
+            "title": "Portal closure",
+            "hint": "Temporary wall for everyone except ADMIN_SSO and the leave approver. Bypass via secret link or after privileged login.",
+            "enabled": "Portal closed",
+            "headline": "Headline",
+            "body": "Body",
+            "launchAt": "Launch date",
+            "launchHelp": "Optional — countdown on the wall",
+            "regen": "Regenerate bypass token",
+            "bypassLink": "Bypass link",
+            "copy": "Copy link",
+            "copied": "Link copied",
+            "noToken": "Token appears after enabling or regenerating",
+            "save": "Save",
+            "saved": "Settings saved",
+            "loadError": "Failed to load settings"
+        },
         "mup": {
             "title": "Letter to Serbian MUP",
             "open": "Notify MUP",
@@ -806,6 +823,7 @@
             "menu-contact": "Contact",
             "menu-reports": "Reports",
             "menu-heatmap": "Heat map",
+            "menu-impersonate": "View as volunteer",
             "menu-activate": "Activate",
             "menu-deactivate": "Deactivate",
             "menu-report-block": "Put reporting on hold",
@@ -1443,10 +1461,26 @@
         },
         "account-settings": "Account settings",
         "activity": "Chronicle",
+        "maintenance": "Portal closure",
         "resources": "Our resources",
         "support": "Contact support",
         "leave": "Leave",
         "dissolutionRequests": "Termination request"
+    },
+    "impersonation": {
+        "banner": "You are viewing as {name}",
+        "exit": "Exit mode"
+    },
+    "maintenance": {
+        "defaultHeadline": "Please come back later",
+        "defaultBody": "The portal is temporarily closed. Try again a bit later.",
+        "countdownLabel": "Opens in",
+        "countdownNone": "Opening date will be announced later",
+        "countdownDone": "Soon",
+        "countdownD": "d",
+        "countdownH": "h",
+        "countdownM": "m",
+        "countdownS": "s"
     },
     "error-boundary": {
         "title": "Something went wrong",
