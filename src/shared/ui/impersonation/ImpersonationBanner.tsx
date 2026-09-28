@@ -7,12 +7,13 @@ import { ImpersonationApiService } from "src/shared/api/ImpersonationApiService"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 
 export const ImpersonationBanner = () => {
-    const { setUser } = useContext(UserContext)
+    const { user, setUser } = useContext(UserContext)
     const queryClient = useQueryClient()
 
     const { data: status } = useQuery({
         queryKey: ["impersonation-status"],
         queryFn: () => ImpersonationApiService.status(),
+        enabled: !!user,
         staleTime: 30_000,
         refetchOnWindowFocus: true,
     })

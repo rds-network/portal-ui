@@ -10,7 +10,13 @@ export type ImpersonationStatusDto = {
 }
 
 const alive = (status: number) =>
-    status === 200 || status === 201 || status === 204 || status === 404 || status >= 500
+    status === 200 ||
+    status === 201 ||
+    status === 204 ||
+    status === 401 ||
+    status === 403 ||
+    status === 404 ||
+    status >= 500
 
 export const ImpersonationApiService = {
     async status(): Promise<ImpersonationStatusDto | null> {
