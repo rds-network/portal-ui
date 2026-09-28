@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: TwitterBot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
