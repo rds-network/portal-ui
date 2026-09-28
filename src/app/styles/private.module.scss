@@ -1,49 +1,48 @@
-.appShell {
-    --portal-navbar-width: 264px;
-    --portal-shell-inset: 20px;
-    display: flex;
-    flex-direction: column;
-    position: fixed;
-    inset: calc(80px + var(--portal-banner-height, 0px)) 0 34px;
-    padding: 0 var(--portal-shell-inset);
-    gap: 8px;
-}
-.appShellMain {
-    flex: 1;
-    min-width: 0;
-    min-height: 0;
-    padding: 0;
-    height: auto;
-}
-.appShellMainScroll {
-    height: 100%;
-    width: 100%;
-
-    :global(.mantine-ScrollArea-viewport) {
-        height: 100% !important;
-    }
-
-    :global(.mantine-ScrollArea-viewport > div) {
-        height: 100% !important;
-        min-height: 100% !important;
-        display: block !important;
-    }
-}
-.divider {
-    width: 100%;
-    margin: 1rem 0;
-    border-top: 1px solid var(--portal-border);
-}
-@media (max-width: 64em) {
-    .appShell {
-        inset: calc(72px + var(--portal-banner-height, 0px)) 0 34px;
-        padding: 0;
-    }
-
-    .appShellMainScroll {
-        :global(.mantine-ScrollArea-viewport > div) {
-            height: auto !important;
-            min-height: 100% !important;
-        }
-    }
-}
+.appShell {
+    --portal-navbar-width: 264px;
+    --portal-shell-inset: 20px;
+    display: flex;
+    position: fixed;
+    inset: calc(80px + var(--portal-banner-height, 0px)) 0 34px;
+    padding: 0 var(--portal-shell-inset);
+    gap: 8px;
+}
+.appShellMain {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    height: 100%;
+    min-height: 0;
+}
+.appShellMainScroll {
+    height: 100%;
+    width: 100%;
+
+    :global(.mantine-ScrollArea-viewport) {
+        height: 100% !important;
+    }
+
+    :global(.mantine-ScrollArea-viewport > div) {
+        height: 100% !important;
+        min-height: 100% !important;
+        display: block !important;
+    }
+}
+.divider {
+    width: 100%;
+    margin: 1rem 0;
+    border-top: 1px solid var(--portal-border);
+}
+@media (max-width: 64em) {
+    .appShell {
+        inset: calc(72px + var(--portal-banner-height, 0px)) 0 34px;
+        padding: 0;
+    }
+
+    .appShellMainScroll {
+        :global(.mantine-ScrollArea-viewport > div) {
+            height: auto !important;
+            min-height: 100% !important;
+        }
+    }
+}
