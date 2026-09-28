@@ -213,19 +213,23 @@ export const DesktopPage: React.FC = () => {
         },
     })
 
+    const firstName =
+        (user?.fullName || (user as { name?: string } | null)?.name || "")
+            .trim()
+            .split(/\s+/)[0] || ""
+    const todayLabel = dayjs().format("dddd, D MMMM YYYY")
+
     return (
         <Flex className={classes.root} direction="column">
             <div className={classes.header}>
                 <div>
-                    <Text className={classes.eyebrow}>
-                        <FormattedMessage id="design.workspace" />
-                    </Text>
                     <Title order={1} className={classes.title}>
-                        <FormattedMessage id="pages.desktop.title" />
+                        <FormattedMessage
+                            id="pages.desktop.greeting"
+                            values={{ name: firstName || intl.formatMessage({ id: "pages.desktop.title" }) }}
+                        />
                     </Title>
-                    <Text className={classes.subtitle}>
-                        <FormattedMessage id="pages.desktop.subtitle" />
-                    </Text>
+                    <Text className={classes.subtitle}>{todayLabel}</Text>
                 </div>
                 <Button
                     color="ocean.7"
@@ -237,10 +241,6 @@ export const DesktopPage: React.FC = () => {
             </div>
 
             <div className={classes.grid}>
-                <section className={classes.heatmap}>
-                    <CurrentUserHeatmap compact />
-                </section>
-
                 <section className={`${classes.card} ${classes.tasksCard}`}>
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
@@ -289,6 +289,56 @@ export const DesktopPage: React.FC = () => {
                                             defaultMessage={String(task.status)}
                                         />
                                     </Badge>
+                                </button>
+                            )
+                        })}
+                    </div>
+                </section>
+
+                <section className={`${classes.card} ${classes.messagesCard}`}>
+                    <div className={classes.cardHeader}>
+                        <Title order={2} className={classes.cardTitle}>
+                            <FormattedMessage id="pages.desktop.messages" />
+                        </Title>
+                        <Link className={classes.cardLink} to="/messages">
+                            <FormattedMessage id="pages.desktop.allMessages" />
+                        </Link>
+                    </div>
+                    <div className={classes.listScroll}>
+                        {recentMessages.length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage id="pages.messages.empty" />
+                            </Text>
+                        )}
+                        {recentMessages.map((item) => {
+                            const name =
+                                item.counterpartName ||
+                                item.recipientName ||
+                                item.counterpart ||
+                                item.recipient ||
+                                item.createdBy ||
+                                "—"
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    className={classes.row}
+                                    onClick={() => navigate("/messages")}
+                                >
+                                    <Avatar radius="xl" size={34} color="initials" name={name} />
+                                    <div className={classes.rowBody}>
+                                        <Text fw={item.unread ? 700 : 500} lineClamp={1}>
+                                            {item.subject}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                            {item.lastBody || name}
+                                        </Text>
+                                    </div>
+                                    {item.unread && (
+                                        <Badge color="ocean" variant="filled" radius="md" size="sm">
+                                            <FormattedMessage id="pages.messages.new" />
+                                        </Badge>
+                                    )}
                                 </button>
                             )
                         })}
@@ -353,54 +403,8 @@ export const DesktopPage: React.FC = () => {
                     />
                 </div>
 
-                <section className={`${classes.card} ${classes.messagesCard}`}>
-                    <div className={classes.cardHeader}>
-                        <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.messages" />
-                        </Title>
-                        <Link className={classes.cardLink} to="/messages">
-                            <FormattedMessage id="pages.desktop.allMessages" />
-                        </Link>
-                    </div>
-                    <div className={classes.listScroll}>
-                        {recentMessages.length === 0 && (
-                            <Text className={classes.empty}>
-                                <FormattedMessage id="pages.messages.empty" />
-                            </Text>
-                        )}
-                        {recentMessages.map((item) => {
-                            const name =
-                                item.counterpartName ||
-                                item.recipientName ||
-                                item.counterpart ||
-                                item.recipient ||
-                                item.createdBy ||
-                                "—"
-                            return (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    className={classes.row}
-                                    onClick={() => navigate("/messages")}
-                                >
-                                    <Avatar radius="xl" size={34} color="initials" name={name} />
-                                    <div className={classes.rowBody}>
-                                        <Text fw={item.unread ? 700 : 500} lineClamp={1}>
-                                            {item.subject}
-                                        </Text>
-                                        <Text className={classes.rowMeta} lineClamp={1}>
-                                            {item.lastBody || name}
-                                        </Text>
-                                    </div>
-                                    {item.unread && (
-                                        <Badge color="ocean" variant="filled" radius="md" size="sm">
-                                            <FormattedMessage id="pages.messages.new" />
-                                        </Badge>
-                                    )}
-                                </button>
-                            )
-                        })}
-                    </div>
+                <section className={classes.heatmap}>
+                    <CurrentUserHeatmap compact />
                 </section>
             </div>
 

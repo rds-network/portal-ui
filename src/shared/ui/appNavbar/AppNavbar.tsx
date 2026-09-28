@@ -1,4 +1,5 @@
-import { AppShell, Drawer, Group, ScrollArea } from "@mantine/core"
+import image from "/resources/pv_logo.png"
+import { Anchor, AppShell, Drawer, Group, Image, ScrollArea, Text } from "@mantine/core"
 import React, { useContext, useEffect, useMemo } from "react"
 import { NavbarContext } from "src/app/providers/NavbarProvider"
 import { UserContext } from "src/app/providers/UserContext"
@@ -15,7 +16,7 @@ import { ImpersonationApiService } from "src/shared/api/ImpersonationApiService"
 import { useQuery } from "@tanstack/react-query"
 import { NavItem } from "./links/NavbarLinksGroup"
 import linkClasses from "./links/NavbarLinksGroup.module.scss"
-import { useLocation } from "react-router"
+import { Link, useLocation } from "react-router"
 
 export interface ItemProps {
     label: string
@@ -116,6 +117,12 @@ export const AppNavbar = React.memo(function AppNavbar() {
     const navigation = (
         <nav id="portal-navigation" className={classes.navbar}>
             <div className={classes.header}>
+                <Anchor component={Link} to="/" className={classes.brand} underline="never">
+                    <Image src={image} className={classes.brandLogo} alt="RDS" />
+                    <Text className={classes.brandText}>
+                        <FormattedMessage id="design.portal" />
+                    </Text>
+                </Anchor>
                 <UserButton />
             </div>
 

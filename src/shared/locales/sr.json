@@ -219,6 +219,7 @@
         },
         "desktop": {
             "title": "Radni sto",
+            "greeting": "Dobar dan, {name}!",
             "subtitle": "Izveštaji, zadaci i poruke na jednom mestu.",
             "reports": "Moji izveštaji",
             "allReports": "Svi izveštaji i filteri →",

@@ -219,6 +219,7 @@
         },
         "desktop": {
             "title": "Desktop",
+            "greeting": "Hello, {name}!",
             "subtitle": "Reports, tasks and messages in one place.",
             "reports": "My reports",
             "allReports": "All reports and filters →",

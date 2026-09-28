@@ -22,17 +22,9 @@
     flex-shrink: 0;
 }
 
-.eyebrow {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    color: var(--portal-accent);
-}
-
 .title {
     @include s.title;
-    margin: 2px 0 0;
+    margin: 0;
     font-size: clamp(22px, 2.4vw, 28px);
 }
 
@@ -47,7 +39,7 @@
     min-height: 0;
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr) auto;
     gap: 10px;
     align-items: stretch;
 }
@@ -95,23 +87,31 @@
     gap: 8px;
 }
 
-.reportsCard {
-    grid-column: 2;
-    grid-row: 2;
+.tasksCard {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .messagesCard {
     grid-column: 2;
-    grid-row: 3;
+    grid-row: 1;
     min-height: 0;
     overflow: hidden;
 }
 
-.tasksCard {
+.reportsCard {
     grid-column: 1;
     grid-row: 2;
     min-height: 0;
     overflow: hidden;
+}
+
+.eventsSlot {
+    grid-column: 2;
+    grid-row: 2;
+    min-height: 0;
 }
 
 .listScroll {
@@ -192,12 +192,6 @@
 
 .heatmap {
     grid-column: 1 / -1;
-    grid-row: 1;
-    min-height: 0;
-}
-
-.eventsSlot {
-    grid-column: 1;
     grid-row: 3;
     min-height: 0;
 }
