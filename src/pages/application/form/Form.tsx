@@ -163,18 +163,19 @@ export const Form = () => {
     })
 
     useEffect(() => {
-        if (currentUser) {
-            form.setFieldValue("email", currentUser.email)
-            form.setFieldValue("name", currentUser.fullName)
+        if (!currentUser) return
+        form.setFieldValue("email", currentUser.email)
+        form.setFieldValue("name", currentUser.fullName)
+        if (currentUser.birthDate) {
             form.setFieldValue("birthDate", dayjs(currentUser.birthDate).toDate())
-            form.setFieldValue("telegram", currentUser.telegram)
-            form.setFieldValue("address", currentUser.address)
-            form.setFieldValue("phone", currentUser.phone)
-            if (currentUser.gender) {
-                form.setFieldValue("gender", currentUser.gender)
-            }
         }
-    }, [currentUser])
+        if (currentUser.telegram) form.setFieldValue("telegram", currentUser.telegram)
+        if (currentUser.address) form.setFieldValue("address", currentUser.address)
+        if (currentUser.phone) form.setFieldValue("phone", currentUser.phone)
+        if (currentUser.gender) form.setFieldValue("gender", currentUser.gender)
+        // Prefill once; keep email/name editable (do not lock fields).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser?.email, currentUser?.fullName])
 
     const { isFetching, refetch } = useQuery({
         enabled: false,
@@ -338,7 +339,7 @@ export const Form = () => {
                 leftSection={<IconAt size={16} />}
                 key={form.key("email")}
                 {...form.getInputProps("email")}
-                disabled={isFetching || currentUser !== undefined}
+                disabled={isFetching}
             />
             <TextInput
                 label={<FormattedMessage id={locales.name} />}
@@ -349,7 +350,7 @@ export const Form = () => {
                 leftSection={<IconSignature size={16} />}
                 key={form.key("name")}
                 {...form.getInputProps("name")}
-                disabled={isFetching || currentUser !== undefined}
+                disabled={isFetching}
             />
             <TextInput
                 label={<FormattedMessage id={locales.patronymic} />}
