@@ -631,32 +631,31 @@ export const ChatPage: React.FC = () => {
                             </button>
                             <Textarea
                                 className={classes.composeInput}
+                                ref={textareaRef}
                                 minRows={2}
                                 maxRows={5}
                                 autosize
                                 value={draft}
                                 disabled={!roomId || sending || uploading}
                                 placeholder={intl.formatMessage({ id: "pages.chat.placeholder" })}
-                                textareaProps={{
-                                    ref: textareaRef,
-                                    onSelect: (e) => setCaret(e.currentTarget.selectionStart),
-                                    onClick: (e) => setCaret(e.currentTarget.selectionStart),
-                                    onKeyUp: (e) => setCaret(e.currentTarget.selectionStart),
-                                    onPaste: (e) => {
-                                        const items = e.clipboardData?.items
-                                        if (!items) return
-                                        for (const item of Array.from(items)) {
-                                            if (item.type.startsWith("image/")) {
-                                                e.preventDefault()
-                                                attachFile(item.getAsFile())
-                                                return
-                                            }
-                                        }
-                                    },
-                                }}
                                 onChange={(e) => {
                                     setDraft(e.currentTarget.value)
                                     setCaret(e.currentTarget.selectionStart)
+                                }}
+                                onSelect={(e) => setCaret(e.currentTarget.selectionStart)}
+                                onClick={(e) => setCaret(e.currentTarget.selectionStart)}
+                                onKeyUp={(e) => setCaret(e.currentTarget.selectionStart)}
+                                onPaste={(e) => {
+                                    const items = e.clipboardData?.items
+                                    if (!items) return
+                                    for (let i = 0; i < items.length; i++) {
+                                        const item = items[i]
+                                        if (item.type.startsWith("image/")) {
+                                            e.preventDefault()
+                                            attachFile(item.getAsFile())
+                                            return
+                                        }
+                                    }
                                 }}
                                 onKeyDown={(e) => {
                                     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
