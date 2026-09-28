@@ -75,9 +75,6 @@ export const DesktopPage: React.FC = () => {
     })
 
     const reports = reportsResponse.content
-    const { data: users = {} } = resolveUsers(
-        reports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[])
-    )
 
     const { data: assignments = [] } = useQuery({
         queryKey: ["work-assignments"],
@@ -91,6 +88,7 @@ export const DesktopPage: React.FC = () => {
                     item.assignee === user?.username && ACTIVE_TASK_STATUSES.has(String(item.status).toUpperCase())
             )
             .sort((a, b) => dayjs(b.createTime).valueOf() - dayjs(a.createTime).valueOf())
+            .slice(0, 4)
     }, [assignments, user?.username])
 
     const { data: threads = [] } = useQuery({
@@ -106,6 +104,19 @@ export const DesktopPage: React.FC = () => {
         return sorted.slice(0, 8)
     }, [threads])
 
+    const messageLogins = useMemo(
+        () =>
+            recentMessages
+                .flatMap((item) => [item.counterpart, item.createdBy, item.recipient].filter(Boolean) as string[])
+                .filter((login, index, all) => all.indexOf(login) === index),
+        [recentMessages]
+    )
+    const { data: users = {} } = resolveUsers(
+        [
+            ...reports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
+            ...messageLogins,
+        ].filter((login, index, all) => all.indexOf(login) === index)
+    )
     const { data: events = [] } = useQuery({
         queryKey: ["portal-events", "upcoming"],
         queryFn: () => PortalEventApiService.list(true, 60),
@@ -311,9 +322,13 @@ export const DesktopPage: React.FC = () => {
                             </Text>
                         )}
                         {recentMessages.map((item) => {
+                            const login =
+                                item.counterpart || item.createdBy || item.recipient || ""
+                            const person = login ? users[login] : undefined
                             const name =
                                 item.counterpartName ||
                                 item.recipientName ||
+                                person?.fullName ||
                                 item.counterpart ||
                                 item.recipient ||
                                 item.createdBy ||
@@ -322,23 +337,33 @@ export const DesktopPage: React.FC = () => {
                                 <button
                                     key={item.id}
                                     type="button"
-                                    className={classes.row}
-                                    onClick={() => navigate("/messages")}
+                                    className={`${classes.row} ${classes.messageRow}`}
+                                    onClick={() => navigate(`/messages`)}
                                 >
-                                    <Avatar radius="xl" size={34} color="initials" name={name} />
+                                    <Avatar
+                                        radius="xl"
+                                        size={42}
+                                        color="initials"
+                                        name={name}
+                                        src={person?.avatar?.link}
+                                    />
                                     <div className={classes.rowBody}>
-                                        <Text fw={item.unread ? 700 : 500} lineClamp={1}>
+                                        <div className={classes.messageHead}>
+                                            <Text className={classes.messageName} lineClamp={1}>
+                                                {name}
+                                            </Text>
+                                            <Text className={classes.messageTime}>
+                                                {dayjs(item.createTime).format("DD.MM HH:mm")}
+                                            </Text>
+                                        </div>
+                                        <Text className={classes.messageSubject} lineClamp={1}>
                                             {item.subject}
                                         </Text>
-                                        <Text className={classes.rowMeta} lineClamp={1}>
-                                            {item.lastBody || name}
+                                        <Text className={classes.rowMeta} lineClamp={2}>
+                                            {item.lastBody || "—"}
                                         </Text>
                                     </div>
-                                    {item.unread && (
-                                        <Badge color="ocean" variant="filled" radius="md" size="sm">
-                                            <FormattedMessage id="pages.messages.new" />
-                                        </Badge>
-                                    )}
+                                    {item.unread ? <span className={classes.unreadDot} /> : null}
                                 </button>
                             )
                         })}

@@ -39,7 +39,7 @@
     min-height: 0;
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 0.85fr) minmax(0, 1.15fr) auto;
     gap: 10px;
     align-items: stretch;
 }
@@ -129,7 +129,8 @@
     appearance: none;
     width: 100%;
     margin: 0;
-    padding: 8px 10px;
+    padding: 12px 12px;
+    min-height: 64px;
     text-align: left;
     font: inherit;
     color: inherit;
@@ -139,7 +140,7 @@
     background: var(--portal-solid);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex-shrink: 0;
     transition:
         background 0.15s ease,
@@ -149,6 +150,48 @@
         background: var(--portal-subtle);
         border-color: var(--portal-accent);
     }
+}
+
+.messageRow {
+    align-items: flex-start;
+    min-height: 88px;
+    padding: 14px 14px;
+}
+
+.messageHead {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+
+.messageName {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--portal-ink);
+    min-width: 0;
+}
+
+.messageTime {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--portal-muted);
+}
+
+.messageSubject {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--portal-ink);
+    margin-top: 2px;
+}
+
+.unreadDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--portal-accent);
+    flex-shrink: 0;
+    margin-top: 6px;
 }
 
 .rowNew {

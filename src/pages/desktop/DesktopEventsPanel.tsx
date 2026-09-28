@@ -16,6 +16,14 @@ const EVENT_COLOR: Record<string, string> = {
     OTHER: "gray",
 }
 
+const EVENT_DATE_TONE: Record<string, string> = {
+    CALL: "eventWhenBlue",
+    SUBBOTNIK: "eventWhenTeal",
+    MEETING: "eventWhenViolet",
+    LECTURE: "eventWhenCyan",
+    OTHER: "eventWhenGray",
+}
+
 type Props = {
     events: PortalEventDto[]
     canManage: boolean
@@ -193,15 +201,19 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                         key={event.id}
                                         className={`${classes.eventCard} ${isNew ? classes.eventNew : ""}`}
                                     >
-                                        <div className={classes.eventWhen}>
+                                        <div
+                                            className={`${classes.eventWhen} ${
+                                                classes[
+                                                    (EVENT_DATE_TONE[event.type] ||
+                                                        "eventWhenGray") as keyof typeof classes
+                                                ]
+                                            }`}
+                                        >
                                             <span className={classes.eventDay}>
                                                 {dayjs(event.startsAt).format("D")}
                                             </span>
                                             <span className={classes.eventMonth}>
                                                 {dayjs(event.startsAt).format("MMM")}
-                                            </span>
-                                            <span className={classes.eventTime}>
-                                                {dayjs(event.startsAt).format("HH:mm")}
                                             </span>
                                         </div>
                                         <div className={classes.eventBody}>
@@ -235,11 +247,12 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                             <Text className={classes.eventTitle} lineClamp={1}>
                                                 {event.title}
                                             </Text>
-                                            {(mapLabel || event.location) && (
-                                                <Text className={classes.eventMeta} lineClamp={1}>
-                                                    {mapLabel || event.location}
-                                                </Text>
-                                            )}
+                                            <Text className={classes.eventMeta} lineClamp={1}>
+                                                {dayjs(event.startsAt).format("HH:mm")}
+                                                {(mapLabel || event.location)
+                                                    ? ` · ${mapLabel || event.location}`
+                                                    : ""}
+                                            </Text>
                                             {locationIsLink && (
                                                 <a
                                                     className={classes.mapLink}
