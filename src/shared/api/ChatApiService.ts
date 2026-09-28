@@ -37,7 +37,8 @@ export type ChatMemberDto = {
     seenLabel?: string | null
 }
 
-const alive = (status: number) => status === 200 || status === 201 || status === 404 || status >= 500
+const alive = (status: number) =>
+    status === 200 || status === 201 || status === 204 || status === 404 || status >= 500
 
 export const ChatApiService = {
     async listRooms(): Promise<ChatRoomsResponse> {
