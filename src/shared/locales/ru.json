@@ -1385,6 +1385,9 @@
         "account-status": {
             "title": "Активации",
             "description": "Согласование активации и деактивации учётных записей.",
+            "waitingForDecision": "Ожидает решения: {name}",
+            "waitingYou": "вас",
+            "decisionByApprover": "Решение принимает {name}",
             "pendingTitle": "На согласовании",
             "pendingEmpty": "Нет ожидающих запросов",
             "historyTitle": "История изменений",

@@ -225,6 +225,26 @@ export const AccountStatusPage: React.FC = () => {
                 <Text c="dimmed" mt={6}>
                     <FormattedMessage id="pages.account-status.description" />
                 </Text>
+                {meta?.approverUsername && (
+                    <Text c="dimmed" size="sm" mt={4}>
+                        <FormattedMessage
+                            id="pages.account-status.waitingForDecision"
+                            values={{
+                                name: canDecide
+                                    ? intl.formatMessage({ id: "pages.account-status.waitingYou" })
+                                    : meta.approverUsername,
+                            }}
+                        />
+                    </Text>
+                )}
+                {!canDecide && canAccess && meta?.approverUsername && (
+                    <Text c="dimmed" size="sm" mt={2}>
+                        <FormattedMessage
+                            id="pages.account-status.decisionByApprover"
+                            values={{ name: meta.approverUsername }}
+                        />
+                    </Text>
+                )}
             </div>
 
             <div className={classes.section}>
