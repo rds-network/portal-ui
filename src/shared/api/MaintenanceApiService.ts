@@ -1,3 +1,4 @@
+import { PublicRequestHttp } from "src/shared/http/PublicRequestHttp"
 import { RequestHttp } from "src/shared/http/RequestHttp"
 
 export type PublicMaintenanceDto = {
@@ -24,7 +25,8 @@ const alive = (status: number) =>
 
 export const MaintenanceApiService = {
     async getPublic(): Promise<PublicMaintenanceDto | null> {
-        const response = await RequestHttp.get<PublicMaintenanceDto>("/public/maintenance", {
+        // PublicRequestHttp: never redirect anonymous visitors on /application to OAuth
+        const response = await PublicRequestHttp.get<PublicMaintenanceDto>("/public/maintenance", {
             validateStatus: alive,
         })
         if (response.status !== 200) return null
@@ -32,7 +34,11 @@ export const MaintenanceApiService = {
     },
 
     async unlock(token: string): Promise<boolean> {
-        const response = await RequestHttp.post("/public/maintenance/unlock", { token }, { validateStatus: alive })
+        const response = await PublicRequestHttp.post(
+            "/public/maintenance/unlock",
+            { token },
+            { validateStatus: alive }
+        )
         return response.status === 200
     },
 

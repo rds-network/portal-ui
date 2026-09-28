@@ -155,10 +155,11 @@ export const Form = () => {
 
     const { data: currentUser } = useQuery({
         queryKey: ["checkUser"],
+        retry: false,
         queryFn: () =>
-            checkUserForApplication().then((res) => {
-                return res.data
-            }),
+            checkUserForApplication()
+                .then((res) => res.data)
+                .catch(() => null),
     })
 
     useEffect(() => {

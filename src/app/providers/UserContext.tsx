@@ -52,7 +52,13 @@ export const UserContextProvider = ({ children }: { children?: ReactNode }) => {
                 if (!cancelled) setUser(res.data)
             })
             .catch(() => {
-                // Not authenticated / network — keep local hydrate or null (no SSO redirect)
+                // Anonymous or expired session — clear stale local user so public
+                // routes like /application stay on PublicApp (no OAuth redirect).
+                if (!cancelled) {
+                    setUser(null)
+                    SimpleLocalStorageService.removeItem(USER)
+                    SimpleLocalStorageService.removeItem(LAST_LOGIN)
+                }
             })
             .finally(() => {
                 if (!cancelled) {
