@@ -77,9 +77,10 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
         staleTime: 5 * 60 * 1000,
     })
     const canImpersonate =
-        !!impersonation?.canImpersonate &&
-        !impersonation.active &&
-        userDto.username.toLowerCase() !== (impersonation.realUsername ?? currentUser?.username ?? "").toLowerCase() &&
+        (!!impersonation?.canImpersonate ||
+            hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])) &&
+        !impersonation?.active &&
+        userDto.username.toLowerCase() !== (impersonation?.realUsername ?? currentUser?.username ?? "").toLowerCase() &&
         !(userDto.groups ?? []).includes(UserGroup.ADMIN_SSO)
 
     const { mutate: startImpersonation, isPending: isStartingImpersonation } = useMutation({

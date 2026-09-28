@@ -17,6 +17,7 @@ import {
     IconMap,
     IconPencil,
     IconPhone,
+    IconUserSearch,
 } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -28,6 +29,7 @@ import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
 import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
+import { ImpersonationApiService } from "src/shared/api/ImpersonationApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { CitiesApiService } from "src/shared/api/CitiesApiService"
@@ -85,6 +87,35 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         queryKey: ["overdue-warnings", userInfo?.username],
         queryFn: () => InboxApiService.overdueWarnings(userInfo!.username),
         enabled: !!userInfo?.username && !!showSensitiveData,
+    })
+
+    const { data: impersonation } = useQuery({
+        queryKey: ["impersonation-status"],
+        queryFn: () => ImpersonationApiService.status(),
+        enabled: !!currentUser,
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const canImpersonateProfile =
+        (!!impersonation?.canImpersonate ||
+            hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])) &&
+        !impersonation?.active &&
+        !!userInfo?.username &&
+        userInfo.username.toLowerCase() !==
+            (impersonation?.realUsername ?? currentUser?.username ?? "").toLowerCase() &&
+        !(userInfo.groups ?? []).includes(UserGroup.ADMIN_SSO)
+
+    const { mutate: startImpersonation, isPending: isStartingImpersonation } = useMutation({
+        mutationFn: async () => {
+            await ImpersonationApiService.start(userInfo!.username)
+            const account = await UserApiService.getCurrentAccount()
+            setUser(account.data)
+            await queryClient.invalidateQueries()
+            return account.data
+        },
+        onSuccess: () => {
+            window.location.assign("/")
+        },
     })
 
     const { mutate: issueWarning, isPending: issuingWarning } = useMutation({
@@ -870,6 +901,17 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     rightSection={<IconPencil size={14} />}
                 >
                     <FormattedMessage id={"pages.profile.buttons.edit"} />
+                </Button>
+            )}
+            {canImpersonateProfile && (
+                <Button
+                    onClick={() => startImpersonation()}
+                    className={classes.button}
+                    variant="outline"
+                    loading={isStartingImpersonation}
+                    rightSection={<IconUserSearch size={14} />}
+                >
+                    <FormattedMessage id="pages.user-list.menu-impersonate" />
                 </Button>
             )}
             {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO]) &&
