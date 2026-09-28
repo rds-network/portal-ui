@@ -1,4 +1,4 @@
-import { Drawer, Group, ScrollArea } from "@mantine/core"
+import { AppShell, Drawer, Group, ScrollArea } from "@mantine/core"
 import React, { useContext, useEffect, useMemo } from "react"
 import { NavbarContext } from "src/app/providers/NavbarProvider"
 import { UserContext } from "src/app/providers/UserContext"
@@ -90,22 +90,6 @@ export const AppNavbar = React.memo(function AppNavbar() {
         )
     }
 
-    const flatItems = useMemo(() => {
-        const items: ItemGroupProps[] = []
-        for (const section of Content) {
-            for (const item of section.items) {
-                if (itemVisible(item)) items.push(item)
-            }
-        }
-        return items
-    }, [
-        navUser,
-        curatorMe?.curator,
-        accountStatusMeta?.isAccountStatusApprover,
-        canShowPrivilegedOps,
-        impersonating,
-    ])
-
     const sections = useMemo(() => {
         return Content.map((section) => {
             const items = section.items.filter(itemVisible)
@@ -129,7 +113,7 @@ export const AppNavbar = React.memo(function AppNavbar() {
         impersonating,
     ])
 
-    const drawerNavigation = (
+    const navigation = (
         <nav id="portal-navigation" className={classes.navbar}>
             <div className={classes.header}>
                 <UserButton />
@@ -159,24 +143,10 @@ export const AppNavbar = React.memo(function AppNavbar() {
                     close: classes.mobileClose,
                 }}
             >
-                {drawerNavigation}
+                {navigation}
             </Drawer>
         )
     }
 
-    return (
-        <nav id="portal-navigation" className={classes.topNav} aria-label="portal">
-            <div className={classes.topNavInner}>
-                <div className={classes.topNavLinks}>
-                    {flatItems.map((item) => (
-                        <NavItem {...item} key={item.label} flat />
-                    ))}
-                </div>
-                <div className={classes.topNavUser}>
-                    <UserButton compact />
-                    <LogoutButton compact />
-                </div>
-            </div>
-        </nav>
-    )
+    return <AppShell.Navbar className={classes.appShellNavbar}>{navigation}</AppShell.Navbar>
 })

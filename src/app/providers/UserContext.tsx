@@ -4,7 +4,7 @@ import { LAST_LOGIN, USER } from "src/shared/constants/Storage"
 import { defaultFunction } from "src/shared/lib/defaultFunction"
 import { SimpleLocalStorageService } from "src/shared/localStorage/SimpleLocalStorageService"
 import { LoadingScreen } from "src/shared/ui/loading/LoadingScreen"
-import { UserApiService } from "src/shared/api/user/UserApiService"
+import { checkUserForApplication } from "src/shared/api/user/UserApiService"
 
 interface UserContextType {
     user: UserInfoDto | null
@@ -28,10 +28,11 @@ export const UserContextProvider = ({ children }: { children?: ReactNode }) => {
     /**
      * Hydrate from localStorage for a fast first paint, then refresh from
      * getCurrentAccount so impersonation/effective groups are never stale.
+     * Uses SimpleRequestHttp (no OAuth redirect on 401) so public routes like
+     * /application work for anonymous applicants without an Authentik account.
      */
     useEffect(() => {
         let cancelled = false
-        let localUser: UserInfoDto | null = null
         let userExpired = true
         const lastLoginRaw = SimpleLocalStorageService.getItem(LAST_LOGIN)
         const lastLogin = lastLoginRaw ? new Date(lastLoginRaw) : null
@@ -40,18 +41,18 @@ export const UserContextProvider = ({ children }: { children?: ReactNode }) => {
             userExpired = diffInMinutes >= SESSION_DURATION
         }
         if (!userExpired) {
-            localUser = SimpleLocalStorageService.getItem(USER) || null
+            const localUser = SimpleLocalStorageService.getItem(USER) || null
             if (localUser && !cancelled) {
                 setUser(localUser)
             }
         }
 
-        UserApiService.getCurrentAccount()
+        checkUserForApplication()
             .then((res) => {
                 if (!cancelled) setUser(res.data)
             })
             .catch(() => {
-                // Not authenticated / network — keep local hydrate or null
+                // Not authenticated / network — keep local hydrate or null (no SSO redirect)
             })
             .finally(() => {
                 if (!cancelled) {
