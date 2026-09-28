@@ -44,9 +44,9 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
     })
 
     const privilegedBypass =
-        hasPermission(user, [UserGroup.ADMIN_SSO]) ||
+        hasPermission(user, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER]) ||
         !!impersonation?.canImpersonate ||
-        (user?.username?.toLowerCase() === "legkov777")
+        user?.username?.toLowerCase() === "legkov777"
 
     useEffect(() => {
         const id = setInterval(() => setTick((x) => x + 1), 1000)

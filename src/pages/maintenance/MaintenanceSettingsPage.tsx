@@ -57,7 +57,7 @@ export default function MaintenanceSettingsPage() {
     })
 
     const allowed =
-        hasPermission(user, [UserGroup.ADMIN_SSO]) ||
+        hasPermission(user, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER]) ||
         !!impersonation?.canImpersonate ||
         user?.username?.toLowerCase() === "legkov777"
 

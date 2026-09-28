@@ -182,7 +182,7 @@ export const Content: NavSection[] = [
                 label: "navbar.maintenance",
                 icon: IconDoorOff,
                 link: "/settings/maintenance",
-                roles: ["ADMIN_SSO"],
+                roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO"],
                 showIfPrivilegedOps: true,
             },
         ],
