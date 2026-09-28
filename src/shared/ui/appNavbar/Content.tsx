@@ -24,6 +24,7 @@ import {
     IconUserCheck,
     IconDoorOff,
     IconMessages,
+    IconFileDescription,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -188,6 +189,13 @@ export const Content: NavSection[] = [
                 label: "navbar.maintenance",
                 icon: IconDoorOff,
                 link: "/settings/maintenance",
+                roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO"],
+                showIfPrivilegedOps: true,
+            },
+            {
+                label: "navbar.applicationJoin",
+                icon: IconFileDescription,
+                link: "/settings/application-join",
                 roles: ["ADMIN_VOLUNTEER", "ADMIN_SSO"],
                 showIfPrivilegedOps: true,
             },

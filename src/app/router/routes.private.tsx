@@ -33,6 +33,9 @@ const DissolutionRequestsPage = lazy(() => import("src/pages/dissolution/Dissolu
 const ControlledVolunteersPage = lazy(() => import("src/pages/controlled/ControlledVolunteersPage"))
 const AccountStatusPage = lazy(() => import("src/pages/accountStatus/AccountStatusPage"))
 const MaintenanceSettingsPage = lazy(() => import("src/pages/maintenance/MaintenanceSettingsPage"))
+const ApplicationJoinSettingsPage = lazy(
+    () => import("src/pages/application/joinSettings/ApplicationJoinSettingsPage")
+)
 
 export const routes: RouteProps[] = [
     {
@@ -154,6 +157,10 @@ export const routes: RouteProps[] = [
     {
         path: "/settings/maintenance",
         element: <MaintenanceSettingsPage />,
+    },
+    {
+        path: "/settings/application-join",
+        element: <ApplicationJoinSettingsPage />,
     },
     {
         path: "/curators",

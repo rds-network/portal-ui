@@ -467,6 +467,20 @@
             "saved": "Podešavanja sačuvana",
             "loadError": "Neuspešno učitavanje"
         },
+        "applicationJoin": {
+            "title": "Tekst stranice prijave",
+            "hint": "Javni tekst na /application. Prazna polja koriste i18n / markdown iz jezika.",
+            "fieldTitle": "Naslov",
+            "fieldBody": "Tekst (markdown)",
+            "bodyHelp": "Ostavi prazno da se koristi podrazumevani markdown iz jezika",
+            "agree1": "Polje 1 (HTML)",
+            "agree2": "Polje 2 (HTML)",
+            "agreeHelp": "Možete ubaciti linkove: <a href='…' target='_blank'>…</a>",
+            "button": "Dugme",
+            "save": "Sačuvaj",
+            "saved": "Tekst sačuvan",
+            "loadError": "Neuspešno učitavanje"
+        },
         "mup": {
             "title": "Pismo MUP-u Srbije",
             "open": "Obaveštenje MUP-u",
@@ -1499,6 +1513,7 @@
         "account-settings": "Podešavanja naloga",
         "activity": "Hronika",
         "maintenance": "Zatvaranje portala",
+        "applicationJoin": "Tekst prijave",
         "resources": "Naši resursi",
         "support": "Kontaktirajte podršku",
         "leave": "Odmor",

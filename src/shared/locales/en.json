@@ -467,6 +467,20 @@
             "saved": "Settings saved",
             "loadError": "Failed to load settings"
         },
+        "applicationJoin": {
+            "title": "Join page text",
+            "hint": "Public copy on /application. Blank fields fall back to i18n / markdown locales.",
+            "fieldTitle": "Title",
+            "fieldBody": "Body (markdown)",
+            "bodyHelp": "Leave empty to use the default markdown from locales",
+            "agree1": "Checkbox 1 (HTML)",
+            "agree2": "Checkbox 2 (HTML)",
+            "agreeHelp": "You can insert links: <a href='…' target='_blank'>…</a>",
+            "button": "Button",
+            "save": "Save",
+            "saved": "Text saved",
+            "loadError": "Failed to load settings"
+        },
         "mup": {
             "title": "Letter to Serbian MUP",
             "open": "Notify MUP",
@@ -1499,6 +1513,7 @@
         "account-settings": "Account settings",
         "activity": "Chronicle",
         "maintenance": "Portal closure",
+        "applicationJoin": "Join page text",
         "resources": "Our resources",
         "support": "Contact support",
         "leave": "Leave",
