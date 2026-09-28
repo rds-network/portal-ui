@@ -111,9 +111,19 @@ export const AccountStatusPage: React.FC = () => {
                     </Text>
                 </Text>
                 <Text size="sm" c="dimmed">
-                    <FormattedMessage
-                        id={item.requestedActive ? "pages.account-status.activate" : "pages.account-status.deactivate"}
-                    />
+                    <Text
+                        span
+                        fw={700}
+                        c={item.requestedActive ? "green.7" : "red.7"}
+                    >
+                        <FormattedMessage
+                            id={
+                                item.requestedActive
+                                    ? "pages.account-status.activate"
+                                    : "pages.account-status.deactivate"
+                            }
+                        />
+                    </Text>
                     {" · "}
                     <FormattedMessage id="pages.account-status.requestedBy" values={{ name: item.createdBy }} />
                     {" · "}
@@ -195,9 +205,15 @@ export const AccountStatusPage: React.FC = () => {
                     </Text>
                 </Text>
                 <Text size="sm" c="dimmed">
-                    <FormattedMessage
-                        id={item.activeTo ? "pages.account-status.becameActive" : "pages.account-status.becameInactive"}
-                    />
+                    <Text span fw={700} c={item.activeTo ? "green.7" : "red.7"}>
+                        <FormattedMessage
+                            id={
+                                item.activeTo
+                                    ? "pages.account-status.becameActive"
+                                    : "pages.account-status.becameInactive"
+                            }
+                        />
+                    </Text>
                     {" · "}
                     <FormattedMessage id={`pages.account-status.source.${item.source}`} />
                     {item.actorUsername ? ` · ${item.actorUsername}` : ""}

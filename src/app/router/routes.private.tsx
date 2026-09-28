@@ -21,6 +21,7 @@ const SupportPage = lazy(() => import("src/pages/support/SupportPage"))
 const AnnouncementsAdminPage = lazy(() => import("src/pages/announcements/AnnouncementsAdminPage"))
 const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
 const MessagesPage = lazy(() => import("src/pages/inbox/MessagesPage"))
+const ChatPage = lazy(() => import("src/pages/chat/ChatPage"))
 const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPage"))
 const DissolutionPage = lazy(() => import("src/pages/dissolution/DissolutionPage"))
 const ResourcesPage = lazy(() => import("src/pages/resources/ResourcesPage"))
@@ -121,6 +122,10 @@ export const routes: RouteProps[] = [
     {
         path: "/messages",
         element: <MessagesPage />,
+    },
+    {
+        path: "/chat",
+        element: <ChatPage />,
     },
     {
         path: "/reports/overdue",

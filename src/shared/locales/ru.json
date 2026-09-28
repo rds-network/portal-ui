@@ -306,6 +306,30 @@
                 "DONE": "Сделано"
             }
         },
+        "chat": {
+            "title": "Чат",
+            "empty": "Напишите первое сообщение",
+            "loading": "Загрузка…",
+            "send": "Отправить",
+            "sendError": "Не удалось отправить сообщение",
+            "placeholder": "Ваше сообщение…",
+            "members": "Участники",
+            "hideMembers": "Скрыть список",
+            "showMembers": "Участники",
+            "noMembers": "Никого нет",
+            "badgeGeneral": "Общий",
+            "badgeProgram": "Программа",
+            "generalHint": "Для всех активных волонтёров офиса.",
+            "programHint": "Участники программы — по основной или дополнительной программе.",
+            "allRoomsHint": "Все чаты",
+            "createProgram": "Создать чат программы",
+            "create": "Создать",
+            "created": "Чат программы создан",
+            "createError": "Не удалось создать чат",
+            "program": "Программа",
+            "programPlaceholder": "Выберите программу",
+            "noProgramsLeft": "Для всех программ уже есть чаты"
+        },
         "messages": {
             "title": "Сообщения",
             "empty": "Пока нет сообщений",
@@ -1469,7 +1493,8 @@
         "resources": "Наши ресурсы",
         "support": "Написать в поддержку",
         "leave": "Отпуск",
-        "dissolutionRequests": "Заявление на расторжение"
+        "dissolutionRequests": "Заявление на расторжение",
+        "chat": "Чат"
     },
     "impersonation": {
         "banner": "Вы смотрите как {name}",

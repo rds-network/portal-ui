@@ -306,6 +306,30 @@
                 "DONE": "Urađeno"
             }
         },
+        "chat": {
+            "title": "Ćaskanje",
+            "empty": "Napišite prvu poruku",
+            "loading": "Učitavanje…",
+            "send": "Pošalji",
+            "sendError": "Nije moguće poslati poruku",
+            "placeholder": "Vaša poruka…",
+            "members": "Učesnici",
+            "hideMembers": "Sakrij listu",
+            "showMembers": "Učesnici",
+            "noMembers": "Nema nikoga",
+            "badgeGeneral": "Opšti",
+            "badgeProgram": "Program",
+            "generalHint": "Za sve aktivne volontere kancelarije.",
+            "programHint": "Učesnici programa — po osnovnom ili dodatnom programu.",
+            "allRoomsHint": "Svi četovi",
+            "createProgram": "Napravi čet programa",
+            "create": "Napravi",
+            "created": "Čet programa je napravljen",
+            "createError": "Nije moguće napraviti čet",
+            "program": "Program",
+            "programPlaceholder": "Izaberite program",
+            "noProgramsLeft": "Za sve programe već postoje četovi"
+        },
         "messages": {
             "title": "Poruke",
             "empty": "Još nema poruka",
@@ -1469,7 +1493,8 @@
         "resources": "Naši resursi",
         "support": "Kontaktirajte podršku",
         "leave": "Odmor",
-        "dissolutionRequests": "Zahtev za raskid"
+        "dissolutionRequests": "Zahtev za raskid",
+        "chat": "Ćaskanje"
     },
     "impersonation": {
         "banner": "Gledate kao {name}",

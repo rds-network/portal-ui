@@ -306,6 +306,30 @@
                 "DONE": "Done"
             }
         },
+        "chat": {
+            "title": "Chat",
+            "empty": "Write the first message",
+            "loading": "Loading…",
+            "send": "Send",
+            "sendError": "Could not send the message",
+            "placeholder": "Your message…",
+            "members": "Members",
+            "hideMembers": "Hide list",
+            "showMembers": "Members",
+            "noMembers": "No one here",
+            "badgeGeneral": "General",
+            "badgeProgram": "Program",
+            "generalHint": "For all active office volunteers.",
+            "programHint": "Program members by primary or secondary program.",
+            "allRoomsHint": "All chats",
+            "createProgram": "Create program chat",
+            "create": "Create",
+            "created": "Program chat created",
+            "createError": "Could not create the chat",
+            "program": "Program",
+            "programPlaceholder": "Select a program",
+            "noProgramsLeft": "Every program already has a chat"
+        },
         "messages": {
             "title": "Messages",
             "empty": "No messages yet",
@@ -1469,7 +1493,8 @@
         "resources": "Our resources",
         "support": "Contact support",
         "leave": "Leave",
-        "dissolutionRequests": "Termination request"
+        "dissolutionRequests": "Termination request",
+        "chat": "Chat"
     },
     "impersonation": {
         "banner": "You are viewing as {name}",

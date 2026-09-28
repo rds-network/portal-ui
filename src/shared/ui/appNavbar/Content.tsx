@@ -23,6 +23,7 @@ import {
     IconShieldCheck,
     IconUserCheck,
     IconDoorOff,
+    IconMessages,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -56,6 +57,11 @@ export const Content: NavSection[] = [
                 icon: IconBell,
                 link: "/messages",
                 showUnread: true,
+            },
+            {
+                label: "navbar.chat",
+                icon: IconMessages,
+                link: "/chat",
             },
             {
                 label: "navbar.leave",
