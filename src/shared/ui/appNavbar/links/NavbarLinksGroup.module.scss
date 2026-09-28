@@ -164,6 +164,31 @@
 
 
 
+.badgePulse {
+
+    animation: chatPulse 1s ease-in-out infinite;
+
+}
+
+
+
+@keyframes chatPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.55;
+        transform: scale(1.08);
+    }
+
+}
+
+
+
 .itemFlat .badge {
 
     margin-left: 2px;

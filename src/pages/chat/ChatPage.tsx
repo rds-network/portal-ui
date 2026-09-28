@@ -1,6 +1,6 @@
 import { Badge, Button, Flex, Select, Text, Textarea, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { IconCamera, IconClipboard, IconMessages, IconSend } from "@tabler/icons-react"
+import { IconCamera, IconClipboard, IconMessages, IconMoodSmile, IconSend } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useEffect, useMemo, useRef, useState } from "react"
@@ -17,6 +17,7 @@ import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import classes from "./ChatPage.module.scss"
+import { KOLOBOK_SMILES, kolobokAssetUrl, parseChatBody } from "./kolobok"
 
 const POLL_MS = 4000
 const MEMBERS_POLL_MS = 15000
@@ -57,25 +58,29 @@ const writeSoundEnabled = (on: boolean) => {
     }
 }
 
-const mentionRegex = /@([^\s@]+(?:\s+[^\s@]+){0,4})/g
-
 const renderBody = (body: string) => {
     if (!body) return null
-    const nodes: React.ReactNode[] = []
-    let last = 0
-    let match: RegExpExecArray | null
-    mentionRegex.lastIndex = 0
-    while ((match = mentionRegex.exec(body)) !== null) {
-        if (match.index > last) nodes.push(body.slice(last, match.index))
-        nodes.push(
-            <span key={`${match.index}-${match[0]}`} className={classes.mention}>
-                {match[0]}
-            </span>
-        )
-        last = match.index + match[0].length
-    }
-    if (last < body.length) nodes.push(body.slice(last))
-    return nodes
+    return parseChatBody(body).map((part, i) => {
+        if (part.type === "smile") {
+            return (
+                <img
+                    key={`s-${i}-${part.code}`}
+                    className={classes.smile}
+                    src={part.src}
+                    alt={part.alt}
+                    title={part.code}
+                />
+            )
+        }
+        if (part.type === "mention") {
+            return (
+                <span key={`m-${i}`} className={classes.mention}>
+                    {part.value}
+                </span>
+            )
+        }
+        return <React.Fragment key={`t-${i}`}>{part.value}</React.Fragment>
+    })
 }
 
 const activeMention = (draft: string, caret: number) => {
@@ -101,6 +106,7 @@ export const ChatPage: React.FC = () => {
     const [uploading, setUploading] = useState(false)
     const [soundOn, setSoundOn] = useState(readSoundEnabled)
     const [caret, setCaret] = useState(0)
+    const [smilesOpen, setSmilesOpen] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const fileRef = useRef<HTMLInputElement>(null)
@@ -108,6 +114,7 @@ export const ChatPage: React.FC = () => {
     const lastSoundId = useRef<string | null>(null)
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const soundUnlocked = useRef(false)
+    const markedReadFor = useRef<string | null>(null)
 
     setDocumentTitleByLocale("pages.chat.title")
 
@@ -189,7 +196,22 @@ export const ChatPage: React.FC = () => {
 
     useEffect(() => {
         lastSoundId.current = null
+        markedReadFor.current = null
+        setSmilesOpen(false)
     }, [roomId])
+
+    useEffect(() => {
+        if (!roomId || messagesLoading) return
+        if (markedReadFor.current === roomId) return
+        markedReadFor.current = roomId
+        ChatApiService.markRead(roomId)
+            .then(() => {
+                queryClient.invalidateQueries({ queryKey: ["chat-unread"] })
+            })
+            .catch(() => {
+                markedReadFor.current = null
+            })
+    }, [roomId, messagesLoading, messages, queryClient])
 
     useEffect(() => {
         if (!messages.length) return
@@ -202,7 +224,12 @@ export const ChatPage: React.FC = () => {
         if (newest.id === lastSoundId.current) return
         lastSoundId.current = newest.id
         if (!newest.mine && soundOn) playSound()
-    }, [messages, soundOn])
+        if (!newest.mine) {
+            ChatApiService.markRead(roomId!).then(() => {
+                queryClient.invalidateQueries({ queryKey: ["chat-unread"] })
+            }).catch(() => undefined)
+        }
+    }, [messages, soundOn, roomId, queryClient])
 
     useEffect(() => {
         const tick = () => {
@@ -310,6 +337,22 @@ export const ChatPage: React.FC = () => {
         setDraft(next)
         setCaret(next.length)
         requestAnimationFrame(() => textareaRef.current?.focus())
+    }
+
+    const insertSmile = (code: string) => {
+        const before = draft.slice(0, caret)
+        const after = draft.slice(caret)
+        const next = before + code + after
+        const nextCaret = before.length + code.length
+        setDraft(next)
+        setCaret(nextCaret)
+        setSmilesOpen(false)
+        requestAnimationFrame(() => {
+            const el = textareaRef.current
+            if (!el) return
+            el.focus()
+            el.setSelectionRange(nextCaret, nextCaret)
+        })
     }
 
     const pasteFromClipboard = async () => {
@@ -618,6 +661,38 @@ export const ChatPage: React.FC = () => {
                             >
                                 <IconCamera size={18} stroke={1.7} />
                             </button>
+                            <div className={classes.smileWrap}>
+                                <button
+                                    type="button"
+                                    className={`${classes.icoBtn} ${smilesOpen ? classes.icoBtnActive : ""}`}
+                                    title={intl.formatMessage({ id: "pages.chat.smiles" })}
+                                    disabled={!roomId || sending || uploading}
+                                    onClick={() => setSmilesOpen((v) => !v)}
+                                >
+                                    <IconMoodSmile size={18} stroke={1.7} />
+                                </button>
+                                {smilesOpen && (
+                                    <div className={classes.smilePanel} role="listbox">
+                                        {KOLOBOK_SMILES.map((s) => (
+                                            <button
+                                                key={s.id}
+                                                type="button"
+                                                className={classes.smilePick}
+                                                title={`${s.label} (${s.code})`}
+                                                onMouseDown={(e) => {
+                                                    e.preventDefault()
+                                                    insertSmile(s.code)
+                                                }}
+                                            >
+                                                <img
+                                                    src={kolobokAssetUrl(s.file)}
+                                                    alt={s.label}
+                                                />
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             <button
                                 type="button"
                                 className={classes.pasteBtn}

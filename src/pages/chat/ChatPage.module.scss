@@ -242,6 +242,64 @@
     color: #15803d;
 }
 
+.smile {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    vertical-align: -5px;
+    margin: 0 1px;
+}
+
+.smileWrap {
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.icoBtnActive {
+    border-color: #fbbf24;
+    background: #fffbeb;
+}
+
+.smilePanel {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 6px);
+    z-index: 30;
+    width: min(320px, 70vw);
+    max-height: 220px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+    padding: 8px;
+    background: light-dark(#fff, var(--mantine-color-dark-5));
+    border: 1px solid light-dark(#cbd5e1, var(--mantine-color-dark-3));
+    border-radius: 12px;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.smilePick {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background: light-dark(#f1f5f9, var(--mantine-color-dark-4));
+    }
+
+    img {
+        width: 28px;
+        height: 28px;
+        object-fit: contain;
+    }
+}
+
 .msgImage {
     display: block;
     max-width: min(100%, 320px);

@@ -337,7 +337,8 @@
             "imageUploadError": "Nije moguće otpremiti sliku",
             "soundOn": "ICQ zvuk",
             "soundOff": "ICQ zvuk",
-            "mentionHint": "Pomeni"
+            "mentionHint": "Pomeni",
+            "smiles": "Smajliji"
         },
         "messages": {
             "title": "Poruke",

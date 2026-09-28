@@ -8,6 +8,7 @@ import { hasPermission } from "src/shared/user/roles"
 import { useQuery } from "@tanstack/react-query"
 import { Link, useLocation } from "react-router"
 import { ApplicationBadgeApi } from "src/shared/api/applications/ApplicationBadgeApi"
+import { ChatApiService } from "src/shared/api/ChatApiService"
 import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
@@ -20,6 +21,7 @@ export function NavItem({
     label,
     link,
     showUnread,
+    showChatUnread,
     showApplications,
     showControlled,
     curatorInbox,
@@ -35,6 +37,13 @@ export function NavItem({
         queryFn: () => InboxApiService.unreadCount(),
         enabled: !!showUnread,
         refetchInterval: 60_000,
+    })
+    const { data: chatUnread = 0 } = useQuery({
+        queryKey: ["chat-unread"],
+        queryFn: () => ChatApiService.unreadCount(),
+        enabled: !!showChatUnread,
+        refetchInterval: 8_000,
+        refetchOnWindowFocus: true,
     })
     const { data: openApplications = 0 } = useQuery({
         queryKey: ["applications-open-count"],
@@ -75,6 +84,11 @@ export function NavItem({
         (showUnread && unread > 0 && (
             <Badge size="xs" color="blue" className={classes.badge}>
                 {unread > 99 ? "99+" : unread}
+            </Badge>
+        )) ||
+        (showChatUnread && chatUnread > 0 && (
+            <Badge size="xs" color="orange" className={`${classes.badge} ${classes.badgePulse}`}>
+                {chatUnread > 99 ? "99+" : chatUnread}
             </Badge>
         )) ||
         (showApplications && openApplications > 0 && (

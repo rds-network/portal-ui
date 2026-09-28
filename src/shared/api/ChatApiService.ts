@@ -83,4 +83,14 @@ export const ChatApiService = {
     async presence(): Promise<void> {
         await RequestHttp.post("/chat/presence", null, { validateStatus: alive })
     },
+
+    async unreadCount(): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/chat/unread", { validateStatus: alive })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
+    },
+
+    async markRead(roomId: string): Promise<void> {
+        await RequestHttp.post(`/chat/rooms/${roomId}/read`, null, { validateStatus: alive })
+    },
 }

@@ -63,6 +63,7 @@ export const Content: NavSection[] = [
                 label: "navbar.chat",
                 icon: IconMessages,
                 link: "/chat",
+                showChatUnread: true,
             },
             {
                 label: "navbar.leave",

@@ -337,7 +337,8 @@
             "imageUploadError": "Не удалось загрузить изображение",
             "soundOn": "Аська",
             "soundOff": "Аська",
-            "mentionHint": "Упомянуть"
+            "mentionHint": "Упомянуть",
+            "smiles": "Смайлы"
         },
         "messages": {
             "title": "Сообщения",

@@ -337,7 +337,8 @@
             "imageUploadError": "Could not upload the image",
             "soundOn": "ICQ sound",
             "soundOff": "ICQ sound",
-            "mentionHint": "Mention"
+            "mentionHint": "Mention",
+            "smiles": "Smilies"
         },
         "messages": {
             "title": "Messages",
