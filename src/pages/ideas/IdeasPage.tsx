@@ -14,7 +14,7 @@ import {
 import { useForm } from "@mantine/form"
 import { useDebouncedValue } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import { IconBulb, IconSearch } from "@tabler/icons-react"
+import { IconBulb, IconHandStop, IconSearch, IconUsers } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -33,6 +33,12 @@ import { CitySelect } from "src/shared/ui/citySelect/CitySelect"
 import classes from "./IdeasPage.module.scss"
 
 const TABS: TalentPostType[] = ["NEED_PEOPLE", "CAN_HELP", "PROJECT_IDEA"]
+
+const TAB_ICONS: Record<TalentPostType, React.FC<{ size?: number; stroke?: number }>> = {
+    NEED_PEOPLE: IconUsers,
+    CAN_HELP: IconHandStop,
+    PROJECT_IDEA: IconBulb,
+}
 
 const TYPE_BADGE: Record<TalentPostType, string> = {
     NEED_PEOPLE: "blue",
@@ -92,7 +98,7 @@ export const IdeasPage: React.FC = () => {
         setSearchParams(next, { replace: true })
     }, [tab, debouncedQ, city, programCode]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { data: postsPage, isLoading } = useQuery({
+    const { data: postsPage, isLoading, isError: postsError } = useQuery({
         queryKey: ["talent-posts", tab, debouncedQ, city, programCode],
         queryFn: () =>
             IdeasApiService.listPosts({
@@ -169,9 +175,13 @@ export const IdeasPage: React.FC = () => {
                 programCode: createForm.values.programCode,
                 skills: createForm.values.skills,
             }),
-        onSuccess: () => {
+        onSuccess: (created) => {
             createForm.reset()
             setCreateOpen(false)
+            setQ("")
+            setCity("")
+            setProgramCode(null)
+            setTab(created.type)
             invalidate()
             notifications.show(
                 SuccessNotification(
@@ -390,16 +400,23 @@ export const IdeasPage: React.FC = () => {
 
                     <div className={classes.panel}>
                         <div className={classes.tabs}>
-                            {TABS.map((type) => (
-                                <button
-                                    key={type}
-                                    type="button"
-                                    className={`${classes.tab} ${tab === type ? classes.tabActive : ""}`}
-                                    onClick={() => setTab(type)}
-                                >
-                                    <FormattedMessage id={`pages.ideas.tabs.${type}`} />
-                                </button>
-                            ))}
+                            {TABS.map((type) => {
+                                const Icon = TAB_ICONS[type]
+                                const active = tab === type
+                                return (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        className={`${classes.tab} ${active ? classes.tabActive : ""} ${
+                                            type === "CAN_HELP" ? classes.tabSoft : ""
+                                        } ${type === "PROJECT_IDEA" ? classes.tabLink : ""}`}
+                                        onClick={() => setTab(type)}
+                                    >
+                                        <Icon size={16} stroke={1.7} />
+                                        <FormattedMessage id={`pages.ideas.tabs.${type}`} />
+                                    </button>
+                                )
+                            })}
                         </div>
                         <div className={classes.filters}>
                             <TextInput
@@ -426,7 +443,12 @@ export const IdeasPage: React.FC = () => {
                                 <FormattedMessage id="pages.ideas.loading" />
                             </Text>
                         )}
-                        {!isLoading && posts.length === 0 && (
+                        {postsError && !isLoading && (
+                            <div className={classes.empty}>
+                                <FormattedMessage id="pages.ideas.loadError" />
+                            </div>
+                        )}
+                        {!isLoading && !postsError && posts.length === 0 && (
                             <div className={classes.empty}>
                                 <FormattedMessage id="pages.ideas.empty" />
                             </div>

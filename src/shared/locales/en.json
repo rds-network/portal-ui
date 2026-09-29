@@ -345,6 +345,7 @@
             "description": "Volunteer board: find people, offer help, and gather teams around project ideas.",
             "publish": "Post",
             "loading": "Loading…",
+            "loadError": "Could not load posts. Please refresh the page.",
             "empty": "No posts in this tab yet",
             "searchPlaceholder": "Search text and skills",
             "programPlaceholder": "Program",
@@ -379,13 +380,13 @@
             "cancel": "Cancel",
             "responseCount": "{count, plural, one {# response} other {# responses}}",
             "tabs": {
-                "NEED_PEOPLE": "Looking for people",
-                "CAN_HELP": "Can help",
+                "NEED_PEOPLE": "People needed",
+                "CAN_HELP": "I can help",
                 "PROJECT_IDEA": "Project ideas"
             },
             "types": {
-                "NEED_PEOPLE": "Looking for people",
-                "CAN_HELP": "Can help",
+                "NEED_PEOPLE": "People needed",
+                "CAN_HELP": "I can help",
                 "PROJECT_IDEA": "Project idea"
             },
             "status": {

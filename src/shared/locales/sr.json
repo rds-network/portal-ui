@@ -345,6 +345,7 @@
             "description": "Tabla volontera: traže ljude, nude pomoć i okupljaju timove oko ideja.",
             "publish": "Objavi",
             "loading": "Učitavanje…",
+            "loadError": "Nije moguće učitati objave. Osvežite stranicu.",
             "empty": "Još nema objava u ovoj kartici",
             "searchPlaceholder": "Pretraga teksta i veština",
             "programPlaceholder": "Program",

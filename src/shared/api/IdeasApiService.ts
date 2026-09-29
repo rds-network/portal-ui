@@ -68,21 +68,28 @@ export const IdeasApiService = {
         page?: number
         size?: number
     }): Promise<TalentPostsPage> {
-        const response = await RequestHttp.get<TalentPostsPage>("/talent/posts", {
-            params: {
-                type: params.type,
-                q: params.q || undefined,
-                city: params.city || undefined,
-                programCode: params.programCode || undefined,
-                page: params.page ?? 0,
-                size: params.size ?? 20,
-            },
-            validateStatus: alive,
-        })
-        if (response.status !== 200) {
-            return { content: [], totalElements: 0, totalPages: 0, number: 0, size: params.size ?? 20 }
+        const response = await RequestHttp.get<TalentPostsPage & { content?: TalentPostDto[] }>(
+            "/talent/posts",
+            {
+                params: {
+                    type: params.type,
+                    q: params.q || undefined,
+                    city: params.city || undefined,
+                    programCode: params.programCode || undefined,
+                    page: params.page ?? 0,
+                    size: params.size ?? 20,
+                },
+            }
+        )
+        const data = response.data
+        const content = Array.isArray(data?.content) ? data.content : []
+        return {
+            content,
+            totalElements: data?.totalElements ?? content.length,
+            totalPages: data?.totalPages ?? 1,
+            number: data?.number ?? 0,
+            size: data?.size ?? params.size ?? 20,
         }
-        return response.data
     },
 
     async createPost(payload: TalentPostCreateRequest): Promise<TalentPostDto> {
