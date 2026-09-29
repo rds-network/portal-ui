@@ -376,7 +376,18 @@
             "respondMessage": "Kratka poruka",
             "responded": "Odgovor je poslat",
             "respondError": "Nije moguće poslati odgovor",
-            "close": "Zatvori",
+            "close": "Deaktiviraj",
+            "closeConfirm": "Skinuti objavu sa table? Ostaće u istoriji „Moje“.",
+            "closed": "Objava je deaktivirana",
+            "closeError": "Nije moguće deaktivirati objavu",
+            "reopen": "Vrati na tablu",
+            "reopened": "Objava je ponovo otvorena",
+            "reopenError": "Nije moguće vratiti objavu",
+            "myPosts": "Moje",
+            "myPostsHint": "Vaše objave — aktivne i deaktivirane",
+            "myPostsEmpty": "Još nemate objava",
+            "viewResponses": "Odgovori",
+            "responsesEmpty": "Još nema odgovora",
             "cancel": "Otkaži",
             "responseCount": "{count, plural, one {# odgovor} few {# odgovora} other {# odgovora}}",
             "tabs": {
@@ -391,7 +402,7 @@
             },
             "status": {
                 "OPEN": "Otvoreno",
-                "CLOSED": "Zatvoreno"
+                "CLOSED": "Deaktivirano"
             }
         },
         "messages": {

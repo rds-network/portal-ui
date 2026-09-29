@@ -14,7 +14,7 @@ import {
 import { useForm } from "@mantine/form"
 import { useDebouncedValue } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import { IconBulb, IconHandStop, IconSearch, IconUsers, type Icon } from "@tabler/icons-react"
+import { IconBulb, IconHandStop, IconHistory, IconSearch, IconUsers, type Icon } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -61,6 +61,7 @@ export const IdeasPage: React.FC = () => {
     const [tab, setTab] = useState<TalentPostType>(
         TABS.includes(initialType) ? initialType : "NEED_PEOPLE"
     )
+    const [showMine, setShowMine] = useState(searchParams.get("mine") === "1")
     const [q, setQ] = useState(searchParams.get("q") || "")
     const [city, setCity] = useState(searchParams.get("city") || "")
     const [programCode, setProgramCode] = useState<string | null>(searchParams.get("programCode"))
@@ -69,6 +70,8 @@ export const IdeasPage: React.FC = () => {
     const [createOpen, setCreateOpen] = useState(false)
     const [respondPost, setRespondPost] = useState<TalentPostDto | null>(null)
     const [respondMessage, setRespondMessage] = useState("")
+    const [closeTarget, setCloseTarget] = useState<TalentPostDto | null>(null)
+    const [responsesPost, setResponsesPost] = useState<TalentPostDto | null>(null)
     const [skillsDraft, setSkillsDraft] = useState<string[]>([])
     const [skillsDirty, setSkillsDirty] = useState(false)
 
@@ -95,16 +98,20 @@ export const IdeasPage: React.FC = () => {
 
     useEffect(() => {
         const next = new URLSearchParams()
-        next.set("type", tab)
-        if (debouncedQ.trim()) next.set("q", debouncedQ.trim())
-        if (city.trim()) next.set("city", city.trim())
-        if (programCode) next.set("programCode", programCode)
+        if (showMine) {
+            next.set("mine", "1")
+        } else {
+            next.set("type", tab)
+            if (debouncedQ.trim()) next.set("q", debouncedQ.trim())
+            if (city.trim()) next.set("city", city.trim())
+            if (programCode) next.set("programCode", programCode)
+        }
         const post = searchParams.get("post")
         if (post) next.set("post", post)
         setSearchParams(next, { replace: true })
-    }, [tab, debouncedQ, city, programCode]) // eslint-disable-line react-hooks/exhaustive-deps
+    }, [tab, debouncedQ, city, programCode, showMine]) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const { data: postsPage, isLoading, isError: postsError } = useQuery({
+    const { data: postsPage, isLoading: boardLoading, isError: boardError } = useQuery({
         queryKey: ["talent-posts", tab, debouncedQ, city, programCode],
         queryFn: () =>
             IdeasApiService.listPosts({
@@ -115,18 +122,32 @@ export const IdeasPage: React.FC = () => {
                 page: 0,
                 size: 40,
             }),
-        enabled: !!user,
+        enabled: !!user && !showMine,
     })
 
-    const posts = postsPage?.content ?? []
+    const { data: myPostsPage, isLoading: mineLoading, isError: mineError } = useQuery({
+        queryKey: ["talent-my-posts"],
+        queryFn: () => IdeasApiService.listMyPosts({ page: 0, size: 50 }),
+        enabled: !!user && showMine,
+    })
+
+    const isLoading = showMine ? mineLoading : boardLoading
+    const postsError = showMine ? mineError : boardError
+    const posts = (showMine ? myPostsPage?.content : postsPage?.content) ?? []
 
     const { data: ideaPosts } = useQuery({
         queryKey: ["talent-posts", "featured-idea"],
         queryFn: () => IdeasApiService.listPosts({ type: "PROJECT_IDEA", page: 0, size: 1 }),
-        enabled: !!user,
+        enabled: !!user && !showMine,
         staleTime: 60_000,
     })
     const featured = ideaPosts?.content?.[0] ?? null
+
+    const { data: responseList = [], isLoading: responsesLoading } = useQuery({
+        queryKey: ["talent-responses", responsesPost?.id],
+        queryFn: () => IdeasApiService.listResponses(responsesPost!.id),
+        enabled: !!responsesPost,
+    })
 
     const { data: mySkills = [] } = useQuery({
         queryKey: ["talent-skills", "me"],
@@ -152,8 +173,9 @@ export const IdeasPage: React.FC = () => {
             ;(p.responderUsernames || []).forEach((u) => set.add(u))
         })
         if (featured) set.add(featured.authorUsername)
+        responseList.forEach((r) => set.add(r.authorUsername))
         return [...set]
-    }, [posts, featured])
+    }, [posts, featured, responseList])
 
     const { data: users = {} } = resolveUsers(avatarLogins)
 
@@ -168,7 +190,9 @@ export const IdeasPage: React.FC = () => {
 
     const invalidate = () => {
         queryClient.invalidateQueries({ queryKey: ["talent-posts"] })
+        queryClient.invalidateQueries({ queryKey: ["talent-my-posts"] })
         queryClient.invalidateQueries({ queryKey: ["talent-skills"] })
+        queryClient.invalidateQueries({ queryKey: ["ideas-unread"] })
     }
 
     const { mutate: createPost, isPending: creating } = useMutation({
@@ -187,6 +211,7 @@ export const IdeasPage: React.FC = () => {
             setQ("")
             setCity("")
             setProgramCode(null)
+            setShowMine(false)
             setTab(created.type)
             invalidate()
             notifications.show(
@@ -257,7 +282,46 @@ export const IdeasPage: React.FC = () => {
 
     const { mutate: closePost, isPending: closing } = useMutation({
         mutationFn: (id: string) => IdeasApiService.closePost(id),
-        onSuccess: () => invalidate(),
+        onSuccess: () => {
+            setCloseTarget(null)
+            invalidate()
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.ideas.closed" />
+                    </Text>,
+                    null
+                )
+            )
+            setShowMine(true)
+        },
+        onError: () => {
+            notifications.show({
+                color: "red",
+                message: intl.formatMessage({ id: "pages.ideas.closeError" }),
+            })
+        },
+    })
+
+    const { mutate: reopenPost, isPending: reopening } = useMutation({
+        mutationFn: (id: string) => IdeasApiService.reopenPost(id),
+        onSuccess: () => {
+            invalidate()
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.ideas.reopened" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+        onError: () => {
+            notifications.show({
+                color: "red",
+                message: intl.formatMessage({ id: "pages.ideas.reopenError" }),
+            })
+        },
     })
 
     const openCreate = () => {
@@ -328,15 +392,34 @@ export const IdeasPage: React.FC = () => {
                         </Text>
                     </div>
                     <Flex gap={8} wrap="wrap">
+                        {post.mine && post.responseCount > 0 && (
+                            <Button
+                                variant="subtle"
+                                size="compact-sm"
+                                onClick={() => setResponsesPost(post)}
+                            >
+                                <FormattedMessage id="pages.ideas.viewResponses" />
+                            </Button>
+                        )}
                         {post.mine && post.status === "OPEN" && (
                             <Button
                                 variant="light"
                                 color="gray"
                                 size="compact-sm"
-                                loading={closing}
-                                onClick={() => closePost(post.id)}
+                                onClick={() => setCloseTarget(post)}
                             >
                                 <FormattedMessage id="pages.ideas.close" />
+                            </Button>
+                        )}
+                        {post.mine && post.status === "CLOSED" && (
+                            <Button
+                                variant="light"
+                                color="teal"
+                                size="compact-sm"
+                                loading={reopening}
+                                onClick={() => reopenPost(post.id)}
+                            >
+                                <FormattedMessage id="pages.ideas.reopen" />
                             </Button>
                         )}
                         {!post.mine && post.status === "OPEN" && (
@@ -384,7 +467,7 @@ export const IdeasPage: React.FC = () => {
 
             <div className={classes.layout}>
                 <div className={classes.main}>
-                    {featured && tab !== "PROJECT_IDEA" && (
+                    {featured && !showMine && tab !== "PROJECT_IDEA" && (
                         <div className={classes.featured}>
                             <Text size="xs" tt="uppercase" fw={700} c="dimmed">
                                 <FormattedMessage id="pages.ideas.featured" />
@@ -397,7 +480,10 @@ export const IdeasPage: React.FC = () => {
                                 variant="subtle"
                                 size="compact-sm"
                                 w="fit-content"
-                                onClick={() => setTab("PROJECT_IDEA")}
+                                onClick={() => {
+                                    setShowMine(false)
+                                    setTab("PROJECT_IDEA")
+                                }}
                             >
                                 <FormattedMessage id="pages.ideas.openIdeas" />
                             </Button>
@@ -408,7 +494,7 @@ export const IdeasPage: React.FC = () => {
                         <div className={classes.tabs}>
                             {TABS.map((type) => {
                                 const Icon = TAB_ICONS[type]
-                                const active = tab === type
+                                const active = !showMine && tab === type
                                 return (
                                     <button
                                         key={type}
@@ -416,31 +502,50 @@ export const IdeasPage: React.FC = () => {
                                         className={`${classes.tab} ${active ? classes.tabActive : ""} ${
                                             type === "CAN_HELP" ? classes.tabSoft : ""
                                         } ${type === "PROJECT_IDEA" ? classes.tabLink : ""}`}
-                                        onClick={() => setTab(type)}
+                                        onClick={() => {
+                                            setShowMine(false)
+                                            setTab(type)
+                                        }}
                                     >
                                         <Icon size={16} stroke={1.7} />
                                         <FormattedMessage id={`pages.ideas.tabs.${type}`} />
                                     </button>
                                 )
                             })}
+                            <button
+                                type="button"
+                                className={`${classes.tab} ${classes.tabSoft} ${
+                                    showMine ? classes.tabActive : ""
+                                }`}
+                                onClick={() => setShowMine(true)}
+                            >
+                                <IconHistory size={16} stroke={1.7} />
+                                <FormattedMessage id="pages.ideas.myPosts" />
+                            </button>
                         </div>
-                        <div className={classes.filters}>
-                            <TextInput
-                                leftSection={<IconSearch size={16} />}
-                                placeholder={intl.formatMessage({ id: "pages.ideas.searchPlaceholder" })}
-                                value={q}
-                                onChange={(e) => setQ(e.currentTarget.value)}
-                            />
-                            <CitySelect value={city} onChange={(v) => setCity(v || "")} />
-                            <Select
-                                clearable
-                                searchable
-                                placeholder={intl.formatMessage({ id: "pages.ideas.programPlaceholder" })}
-                                data={programOptions}
-                                value={programCode}
-                                onChange={setProgramCode}
-                            />
-                        </div>
+                        {showMine ? (
+                            <Text size="sm" c="dimmed">
+                                <FormattedMessage id="pages.ideas.myPostsHint" />
+                            </Text>
+                        ) : (
+                            <div className={classes.filters}>
+                                <TextInput
+                                    leftSection={<IconSearch size={16} />}
+                                    placeholder={intl.formatMessage({ id: "pages.ideas.searchPlaceholder" })}
+                                    value={q}
+                                    onChange={(e) => setQ(e.currentTarget.value)}
+                                />
+                                <CitySelect value={city} onChange={(v) => setCity(v || "")} />
+                                <Select
+                                    clearable
+                                    searchable
+                                    placeholder={intl.formatMessage({ id: "pages.ideas.programPlaceholder" })}
+                                    data={programOptions}
+                                    value={programCode}
+                                    onChange={setProgramCode}
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className={classes.cards}>
@@ -456,10 +561,12 @@ export const IdeasPage: React.FC = () => {
                         )}
                         {!isLoading && !postsError && posts.length === 0 && (
                             <div className={classes.empty}>
-                                <FormattedMessage id="pages.ideas.empty" />
+                                <FormattedMessage
+                                    id={showMine ? "pages.ideas.myPostsEmpty" : "pages.ideas.empty"}
+                                />
                             </div>
                         )}
-                        {posts.map(renderCard)}
+                        {!isLoading && !postsError && posts.map(renderCard)}
                     </div>
                 </div>
 
@@ -601,6 +708,75 @@ export const IdeasPage: React.FC = () => {
                             />
                         </Button>
                     </Flex>
+                </div>
+            </Modal>
+
+            <Modal
+                opened={!!closeTarget}
+                onClose={() => setCloseTarget(null)}
+                title={intl.formatMessage({ id: "pages.ideas.close" })}
+                centered
+            >
+                <div className={classes.formStack}>
+                    {closeTarget && (
+                        <Text size="sm" fw={600}>
+                            {closeTarget.title}
+                        </Text>
+                    )}
+                    <Text size="sm" c="dimmed">
+                        <FormattedMessage id="pages.ideas.closeConfirm" />
+                    </Text>
+                    <Flex justify="flex-end" gap="sm">
+                        <Button variant="default" onClick={() => setCloseTarget(null)}>
+                            <FormattedMessage id="pages.ideas.cancel" />
+                        </Button>
+                        <Button
+                            color="gray"
+                            loading={closing}
+                            onClick={() => closeTarget && closePost(closeTarget.id)}
+                        >
+                            <FormattedMessage id="pages.ideas.close" />
+                        </Button>
+                    </Flex>
+                </div>
+            </Modal>
+
+            <Modal
+                opened={!!responsesPost}
+                onClose={() => setResponsesPost(null)}
+                title={intl.formatMessage({ id: "pages.ideas.viewResponses" })}
+                centered
+                size="lg"
+            >
+                <div className={classes.formStack}>
+                    {responsesPost && (
+                        <Text size="sm" c="dimmed">
+                            {responsesPost.title}
+                        </Text>
+                    )}
+                    {responsesLoading && (
+                        <Text size="sm" c="dimmed">
+                            <FormattedMessage id="pages.ideas.loading" />
+                        </Text>
+                    )}
+                    {!responsesLoading && responseList.length === 0 && (
+                        <Text size="sm" c="dimmed">
+                            <FormattedMessage id="pages.ideas.responsesEmpty" />
+                        </Text>
+                    )}
+                    {!responsesLoading &&
+                        responseList.map((r) => (
+                            <div key={r.id} className={classes.responseItem}>
+                                <Text size="sm" fw={650}>
+                                    {users[r.authorUsername]?.fullName ||
+                                        r.authorFullName ||
+                                        r.authorUsername}
+                                </Text>
+                                <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+                                    {r.message}
+                                </Text>
+                            </div>
+                        ))}
                 </div>
             </Modal>
         </div>

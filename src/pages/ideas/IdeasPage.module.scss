@@ -238,3 +238,12 @@
     flex-direction: column;
     gap: 12px;
 }
+
+.responseItem {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: light-dark(#f8fafc, var(--mantine-color-dark-6));
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}

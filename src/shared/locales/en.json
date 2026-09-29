@@ -376,7 +376,18 @@
             "respondMessage": "Short message",
             "responded": "Response sent",
             "respondError": "Could not send the response",
-            "close": "Close",
+            "close": "Deactivate",
+            "closeConfirm": "Take this post off the board? It will stay in My history.",
+            "closed": "Post deactivated",
+            "closeError": "Could not deactivate the post",
+            "reopen": "Restore to board",
+            "reopened": "Post is open again",
+            "reopenError": "Could not restore the post",
+            "myPosts": "Mine",
+            "myPostsHint": "Your posts — active and deactivated",
+            "myPostsEmpty": "You have no posts yet",
+            "viewResponses": "Responses",
+            "responsesEmpty": "No responses yet",
             "cancel": "Cancel",
             "responseCount": "{count, plural, one {# response} other {# responses}}",
             "tabs": {
@@ -391,7 +402,7 @@
             },
             "status": {
                 "OPEN": "Open",
-                "CLOSED": "Closed"
+                "CLOSED": "Deactivated"
             }
         },
         "messages": {

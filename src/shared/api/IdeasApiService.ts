@@ -113,6 +113,41 @@ export const IdeasApiService = {
         return response.data
     },
 
+    async reopenPost(id: string): Promise<TalentPostDto> {
+        const response = await RequestHttp.post<TalentPostDto>(`/talent/posts/${id}/reopen`)
+        return response.data
+    },
+
+    async listMyPosts(params?: {
+        status?: TalentPostStatus
+        page?: number
+        size?: number
+    }): Promise<TalentPostsPage> {
+        const response = await RequestHttp.get<TalentPostsPage & { content?: TalentPostDto[] }>(
+            "/talent/me/posts",
+            {
+                params: {
+                    status: params?.status,
+                    page: params?.page ?? 0,
+                    size: params?.size ?? 40,
+                },
+                validateStatus: alive,
+            }
+        )
+        if (response.status !== 200) {
+            return { content: [], totalElements: 0, totalPages: 0, number: 0, size: params?.size ?? 40 }
+        }
+        const data = response.data
+        const content = Array.isArray(data?.content) ? data.content : []
+        return {
+            content,
+            totalElements: data?.totalElements ?? content.length,
+            totalPages: data?.totalPages ?? 1,
+            number: data?.number ?? 0,
+            size: data?.size ?? params?.size ?? 40,
+        }
+    },
+
     async createResponse(id: string, payload: TalentResponseCreateRequest): Promise<TalentResponseDto> {
         const response = await RequestHttp.post<TalentResponseDto>(`/talent/posts/${id}/responses`, payload)
         return response.data
