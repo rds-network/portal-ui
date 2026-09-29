@@ -138,4 +138,33 @@ export const IdeasApiService = {
         const response = await RequestHttp.put<TalentSkillsDto>("/talent/me/skills", { skills })
         return response.data?.skills ?? []
     },
+
+    /** Nav badge: new open posts by others + responses on my posts since last visit. */
+    async unreadCount(since?: string | null): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/talent/unread-count", {
+            params: since ? { since } : undefined,
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
+    },
+}
+
+const IDEAS_LAST_SEEN_KEY = "portal.ideas.lastSeen"
+
+export const IdeasBadge = {
+    getLastSeen(): string | null {
+        try {
+            return localStorage.getItem(IDEAS_LAST_SEEN_KEY)
+        } catch {
+            return null
+        }
+    },
+    markSeen(at: string = new Date().toISOString()) {
+        try {
+            localStorage.setItem(IDEAS_LAST_SEEN_KEY, at)
+        } catch {
+            /* ignore */
+        }
+    },
 }

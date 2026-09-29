@@ -23,6 +23,7 @@ import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { UserContext } from "src/app/providers/UserContext"
 import {
     IdeasApiService,
+    IdeasBadge,
     TalentPostDto,
     TalentPostType,
 } from "src/shared/api/IdeasApiService"
@@ -72,6 +73,11 @@ export const IdeasPage: React.FC = () => {
     const [skillsDirty, setSkillsDirty] = useState(false)
 
     setDocumentTitleByLocale("pages.ideas.title")
+
+    useEffect(() => {
+        IdeasBadge.markSeen()
+        queryClient.invalidateQueries({ queryKey: ["ideas-unread"] })
+    }, [queryClient])
 
     const createForm = useForm({
         initialValues: {

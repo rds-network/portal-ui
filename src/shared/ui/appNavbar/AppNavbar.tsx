@@ -36,6 +36,7 @@ export interface ItemGroupProps {
     roles?: string[]
     showUnread?: boolean
     showChatUnread?: boolean
+    showIdeasUnread?: boolean
     showApplications?: boolean
     showControlled?: boolean
     showIfCurator?: boolean

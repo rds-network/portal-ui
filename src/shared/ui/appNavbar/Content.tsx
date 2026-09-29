@@ -70,6 +70,7 @@ export const Content: NavSection[] = [
                 label: "navbar.ideas",
                 icon: IconBulb,
                 link: "/ideas",
+                showIdeasUnread: true,
             },
             {
                 label: "navbar.leave",

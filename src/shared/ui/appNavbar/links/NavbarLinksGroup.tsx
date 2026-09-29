@@ -10,6 +10,7 @@ import { Link, useLocation } from "react-router"
 import { ApplicationBadgeApi } from "src/shared/api/applications/ApplicationBadgeApi"
 import { ChatApiService } from "src/shared/api/ChatApiService"
 import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
+import { IdeasApiService, IdeasBadge } from "src/shared/api/IdeasApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { UserAccountApiService } from "src/shared/api/user/UserApiService"
@@ -22,6 +23,7 @@ export function NavItem({
     link,
     showUnread,
     showChatUnread,
+    showIdeasUnread,
     showApplications,
     showControlled,
     curatorInbox,
@@ -43,6 +45,13 @@ export function NavItem({
         queryFn: () => ChatApiService.unreadCount(),
         enabled: !!showChatUnread,
         refetchInterval: 8_000,
+        refetchOnWindowFocus: true,
+    })
+    const { data: ideasUnread = 0 } = useQuery({
+        queryKey: ["ideas-unread"],
+        queryFn: () => IdeasApiService.unreadCount(IdeasBadge.getLastSeen()),
+        enabled: !!showIdeasUnread,
+        refetchInterval: 60_000,
         refetchOnWindowFocus: true,
     })
     const { data: openApplications = 0 } = useQuery({
@@ -89,6 +98,11 @@ export function NavItem({
         (showChatUnread && chatUnread > 0 && (
             <Badge size="xs" color="orange" className={`${classes.badge} ${classes.badgePulse}`}>
                 {chatUnread > 99 ? "99+" : chatUnread}
+            </Badge>
+        )) ||
+        (showIdeasUnread && ideasUnread > 0 && (
+            <Badge size="xs" color="teal" className={`${classes.badge} ${classes.badgePulse}`}>
+                {ideasUnread > 99 ? "99+" : ideasUnread}
             </Badge>
         )) ||
         (showApplications && openApplications > 0 && (
