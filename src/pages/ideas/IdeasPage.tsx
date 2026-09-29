@@ -14,7 +14,7 @@ import {
 import { useForm } from "@mantine/form"
 import { useDebouncedValue } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
-import { IconBulb, IconHandStop, IconSearch, IconUsers } from "@tabler/icons-react"
+import { IconBulb, IconHandStop, IconSearch, IconUsers, type Icon } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -34,7 +34,7 @@ import classes from "./IdeasPage.module.scss"
 
 const TABS: TalentPostType[] = ["NEED_PEOPLE", "CAN_HELP", "PROJECT_IDEA"]
 
-const TAB_ICONS: Record<TalentPostType, React.FC<{ size?: number; stroke?: number }>> = {
+const TAB_ICONS: Record<TalentPostType, Icon> = {
     NEED_PEOPLE: IconUsers,
     CAN_HELP: IconHandStop,
     PROJECT_IDEA: IconBulb,
