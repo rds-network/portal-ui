@@ -340,6 +340,59 @@
             "mentionHint": "Mention",
             "smiles": "Smilies"
         },
+        "ideas": {
+            "title": "Ideas & talents",
+            "description": "Volunteer board: find people, offer help, and gather teams around project ideas.",
+            "publish": "Post",
+            "loading": "Loading…",
+            "empty": "No posts in this tab yet",
+            "searchPlaceholder": "Search text and skills",
+            "programPlaceholder": "Program",
+            "featured": "Latest idea",
+            "openIdeas": "Browse project ideas",
+            "openBoard": "Open board",
+            "myCard": "My card",
+            "skillsLabel": "Skills",
+            "skillsPlaceholder": "Add a skill and press Enter",
+            "saveSkills": "Save skills",
+            "skillsSaved": "Skills saved",
+            "skillsError": "Could not save skills",
+            "openProfile": "Open profile",
+            "createTitle": "New post",
+            "fieldTitle": "Title",
+            "fieldBody": "Description",
+            "fieldCity": "City",
+            "fieldProgram": "Program",
+            "fieldSkills": "Skills and tags",
+            "requiredTitle": "Title is required",
+            "requiredBody": "Description is required",
+            "created": "Post published",
+            "createError": "Could not publish the post",
+            "respond": "Respond",
+            "offerSelf": "Offer help",
+            "alreadyResponded": "Already responded",
+            "respondTitle": "Response",
+            "respondMessage": "Short message",
+            "responded": "Response sent",
+            "respondError": "Could not send the response",
+            "close": "Close",
+            "cancel": "Cancel",
+            "responseCount": "{count, plural, one {# response} other {# responses}}",
+            "tabs": {
+                "NEED_PEOPLE": "Looking for people",
+                "CAN_HELP": "Can help",
+                "PROJECT_IDEA": "Project ideas"
+            },
+            "types": {
+                "NEED_PEOPLE": "Looking for people",
+                "CAN_HELP": "Can help",
+                "PROJECT_IDEA": "Project idea"
+            },
+            "status": {
+                "OPEN": "Open",
+                "CLOSED": "Closed"
+            }
+        },
         "messages": {
             "title": "Messages",
             "empty": "No messages yet",
@@ -1532,7 +1585,8 @@
         "support": "Contact support",
         "leave": "Leave",
         "dissolutionRequests": "Termination request",
-        "chat": "Chat"
+        "chat": "Chat",
+        "ideas": "Ideas & talents"
     },
     "impersonation": {
         "banner": "You are viewing as {name}",

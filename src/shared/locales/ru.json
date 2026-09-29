@@ -340,6 +340,59 @@
             "mentionHint": "Упомянуть",
             "smiles": "Смайлы"
         },
+        "ideas": {
+            "title": "Идеи и таланты",
+            "description": "Доска волонтёров: ищем людей, предлагаем помощь и собираем команды вокруг идей.",
+            "publish": "Разместить",
+            "loading": "Загрузка…",
+            "empty": "Пока нет объявлений в этой вкладке",
+            "searchPlaceholder": "Поиск по тексту и навыкам",
+            "programPlaceholder": "Программа",
+            "featured": "Свежая идея",
+            "openIdeas": "К идеям проектов",
+            "openBoard": "Открыть доску",
+            "myCard": "Моя карточка",
+            "skillsLabel": "Навыки",
+            "skillsPlaceholder": "Добавьте навык и Enter",
+            "saveSkills": "Сохранить навыки",
+            "skillsSaved": "Навыки сохранены",
+            "skillsError": "Не удалось сохранить навыки",
+            "openProfile": "Открыть профиль",
+            "createTitle": "Новое объявление",
+            "fieldTitle": "Заголовок",
+            "fieldBody": "Описание",
+            "fieldCity": "Город",
+            "fieldProgram": "Программа",
+            "fieldSkills": "Навыки и теги",
+            "requiredTitle": "Укажите заголовок",
+            "requiredBody": "Укажите описание",
+            "created": "Объявление размещено",
+            "createError": "Не удалось разместить объявление",
+            "respond": "Откликнуться",
+            "offerSelf": "Предложить себя",
+            "alreadyResponded": "Вы уже откликнулись",
+            "respondTitle": "Отклик",
+            "respondMessage": "Короткое сообщение",
+            "responded": "Отклик отправлен",
+            "respondError": "Не удалось отправить отклик",
+            "close": "Закрыть",
+            "cancel": "Отмена",
+            "responseCount": "{count, plural, one {# отклик} few {# отклика} many {# откликов} other {# отклика}}",
+            "tabs": {
+                "NEED_PEOPLE": "Ищут людей",
+                "CAN_HELP": "Могу помочь",
+                "PROJECT_IDEA": "Идеи проектов"
+            },
+            "types": {
+                "NEED_PEOPLE": "Ищут людей",
+                "CAN_HELP": "Могу помочь",
+                "PROJECT_IDEA": "Идея проекта"
+            },
+            "status": {
+                "OPEN": "Открыто",
+                "CLOSED": "Закрыто"
+            }
+        },
         "messages": {
             "title": "Сообщения",
             "empty": "Пока нет сообщений",
@@ -1532,7 +1585,8 @@
         "support": "Написать в поддержку",
         "leave": "Отпуск",
         "dissolutionRequests": "Заявление на расторжение",
-        "chat": "Чат"
+        "chat": "Чат",
+        "ideas": "Идеи и таланты"
     },
     "impersonation": {
         "banner": "Вы смотрите как {name}",

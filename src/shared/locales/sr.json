@@ -340,6 +340,59 @@
             "mentionHint": "Pomeni",
             "smiles": "Smajliji"
         },
+        "ideas": {
+            "title": "Ideje i talenti",
+            "description": "Tabla volontera: traže ljude, nude pomoć i okupljaju timove oko ideja.",
+            "publish": "Objavi",
+            "loading": "Učitavanje…",
+            "empty": "Još nema objava u ovoj kartici",
+            "searchPlaceholder": "Pretraga teksta i veština",
+            "programPlaceholder": "Program",
+            "featured": "Najnovija ideja",
+            "openIdeas": "Ka idejama projekata",
+            "openBoard": "Otvori tablu",
+            "myCard": "Moja kartica",
+            "skillsLabel": "Veštine",
+            "skillsPlaceholder": "Dodajte veštinu i Enter",
+            "saveSkills": "Sačuvaj veštine",
+            "skillsSaved": "Veštine sačuvane",
+            "skillsError": "Nije moguće sačuvati veštine",
+            "openProfile": "Otvori profil",
+            "createTitle": "Nova objava",
+            "fieldTitle": "Naslov",
+            "fieldBody": "Opis",
+            "fieldCity": "Grad",
+            "fieldProgram": "Program",
+            "fieldSkills": "Veštine i oznake",
+            "requiredTitle": "Unesite naslov",
+            "requiredBody": "Unesite opis",
+            "created": "Objava je postavljena",
+            "createError": "Nije moguće objaviti",
+            "respond": "Javi se",
+            "offerSelf": "Ponudi se",
+            "alreadyResponded": "Već ste se javili",
+            "respondTitle": "Odgovor",
+            "respondMessage": "Kratka poruka",
+            "responded": "Odgovor je poslat",
+            "respondError": "Nije moguće poslati odgovor",
+            "close": "Zatvori",
+            "cancel": "Otkaži",
+            "responseCount": "{count, plural, one {# odgovor} few {# odgovora} other {# odgovora}}",
+            "tabs": {
+                "NEED_PEOPLE": "Traže ljude",
+                "CAN_HELP": "Mogu da pomognem",
+                "PROJECT_IDEA": "Ideje projekata"
+            },
+            "types": {
+                "NEED_PEOPLE": "Traže ljude",
+                "CAN_HELP": "Mogu da pomognem",
+                "PROJECT_IDEA": "Ideja projekta"
+            },
+            "status": {
+                "OPEN": "Otvoreno",
+                "CLOSED": "Zatvoreno"
+            }
+        },
         "messages": {
             "title": "Poruke",
             "empty": "Još nema poruka",
@@ -1532,7 +1585,8 @@
         "support": "Kontaktirajte podršku",
         "leave": "Odmor",
         "dissolutionRequests": "Zahtev za raskid",
-        "chat": "Ćaskanje"
+        "chat": "Ćaskanje",
+        "ideas": "Ideje i talenti"
     },
     "impersonation": {
         "banner": "Gledate kao {name}",

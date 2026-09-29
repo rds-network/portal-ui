@@ -33,6 +33,8 @@ const isMandatoryKind = (kind?: string | null) => {
 const isReportInboxKind = (kind?: string | null) =>
     kind === "REPORT_CUSTOMER" || kind === "REPORT_DECISION"
 
+const isTalentInboxKind = (kind?: string | null) => kind === "TALENT_RESPONSE"
+
 const formatSeen = (value?: string | null) => (value ? dayjs(value).format("DD.MM HH:mm") : null)
 
 const personOf = (item: InboxThreadDto) => {
@@ -324,6 +326,11 @@ export const MessagesPage: React.FC = () => {
                                                 }
                                             >
                                                 <FormattedMessage id="pages.review-reports.open" />
+                                            </Button>
+                                        )}
+                                        {isTalentInboxKind(thread.kind) && (
+                                            <Button variant="light" onClick={() => navigate("/ideas")}>
+                                                <FormattedMessage id="pages.ideas.openBoard" />
                                             </Button>
                                         )}
                                         {heatmapUser(thread) && (

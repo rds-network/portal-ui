@@ -136,6 +136,10 @@ export const AnnouncementBell: React.FC = () => {
                                         )
                                         return
                                     }
+                                    if (item.kind === "TALENT_RESPONSE") {
+                                        navigate("/ideas")
+                                        return
+                                    }
                                     const login = item.heatmapUser || item.counterpart
                                     if (login && (item.kind.startsWith("OVERDUE") || item.kind === "TASK")) {
                                         navigate(`/volunteers/heatmap?search=${encodeURIComponent(login)}`)
