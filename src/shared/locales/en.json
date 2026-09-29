@@ -650,6 +650,18 @@
                 },
                 "required": "Required"
             },
+            "applicationDocs": {
+                "title": "Admission application",
+                "notFound": "Application not found",
+                "searchLink": "Search completed applications",
+                "open": "Open application",
+                "status": "Status",
+                "created": "Created",
+                "type": "Type",
+                "program": "Program",
+                "skills": "Skills",
+                "goal": "Goal"
+            },
             "selectProgram": "Select a program",
             "selectProject": "Select a project"
         },

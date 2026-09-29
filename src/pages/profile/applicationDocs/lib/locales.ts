@@ -1,0 +1,15 @@
+export const locales = {
+    title: "pages.profile.applicationDocs.title",
+    notFound: "pages.profile.applicationDocs.notFound",
+    searchLink: "pages.profile.applicationDocs.searchLink",
+    open: "pages.profile.applicationDocs.open",
+    status: "pages.profile.applicationDocs.status",
+    created: "pages.profile.applicationDocs.created",
+    type: "pages.profile.applicationDocs.type",
+    program: "pages.profile.applicationDocs.program",
+    skills: "pages.profile.applicationDocs.skills",
+    goal: "pages.profile.applicationDocs.goal",
+    contractDownload: "pages.applications.view.contractDownload",
+    questionnaireDownload: "pages.applications.view.questionnaireDownload",
+    envelopDownload: "pages.applications.view.envelopDownload",
+}

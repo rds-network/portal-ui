@@ -650,6 +650,18 @@
                 },
                 "required": "Obavezno"
             },
+            "applicationDocs": {
+                "title": "Prijava za učlanjenje",
+                "notFound": "Prijava nije pronađena",
+                "searchLink": "Traži u završenim prijavama",
+                "open": "Otvori prijavu",
+                "status": "Status",
+                "created": "Kreirana",
+                "type": "Tip",
+                "program": "Program",
+                "skills": "Veštine",
+                "goal": "Cilj"
+            },
             "selectProgram": "Izaberite program",
             "selectProject": "Izaberite projekat"
         },
