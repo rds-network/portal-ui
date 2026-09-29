@@ -22,6 +22,7 @@ const isMandatoryKind = (kind?: string | null) => {
         kind === "TASK" ||
         kind === "LEAVE_REQUEST" ||
         kind === "LEAVE_DECISION" ||
+        kind === "REPORT_DECISION" ||
         kind === "ACCOUNT_STATUS_REQUEST" ||
         kind === "ACCOUNT_STATUS_DECISION" ||
         kind === "ACCOUNT_STATUS_CHANGED" ||
@@ -29,10 +30,13 @@ const isMandatoryKind = (kind?: string | null) => {
     )
 }
 
+const isReportInboxKind = (kind?: string | null) =>
+    kind === "REPORT_CUSTOMER" || kind === "REPORT_DECISION"
+
 const formatSeen = (value?: string | null) => (value ? dayjs(value).format("DD.MM HH:mm") : null)
 
 const personOf = (item: InboxThreadDto) => {
-    if (item.kind === "REPORT_CUSTOMER") {
+    if (isReportInboxKind(item.kind)) {
         return {
             name: item.counterpartName || item.createdBy || item.recipientName || item.recipient || "портал",
             login: item.counterpart || item.createdBy || item.recipient || null,
@@ -306,14 +310,16 @@ export const MessagesPage: React.FC = () => {
                                         {thread.subject}
                                     </Title>
                                     <Flex gap="sm" wrap="wrap">
-                                        {thread.kind === "REPORT_CUSTOMER" && (
+                                        {isReportInboxKind(thread.kind) && (
                                             <Button
                                                 variant="light"
                                                 onClick={() =>
                                                     navigate(
                                                         thread.reportId
                                                             ? `/report/${thread.reportId}`
-                                                            : "/reports/review"
+                                                            : thread.kind === "REPORT_CUSTOMER"
+                                                              ? "/reports/review"
+                                                              : "/messages"
                                                     )
                                                 }
                                             >

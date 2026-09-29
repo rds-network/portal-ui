@@ -126,8 +126,14 @@ export const AnnouncementBell: React.FC = () => {
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
                                     setOpened(false)
-                                    if (item.kind === "REPORT_CUSTOMER") {
-                                        navigate(item.reportId ? `/report/${item.reportId}` : "/reports/review")
+                                    if (item.kind === "REPORT_CUSTOMER" || item.kind === "REPORT_DECISION") {
+                                        navigate(
+                                            item.reportId
+                                                ? `/report/${item.reportId}`
+                                                : item.kind === "REPORT_CUSTOMER"
+                                                  ? "/reports/review"
+                                                  : "/messages"
+                                        )
                                         return
                                     }
                                     const login = item.heatmapUser || item.counterpart

@@ -798,7 +798,8 @@
             "project-filter-not-selected": "Not selected",
             "digest-title": "Week summary",
             "week-short": "wk. {week}",
-            "show-tasks": "What was done"
+            "show-tasks": "What was done",
+            "remark": "Remark:"
         },
         "heat-map": {
             "description": "Volunteers with a current regular or associated contract. Associated members have no hour quota or overdue notices; they are marked on the map.",

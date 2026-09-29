@@ -798,7 +798,8 @@
             "project-filter-not-selected": "Nije odabrano",
             "digest-title": "Pregled nedelje",
             "week-short": "ned. {week}",
-            "show-tasks": "Šta je urađeno"
+            "show-tasks": "Šta je urađeno",
+            "remark": "Napomena:"
         },
         "heat-map": {
             "description": "Volonteri sa važećim redovnim ili asociranim ugovorom. Asocirani nemaju obavezne sate ni kašnjenja; označeni su na karti.",

@@ -50,6 +50,10 @@ export const ReportCard: React.FC<Props> = ({
             : null
     const showModerator =
         hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && !!report.moderator && !!moderator
+    const latestNoteText = [...(report.notes || [])]
+        .sort((a, b) => dayjs(b.createTime).valueOf() - dayjs(a.createTime).valueOf())
+        .find((note) => note.text?.trim())
+        ?.text?.trim()
 
     return (
         <button type="button" className={classes.reportCard} onClick={onOpen}>
@@ -113,6 +117,16 @@ export const ReportCard: React.FC<Props> = ({
                     )
                 })}
             </div>
+            {latestNoteText && (
+                <div className={classes.remark}>
+                    <Text size="xs" fw={600} className={classes.remarkLabel}>
+                        <FormattedMessage id="pages.report-list.remark" />
+                    </Text>
+                    <Text size="sm" className={classes.remarkText}>
+                        {latestNoteText}
+                    </Text>
+                </div>
+            )}
         </button>
     )
 }
