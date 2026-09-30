@@ -37,6 +37,10 @@ export interface ItemGroupProps {
     showUnread?: boolean
     showChatUnread?: boolean
     showIdeasUnread?: boolean
+    showTasksOpen?: boolean
+    showResourcesNew?: boolean
+    showLeavePending?: boolean
+    showDissolutionPending?: boolean
     showApplications?: boolean
     showControlled?: boolean
     showIfCurator?: boolean

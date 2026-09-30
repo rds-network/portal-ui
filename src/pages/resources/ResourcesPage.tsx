@@ -3,10 +3,10 @@ import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
 import { IconExternalLink, IconPlus, IconTrash } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { UserContext } from "src/app/providers/UserContext"
-import { OrgLinkApiService, OrgLinkDto, OrgLinkWriteRequest } from "src/shared/api/OrgLinkApiService"
+import { OrgLinkApiService, OrgLinkDto, OrgLinkWriteRequest, ResourcesBadge } from "src/shared/api/OrgLinkApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -29,6 +29,11 @@ export const ResourcesPage: React.FC = () => {
     const [edit, setEdit] = useState<OrgLinkDto | null>(null)
 
     setDocumentTitleByLocale("pages.resources.title")
+
+    useEffect(() => {
+        ResourcesBadge.markSeen()
+        queryClient.invalidateQueries({ queryKey: ["resources-new-count"] })
+    }, [queryClient])
 
     const form = useForm({
         initialValues: {

@@ -67,6 +67,14 @@ export const LeaveRequestApiService = {
         return response.data ?? []
     },
 
+    async pendingCount(): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/leave-requests/pending-count", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
+    },
+
     /** Решённые заявки: после согласования отпуск уходит из [pending], но согласующему нужно его помнить. */
     async history(): Promise<LeaveRequestDto[]> {
         const response = await RequestHttp.get<LeaveRequestDto[]>("/leave-requests/history", {

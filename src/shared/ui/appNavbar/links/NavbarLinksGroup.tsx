@@ -10,12 +10,18 @@ import { Link, useLocation } from "react-router"
 import { ApplicationBadgeApi } from "src/shared/api/applications/ApplicationBadgeApi"
 import { ChatApiService } from "src/shared/api/ChatApiService"
 import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
+import { DissolutionRequestApiService } from "src/shared/api/DissolutionRequestApiService"
 import { IdeasApiService, IdeasBadge } from "src/shared/api/IdeasApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
+import { LeaveRequestApiService } from "src/shared/api/LeaveRequestApiService"
+import { OrgLinkApiService, ResourcesBadge } from "src/shared/api/OrgLinkApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { UserAccountApiService } from "src/shared/api/user/UserApiService"
+import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 
 type NavItemProps = ItemGroupProps & { flat?: boolean }
+
+const formatBadge = (count: number) => (count > 99 ? "99+" : count)
 
 export function NavItem({
     icon: Icon,
@@ -24,6 +30,10 @@ export function NavItem({
     showUnread,
     showChatUnread,
     showIdeasUnread,
+    showTasksOpen,
+    showResourcesNew,
+    showLeavePending,
+    showDissolutionPending,
     showApplications,
     showControlled,
     curatorInbox,
@@ -53,6 +63,32 @@ export function NavItem({
         enabled: !!showIdeasUnread,
         refetchInterval: 60_000,
         refetchOnWindowFocus: true,
+    })
+    const { data: tasksOpen = 0 } = useQuery({
+        queryKey: ["tasks-open-count"],
+        queryFn: () => WorkAssignmentApiService.myOpenCount(),
+        enabled: !!showTasksOpen,
+        refetchInterval: 60_000,
+        refetchOnWindowFocus: true,
+    })
+    const { data: resourcesNew = 0 } = useQuery({
+        queryKey: ["resources-new-count"],
+        queryFn: () => OrgLinkApiService.newCount(ResourcesBadge.getLastSeen()),
+        enabled: !!showResourcesNew,
+        refetchInterval: 60_000,
+        refetchOnWindowFocus: true,
+    })
+    const { data: leavePending = 0 } = useQuery({
+        queryKey: ["leave-pending-count"],
+        queryFn: () => LeaveRequestApiService.pendingCount(),
+        enabled: !!showLeavePending,
+        refetchInterval: 60_000,
+    })
+    const { data: dissolutionPending = 0 } = useQuery({
+        queryKey: ["dissolution-pending-count"],
+        queryFn: () => DissolutionRequestApiService.pendingCount(),
+        enabled: !!showDissolutionPending,
+        refetchInterval: 60_000,
     })
     const { data: openApplications = 0 } = useQuery({
         queryKey: ["applications-open-count"],
@@ -92,32 +128,52 @@ export function NavItem({
     const badge =
         (showUnread && unread > 0 && (
             <Badge size="xs" color="blue" className={classes.badge}>
-                {unread > 99 ? "99+" : unread}
+                {formatBadge(unread)}
             </Badge>
         )) ||
         (showChatUnread && chatUnread > 0 && (
             <Badge size="xs" color="orange" className={`${classes.badge} ${classes.badgePulse}`}>
-                {chatUnread > 99 ? "99+" : chatUnread}
+                {formatBadge(chatUnread)}
             </Badge>
         )) ||
         (showIdeasUnread && ideasUnread > 0 && (
             <Badge size="xs" color="teal" className={`${classes.badge} ${classes.badgePulse}`}>
-                {ideasUnread > 99 ? "99+" : ideasUnread}
+                {formatBadge(ideasUnread)}
+            </Badge>
+        )) ||
+        (showTasksOpen && tasksOpen > 0 && (
+            <Badge size="xs" color="blue" className={classes.badge}>
+                {formatBadge(tasksOpen)}
+            </Badge>
+        )) ||
+        (showResourcesNew && resourcesNew > 0 && (
+            <Badge size="xs" color="teal" className={`${classes.badge} ${classes.badgePulse}`}>
+                {formatBadge(resourcesNew)}
+            </Badge>
+        )) ||
+        (showLeavePending && leavePending > 0 && (
+            <Badge size="xs" color="blue" className={classes.badge}>
+                {formatBadge(leavePending)}
+            </Badge>
+        )) ||
+        (showDissolutionPending && dissolutionPending > 0 && (
+            <Badge size="xs" color="blue" className={classes.badge}>
+                {formatBadge(dissolutionPending)}
             </Badge>
         )) ||
         (showApplications && openApplications > 0 && (
             <Badge size="xs" color="blue" className={classes.badge}>
-                {openApplications > 99 ? "99+" : openApplications}
+                {formatBadge(openApplications)}
             </Badge>
         )) ||
         (curatorInbox && pendingReports > 0 && (
             <Badge size="xs" color="blue" className={classes.badge}>
-                {pendingReports > 99 ? "99+" : pendingReports}
+                {formatBadge(pendingReports)}
             </Badge>
         )) ||
         (showControlled && controlledCount > 0 && (
             <Badge size="xs" color="teal" className={classes.badge}>
-                {controlledCount > 99 ? "99+" : controlledCount}
+                {formatBadge(controlledCount)}
             </Badge>
         )) ||
         null

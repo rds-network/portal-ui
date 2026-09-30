@@ -136,7 +136,7 @@ export const AnnouncementBell: React.FC = () => {
                                         )
                                         return
                                     }
-                                    if (item.kind === "TALENT_RESPONSE") {
+                                    if (item.kind === "TALENT_RESPONSE" || item.kind === "TALENT_POST") {
                                         navigate("/ideas")
                                         return
                                     }

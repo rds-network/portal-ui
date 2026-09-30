@@ -48,11 +48,13 @@ export const Content: NavSection[] = [
                 label: "navbar.reports.tasks",
                 icon: IconChecklist,
                 link: "/tasks",
+                showTasksOpen: true,
             },
             {
                 label: "navbar.resources",
                 icon: IconLink,
                 link: "/resources",
+                showResourcesNew: true,
             },
             {
                 label: "navbar.reports.messages",
@@ -76,11 +78,13 @@ export const Content: NavSection[] = [
                 label: "navbar.leave",
                 icon: IconBeach,
                 link: "/leave",
+                showLeavePending: true,
             },
             {
                 label: "navbar.dissolutionRequests",
                 icon: IconFileOff,
                 link: "/dissolution-requests",
+                showDissolutionPending: true,
             },
             {
                 label: "navbar.reports.review",

@@ -67,6 +67,14 @@ export const DissolutionRequestApiService = {
         return response.data ?? []
     },
 
+    async pendingCount(): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/dissolution-requests/pending-count", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
+    },
+
     async history(): Promise<DissolutionRequestDto[]> {
         const response = await RequestHttp.get<DissolutionRequestDto[]>("/dissolution-requests/history", {
             validateStatus: alive,
