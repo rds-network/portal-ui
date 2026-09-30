@@ -1622,5 +1622,52 @@
         "title": "Something went wrong",
         "description": "An error occurred while processing your request. Please write to <a href='mailto:help@russian.rs'>help@russian.rs</a> and provide the error message:",
         "reload-button": "Reload page"
+    },
+    "whatsNew": {
+        "open": "What's new",
+        "skip": "Skip",
+        "back": "Back",
+        "next": "Next",
+        "finish": "Done",
+        "welcome": {
+            "title": "What's new on the portal",
+            "body": "A short tour of recent sections. You can take it now or reopen later via the sparkle icon in the header."
+        },
+        "messages": {
+            "title": "Messages",
+            "body": "Inbox for reports, applications, and Ideas & talents. A yellow badge means a talent post or reply."
+        },
+        "chat": {
+            "title": "Chat",
+            "body": "Personal and group conversations. An orange badge means unread messages."
+        },
+        "ideas": {
+            "title": "Ideas & talents",
+            "body": "Board for project ideas and people search. Post a card, respond, and manage your post history."
+        },
+        "leave": {
+            "title": "Leave",
+            "body": "Leave requests and their status. The badge shows items waiting for a decision."
+        },
+        "dissolution": {
+            "title": "Dissolution",
+            "body": "Requests to end cooperation — submit and track status here."
+        },
+        "tasks": {
+            "title": "Tasks",
+            "body": "Your open assignments. The badge shows how many are still open."
+        },
+        "resources": {
+            "title": "Resources",
+            "body": "Useful links and materials. The badge appears when something new is added."
+        },
+        "bell": {
+            "title": "Notifications",
+            "body": "Quick access to announcements and inbox from the header."
+        },
+        "done": {
+            "title": "You're set!",
+            "body": "Missed something? Tap the sparkle in the header to run the tour again."
+        }
     }
 }

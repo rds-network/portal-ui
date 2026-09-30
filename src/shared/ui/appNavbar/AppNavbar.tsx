@@ -47,6 +47,8 @@ export interface ItemGroupProps {
     showIfAccountStatusApprover?: boolean
     showIfPrivilegedOps?: boolean
     curatorInbox?: boolean
+    /** Anchor for What’s New tour spotlight */
+    dataTourId?: string
 }
 
 export const AppNavbar = React.memo(function AppNavbar() {

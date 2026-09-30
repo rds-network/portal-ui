@@ -37,6 +37,7 @@ export function NavItem({
     showApplications,
     showControlled,
     curatorInbox,
+    dataTourId,
     flat,
 }: NavItemProps) {
     const location = useLocation()
@@ -202,6 +203,7 @@ export function NavItem({
                 href={link}
                 target="_blank"
                 rel="noopener noreferrer"
+                data-tour-id={dataTourId}
             >
                 {body}
             </UnstyledButton>
@@ -214,6 +216,7 @@ export function NavItem({
             component={Link}
             to={link}
             aria-current={isActive ? "page" : undefined}
+            data-tour-id={dataTourId}
         >
             {body}
         </UnstyledButton>

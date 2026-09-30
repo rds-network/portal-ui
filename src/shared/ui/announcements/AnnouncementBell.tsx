@@ -94,6 +94,7 @@ export const AnnouncementBell: React.FC = () => {
                     aria-label="notifications"
                     onClick={() => setOpened(true)}
                     className={classes.button}
+                    data-tour-id="header-bell"
                 >
                     <IconBell size={22} />
                 </Button>

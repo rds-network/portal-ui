@@ -1622,5 +1622,52 @@
         "title": "Nešto je pošlo po zlu",
         "description": "Došlo je do greške pri obradi vašeg zahteva. Molimo Vas da pišete na <a href='mailto:help@russian.rs'>help@russian.rs</a> i navedete sledeću poruku o grešci:",
         "reload-button": "Preuzmi stranicu ponovo"
+    },
+    "whatsNew": {
+        "open": "Šta je novo",
+        "skip": "Preskoči",
+        "back": "Nazad",
+        "next": "Dalje",
+        "finish": "Gotovo",
+        "welcome": {
+            "title": "Šta je novo na portalu",
+            "body": "Kratak pregled novih sekcija. Možete sada ili kasnije — ikonica zvezdice u zaglavlju."
+        },
+        "messages": {
+            "title": "Poruke",
+            "body": "Obaveštenja o izveštajima, prijavama i kartama Ideje i talenti. Žuti bedž — talent post ili odgovor."
+        },
+        "chat": {
+            "title": "Čet",
+            "body": "Lične i grupne poruke. Narandžasti bedž — nepročitano."
+        },
+        "ideas": {
+            "title": "Ideje i talenti",
+            "body": "Tabla za ideje projekata i potragu za ljudima. Objavite karticu, odgovorite i pratite istoriju."
+        },
+        "leave": {
+            "title": "Odmor",
+            "body": "Zahtevi za odmor i njihov status. Bedž pokazuje šta čeka odluku."
+        },
+        "dissolution": {
+            "title": "Raskid",
+            "body": "Zahtevi za raskid saradnje — podnošenje i praćenje statusa."
+        },
+        "tasks": {
+            "title": "Zadaci",
+            "body": "Vaši otvoreni zadaci. Bedž pokazuje koliko još nije zatvoreno."
+        },
+        "resources": {
+            "title": "Resursi",
+            "body": "Korisni linkovi i materijali. Bedž se pojavi kada je dodato nešto novo."
+        },
+        "bell": {
+            "title": "Zvono",
+            "body": "Brzi pristup obaveštenjima iz zaglavlja."
+        },
+        "done": {
+            "title": "Gotovo!",
+            "body": "Ako ste nešto propustili — kliknite zvezdicu u zaglavlju da ponovo otvorite turu."
+        }
     }
 }
