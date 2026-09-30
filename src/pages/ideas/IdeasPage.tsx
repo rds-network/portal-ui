@@ -425,6 +425,7 @@ export const IdeasPage: React.FC = () => {
                         {!post.mine && post.status === "OPEN" && (
                             <Button
                                 size="compact-sm"
+                                data-tour-id="ideas-respond"
                                 disabled={!!post.alreadyResponded}
                                 onClick={() => {
                                     setRespondPost(post)
@@ -460,7 +461,7 @@ export const IdeasPage: React.FC = () => {
                         <FormattedMessage id="pages.ideas.description" />
                     </Text>
                 </div>
-                <Button onClick={openCreate}>
+                <Button onClick={openCreate} data-tour-id="ideas-publish">
                     <FormattedMessage id="pages.ideas.publish" />
                 </Button>
             </div>

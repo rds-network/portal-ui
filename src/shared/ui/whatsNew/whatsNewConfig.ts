@@ -1,5 +1,5 @@
 /** Bump when the tour steps change so users see the tour again. */
-export const WHATS_NEW_VERSION = "2026-09-30-v1"
+export const WHATS_NEW_VERSION = "2026-09-30-v2"
 export const WHATS_NEW_STORAGE_KEY = "portal.whatsNew.seen"
 export const WHATS_NEW_START_EVENT = "portal-whats-new-start"
 
@@ -31,8 +31,14 @@ export type WhatsNewStep = {
     bodyId: string
     /** Open mobile drawer before highlighting nav */
     needsNav?: boolean
+    /** Navigate here before measuring the target */
+    route?: string
 }
 
+/**
+ * Content is code-configured (not an admin CMS).
+ * Bump WHATS_NEW_VERSION when steps/copy change so returning users see the tour again.
+ */
 export const WHATS_NEW_STEPS: WhatsNewStep[] = [
     {
         id: "welcome",
@@ -40,59 +46,91 @@ export const WHATS_NEW_STEPS: WhatsNewStep[] = [
         bodyId: "whatsNew.welcome.body",
     },
     {
-        id: "messages",
-        target: '[data-tour-id="nav-messages"]',
-        titleId: "whatsNew.messages.title",
-        bodyId: "whatsNew.messages.body",
-        needsNav: true,
+        id: "desktop",
+        route: "/",
+        target: '[data-tour-id="desktop-root"]',
+        titleId: "whatsNew.desktop.title",
+        bodyId: "whatsNew.desktop.body",
     },
     {
-        id: "chat",
-        target: '[data-tour-id="nav-chat"]',
-        titleId: "whatsNew.chat.title",
-        bodyId: "whatsNew.chat.body",
-        needsNav: true,
+        id: "desktop-tasks",
+        route: "/",
+        target: '[data-tour-id="desktop-tasks"]',
+        titleId: "whatsNew.desktopTasks.title",
+        bodyId: "whatsNew.desktopTasks.body",
+    },
+    {
+        id: "desktop-messages",
+        route: "/",
+        target: '[data-tour-id="desktop-messages"]',
+        titleId: "whatsNew.desktopMessages.title",
+        bodyId: "whatsNew.desktopMessages.body",
+    },
+    {
+        id: "desktop-events",
+        route: "/",
+        target: '[data-tour-id="desktop-events"]',
+        titleId: "whatsNew.desktopEvents.title",
+        bodyId: "whatsNew.desktopEvents.body",
+    },
+    {
+        id: "desktop-reports",
+        route: "/",
+        target: '[data-tour-id="desktop-reports"]',
+        titleId: "whatsNew.desktopReports.title",
+        bodyId: "whatsNew.desktopReports.body",
+    },
+    {
+        id: "report-remarks",
+        route: "/",
+        target: '[data-tour-id="report-remark"]',
+        titleId: "whatsNew.reportRemarks.title",
+        bodyId: "whatsNew.reportRemarks.body",
+    },
+    {
+        id: "report-customer",
+        titleId: "whatsNew.reportCustomer.title",
+        bodyId: "whatsNew.reportCustomer.body",
     },
     {
         id: "ideas",
-        target: '[data-tour-id="nav-ideas"]',
+        route: "/ideas",
+        target: '[data-tour-id="ideas-publish"]',
         titleId: "whatsNew.ideas.title",
         bodyId: "whatsNew.ideas.body",
-        needsNav: true,
+    },
+    {
+        id: "ideas-respond",
+        route: "/ideas",
+        target: '[data-tour-id="ideas-respond"]',
+        titleId: "whatsNew.ideasRespond.title",
+        bodyId: "whatsNew.ideasRespond.body",
     },
     {
         id: "leave",
-        target: '[data-tour-id="nav-leave"]',
+        route: "/leave",
+        target: '[data-tour-id="leave-form"]',
         titleId: "whatsNew.leave.title",
         bodyId: "whatsNew.leave.body",
-        needsNav: true,
-    },
-    {
-        id: "dissolution",
-        target: '[data-tour-id="nav-dissolution"]',
-        titleId: "whatsNew.dissolution.title",
-        bodyId: "whatsNew.dissolution.body",
-        needsNav: true,
     },
     {
         id: "tasks",
-        target: '[data-tour-id="nav-tasks"]',
+        route: "/tasks",
+        target: '[data-tour-id="tasks-board"]',
         titleId: "whatsNew.tasks.title",
         bodyId: "whatsNew.tasks.body",
-        needsNav: true,
-    },
-    {
-        id: "resources",
-        target: '[data-tour-id="nav-resources"]',
-        titleId: "whatsNew.resources.title",
-        bodyId: "whatsNew.resources.body",
-        needsNav: true,
     },
     {
         id: "bell",
         target: '[data-tour-id="header-bell"]',
         titleId: "whatsNew.bell.title",
         bodyId: "whatsNew.bell.body",
+    },
+    {
+        id: "configure",
+        target: '[data-tour-id="whats-new-open"]',
+        titleId: "whatsNew.configure.title",
+        bodyId: "whatsNew.configure.body",
     },
     {
         id: "done",

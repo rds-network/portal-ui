@@ -231,7 +231,7 @@ export const DesktopPage: React.FC = () => {
     const todayLabel = dayjs().format("dddd, D MMMM YYYY")
 
     return (
-        <Flex className={classes.root} direction="column">
+        <Flex className={classes.root} direction="column" data-tour-id="desktop-root">
             <div className={classes.header}>
                 <div>
                     <Title order={1} className={classes.title}>
@@ -246,13 +246,14 @@ export const DesktopPage: React.FC = () => {
                     color="ocean.7"
                     leftSection={<IconPlus size={16} />}
                     onClick={() => navigate("/report/create")}
+                    data-tour-id="desktop-new-report"
                 >
                     <FormattedMessage id="pages.my-reports.new-report" />
                 </Button>
             </div>
 
             <div className={classes.grid}>
-                <section className={`${classes.card} ${classes.tasksCard}`}>
+                <section className={`${classes.card} ${classes.tasksCard}`} data-tour-id="desktop-tasks">
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
                             <FormattedMessage id="pages.desktop.tasks" />
@@ -306,7 +307,7 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <section className={`${classes.card} ${classes.messagesCard}`}>
+                <section className={`${classes.card} ${classes.messagesCard}`} data-tour-id="desktop-messages">
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
                             <FormattedMessage id="pages.desktop.messages" />
@@ -370,7 +371,7 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <section className={`${classes.card} ${classes.reportsCard}`}>
+                <section className={`${classes.card} ${classes.reportsCard}`} data-tour-id="desktop-reports">
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
                             <FormattedMessage id="pages.desktop.reports" />
@@ -419,7 +420,7 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <div className={classes.eventsSlot}>
+                <div className={classes.eventsSlot} data-tour-id="desktop-events">
                     <DesktopEventsPanel
                         events={events}
                         canManage={canManageEvents}

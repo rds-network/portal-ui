@@ -1631,43 +1631,63 @@
         "finish": "Done",
         "welcome": {
             "title": "What's new on the portal",
-            "body": "A short tour of recent sections. You can take it now or reopen later via the sparkle icon in the header."
+            "body": "A short guide to the desktop, ideas board, leave, tasks, and reports. Take it now or reopen later via the sparkle in the header."
         },
-        "messages": {
-            "title": "Messages",
-            "body": "Inbox for reports, applications, and Ideas & talents. A yellow badge means a talent post or reply."
+        "desktop": {
+            "title": "Desktop",
+            "body": "Your home hub: active tasks, recent messages, reports, events calendar, and hours timeline — without hunting through the menu."
         },
-        "chat": {
-            "title": "Chat",
-            "body": "Personal and group conversations. An orange badge means unread messages."
+        "desktopTasks": {
+            "title": "Tasks on the desktop",
+            "body": "Assignments where you are the assignee and the status is not Done yet. Cards created on the Tasks board appear here. “Board →” opens the full kanban."
+        },
+        "desktopMessages": {
+            "title": "Messages on the desktop",
+            "body": "Inbox preview: reports, reviews, and Ideas & talents. New talent posts land here for everyone — open the link right away."
+        },
+        "desktopEvents": {
+            "title": "Upcoming events",
+            "body": "Meetings, cleanups, and lectures. The list shows the next dates; click a day to filter. Curators and admins can add events."
+        },
+        "desktopReports": {
+            "title": "Reports and remarks",
+            "body": "Your latest reports. If a moderator or customer left feedback, it shows as a yellow Remark on the card."
+        },
+        "reportRemarks": {
+            "title": "Comments on reports",
+            "body": "The yellow Remark is review feedback: what to clarify, who the customer should be, where the task came from. Read it and edit the report if needed."
+        },
+        "reportCustomer": {
+            "title": "Customer in a report",
+            "body": "Every report task needs a customer — the program curator or their acceptance delegate. They accept the work. You cannot pick yourself. Board tasks often fill the customer automatically."
         },
         "ideas": {
             "title": "Ideas & talents",
-            "body": "Board for project ideas and people search. Post a card, respond, and manage your post history."
+            "body": "Board for finding people, offering help, and project ideas. Publish a card; skills on the right help others find you."
+        },
+        "ideasRespond": {
+            "title": "How to take part",
+            "body": "On someone else's open card, tap Respond — the author gets a message. Your posts live under My: history, close, and reopen."
         },
         "leave": {
-            "title": "Leave",
-            "body": "Leave requests and their status. The badge shows items waiting for a decision."
-        },
-        "dissolution": {
-            "title": "Dissolution",
-            "body": "Requests to end cooperation — submit and track status here."
+            "title": "Leave — why and how",
+            "body": "Approved days do not count toward the hour quota and do not increase report delay. Pick dates, optional reason — after approval, leave shows in the hours history on the desktop."
         },
         "tasks": {
-            "title": "Tasks",
-            "body": "Your open assignments. The badge shows how many are still open."
-        },
-        "resources": {
-            "title": "Resources",
-            "body": "Useful links and materials. The badge appears when something new is added."
+            "title": "Tasks board",
+            "body": "The assignee drives the card until Review. The customer can send it back or accept. The deadline starts on the first move. From the board, the task appears on the assignee's desktop."
         },
         "bell": {
             "title": "Notifications",
             "body": "Quick access to announcements and inbox from the header."
         },
+        "configure": {
+            "title": "Tour settings",
+            "body": "The wizard is not admin-configurable yet: steps and copy ship with portal updates. This button always reopens the tour. After a big feature wave we bump the tour version so everyone sees it again."
+        },
         "done": {
             "title": "You're set!",
-            "body": "Missed something? Tap the sparkle in the header to run the tour again."
+            "body": "Use the sparkle in the header anytime you want the guide again."
         }
     }
 }

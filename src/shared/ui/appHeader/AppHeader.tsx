@@ -51,6 +51,7 @@ export const AppHeader = () => {
                             color="gray"
                             size="lg"
                             aria-label={intl.formatMessage({ id: "whatsNew.open" })}
+                            data-tour-id="whats-new-open"
                             onClick={() => startWhatsNewTour()}
                         >
                             <IconSparkles size={20} stroke={1.6} />

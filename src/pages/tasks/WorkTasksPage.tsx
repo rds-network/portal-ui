@@ -219,7 +219,7 @@ export const WorkTasksPage: React.FC = () => {
     }
 
     return (
-        <Flex className={classes.root} direction="column">
+        <Flex className={classes.root} direction="column" data-tour-id="tasks-board">
             <div className={classes.top}>
                 <Title order={2}>
                     <FormattedMessage id="pages.tasks.title" />

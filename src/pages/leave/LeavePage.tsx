@@ -240,7 +240,7 @@ export const LeavePage: React.FC = () => {
                 </div>
             </Flex>
 
-            <div className={classes.section}>
+            <div className={classes.section} data-tour-id="leave-form">
                 <Title order={4}>
                     <FormattedMessage id="pages.leave.requestTitle" />
                 </Title>

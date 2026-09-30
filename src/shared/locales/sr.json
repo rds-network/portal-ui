@@ -1631,43 +1631,63 @@
         "finish": "Gotovo",
         "welcome": {
             "title": "Šta je novo na portalu",
-            "body": "Kratak pregled novih sekcija. Možete sada ili kasnije — ikonica zvezdice u zaglavlju."
+            "body": "Kratak vodič kroz radni sto, ideje, odmor, zadatke i izveštaje. Sada ili kasnije — zvezdica u zaglavlju."
         },
-        "messages": {
-            "title": "Poruke",
-            "body": "Obaveštenja o izveštajima, prijavama i kartama Ideje i talenti. Žuti bedž — talent post ili odgovor."
+        "desktop": {
+            "title": "Radni sto",
+            "body": "Vaša početna strana: aktivni zadaci, poruke, izveštaji, kalendar događaja i sati — bez lutanja po meniju."
         },
-        "chat": {
-            "title": "Čet",
-            "body": "Lične i grupne poruke. Narandžasti bedž — nepročitano."
+        "desktopTasks": {
+            "title": "Zadaci na stolu",
+            "body": "Ovde su zadaci gde ste izvršilac i status nije „Gotovo“. Kartice sa table Zadaci odmah se pojavljuju ovde. „Tabla →“ otvara ceo kanban."
+        },
+        "desktopMessages": {
+            "title": "Poruke na stolu",
+            "body": "Pregled ulaznih: izveštaji, prijemka, ideje i talenti. Nove kartice sa table ideja stižu svima — otvorite link odmah."
+        },
+        "desktopEvents": {
+            "title": "Predstojeći događaji",
+            "body": "Kalendar sastanaka, subotnika i predavanja. Lista desno — najbliži datumi; klik na dan filtrira. Događaje dodaju kuratori i admini."
+        },
+        "desktopReports": {
+            "title": "Izveštaji i napomene",
+            "body": "Vaši poslednji izveštaji. Ako je moderator ili naručilac ostavio komentar — žuti blok „Napomena“ na kartici."
+        },
+        "reportRemarks": {
+            "title": "Komentari na izveštajima",
+            "body": "Žuta napomena je povratna informacija pri prijemci: šta pojasniti, ko je naručilac, odakle zadatak. Pročitajte i po potrebi ispravite izveštaj."
+        },
+        "reportCustomer": {
+            "title": "Naručilac u izveštaju",
+            "body": "U svakom zadatku izveštaja obavezan je naručilac — kurator programa ili njegov delegat za prijemku. On prima rad. Sebe ne možete izabrati. Sa table zadataka naručilac se često popuni sam."
         },
         "ideas": {
             "title": "Ideje i talenti",
-            "body": "Tabla za ideje projekata i potragu za ljudima. Objavite karticu, odgovorite i pratite istoriju."
+            "body": "Tabla za potragu ljudi, pomoć i ideje projekata. „Objavi“ — vaša kartica. Veštine desno pomažu da vas nađu."
+        },
+        "ideasRespond": {
+            "title": "Kako učestvovati",
+            "body": "Na tuđoj otvorenoj kartici kliknite „Odgovori“ — autor dobija poruku. Svoje postove gledajte u „Moji“: istorija, zatvaranje i ponovno otvaranje."
         },
         "leave": {
-            "title": "Odmor",
-            "body": "Zahtevi za odmor i njihov status. Bedž pokazuje šta čeka odluku."
-        },
-        "dissolution": {
-            "title": "Raskid",
-            "body": "Zahtevi za raskid saradnje — podnošenje i praćenje statusa."
+            "title": "Odmor — zašto i kako",
+            "body": "Odobreni dani ne ulaze u satnu normu i ne uvećavaju kašnjenje izveštaja. Unesite datume, po želji razlog — posle odobrenja odmor se vidi u istoriji sati na stolu."
         },
         "tasks": {
-            "title": "Zadaci",
-            "body": "Vaši otvoreni zadaci. Bedž pokazuje koliko još nije zatvoreno."
-        },
-        "resources": {
-            "title": "Resursi",
-            "body": "Korisni linkovi i materijali. Bedž se pojavi kada je dodato nešto novo."
+            "title": "Tabla zadataka",
+            "body": "Izvršilac vodi karticu do „Provera“. Naručilac može vratiti na doradu ili prihvatiti. Rok kreće od prvog pomeranja. Sa table zadatak ide na radni sto izvršioca."
         },
         "bell": {
             "title": "Zvono",
             "body": "Brzi pristup obaveštenjima iz zaglavlja."
         },
+        "configure": {
+            "title": "Podešavanje ture",
+            "body": "Majstor još nije podesiv u admin panelu: koraci i tekstovi stižu sa ažuriranjem portala. Ovo dugme uvek ponovo otvara turu. Posle velikog talasa funkcija menjamo verziju — tura se ponovo prikaže svima."
+        },
         "done": {
             "title": "Gotovo!",
-            "body": "Ako ste nešto propustili — kliknite zvezdicu u zaglavlju da ponovo otvorite turu."
+            "body": "Zvezdica u zaglavlju — ako želite da ponovo prođete vodič."
         }
     }
 }

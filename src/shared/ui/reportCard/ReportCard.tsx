@@ -118,7 +118,7 @@ export const ReportCard: React.FC<Props> = ({
                 })}
             </div>
             {latestNoteText && (
-                <div className={classes.remark}>
+                <div className={classes.remark} data-tour-id="report-remark">
                     <Text size="xs" fw={600} className={classes.remarkLabel}>
                         <FormattedMessage id="pages.report-list.remark" />
                     </Text>

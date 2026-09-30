@@ -35,6 +35,7 @@ const PrivateAppShell = () => {
             <WhatsNewTour
                 blocked={showProfileModal}
                 onOpenNav={() => setMenuOpened(true)}
+                onCloseNav={() => setMenuOpened(false)}
             />
         </>
     )

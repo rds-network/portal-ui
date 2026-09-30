@@ -2,6 +2,7 @@ import { Button, Text } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
 import React, { useCallback, useEffect, useLayoutEffect, useState } from "react"
 import { FormattedMessage } from "react-intl"
+import { useLocation, useNavigate } from "react-router"
 import {
     WHATS_NEW_START_EVENT,
     WHATS_NEW_STEPS,
@@ -20,6 +21,7 @@ type Rect = { top: number; left: number; width: number; height: number }
 type Props = {
     blocked?: boolean
     onOpenNav?: () => void
+    onCloseNav?: () => void
 }
 
 const measureTarget = (selector: string): Rect | null => {
@@ -38,7 +40,7 @@ const measureTarget = (selector: string): Rect | null => {
 const placeCard = (rect: Rect): React.CSSProperties => {
     const vw = window.innerWidth
     const vh = window.innerHeight
-    const cardH = 210
+    const cardH = 240
     const preferBelow = rect.top + rect.height + CARD_GAP + cardH < vh - 16
     const top = preferBelow
         ? rect.top + rect.height + CARD_GAP
@@ -47,8 +49,10 @@ const placeCard = (rect: Rect): React.CSSProperties => {
     return { top, left, transform: "none" }
 }
 
-export const WhatsNewTour: React.FC<Props> = ({ blocked = false, onOpenNav }) => {
+export const WhatsNewTour: React.FC<Props> = ({ blocked = false, onOpenNav, onCloseNav }) => {
     const isMobile = useMediaQuery("(max-width: 768px)")
+    const navigate = useNavigate()
+    const location = useLocation()
     const [active, setActive] = useState(false)
     const [index, setIndex] = useState(0)
     const [rect, setRect] = useState<Rect | null>(null)
@@ -91,10 +95,22 @@ export const WhatsNewTour: React.FC<Props> = ({ blocked = false, onOpenNav }) =>
         return () => window.clearTimeout(t)
     }, [blocked, start])
 
+    // Navigate to step route when needed
+    useEffect(() => {
+        if (!active || !step?.route) return
+        if (location.pathname !== step.route) {
+            navigate(step.route)
+        }
+        if (!step.needsNav && isMobile) {
+            onCloseNav?.()
+        }
+    }, [active, step, location.pathname, navigate, isMobile, onCloseNav])
+
     useLayoutEffect(() => {
         if (!active || !step) return
 
         let cancelled = false
+        const needsRouteWait = !!step.route && location.pathname !== step.route
         const run = () => {
             if (cancelled) return
             if (!step.target) {
@@ -111,19 +127,23 @@ export const WhatsNewTour: React.FC<Props> = ({ blocked = false, onOpenNav }) =>
             }
         }
 
-        run()
-        const delays = step.needsNav && isMobile ? [120, 320, 600] : [40, 200]
+        const delays = needsRouteWait
+            ? [200, 450, 800, 1200]
+            : step.needsNav && isMobile
+              ? [120, 320, 600]
+              : [40, 200, 450]
         const timers = delays.map((ms) => window.setTimeout(run, ms))
 
-        // Skip nav steps that never appear (role-hidden)
+        const skipMs = needsRouteWait ? 1600 : step.needsNav && isMobile ? 900 : 700
         const skipTimer =
             step.target &&
             window.setTimeout(() => {
                 if (cancelled) return
+                // Optional highlights (e.g. remark) — skip if absent; required page anchors too
                 if (!measureTarget(step.target!)) {
                     goNext()
                 }
-            }, step.needsNav && isMobile ? 900 : 450)
+            }, skipMs)
 
         const onWin = () => run()
         window.addEventListener("resize", onWin)
@@ -136,7 +156,7 @@ export const WhatsNewTour: React.FC<Props> = ({ blocked = false, onOpenNav }) =>
             window.removeEventListener("resize", onWin)
             window.removeEventListener("scroll", onWin, true)
         }
-    }, [active, step, isMobile, onOpenNav, goNext])
+    }, [active, step, isMobile, onOpenNav, goNext, location.pathname])
 
     if (!active || !step) return null
 
