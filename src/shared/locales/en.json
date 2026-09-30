@@ -408,8 +408,11 @@
         "messages": {
             "title": "Messages",
             "empty": "No messages yet",
+            "searchPlaceholder": "Search by subject, text, name…",
+            "searchEmpty": "Nothing found",
             "pick": "Select a conversation",
             "new": "New",
+            "kindTalent": "Ideas & talents",
             "replied": "Has reply",
             "awaitingReply": "No reply",
             "lastFrom": "Last from: {name}",

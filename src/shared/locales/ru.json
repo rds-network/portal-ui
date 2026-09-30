@@ -408,8 +408,11 @@
         "messages": {
             "title": "Сообщения",
             "empty": "Пока нет сообщений",
+            "searchPlaceholder": "Поиск по теме, тексту, имени…",
+            "searchEmpty": "Ничего не найдено",
             "pick": "Выберите переписку",
             "new": "Новое",
+            "kindTalent": "Идеи и таланты",
             "replied": "Есть ответ",
             "awaitingReply": "Без ответа",
             "lastFrom": "Последнее от: {name}",

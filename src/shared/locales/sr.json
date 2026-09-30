@@ -408,8 +408,11 @@
         "messages": {
             "title": "Poruke",
             "empty": "Još nema poruka",
+            "searchPlaceholder": "Pretraga po temi, tekstu, imenu…",
+            "searchEmpty": "Ništa nije pronađeno",
             "pick": "Izaberite razgovor",
             "new": "Novo",
+            "kindTalent": "Ideje i talenti",
             "replied": "Ima odgovor",
             "awaitingReply": "Bez odgovora",
             "lastFrom": "Poslednje od: {name}",

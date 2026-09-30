@@ -78,6 +78,11 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--mantine-color-orange-5) 35%, transparent);
 }
 
+.itemTalent {
+    border-left: 3px solid var(--mantine-color-yellow-6);
+    background: light-dark(#fffbeb, color-mix(in srgb, var(--mantine-color-dark-6) 85%, #854d0e));
+}
+
 .mandatoryBlock {
     margin-bottom: 14px;
     padding-bottom: 6px;

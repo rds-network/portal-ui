@@ -1,5 +1,6 @@
-import { Alert, Badge, Flex, Text, Textarea, Title, Button } from "@mantine/core"
+import { Alert, Badge, Flex, Text, Textarea, TextInput, Title, Button } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
+import { IconSearch } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useMemo, useState } from "react"
@@ -45,6 +46,12 @@ const personOf = (item: InboxThreadDto) => {
             login: item.counterpart || item.createdBy || item.recipient || null,
         }
     }
+    if (isTalentInboxKind(item.kind)) {
+        return {
+            name: item.counterpartName || item.createdBy || item.recipientName || item.recipient || "портал",
+            login: item.counterpart || item.createdBy || item.recipient || null,
+        }
+    }
     return {
         name: item.recipientName || item.counterpartName || item.recipient || item.counterpart || item.createdBy || "портал",
         login: item.recipient || item.counterpart || item.createdBy || null,
@@ -54,9 +61,11 @@ const personOf = (item: InboxThreadDto) => {
 const threadRank = (item: InboxThreadDto) => {
     if (item.needsAck) return 0
     if (isMandatoryKind(item.kind) && !item.receivedAt) return 1
-    if (item.unread) return 2
-    if (item.hasReply) return 4
-    return 3
+    if (isTalentInboxKind(item.kind) && item.unread) return 2
+    if (item.unread) return 3
+    if (isTalentInboxKind(item.kind)) return 4
+    if (item.hasReply) return 6
+    return 5
 }
 
 const sortThreads = (threads: InboxThreadDto[]) =>
@@ -76,6 +85,7 @@ export const MessagesPage: React.FC = () => {
     const { isMobile } = useScreenSize()
     const [selectedId, setSelectedId] = useState<string | null>(null)
     const [reply, setReply] = useState("")
+    const [search, setSearch] = useState("")
     const showList = !isMobile || !selectedId
     const showThread = !isMobile || !!selectedId
     const canDelete = hasPermission(user, MANAGERS)
@@ -91,7 +101,29 @@ export const MessagesPage: React.FC = () => {
         queryFn: () => InboxApiService.pendingAckCount(),
     })
 
-    const sortedThreads = useMemo(() => sortThreads(threads), [threads])
+    const filteredThreads = useMemo(() => {
+        const needle = search.trim().toLowerCase()
+        if (!needle) return threads
+        return threads.filter((item) => {
+            const person = personOf(item)
+            const hay = [
+                item.subject,
+                item.lastBody,
+                item.kind,
+                person.name,
+                person.login,
+                item.createdBy,
+                item.recipientName,
+                item.counterpartName,
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase()
+            return hay.includes(needle)
+        })
+    }, [threads, search])
+
+    const sortedThreads = useMemo(() => sortThreads(filteredThreads), [filteredThreads])
     const mandatoryThreads = useMemo(() => sortedThreads.filter((item) => item.needsAck), [sortedThreads])
     const otherThreads = useMemo(() => sortedThreads.filter((item) => !item.needsAck), [sortedThreads])
 
@@ -182,6 +214,7 @@ export const MessagesPage: React.FC = () => {
                     item.unread ? classes.itemUnread : "",
                     item.hasReply ? classes.itemReplied : "",
                     mustAck ? classes.itemNeedsAck : "",
+                    isTalentInboxKind(item.kind) ? classes.itemTalent : "",
                 ]
                     .filter(Boolean)
                     .join(" ")}
@@ -199,6 +232,11 @@ export const MessagesPage: React.FC = () => {
                     {item.subject}
                 </Text>
                 <Flex gap={6} wrap="wrap" mt={8}>
+                    {isTalentInboxKind(item.kind) && (
+                        <Badge size="xs" color="yellow" variant="filled">
+                            <FormattedMessage id="pages.messages.kindTalent" />
+                        </Badge>
+                    )}
                     {item.kind === "ACCOUNT_DEACTIVATED" && (
                         <Badge size="xs" color="gray" variant="light">
                             <FormattedMessage id="pages.messages.kindAccountDeactivated" />
@@ -270,6 +308,13 @@ export const MessagesPage: React.FC = () => {
                         <Text size="xs" c="dimmed" mt={4}>
                             <FormattedMessage id="pages.messages.sortHint" />
                         </Text>
+                        <TextInput
+                            mt="sm"
+                            leftSection={<IconSearch size={16} />}
+                            placeholder={intl.formatMessage({ id: "pages.messages.searchPlaceholder" })}
+                            value={search}
+                            onChange={(e) => setSearch(e.currentTarget.value)}
+                        />
                         {pendingAck > 0 && (
                             <Alert color="orange" mt="md">
                                 <FormattedMessage id="pages.messages.ackBlock" values={{ count: pendingAck }} />
@@ -279,7 +324,9 @@ export const MessagesPage: React.FC = () => {
                     <div className={classes.listScroll}>
                         {sortedThreads.length === 0 && (
                             <Text c="dimmed">
-                                <FormattedMessage id="pages.messages.empty" />
+                                <FormattedMessage
+                                    id={search.trim() ? "pages.messages.searchEmpty" : "pages.messages.empty"}
+                                />
                             </Text>
                         )}
                         {mandatoryThreads.length > 0 && (
