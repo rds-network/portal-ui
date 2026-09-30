@@ -31,6 +31,7 @@ import { resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { CitySelect } from "src/shared/ui/citySelect/CitySelect"
+import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./IdeasPage.module.scss"
 
 const TABS: TalentPostType[] = ["NEED_PEOPLE", "CAN_HELP", "PROJECT_IDEA"]
@@ -47,12 +48,20 @@ const TYPE_BADGE: Record<TalentPostType, string> = {
     PROJECT_IDEA: "grape",
 }
 
+const IDEAS_MANAGERS = [
+    UserGroup.ADMIN,
+    UserGroup.ADMIN_VOLUNTEER,
+    UserGroup.ADMIN_SSO,
+    UserGroup.MAIN_VOLUNTEER,
+]
+
 const respondLabelId = (type: TalentPostType) =>
     type === "CAN_HELP" ? "pages.ideas.offerSelf" : "pages.ideas.respond"
 
 export const IdeasPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const intl = useIntl()
+    const isManager = hasPermission(user, IDEAS_MANAGERS)
     const queryClient = useQueryClient()
     const programs = usePrograms()
     const [searchParams, setSearchParams] = useSearchParams()
@@ -338,6 +347,8 @@ export const IdeasPage: React.FC = () => {
     const renderCard = (post: TalentPostDto) => {
         const author = users[post.authorUsername]
         const responders = (post.responderUsernames || []).slice(0, 5)
+        const canManagePost = post.mine || isManager
+        const canSeeResponses = canManagePost && post.responseCount > 0
         return (
             <article key={post.id} className={classes.card} id={`post-${post.id}`}>
                 <div className={classes.cardTop}>
@@ -371,7 +382,19 @@ export const IdeasPage: React.FC = () => {
                     )}
                 </div>
                 <div className={classes.cardFooter}>
-                    <div className={classes.responders}>
+                    <button
+                        type="button"
+                        className={classes.responders}
+                        disabled={!canSeeResponses}
+                        onClick={() => canSeeResponses && setResponsesPost(post)}
+                        style={{
+                            cursor: canSeeResponses ? "pointer" : "default",
+                            background: "none",
+                            border: "none",
+                            padding: 0,
+                            textAlign: "left",
+                        }}
+                    >
                         <div className={classes.avatarStack}>
                             {responders.map((login) => (
                                 <Avatar
@@ -384,15 +407,15 @@ export const IdeasPage: React.FC = () => {
                                 />
                             ))}
                         </div>
-                        <Text size="sm" c="dimmed">
+                        <Text size="sm" c={canSeeResponses ? "teal" : "dimmed"} fw={canSeeResponses ? 600 : 400}>
                             <FormattedMessage
                                 id="pages.ideas.responseCount"
                                 values={{ count: post.responseCount }}
                             />
                         </Text>
-                    </div>
+                    </button>
                     <Flex gap={8} wrap="wrap">
-                        {post.mine && post.responseCount > 0 && (
+                        {canSeeResponses && (
                             <Button
                                 variant="subtle"
                                 size="compact-sm"
@@ -401,7 +424,7 @@ export const IdeasPage: React.FC = () => {
                                 <FormattedMessage id="pages.ideas.viewResponses" />
                             </Button>
                         )}
-                        {post.mine && post.status === "OPEN" && (
+                        {canManagePost && post.status === "OPEN" && (
                             <Button
                                 variant="light"
                                 color="gray"
@@ -411,7 +434,7 @@ export const IdeasPage: React.FC = () => {
                                 <FormattedMessage id="pages.ideas.close" />
                             </Button>
                         )}
-                        {post.mine && post.status === "CLOSED" && (
+                        {canManagePost && post.status === "CLOSED" && (
                             <Button
                                 variant="light"
                                 color="teal"
@@ -753,6 +776,10 @@ export const IdeasPage: React.FC = () => {
                     {responsesPost && (
                         <Text size="sm" c="dimmed">
                             {responsesPost.title}
+                            {" · "}
+                            {users[responsesPost.authorUsername]?.fullName ||
+                                responsesPost.authorFullName ||
+                                responsesPost.authorUsername}
                         </Text>
                     )}
                     {responsesLoading && (
@@ -768,11 +795,18 @@ export const IdeasPage: React.FC = () => {
                     {!responsesLoading &&
                         responseList.map((r) => (
                             <div key={r.id} className={classes.responseItem}>
-                                <Text size="sm" fw={650}>
-                                    {users[r.authorUsername]?.fullName ||
-                                        r.authorFullName ||
-                                        r.authorUsername}
-                                </Text>
+                                <Flex justify="space-between" gap="sm" align="baseline">
+                                    <Text size="sm" fw={650}>
+                                        {users[r.authorUsername]?.fullName ||
+                                            r.authorFullName ||
+                                            r.authorUsername}
+                                    </Text>
+                                    {r.createdAt && (
+                                        <Text size="xs" c="dimmed">
+                                            {new Date(r.createdAt).toLocaleString()}
+                                        </Text>
+                                    )}
+                                </Flex>
                                 <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
                                     {r.message}
                                 </Text>
