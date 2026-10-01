@@ -1339,6 +1339,46 @@
                 "CANCELLED": "Povučen"
             }
         },
+        "zahvalnica": {
+            "title": "Zahvalnica",
+            "description": "Zahvalnica volonteru: uredite tekst, logo i pozadinu, zatim preuzmite PDF.",
+            "volunteer": "Volonter",
+            "pickVolunteer": "Pronađi volontera",
+            "volunteerName": "Ime na obrascu",
+            "textBlock": "Tekst",
+            "template": "Šablon teksta",
+            "templates": {
+                "default": "Standardni",
+                "event": "Događaj",
+                "long": "Dugogodišnji rad"
+            },
+            "orgTitle": "Naziv udruženja",
+            "docTitle": "Naslov",
+            "intro": "Glavni pasus",
+            "contribution": "Konkretan doprinos",
+            "contributionHint": "Ubacuje se u rečenicu „Посебну захвалност изражавамо за …“",
+            "closing": "Završni pasus",
+            "presidentLabel": "Uloga potpisnika",
+            "presidentName": "Ime potpisnika",
+            "place": "Mesto",
+            "date": "Datum",
+            "number": "Broj",
+            "design": "Izgled",
+            "background": "Boja šablona",
+            "bg": {
+                "parchment": "Pergament",
+                "white": "Bela",
+                "soft": "Svetloplava",
+                "navy": "Teget"
+            },
+            "uploadLogo": "Sopstveni logo",
+            "defaultLogo": "Logo RDS",
+            "uploadBg": "Pozadinska slika",
+            "clearBg": "Ukloni pozadinu",
+            "preview": "Pregled",
+            "download": "Preuzmi PDF",
+            "reset": "Resetuj obrazac"
+        },
         "leave": {
             "title": "Odmor",
             "description": "Zatražite odmor: odobreni dani ne ulaze u normu sati i ne povećavaju kašnjenje izveštaja.",
@@ -1594,6 +1634,7 @@
         },
         "account-settings": "Podešavanja naloga",
         "activity": "Hronika",
+        "zahvalnica": "Zahvalnica",
         "maintenance": "Zatvaranje portala",
         "applicationJoin": "Tekst prijave",
         "resources": "Naši resursi",

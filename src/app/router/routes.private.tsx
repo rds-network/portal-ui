@@ -37,6 +37,7 @@ const MaintenanceSettingsPage = lazy(() => import("src/pages/maintenance/Mainten
 const ApplicationJoinSettingsPage = lazy(
     () => import("src/pages/application/joinSettings/ApplicationJoinSettingsPage")
 )
+const ZahvalnicaPage = lazy(() => import("src/pages/zahvalnica/ZahvalnicaPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -166,6 +167,10 @@ export const routes: RouteProps[] = [
     {
         path: "/settings/application-join",
         element: <ApplicationJoinSettingsPage />,
+    },
+    {
+        path: "/zahvalnica",
+        element: <ZahvalnicaPage />,
     },
     {
         path: "/curators",

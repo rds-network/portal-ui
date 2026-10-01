@@ -1339,6 +1339,46 @@
                 "CANCELLED": "Cancelled"
             }
         },
+        "zahvalnica": {
+            "title": "Certificate of thanks",
+            "description": "Thank-you letter for a volunteer: edit text, logo and background, then download a PDF.",
+            "volunteer": "Volunteer",
+            "pickVolunteer": "Find volunteer",
+            "volunteerName": "Name on the certificate",
+            "textBlock": "Text",
+            "template": "Text template",
+            "templates": {
+                "default": "Standard",
+                "event": "Event",
+                "long": "Long service"
+            },
+            "orgTitle": "Organization title",
+            "docTitle": "Heading",
+            "intro": "Main paragraph",
+            "contribution": "Specific contribution",
+            "contributionHint": "Inserted into “Посебну захвалност изражавамо за …”",
+            "closing": "Closing paragraph",
+            "presidentLabel": "Signatory role",
+            "presidentName": "Signatory name",
+            "place": "Place",
+            "date": "Date",
+            "number": "Number",
+            "design": "Design",
+            "background": "Color template",
+            "bg": {
+                "parchment": "Parchment",
+                "white": "White",
+                "soft": "Soft blue",
+                "navy": "Navy"
+            },
+            "uploadLogo": "Custom logo",
+            "defaultLogo": "RDS logo",
+            "uploadBg": "Background image",
+            "clearBg": "Clear background",
+            "preview": "Preview",
+            "download": "Download PDF",
+            "reset": "Reset form"
+        },
         "leave": {
             "title": "Leave",
             "description": "Request leave: accepted days do not count toward hour norms and do not increase report overdue streaks.",
@@ -1594,6 +1634,7 @@
         },
         "account-settings": "Account settings",
         "activity": "Chronicle",
+        "zahvalnica": "Certificate of thanks",
         "maintenance": "Portal closure",
         "applicationJoin": "Join page text",
         "resources": "Our resources",

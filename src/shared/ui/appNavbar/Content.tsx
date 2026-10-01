@@ -26,6 +26,7 @@ import {
     IconMessages,
     IconBulb,
     IconFileDescription,
+    IconAward,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -197,6 +198,12 @@ export const Content: NavSection[] = [
                 link: "/announcements/admin",
                 roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
                 showIfCurator: true,
+            },
+            {
+                label: "navbar.zahvalnica",
+                icon: IconAward,
+                link: "/zahvalnica",
+                roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
             },
             {
                 label: "navbar.activity",
