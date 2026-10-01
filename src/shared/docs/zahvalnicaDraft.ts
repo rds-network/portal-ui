@@ -77,12 +77,35 @@ export type ZahvalnicaIssue = {
 export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
 export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
 export const ZAHVALNICA_HISTORY_KEY = "portal.zahvalnica.history"
+export const ZAHVALNICA_BACKGROUNDS_KEY = "portal.zahvalnica.backgrounds"
 export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png?v=2"
 export const DEFAULT_BACKGROUND = "/resources/zahvalnica-bg.jpg"
 export const DEFAULT_STAMP = "/resources/zahvalnica-stamp.png"
 export const DEFAULT_SIGNATURE = "/resources/zahvalnica-signature.png"
 export const MARCK_FONT_URL = "/resources/fonts/MarckScript-Regular.ttf"
 export const MAGNOLIA_FONT_URL = "/resources/fonts/MagnoliaScript.otf"
+
+/**
+ * Preview panel is ~420px wide for A4 (210mm) → ~2 px/mm.
+ * Use the same constant for signature/stamp so preview matches PDF.
+ */
+export const PREVIEW_PX_PER_MM = 2
+
+export type SavedBackground = {
+    id: string
+    name: string
+    src: string
+    builtin?: boolean
+}
+
+export const BUILTIN_BACKGROUNDS: SavedBackground[] = [
+    {
+        id: "builtin-default",
+        name: "Šablon / Шаблон",
+        src: DEFAULT_BACKGROUND,
+        builtin: true,
+    },
+]
 
 export const TITLE_FONT_CSS: Record<ZahvalnicaTitleFont, string> = {
     marck: '"Marck Script", cursive',
@@ -364,6 +387,78 @@ export const clearZahvalnicaHistory = () => {
         localStorage.removeItem(ZAHVALNICA_HISTORY_KEY)
     } catch {
         /* ignore */
+    }
+}
+
+export const loadSavedBackgrounds = (): SavedBackground[] => {
+    let custom: SavedBackground[] = []
+    try {
+        const raw = localStorage.getItem(ZAHVALNICA_BACKGROUNDS_KEY)
+        if (raw) {
+            const list = JSON.parse(raw) as SavedBackground[]
+            if (Array.isArray(list)) custom = list.filter((b) => b?.id && b?.src && !b.builtin)
+        }
+    } catch {
+        /* ignore */
+    }
+    return [...BUILTIN_BACKGROUNDS, ...custom]
+}
+
+export const persistCustomBackgrounds = (all: SavedBackground[]) => {
+    const custom = all.filter((b) => !b.builtin)
+    try {
+        localStorage.setItem(ZAHVALNICA_BACKGROUNDS_KEY, JSON.stringify(custom.slice(0, 12)))
+    } catch {
+        /* quota — drop oldest half and retry */
+        try {
+            localStorage.setItem(ZAHVALNICA_BACKGROUNDS_KEY, JSON.stringify(custom.slice(0, 4)))
+        } catch {
+            /* ignore */
+        }
+    }
+}
+
+export const addSavedBackground = (name: string, src: string): SavedBackground[] => {
+    const nextItem: SavedBackground = {
+        id: `bg-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: name.trim() || "Фон",
+        src,
+    }
+    const withoutDup = loadSavedBackgrounds().filter((b) => b.src !== src || b.builtin)
+    const next = [...withoutDup.filter((b) => b.builtin), nextItem, ...withoutDup.filter((b) => !b.builtin)]
+    persistCustomBackgrounds(next)
+    return loadSavedBackgrounds()
+}
+
+export const removeSavedBackground = (id: string): SavedBackground[] => {
+    const next = loadSavedBackgrounds().filter((b) => b.id !== id || b.builtin)
+    persistCustomBackgrounds(next)
+    return loadSavedBackgrounds()
+}
+
+/** Shrink large images before storing in localStorage. */
+export const compressImageDataUrl = async (
+    dataUrl: string,
+    maxSide = 1600,
+    quality = 0.82
+): Promise<string> => {
+    try {
+        const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+            const el = new Image()
+            el.onload = () => resolve(el)
+            el.onerror = reject
+            el.src = dataUrl
+        })
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height))
+        const w = Math.max(1, Math.round(img.width * scale))
+        const h = Math.max(1, Math.round(img.height * scale))
+        const canvas = document.createElement("canvas")
+        canvas.width = w
+        canvas.height = h
+        canvas.getContext("2d")?.drawImage(img, 0, 0, w, h)
+        return canvas.toDataURL("image/jpeg", quality)
+    } catch {
+        return dataUrl
     }
 }
 

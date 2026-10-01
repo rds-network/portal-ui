@@ -26,18 +26,26 @@ import {
     DEFAULT_LOGO,
     DEFAULT_SIGNATURE,
     DEFAULT_STAMP,
+    PREVIEW_PX_PER_MM,
+    SIGNATURE_BASE_WIDTH_MM,
+    STAMP_BASE_SIZE_MM,
     TEXT_TEMPLATES,
     TITLE_FONT_CSS,
     TextStyle,
+    SavedBackground,
     ZahvalnicaBackground,
     ZahvalnicaDraft,
     ZahvalnicaIssue,
     ZahvalnicaTitleFont,
     ZahvalnicaTypography,
+    addSavedBackground,
     clearZahvalnicaHistory,
+    compressImageDataUrl,
     defaultZahvalnicaDraft,
+    loadSavedBackgrounds,
     loadZahvalnicaDraft,
     loadZahvalnicaHistory,
+    removeSavedBackground,
     saveZahvalnicaDraft,
 } from "src/shared/docs/zahvalnicaDraft"
 import { makeQrDataUrl } from "src/shared/docs/zahvalnicaQr"
@@ -99,6 +107,7 @@ export const ZahvalnicaPage: React.FC = () => {
 
     const [draft, setDraft] = useState<ZahvalnicaDraft>(() => loadZahvalnicaDraft())
     const [history, setHistory] = useState<ZahvalnicaIssue[]>(() => loadZahvalnicaHistory())
+    const [backgrounds, setBackgrounds] = useState<SavedBackground[]>(() => loadSavedBackgrounds())
     const [busy, setBusy] = useState(false)
     const [previewQr, setPreviewQr] = useState<string | null>(null)
 
@@ -199,6 +208,15 @@ export const ZahvalnicaPage: React.FC = () => {
             : "white"
     const ty = draft.typography
     const titleFontCss = TITLE_FONT_CSS[draft.titleFont] || TITLE_FONT_CSS.marck
+    const sigPreviewW = Math.round(
+        SIGNATURE_BASE_WIDTH_MM * (Math.min(120, Math.max(10, draft.signatureScale)) / 100) * PREVIEW_PX_PER_MM
+    )
+    const stampPreviewSize = Math.round(
+        STAMP_BASE_SIZE_MM * (Math.min(140, Math.max(20, draft.stampScale)) / 100) * PREVIEW_PX_PER_MM
+    )
+    const selectedBgId =
+        backgrounds.find((b) => b.src === draft.backgroundImageSrc)?.id ||
+        (draft.backgroundImageSrc ? null : "builtin-default")
 
     const issue = async (mode: "pdf" | "print") => {
         setBusy(true)
@@ -564,11 +582,79 @@ export const ZahvalnicaPage: React.FC = () => {
                         <Button variant="subtle" onClick={() => patch({ logoSrc: DEFAULT_LOGO })}>
                             <FormattedMessage id="pages.zahvalnica.defaultLogo" />
                         </Button>
+                    </Flex>
+
+                    <Text size="sm" fw={500} mt="md" mb={6}>
+                        <FormattedMessage id="pages.zahvalnica.bgLibrary" />
+                    </Text>
+                    <Text size="xs" c="dimmed" mb="sm">
+                        <FormattedMessage id="pages.zahvalnica.bgLibraryHint" />
+                    </Text>
+                    <div className={classes.bgGallery}>
+                        {backgrounds.map((bg) => (
+                            <button
+                                key={bg.id}
+                                type="button"
+                                className={`${classes.bgThumb} ${
+                                    selectedBgId === bg.id || draft.backgroundImageSrc === bg.src
+                                        ? classes.bgThumbActive
+                                        : ""
+                                }`}
+                                title={bg.name}
+                                onClick={() =>
+                                    patch({
+                                        backgroundImageSrc: bg.src,
+                                        backgroundOpacity: 100,
+                                        watermarkScale: 100,
+                                    })
+                                }
+                            >
+                                <img src={bg.src} alt={bg.name} />
+                                <span>{bg.name}</span>
+                                {!bg.builtin && (
+                                    <span
+                                        className={classes.bgThumbDelete}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            const next = removeSavedBackground(bg.id)
+                                            setBackgrounds(next)
+                                            if (draft.backgroundImageSrc === bg.src) {
+                                                patch({ backgroundImageSrc: DEFAULT_BACKGROUND })
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.stopPropagation()
+                                                const next = removeSavedBackground(bg.id)
+                                                setBackgrounds(next)
+                                                if (draft.backgroundImageSrc === bg.src) {
+                                                    patch({ backgroundImageSrc: DEFAULT_BACKGROUND })
+                                                }
+                                            }
+                                        }}
+                                    >
+                                        ×
+                                    </span>
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                    <Flex gap="sm" wrap="wrap" align="center" mt="sm">
                         <FileButton
                             accept="image/png,image/jpeg,image/webp"
                             onChange={async (file) => {
                                 if (!file) return
-                                patch({ backgroundImageSrc: await readFileAsDataUrl(file) })
+                                const raw = await readFileAsDataUrl(file)
+                                const compressed = await compressImageDataUrl(raw)
+                                const next = addSavedBackground(file.name.replace(/\.[^.]+$/, ""), compressed)
+                                setBackgrounds(next)
+                                patch({
+                                    backgroundImageSrc: compressed,
+                                    backgroundOpacity: 100,
+                                    watermarkScale: 100,
+                                })
                             }}
                         >
                             {(props) => (
@@ -577,18 +663,24 @@ export const ZahvalnicaPage: React.FC = () => {
                                 </Button>
                             )}
                         </FileButton>
-                        <Button
-                            variant="subtle"
-                            onClick={() =>
-                                patch({
-                                    backgroundImageSrc: DEFAULT_BACKGROUND,
-                                    backgroundOpacity: 100,
-                                    watermarkScale: 100,
-                                })
-                            }
-                        >
-                            <FormattedMessage id="pages.zahvalnica.defaultBg" />
-                        </Button>
+                        {draft.backgroundImageSrc &&
+                            !backgrounds.some((b) => b.src === draft.backgroundImageSrc) && (
+                                <Button
+                                    variant="light"
+                                    size="compact-sm"
+                                    onClick={() => {
+                                        const src = draft.backgroundImageSrc
+                                        if (!src) return
+                                        const next = addSavedBackground(
+                                            intl.formatMessage({ id: "pages.zahvalnica.savedBg" }),
+                                            src
+                                        )
+                                        setBackgrounds(next)
+                                    }}
+                                >
+                                    <FormattedMessage id="pages.zahvalnica.saveBg" />
+                                </Button>
+                            )}
                         {draft.backgroundImageSrc && (
                             <Button variant="subtle" onClick={() => patch({ backgroundImageSrc: null })}>
                                 <FormattedMessage id="pages.zahvalnica.clearBg" />
@@ -779,12 +871,12 @@ export const ZahvalnicaPage: React.FC = () => {
                             />
                         )}
                         <div className={classes.previewContent}>
-                            <img src={draft.logoSrc} alt="" className={classes.previewLogo} />
+                            <img src={draft.logoSrc} alt="" className={classes.previewLogo} style={{ width: 32 * PREVIEW_PX_PER_MM, height: 32 * PREVIEW_PX_PER_MM }} />
                             <p
                                 className={classes.org}
                                 style={{
                                     color: ty.org.color,
-                                    fontSize: ty.org.size,
+                                    fontSize: ty.org.size * (96 / 72),
                                     fontWeight: ty.org.bold ? 700 : 500,
                                 }}
                             >
@@ -794,7 +886,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.docTitle}
                                 style={{
                                     color: ty.title.color,
-                                    fontSize: ty.title.size * 1.15,
+                                    fontSize: ty.title.size * (96 / 72),
                                     fontWeight: ty.title.bold ? 700 : 400,
                                     fontFamily: titleFontCss,
                                 }}
@@ -806,7 +898,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.name}
                                 style={{
                                     color: ty.name.color,
-                                    fontSize: ty.name.size,
+                                    fontSize: ty.name.size * (96 / 72),
                                     fontWeight: ty.name.bold ? 700 : 500,
                                 }}
                             >
@@ -816,7 +908,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.body}
                                 style={{
                                     color: ty.body.color,
-                                    fontSize: ty.body.size,
+                                    fontSize: ty.body.size * (96 / 72),
                                     fontWeight: ty.body.bold ? 700 : 400,
                                     lineHeight: draft.bodyLineHeight,
                                 }}
@@ -828,7 +920,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                     className={classes.body}
                                     style={{
                                         color: ty.body.color,
-                                        fontSize: ty.body.size,
+                                        fontSize: ty.body.size * (96 / 72),
                                         fontWeight: ty.body.bold ? 700 : 400,
                                         lineHeight: draft.bodyLineHeight,
                                     }}
@@ -840,7 +932,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.body}
                                 style={{
                                     color: ty.body.color,
-                                    fontSize: ty.body.size,
+                                    fontSize: ty.body.size * (96 / 72),
                                     fontWeight: ty.body.bold ? 700 : 400,
                                     lineHeight: draft.bodyLineHeight,
                                 }}
@@ -852,7 +944,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                     <span
                                         style={{
                                             color: ty.sign.color,
-                                            fontSize: Math.max(10, ty.sign.size - 2),
+                                            fontSize: Math.max(10, (ty.sign.size - 2) * (96 / 72)),
                                             fontWeight: 400,
                                         }}
                                     >
@@ -864,15 +956,15 @@ export const ZahvalnicaPage: React.FC = () => {
                                             alt=""
                                             className={classes.signatureImg}
                                             style={{
-                                                width: `${Math.round(140 * (draft.signatureScale / 100))}px`,
-                                                transform: `translate(${draft.signatureOffsetX * 2}px, ${draft.signatureOffsetY * 2}px)`,
+                                                width: `${sigPreviewW}px`,
+                                                transform: `translate(${draft.signatureOffsetX * PREVIEW_PX_PER_MM}px, ${draft.signatureOffsetY * PREVIEW_PX_PER_MM}px)`,
                                             }}
                                         />
                                     )}
                                     <strong
                                         style={{
                                             color: ty.sign.color,
-                                            fontSize: ty.sign.size,
+                                            fontSize: ty.sign.size * (96 / 72),
                                             fontWeight: ty.sign.bold ? 700 : 500,
                                         }}
                                     >
@@ -885,9 +977,9 @@ export const ZahvalnicaPage: React.FC = () => {
                                         alt=""
                                         className={classes.stampImg}
                                         style={{
-                                            width: `${Math.round(96 * (draft.stampScale / 100))}px`,
-                                            height: `${Math.round(96 * (draft.stampScale / 100))}px`,
-                                            transform: `translate(${draft.stampOffsetX * 1.5}px, ${draft.stampOffsetY * 1.5}px)`,
+                                            width: `${stampPreviewSize}px`,
+                                            height: `${stampPreviewSize}px`,
+                                            transform: `translate(${draft.stampOffsetX * PREVIEW_PX_PER_MM}px, ${draft.stampOffsetY * PREVIEW_PX_PER_MM}px)`,
                                         }}
                                     />
                                 )}
@@ -896,7 +988,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.meta}
                                 style={{
                                     color: ty.meta.color,
-                                    fontSize: ty.meta.size,
+                                    fontSize: ty.meta.size * (96 / 72),
                                     fontWeight: ty.meta.bold ? 700 : 400,
                                 }}
                             >
