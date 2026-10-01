@@ -1365,6 +1365,14 @@
             "number": "Broj",
             "design": "Izgled",
             "background": "Boja šablona",
+            "frameStyle": "Okvir",
+            "frameStyleHint": "Ako blanko već ima okvir — izaberite „Bez okvira”.",
+            "frame": {
+                "none": "Bez okvira",
+                "single": "Jednostruki",
+                "double": "Dvostruki",
+                "elegant": "Sa uglovima"
+            },
             "bg": {
                 "parchment": "Pergament",
                 "white": "Bela",
@@ -1401,6 +1409,10 @@
             "bgScale": "Veličina pozadinske slike: {value}%",
             "onlineBlock": "Onlajn verzija",
             "onlineHint": "Pečat, potpis i QR za digitalnu dodelu. QR vodi na stranicu provere: kome je izdato pismo.",
+            "signBlockOffsetX": "Blok potpisa ↔: {value} mm",
+            "signBlockOffsetY": "Blok potpisa ↕: {value} mm",
+            "metaOffsetX": "Datum / broj ↔: {value} mm",
+            "metaOffsetY": "Datum / broj ↕: {value} mm",
             "showSignature": "Prikaži potpis",
             "signatureScale": "Veličina potpisa: {value}%",
             "signatureOffsetX": "Potpis ↔: {value} mm",

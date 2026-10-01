@@ -2,6 +2,9 @@ export type ZahvalnicaBackground = "white" | "navy" | "soft"
 
 export type ZahvalnicaTitleFont = "marck" | "magnolia" | "montserrat" | "custom"
 
+/** Decorative page frame drawn over the background. */
+export type ZahvalnicaFrameStyle = "none" | "single" | "double" | "elegant"
+
 export type TextStyle = {
     size: number
     color: string
@@ -42,6 +45,7 @@ export type ZahvalnicaDraft = {
     /** Uploaded TTF/OTF as data-URL when titleFont === "custom". */
     customTitleFontData: string | null
     customTitleFontName: string
+    frameStyle: ZahvalnicaFrameStyle
     showStamp: boolean
     showSignature: boolean
     showQr: boolean
@@ -56,6 +60,12 @@ export type ZahvalnicaDraft = {
     stampScale: number
     stampOffsetX: number
     stampOffsetY: number
+    /** Move whole signature block (label + sig + name + stamp) in mm. */
+    signBlockOffsetX: number
+    signBlockOffsetY: number
+    /** Move footer (QR + date + number) in mm. */
+    metaOffsetX: number
+    metaOffsetY: number
     typography: ZahvalnicaTypography
 }
 
@@ -90,6 +100,7 @@ export type ZahvalnicaTemplateSettings = {
     customTitleFontData: string | null
     customTitleFontName: string
     bodyLineHeight: number
+    frameStyle: ZahvalnicaFrameStyle
     showStamp: boolean
     showSignature: boolean
     showQr: boolean
@@ -101,6 +112,10 @@ export type ZahvalnicaTemplateSettings = {
     stampScale: number
     stampOffsetX: number
     stampOffsetY: number
+    signBlockOffsetX: number
+    signBlockOffsetY: number
+    metaOffsetX: number
+    metaOffsetY: number
     orgTitle: string
     title: string
     intro: string
@@ -108,6 +123,8 @@ export type ZahvalnicaTemplateSettings = {
     presidentLabel: string
     place: string
 }
+
+export const FRAME_STYLE_OPTIONS: ZahvalnicaFrameStyle[] = ["none", "single", "double", "elegant"]
 
 export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
 export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
@@ -208,6 +225,7 @@ export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): Za
         titleFont: "marck",
         customTitleFontData: null,
         customTitleFontName: "",
+        frameStyle: "none",
         showStamp: true,
         showSignature: true,
         showQr: true,
@@ -219,6 +237,10 @@ export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): Za
         stampScale: 100,
         stampOffsetX: 18,
         stampOffsetY: -8,
+        signBlockOffsetX: 0,
+        signBlockOffsetY: 0,
+        metaOffsetX: 0,
+        metaOffsetY: 0,
         typography: defaultTypography(),
         ...overrides,
     }
@@ -322,6 +344,15 @@ const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
     }
     if (raw.customTitleFontData === undefined) merged.customTitleFontData = null
     if (raw.customTitleFontName === undefined) merged.customTitleFontName = ""
+    if (
+        raw.frameStyle !== "none" &&
+        raw.frameStyle !== "single" &&
+        raw.frameStyle !== "double" &&
+        raw.frameStyle !== "elegant"
+    ) {
+        // Older drafts always drew a double frame — keep that look unless user changes it
+        merged.frameStyle = "double"
+    }
     if (raw.showStamp == null) merged.showStamp = true
     if (raw.showSignature == null) merged.showSignature = true
     if (raw.showQr == null) merged.showQr = true
@@ -345,7 +376,6 @@ const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
     if (raw.stampScale == null || Number.isNaN(Number(raw.stampScale))) {
         merged.stampScale = 100
     } else if (Number(raw.stampScale) === 85) {
-        // Previous default made stamp ~32mm; migrate to true 40×40 at 100%
         merged.stampScale = 100
     } else {
         merged.stampScale = clamp(Number(raw.stampScale), 20, 140)
@@ -359,6 +389,26 @@ const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
         merged.stampOffsetY = -8
     } else {
         merged.stampOffsetY = clamp(Number(raw.stampOffsetY), -40, 40)
+    }
+    if (raw.signBlockOffsetX == null || Number.isNaN(Number(raw.signBlockOffsetX))) {
+        merged.signBlockOffsetX = 0
+    } else {
+        merged.signBlockOffsetX = clamp(Number(raw.signBlockOffsetX), -50, 50)
+    }
+    if (raw.signBlockOffsetY == null || Number.isNaN(Number(raw.signBlockOffsetY))) {
+        merged.signBlockOffsetY = 0
+    } else {
+        merged.signBlockOffsetY = clamp(Number(raw.signBlockOffsetY), -60, 40)
+    }
+    if (raw.metaOffsetX == null || Number.isNaN(Number(raw.metaOffsetX))) {
+        merged.metaOffsetX = 0
+    } else {
+        merged.metaOffsetX = clamp(Number(raw.metaOffsetX), -40, 40)
+    }
+    if (raw.metaOffsetY == null || Number.isNaN(Number(raw.metaOffsetY))) {
+        merged.metaOffsetY = 0
+    } else {
+        merged.metaOffsetY = clamp(Number(raw.metaOffsetY), -40, 30)
     }
     return merged
 }
@@ -548,6 +598,7 @@ export const extractTemplateSettings = (draft: ZahvalnicaDraft): ZahvalnicaTempl
     customTitleFontData: draft.customTitleFontData,
     customTitleFontName: draft.customTitleFontName,
     bodyLineHeight: draft.bodyLineHeight,
+    frameStyle: draft.frameStyle,
     showStamp: draft.showStamp,
     showSignature: draft.showSignature,
     showQr: draft.showQr,
@@ -559,6 +610,10 @@ export const extractTemplateSettings = (draft: ZahvalnicaDraft): ZahvalnicaTempl
     stampScale: draft.stampScale,
     stampOffsetX: draft.stampOffsetX,
     stampOffsetY: draft.stampOffsetY,
+    signBlockOffsetX: draft.signBlockOffsetX,
+    signBlockOffsetY: draft.signBlockOffsetY,
+    metaOffsetX: draft.metaOffsetX,
+    metaOffsetY: draft.metaOffsetY,
     orgTitle: draft.orgTitle,
     title: draft.title,
     intro: draft.intro,

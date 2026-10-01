@@ -16,6 +16,7 @@ import {
     TextStyle,
     TITLE_FONT_CSS,
     ZahvalnicaDraft,
+    ZahvalnicaFrameStyle,
     ZahvalnicaTitleFont,
     hexToRgb,
     recordZahvalnicaIssue,
@@ -228,6 +229,50 @@ const applyStyle = (pdf: JsPdf, style: TextStyle, fontFamily?: string) => {
     pdf.setTextColor(r, g, b)
 }
 
+const drawPageFrame = (
+    pdf: JsPdf,
+    style: ZahvalnicaFrameStyle,
+    pageW: number,
+    pageH: number,
+    color: [number, number, number]
+) => {
+    if (style === "none") return
+    pdf.setDrawColor(color[0], color[1], color[2])
+    if (style === "single") {
+        pdf.setLineWidth(0.7)
+        pdf.rect(12, 12, pageW - 24, pageH - 24)
+        return
+    }
+    if (style === "double") {
+        pdf.setLineWidth(0.6)
+        pdf.rect(12, 12, pageW - 24, pageH - 24)
+        pdf.setLineWidth(0.25)
+        pdf.rect(14, 14, pageW - 28, pageH - 28)
+        return
+    }
+    // elegant: double frame with corner accents
+    const outer = 10
+    const inner = 14
+    pdf.setLineWidth(0.85)
+    pdf.rect(outer, outer, pageW - outer * 2, pageH - outer * 2)
+    pdf.setLineWidth(0.28)
+    pdf.rect(inner, inner, pageW - inner * 2, pageH - inner * 2)
+    const corner = 7
+    pdf.setLineWidth(0.5)
+    // top-left
+    pdf.line(inner, inner + corner, inner, inner)
+    pdf.line(inner, inner, inner + corner, inner)
+    // top-right
+    pdf.line(pageW - inner - corner, inner, pageW - inner, inner)
+    pdf.line(pageW - inner, inner, pageW - inner, inner + corner)
+    // bottom-left
+    pdf.line(inner, pageH - inner - corner, inner, pageH - inner)
+    pdf.line(inner, pageH - inner, inner + corner, pageH - inner)
+    // bottom-right
+    pdf.line(pageW - inner - corner, pageH - inner, pageW - inner, pageH - inner)
+    pdf.line(pageW - inner, pageH - inner - corner, pageW - inner, pageH - inner)
+}
+
 type GenerateOpts = {
     issuedBy?: string
     print?: boolean
@@ -317,13 +362,8 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
         }
     }
 
-    // Decorative double frame sits above the page template
     const frameColor = hexToRgb(ty.title.color)
-    pdf.setDrawColor(frameColor[0], frameColor[1], frameColor[2])
-    pdf.setLineWidth(0.6)
-    pdf.rect(12, 12, pageW - 24, pageH - 24)
-    pdf.setLineWidth(0.25)
-    pdf.rect(14, 14, pageW - 28, pageH - 28)
+    drawPageFrame(pdf, draft.frameStyle || "none", pageW, pageH, frameColor)
 
     const marginX = 28
     const contentW = pageW - marginX * 2
@@ -410,8 +450,10 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
     }
     if (draft.closing.trim()) writeBlock(draft.closing, 16)
 
-    y = Math.max(y, pageH - 62)
-    const signCenterX = pageW / 2
+    const signBlockOffX = draft.signBlockOffsetX ?? 0
+    const signBlockOffY = draft.signBlockOffsetY ?? 0
+    y = Math.max(y, pageH - 62) + signBlockOffY
+    const signCenterX = pageW / 2 + signBlockOffX
     applyStyle(pdf, { ...ty.sign, bold: false, size: Math.max(8, ty.sign.size - 2) })
     pdf.text(draft.presidentLabel, signCenterX, y, { align: "center" })
     y += 4
@@ -479,26 +521,39 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
         })
     const verifyUrl = buildZahvalnicaVerifyUrl(verifyToken)
 
-    const metaY = pageH - 28
+    const metaOffX = draft.metaOffsetX ?? 0
+    const metaOffY = draft.metaOffsetY ?? 0
+    const metaY = pageH - 28 + metaOffY
+    const metaLeftX = marginX + metaOffX
+    const metaRightX = pageW - marginX + metaOffX
     if (draft.showQr) {
         try {
             const qrData = makeQrDataUrl(verifyUrl, 2, 1)
             const qrSize = 18
-            pdf.addImage(qrData, "PNG", marginX, pageH - 24 - qrSize, qrSize, qrSize, undefined, "FAST")
+            pdf.addImage(
+                qrData,
+                "PNG",
+                metaLeftX,
+                pageH - 24 - qrSize + metaOffY,
+                qrSize,
+                qrSize,
+                undefined,
+                "FAST"
+            )
             applyStyle(pdf, { ...ty.meta, size: Math.max(7, ty.meta.size - 1) })
-            pdf.text("провера", marginX + qrSize / 2, pageH - 20, { align: "center" })
+            pdf.text("провера", metaLeftX + qrSize / 2, pageH - 20 + metaOffY, { align: "center" })
             applyStyle(pdf, ty.meta)
-            pdf.text(`${draft.place}, ${draft.dateLabel}`, marginX + qrSize + 6, metaY)
+            pdf.text(`${draft.place}, ${draft.dateLabel}`, metaLeftX + qrSize + 6, metaY)
         } catch {
             applyStyle(pdf, ty.meta)
-            pdf.text(`${draft.place}, ${draft.dateLabel}`, marginX, metaY)
+            pdf.text(`${draft.place}, ${draft.dateLabel}`, metaLeftX, metaY)
         }
     } else {
         applyStyle(pdf, ty.meta)
-        pdf.text(`${draft.place}, ${draft.dateLabel}`, marginX, metaY)
+        pdf.text(`${draft.place}, ${draft.dateLabel}`, metaLeftX, metaY)
     }
     applyStyle(pdf, ty.meta)
-    pdf.text(`Број: ${draft.number}`, pageW - marginX, metaY, { align: "right" })
+    pdf.text(`Број: ${draft.number}`, metaRightX, metaY, { align: "right" })
 
     const safeName = volunteerName.replace(/[^\p{L}\p{N}\s_-]+/gu, "").trim() || "volunteer"
     if (!opts.reprintOf) {

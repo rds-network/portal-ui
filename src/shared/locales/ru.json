@@ -1365,6 +1365,14 @@
             "number": "Номер",
             "design": "Оформление",
             "background": "Цветовой шаблон",
+            "frameStyle": "Рамка",
+            "frameStyleHint": "Если бланк уже с рамкой — выберите «Без рамки».",
+            "frame": {
+                "none": "Без рамки",
+                "single": "Одинарная",
+                "double": "Двойная",
+                "elegant": "С углами"
+            },
             "bg": {
                 "parchment": "Пергамент",
                 "white": "Белый",
@@ -1401,6 +1409,10 @@
             "bgScale": "Размер фонового изображения: {value}%",
             "onlineBlock": "Онлайн-версия",
             "onlineHint": "Печать, подпись и QR для цифровой выдачи. QR ведёт на страницу проверки: кому выдано письмо.",
+            "signBlockOffsetX": "Блок подписи ↔: {value} мм",
+            "signBlockOffsetY": "Блок подписи ↕: {value} мм",
+            "metaOffsetX": "Дата / номер ↔: {value} мм",
+            "metaOffsetY": "Дата / номер ↕: {value} мм",
             "showSignature": "Показать подпись",
             "signatureScale": "Размер подписи: {value}%",
             "signatureOffsetX": "Подпись ↔: {value} мм",

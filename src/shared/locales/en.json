@@ -1365,6 +1365,14 @@
             "number": "Number",
             "design": "Design",
             "background": "Color template",
+            "frameStyle": "Frame",
+            "frameStyleHint": "If the blank already has a border, choose “No frame”.",
+            "frame": {
+                "none": "No frame",
+                "single": "Single",
+                "double": "Double",
+                "elegant": "With corners"
+            },
             "bg": {
                 "parchment": "Parchment",
                 "white": "White",
@@ -1401,6 +1409,10 @@
             "bgScale": "Background image size: {value}%",
             "onlineBlock": "Online version",
             "onlineHint": "Stamp, signature and QR for digital certificates. QR opens a public page showing who received the letter.",
+            "signBlockOffsetX": "Signature block ↔: {value} mm",
+            "signBlockOffsetY": "Signature block ↕: {value} mm",
+            "metaOffsetX": "Date / number ↔: {value} mm",
+            "metaOffsetY": "Date / number ↕: {value} mm",
             "showSignature": "Show signature",
             "signatureScale": "Signature size: {value}%",
             "signatureOffsetX": "Signature ↔: {value} mm",

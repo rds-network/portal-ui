@@ -36,9 +36,11 @@ import {
     SavedBackground,
     ZahvalnicaBackground,
     ZahvalnicaDraft,
+    ZahvalnicaFrameStyle,
     ZahvalnicaIssue,
     ZahvalnicaTitleFont,
     ZahvalnicaTypography,
+    FRAME_STYLE_OPTIONS,
     addSavedBackground,
     applyTemplateSettings,
     clearZahvalnicaHistory,
@@ -171,6 +173,7 @@ export const ZahvalnicaPage: React.FC = () => {
         draft.customTitleFontData,
         draft.customTitleFontName,
         draft.bodyLineHeight,
+        draft.frameStyle,
         draft.showStamp,
         draft.showSignature,
         draft.showQr,
@@ -182,6 +185,10 @@ export const ZahvalnicaPage: React.FC = () => {
         draft.stampScale,
         draft.stampOffsetX,
         draft.stampOffsetY,
+        draft.signBlockOffsetX,
+        draft.signBlockOffsetY,
+        draft.metaOffsetX,
+        draft.metaOffsetY,
         draft.orgTitle,
         draft.title,
         draft.intro,
@@ -601,6 +608,17 @@ export const ZahvalnicaPage: React.FC = () => {
                         ]}
                         onChange={(v) => v && patch({ background: v as ZahvalnicaBackground })}
                     />
+                    <Select
+                        label={intl.formatMessage({ id: "pages.zahvalnica.frameStyle" })}
+                        description={intl.formatMessage({ id: "pages.zahvalnica.frameStyleHint" })}
+                        value={draft.frameStyle}
+                        data={FRAME_STYLE_OPTIONS.map((value) => ({
+                            value,
+                            label: intl.formatMessage({ id: `pages.zahvalnica.frame.${value}` }),
+                        }))}
+                        onChange={(v) => v && patch({ frameStyle: v as ZahvalnicaFrameStyle })}
+                        mb="sm"
+                    />
                     <div>
                         <Text size="sm" fw={500} mb={6}>
                             <FormattedMessage
@@ -792,6 +810,62 @@ export const ZahvalnicaPage: React.FC = () => {
                     <Text size="xs" c="dimmed" mb="sm">
                         <FormattedMessage id="pages.zahvalnica.onlineHint" />
                     </Text>
+                    <Text size="sm" fw={500} mb={6}>
+                        <FormattedMessage
+                            id="pages.zahvalnica.signBlockOffsetX"
+                            values={{ value: draft.signBlockOffsetX }}
+                        />
+                    </Text>
+                    <Slider
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={draft.signBlockOffsetX}
+                        onChange={(value) => patch({ signBlockOffsetX: value })}
+                        mb="sm"
+                    />
+                    <Text size="sm" fw={500} mb={6}>
+                        <FormattedMessage
+                            id="pages.zahvalnica.signBlockOffsetY"
+                            values={{ value: draft.signBlockOffsetY }}
+                        />
+                    </Text>
+                    <Slider
+                        min={-60}
+                        max={40}
+                        step={1}
+                        value={draft.signBlockOffsetY}
+                        onChange={(value) => patch({ signBlockOffsetY: value })}
+                        mb="sm"
+                    />
+                    <Text size="sm" fw={500} mb={6}>
+                        <FormattedMessage
+                            id="pages.zahvalnica.metaOffsetX"
+                            values={{ value: draft.metaOffsetX }}
+                        />
+                    </Text>
+                    <Slider
+                        min={-40}
+                        max={40}
+                        step={1}
+                        value={draft.metaOffsetX}
+                        onChange={(value) => patch({ metaOffsetX: value })}
+                        mb="sm"
+                    />
+                    <Text size="sm" fw={500} mb={6}>
+                        <FormattedMessage
+                            id="pages.zahvalnica.metaOffsetY"
+                            values={{ value: draft.metaOffsetY }}
+                        />
+                    </Text>
+                    <Slider
+                        min={-40}
+                        max={30}
+                        step={1}
+                        value={draft.metaOffsetY}
+                        onChange={(value) => patch({ metaOffsetY: value })}
+                        mb="md"
+                    />
                     <Switch
                         label={intl.formatMessage({ id: "pages.zahvalnica.showSignature" })}
                         checked={draft.showSignature}
@@ -953,12 +1027,18 @@ export const ZahvalnicaPage: React.FC = () => {
                     <article
                         ref={previewRef}
                         className={classes.preview}
-                        style={{
-                            backgroundColor: previewStyle.page,
-                            borderColor: ty.title.color,
-                            padding: `${mm(12)}px ${mm(14)}px ${mm(10)}px`,
-                        }}
+                        data-frame={draft.frameStyle}
+                        style={
+                            {
+                                backgroundColor: previewStyle.page,
+                                "--frame-color": ty.title.color,
+                                padding: `${mm(12)}px ${mm(14)}px ${mm(10)}px`,
+                            } as React.CSSProperties
+                        }
                     >
+                        {draft.frameStyle !== "none" && (
+                            <div className={classes.frameOverlay} aria-hidden />
+                        )}
                         {watermarkSrc && draft.backgroundOpacity > 0 && (
                             <img
                                 src={watermarkSrc}
@@ -1044,7 +1124,12 @@ export const ZahvalnicaPage: React.FC = () => {
                             >
                                 {draft.closing}
                             </p>
-                            <div className={classes.signBlock}>
+                            <div
+                                className={classes.signBlock}
+                                style={{
+                                    transform: `translate(${mm(draft.signBlockOffsetX)}px, ${mm(draft.signBlockOffsetY)}px)`,
+                                }}
+                            >
                                 <div className={classes.sign}>
                                     <span
                                         style={{
@@ -1095,6 +1180,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                     color: ty.meta.color,
                                     fontSize: pt(ty.meta.size),
                                     fontWeight: ty.meta.bold ? 700 : 400,
+                                    transform: `translate(${mm(draft.metaOffsetX)}px, ${mm(draft.metaOffsetY)}px)`,
                                 }}
                             >
                                 <div className={classes.metaLeft}>
