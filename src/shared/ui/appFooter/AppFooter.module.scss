@@ -13,6 +13,12 @@
     justify-content: end;
     gap: 14px;
 }
+@media (max-width: 64em) {
+    /* Bottom tab bar occupies this strip on mobile */
+    .footerContainer {
+        display: none;
+    }
+}
 @media (max-width: 36em) {
     .footerContainer {
         padding: 7px 12px;
