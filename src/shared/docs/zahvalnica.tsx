@@ -5,6 +5,7 @@ import { MONTSERRAT_MEDIUM_NORMAL } from "src/shared/docs/fonts/Montserrat-Mediu
 import { makeQrDataUrl } from "src/shared/docs/zahvalnicaQr"
 import {
     BACKGROUND_COLORS,
+    DEFAULT_BACKGROUND,
     DEFAULT_LOGO,
     DEFAULT_SIGNATURE,
     DEFAULT_STAMP,
@@ -85,8 +86,8 @@ const loadImageElement = async (src: string): Promise<HTMLImageElement | null> =
 const imageDataUrlWithOpacity = async (
     src: string,
     opacity: number,
-    maxPx = 1600
-): Promise<string | null> => {
+    maxPx = 2200
+): Promise<{ dataUrl: string; width: number; height: number } | null> => {
     const img = await loadImageElement(src)
     if (!img) return null
     const scale = Math.min(1, maxPx / Math.max(img.width, img.height))
@@ -100,7 +101,22 @@ const imageDataUrlWithOpacity = async (
     ctx.clearRect(0, 0, w, h)
     ctx.globalAlpha = Math.min(1, Math.max(0, opacity / 100))
     ctx.drawImage(img, 0, 0, w, h)
-    return canvas.toDataURL("image/png")
+    return { dataUrl: canvas.toDataURL("image/png"), width: w, height: h }
+}
+
+/** Cover-fit rectangle into page, then apply uniform scale around center. */
+const coverRect = (
+    pageW: number,
+    pageH: number,
+    imgW: number,
+    imgH: number,
+    scalePct: number
+) => {
+    const cover = Math.max(pageW / imgW, pageH / imgH)
+    const s = cover * (Math.min(140, Math.max(40, scalePct)) / 100)
+    const w = imgW * s
+    const h = imgH * s
+    return { x: (pageW - w) / 2, y: (pageH - h) / 2, w, h }
 }
 
 const rasterizeTitle = async (
@@ -200,21 +216,22 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
     pdf.setFillColor(pr, pg, pb)
     pdf.rect(0, 0, pageW, pageH, "F")
 
-    const watermarkSrc = draft.backgroundImageSrc || DEFAULT_LOGO
-    const opacity = draft.backgroundOpacity ?? 12
-    const wmScale = Math.min(140, Math.max(40, draft.watermarkScale ?? 95)) / 100
+    const watermarkSrc = draft.backgroundImageSrc || DEFAULT_BACKGROUND
+    const opacity = draft.backgroundOpacity ?? 100
+    const wmScale = draft.watermarkScale ?? 100
     if (watermarkSrc && opacity > 0) {
         const faded = await imageDataUrlWithOpacity(watermarkSrc, opacity)
         if (faded) {
             try {
-                const wmW = pageW * wmScale
-                pdf.addImage(faded, "PNG", (pageW - wmW) / 2, (pageH - wmW) / 2 - 8, wmW, wmW, undefined, "FAST")
+                const box = coverRect(pageW, pageH, faded.width, faded.height, wmScale)
+                pdf.addImage(faded.dataUrl, "PNG", box.x, box.y, box.w, box.h, undefined, "FAST")
             } catch {
                 /* ignore */
             }
         }
     }
 
+    // Decorative double frame sits above the page template
     const frameColor = hexToRgb(ty.title.color)
     pdf.setDrawColor(frameColor[0], frameColor[1], frameColor[2])
     pdf.setLineWidth(0.6)

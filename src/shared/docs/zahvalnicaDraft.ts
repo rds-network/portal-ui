@@ -66,6 +66,7 @@ export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
 export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
 export const ZAHVALNICA_HISTORY_KEY = "portal.zahvalnica.history"
 export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png"
+export const DEFAULT_BACKGROUND = "/resources/zahvalnica-bg.jpg"
 export const DEFAULT_STAMP = "/resources/zahvalnica-stamp.png"
 export const DEFAULT_SIGNATURE = "/resources/zahvalnica-signature.png"
 export const MARCK_FONT_URL = "/resources/fonts/MarckScript-Regular.ttf"
@@ -114,9 +115,9 @@ export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): Za
         number: String(nextNumber),
         background: "white",
         logoSrc: DEFAULT_LOGO,
-        backgroundImageSrc: DEFAULT_LOGO,
-        backgroundOpacity: 12,
-        watermarkScale: 95,
+        backgroundImageSrc: DEFAULT_BACKGROUND,
+        backgroundOpacity: 100,
+        watermarkScale: 100,
         bodyLineHeight: 1.55,
         titleFont: "marck",
         showStamp: true,
@@ -187,16 +188,28 @@ const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
         merged.logoSrc = DEFAULT_LOGO
     }
     if (raw.backgroundOpacity == null || Number.isNaN(Number(raw.backgroundOpacity))) {
-        merged.backgroundOpacity = 12
+        merged.backgroundOpacity = 100
     } else {
         merged.backgroundOpacity = clamp(Number(raw.backgroundOpacity), 0, 100)
     }
-    if (raw.backgroundImageSrc === undefined) {
-        merged.backgroundImageSrc = DEFAULT_LOGO
+    // Migrate older drafts that used the RDS logo as the page background
+    if (
+        raw.backgroundImageSrc === undefined ||
+        raw.backgroundImageSrc === null ||
+        raw.backgroundImageSrc === DEFAULT_LOGO ||
+        String(raw.backgroundImageSrc).includes("zahvalnica-logo")
+    ) {
+        merged.backgroundImageSrc = DEFAULT_BACKGROUND
+        if (raw.backgroundOpacity == null || Number(raw.backgroundOpacity) <= 30) {
+            merged.backgroundOpacity = 100
+        }
+        if (raw.watermarkScale == null || Number(raw.watermarkScale) < 90) {
+            merged.watermarkScale = 100
+        }
     }
     if (raw.volunteerUsername === undefined) merged.volunteerUsername = null
     if (raw.watermarkScale == null || Number.isNaN(Number(raw.watermarkScale))) {
-        merged.watermarkScale = 95
+        merged.watermarkScale = 100
     } else {
         merged.watermarkScale = clamp(Number(raw.watermarkScale), 40, 140)
     }

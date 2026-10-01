@@ -1374,6 +1374,7 @@
             "bgOpacity": "Прозрачность фона: {value}%",
             "uploadLogo": "Свой логотип",
             "defaultLogo": "Логотип РДС",
+            "defaultBg": "Шаблон бланка",
             "uploadBg": "Фоновое изображение",
             "clearBg": "Убрать фон",
             "preview": "Превью",

@@ -22,6 +22,7 @@ import { Link, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import generateZahvalnicaPdf from "src/shared/docs/zahvalnica"
 import {
+    DEFAULT_BACKGROUND,
     DEFAULT_LOGO,
     DEFAULT_SIGNATURE,
     DEFAULT_STAMP,
@@ -174,7 +175,7 @@ export const ZahvalnicaPage: React.FC = () => {
         return { page: map[bg] }
     }, [draft.background])
 
-    const watermarkSrc = draft.backgroundImageSrc || DEFAULT_LOGO
+    const watermarkSrc = draft.backgroundImageSrc || DEFAULT_BACKGROUND
     const themeValue: ZahvalnicaBackground =
         draft.background === "white" || draft.background === "navy" || draft.background === "soft"
             ? draft.background
@@ -427,7 +428,7 @@ export const ZahvalnicaPage: React.FC = () => {
                         </Text>
                         <Slider
                             min={0}
-                            max={60}
+                            max={100}
                             step={1}
                             value={draft.backgroundOpacity}
                             onChange={(value) => patch({ backgroundOpacity: value })}
@@ -464,10 +465,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 </Button>
                             )}
                         </FileButton>
-                        <Button
-                            variant="subtle"
-                            onClick={() => patch({ logoSrc: DEFAULT_LOGO, backgroundImageSrc: DEFAULT_LOGO })}
-                        >
+                        <Button variant="subtle" onClick={() => patch({ logoSrc: DEFAULT_LOGO })}>
                             <FormattedMessage id="pages.zahvalnica.defaultLogo" />
                         </Button>
                         <FileButton
@@ -483,6 +481,18 @@ export const ZahvalnicaPage: React.FC = () => {
                                 </Button>
                             )}
                         </FileButton>
+                        <Button
+                            variant="subtle"
+                            onClick={() =>
+                                patch({
+                                    backgroundImageSrc: DEFAULT_BACKGROUND,
+                                    backgroundOpacity: 100,
+                                    watermarkScale: 100,
+                                })
+                            }
+                        >
+                            <FormattedMessage id="pages.zahvalnica.defaultBg" />
+                        </Button>
                         {draft.backgroundImageSrc && (
                             <Button variant="subtle" onClick={() => patch({ backgroundImageSrc: null })}>
                                 <FormattedMessage id="pages.zahvalnica.clearBg" />
@@ -573,11 +583,10 @@ export const ZahvalnicaPage: React.FC = () => {
                             <img
                                 src={watermarkSrc}
                                 alt=""
-                                className={classes.watermark}
+                                className={classes.pageBg}
                                 style={{
                                     opacity: draft.backgroundOpacity / 100,
-                                    width: `${draft.watermarkScale}%`,
-                                    maxWidth: "none",
+                                    transform: `translate(-50%, -50%) scale(${draft.watermarkScale / 100})`,
                                 }}
                             />
                         )}

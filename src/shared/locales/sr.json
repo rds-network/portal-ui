@@ -1374,6 +1374,7 @@
             "bgOpacity": "Providnost pozadine: {value}%",
             "uploadLogo": "Sopstveni logo",
             "defaultLogo": "Logo RDS",
+            "defaultBg": "Šablon obrasca",
             "uploadBg": "Pozadinska slika",
             "clearBg": "Ukloni pozadinu",
             "preview": "Pregled",
