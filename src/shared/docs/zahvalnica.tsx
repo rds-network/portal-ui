@@ -231,6 +231,11 @@ const applyStyle = (pdf: JsPdf, style: TextStyle, fontFamily?: string) => {
 type GenerateOpts = {
     issuedBy?: string
     print?: boolean
+    /** Reprint existing certificate — keep number & QR token, don't create a new history row. */
+    reprintOf?: {
+        id: string
+        verifyToken: string
+    }
 }
 
 export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts: GenerateOpts = {}) {
@@ -453,22 +458,25 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
         }
     }
 
-    const issueId =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+    const issueId = opts.reprintOf?.id
+        ? opts.reprintOf.id
+        : typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
     const issuedAt = new Date().toISOString()
-    const verifyToken = encodeZahvalnicaVerifyToken({
-        v: 1,
-        id: issueId,
-        name: volunteerName,
-        number: draft.number,
-        date: draft.dateLabel,
-        place: draft.place,
-        contribution: draft.contribution.trim(),
-        president: draft.presidentName.trim(),
-        issuedAt,
-    })
+    const verifyToken =
+        opts.reprintOf?.verifyToken ||
+        encodeZahvalnicaVerifyToken({
+            v: 1,
+            id: issueId,
+            name: volunteerName,
+            number: draft.number,
+            date: draft.dateLabel,
+            place: draft.place,
+            contribution: draft.contribution.trim(),
+            president: draft.presidentName.trim(),
+            issuedAt,
+        })
     const verifyUrl = buildZahvalnicaVerifyUrl(verifyToken)
 
     const metaY = pageH - 28
@@ -493,9 +501,11 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
     pdf.text(`Број: ${draft.number}`, pageW - marginX, metaY, { align: "right" })
 
     const safeName = volunteerName.replace(/[^\p{L}\p{N}\s_-]+/gu, "").trim() || "volunteer"
-    saveZahvalnicaDraft(draft)
-    if (opts.issuedBy) {
-        recordZahvalnicaIssue(draft, opts.issuedBy, opts.print ? "print" : "pdf", verifyToken, issueId)
+    if (!opts.reprintOf) {
+        saveZahvalnicaDraft(draft)
+        if (opts.issuedBy) {
+            recordZahvalnicaIssue(draft, opts.issuedBy, opts.print ? "print" : "pdf", verifyToken, issueId)
+        }
     }
 
     if (opts.print) {

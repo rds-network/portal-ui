@@ -39,15 +39,20 @@ import {
     ZahvalnicaTitleFont,
     ZahvalnicaTypography,
     addSavedBackground,
+    applyTemplateSettings,
     clearZahvalnicaHistory,
     compressImageDataUrl,
     defaultZahvalnicaDraft,
     deleteZahvalnicaIssue,
+    draftFromIssue,
+    extractTemplateSettings,
     loadSavedBackgrounds,
+    loadTemplateSettingsFor,
     loadZahvalnicaDraft,
     loadZahvalnicaHistory,
     removeSavedBackground,
     restoreZahvalnicaIssue,
+    saveTemplateSettingsFor,
     saveZahvalnicaDraft,
     voidAllZahvalnicaIssues,
     voidZahvalnicaIssue,
@@ -114,6 +119,11 @@ export const ZahvalnicaPage: React.FC = () => {
     const [backgrounds, setBackgrounds] = useState<SavedBackground[]>(() => loadSavedBackgrounds())
     const [busy, setBusy] = useState(false)
     const [previewQr, setPreviewQr] = useState<string | null>(null)
+    const [activeTemplateId, setActiveTemplateId] = useState<string>(() => {
+        const d = loadZahvalnicaDraft()
+        const bgs = loadSavedBackgrounds()
+        return bgs.find((b) => b.src === d.backgroundImageSrc)?.id || "builtin-default"
+    })
 
     useEffect(() => {
         if (!canManage) navigate("/", { replace: true })
@@ -127,6 +137,40 @@ export const ZahvalnicaPage: React.FC = () => {
             return next
         })
     }, [user?.fullName])
+
+    // Persist design state for the active background template
+    useEffect(() => {
+        if (!activeTemplateId) return
+        saveTemplateSettingsFor(activeTemplateId, extractTemplateSettings(draft))
+    }, [
+        activeTemplateId,
+        draft.background,
+        draft.backgroundOpacity,
+        draft.watermarkScale,
+        draft.logoSrc,
+        draft.typography,
+        draft.titleFont,
+        draft.customTitleFontData,
+        draft.customTitleFontName,
+        draft.bodyLineHeight,
+        draft.showStamp,
+        draft.showSignature,
+        draft.showQr,
+        draft.stampSrc,
+        draft.signatureSrc,
+        draft.signatureScale,
+        draft.signatureOffsetX,
+        draft.signatureOffsetY,
+        draft.stampScale,
+        draft.stampOffsetX,
+        draft.stampOffsetY,
+        draft.orgTitle,
+        draft.title,
+        draft.intro,
+        draft.closing,
+        draft.presidentLabel,
+        draft.place,
+    ])
 
     useEffect(() => {
         if (!draft.customTitleFontData) return
@@ -222,6 +266,21 @@ export const ZahvalnicaPage: React.FC = () => {
         backgrounds.find((b) => b.src === draft.backgroundImageSrc)?.id ||
         (draft.backgroundImageSrc ? null : "builtin-default")
 
+    const selectBackground = (bg: SavedBackground) => {
+        setDraft((d) => {
+            if (activeTemplateId) {
+                saveTemplateSettingsFor(activeTemplateId, extractTemplateSettings(d))
+            }
+            const saved = loadTemplateSettingsFor(bg.id)
+            const next = saved
+                ? applyTemplateSettings(d, saved, bg.src)
+                : { ...d, backgroundImageSrc: bg.src, backgroundOpacity: 100, watermarkScale: 100 }
+            saveZahvalnicaDraft(next)
+            return next
+        })
+        setActiveTemplateId(bg.id)
+    }
+
     const issue = async (mode: "pdf" | "print") => {
         setBusy(true)
         try {
@@ -234,6 +293,20 @@ export const ZahvalnicaPage: React.FC = () => {
             if (!Number.isNaN(n)) {
                 patch({ number: String(n + 1) })
             }
+        } finally {
+            setBusy(false)
+        }
+    }
+
+    const reprint = async (row: ZahvalnicaIssue, mode: "pdf" | "print") => {
+        if (!row.verifyToken) return
+        setBusy(true)
+        try {
+            const reprintDraft = draftFromIssue(row, draft)
+            await generateZahvalnicaPdf(reprintDraft, {
+                print: mode === "print",
+                reprintOf: { id: row.id, verifyToken: row.verifyToken },
+            })
         } finally {
             setBusy(false)
         }
@@ -605,13 +678,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                         : ""
                                 }`}
                                 title={bg.name}
-                                onClick={() =>
-                                    patch({
-                                        backgroundImageSrc: bg.src,
-                                        backgroundOpacity: 100,
-                                        watermarkScale: 100,
-                                    })
-                                }
+                                onClick={() => selectBackground(bg)}
                             >
                                 <img src={bg.src} alt={bg.name} />
                                 <span>{bg.name}</span>
@@ -654,11 +721,16 @@ export const ZahvalnicaPage: React.FC = () => {
                                 const compressed = await compressImageDataUrl(raw)
                                 const next = addSavedBackground(file.name.replace(/\.[^.]+$/, ""), compressed)
                                 setBackgrounds(next)
-                                patch({
-                                    backgroundImageSrc: compressed,
-                                    backgroundOpacity: 100,
-                                    watermarkScale: 100,
-                                })
+                                const created = next.find((b) => b.src === compressed)
+                                if (created) {
+                                    selectBackground(created)
+                                } else {
+                                    patch({
+                                        backgroundImageSrc: compressed,
+                                        backgroundOpacity: 100,
+                                        watermarkScale: 100,
+                                    })
+                                }
                             }}
                         >
                             {(props) => (
@@ -1118,7 +1190,9 @@ export const ZahvalnicaPage: React.FC = () => {
                                     <Table.Td>
                                         {row.channel === "print"
                                             ? intl.formatMessage({ id: "pages.zahvalnica.print" })
-                                            : "PDF"}
+                                            : row.channel === "reprint"
+                                              ? intl.formatMessage({ id: "pages.zahvalnica.reprint" })
+                                              : "PDF"}
                                     </Table.Td>
                                     <Table.Td>
                                         {row.voided ? (
@@ -1145,6 +1219,28 @@ export const ZahvalnicaPage: React.FC = () => {
                                     </Table.Td>
                                     <Table.Td>
                                         <Flex gap={6} wrap="wrap">
+                                            {row.verifyToken && (
+                                                <>
+                                                    <Button
+                                                        variant="light"
+                                                        size="compact-xs"
+                                                        leftSection={<IconPrinter size={12} />}
+                                                        loading={busy}
+                                                        onClick={() => reprint(row, "print")}
+                                                    >
+                                                        <FormattedMessage id="pages.zahvalnica.reprint" />
+                                                    </Button>
+                                                    <Button
+                                                        variant="subtle"
+                                                        size="compact-xs"
+                                                        leftSection={<IconDownload size={12} />}
+                                                        loading={busy}
+                                                        onClick={() => reprint(row, "pdf")}
+                                                    >
+                                                        PDF
+                                                    </Button>
+                                                </>
+                                            )}
                                             {row.voided ? (
                                                 <Button
                                                     variant="subtle"

@@ -71,10 +71,42 @@ export type ZahvalnicaIssue = {
     presidentName: string
     issuedAt: string
     issuedBy: string
-    channel: "pdf" | "print"
+    channel: "pdf" | "print" | "reprint"
+    /** Full draft snapshot for reprint with same layout/QR. */
+    snapshot?: ZahvalnicaDraft
     /** Marked invalid; verify page shows «недействительно», link still opens. */
     voided?: boolean
     voidedAt?: string
+}
+
+/** Design/layout state stored per background template. */
+export type ZahvalnicaTemplateSettings = {
+    background: ZahvalnicaBackground
+    backgroundOpacity: number
+    watermarkScale: number
+    logoSrc: string
+    typography: ZahvalnicaTypography
+    titleFont: ZahvalnicaTitleFont
+    customTitleFontData: string | null
+    customTitleFontName: string
+    bodyLineHeight: number
+    showStamp: boolean
+    showSignature: boolean
+    showQr: boolean
+    stampSrc: string
+    signatureSrc: string
+    signatureScale: number
+    signatureOffsetX: number
+    signatureOffsetY: number
+    stampScale: number
+    stampOffsetX: number
+    stampOffsetY: number
+    orgTitle: string
+    title: string
+    intro: string
+    closing: string
+    presidentLabel: string
+    place: string
 }
 
 export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
@@ -82,6 +114,7 @@ export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
 export const ZAHVALNICA_HISTORY_KEY = "portal.zahvalnica.history"
 export const ZAHVALNICA_VOIDED_KEY = "portal.zahvalnica.voidedIds"
 export const ZAHVALNICA_BACKGROUNDS_KEY = "portal.zahvalnica.backgrounds"
+export const ZAHVALNICA_TEMPLATE_SETTINGS_KEY = "portal.zahvalnica.templateSettings"
 export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png?v=2"
 export const DEFAULT_BACKGROUND = "/resources/zahvalnica-bg.jpg"
 export const DEFAULT_STAMP = "/resources/zahvalnica-stamp.png"
@@ -358,7 +391,7 @@ export const loadZahvalnicaHistory = (): ZahvalnicaIssue[] => {
 export const recordZahvalnicaIssue = (
     draft: ZahvalnicaDraft,
     issuedBy: string,
-    channel: "pdf" | "print",
+    channel: "pdf" | "print" | "reprint",
     verifyToken: string,
     issueId: string
 ): ZahvalnicaIssue[] => {
@@ -375,6 +408,7 @@ export const recordZahvalnicaIssue = (
         issuedAt: new Date().toISOString(),
         issuedBy,
         channel,
+        snapshot: { ...draft, typography: { ...draft.typography } },
         voided: false,
     }
     const next = [issue, ...loadZahvalnicaHistory()].slice(0, 500)
@@ -385,9 +419,34 @@ export const recordZahvalnicaIssue = (
             localStorage.setItem(ZAHVALNICA_NUMBER_KEY, String(n))
         }
     } catch {
-        /* ignore */
+        /* ignore quota — retry without heavy custom font / data urls */
+        try {
+            const slim: ZahvalnicaIssue = {
+                ...issue,
+                snapshot: {
+                    ...draft,
+                    customTitleFontData: null,
+                    logoSrc: draft.logoSrc.startsWith("data:") ? DEFAULT_LOGO : draft.logoSrc,
+                    backgroundImageSrc:
+                        draft.backgroundImageSrc && draft.backgroundImageSrc.startsWith("data:")
+                            ? DEFAULT_BACKGROUND
+                            : draft.backgroundImageSrc,
+                    stampSrc: draft.stampSrc.startsWith("data:") ? DEFAULT_STAMP : draft.stampSrc,
+                    signatureSrc: draft.signatureSrc.startsWith("data:")
+                        ? DEFAULT_SIGNATURE
+                        : draft.signatureSrc,
+                    typography: { ...draft.typography },
+                },
+            }
+            localStorage.setItem(
+                ZAHVALNICA_HISTORY_KEY,
+                JSON.stringify([slim, ...loadZahvalnicaHistory()].slice(0, 200))
+            )
+        } catch {
+            /* ignore */
+        }
     }
-    return next
+    return loadZahvalnicaHistory()
 }
 
 export const clearZahvalnicaHistory = () => {
@@ -464,6 +523,131 @@ export const deleteZahvalnicaIssue = (issueId: string): ZahvalnicaIssue[] => {
     return next
 }
 
+export const extractTemplateSettings = (draft: ZahvalnicaDraft): ZahvalnicaTemplateSettings => ({
+    background: draft.background,
+    backgroundOpacity: draft.backgroundOpacity,
+    watermarkScale: draft.watermarkScale,
+    logoSrc: draft.logoSrc,
+    typography: {
+        org: { ...draft.typography.org },
+        title: { ...draft.typography.title },
+        name: { ...draft.typography.name },
+        body: { ...draft.typography.body },
+        sign: { ...draft.typography.sign },
+        meta: { ...draft.typography.meta },
+    },
+    titleFont: draft.titleFont,
+    customTitleFontData: draft.customTitleFontData,
+    customTitleFontName: draft.customTitleFontName,
+    bodyLineHeight: draft.bodyLineHeight,
+    showStamp: draft.showStamp,
+    showSignature: draft.showSignature,
+    showQr: draft.showQr,
+    stampSrc: draft.stampSrc,
+    signatureSrc: draft.signatureSrc,
+    signatureScale: draft.signatureScale,
+    signatureOffsetX: draft.signatureOffsetX,
+    signatureOffsetY: draft.signatureOffsetY,
+    stampScale: draft.stampScale,
+    stampOffsetX: draft.stampOffsetX,
+    stampOffsetY: draft.stampOffsetY,
+    orgTitle: draft.orgTitle,
+    title: draft.title,
+    intro: draft.intro,
+    closing: draft.closing,
+    presidentLabel: draft.presidentLabel,
+    place: draft.place,
+})
+
+export const applyTemplateSettings = (
+    draft: ZahvalnicaDraft,
+    settings: ZahvalnicaTemplateSettings,
+    backgroundImageSrc: string | null
+): ZahvalnicaDraft => ({
+    ...draft,
+    ...settings,
+    typography: {
+        org: { ...settings.typography.org },
+        title: { ...settings.typography.title },
+        name: { ...settings.typography.name },
+        body: { ...settings.typography.body },
+        sign: { ...settings.typography.sign },
+        meta: { ...settings.typography.meta },
+    },
+    backgroundImageSrc,
+})
+
+export const loadAllTemplateSettings = (): Record<string, ZahvalnicaTemplateSettings> => {
+    try {
+        const raw = localStorage.getItem(ZAHVALNICA_TEMPLATE_SETTINGS_KEY)
+        if (!raw) return {}
+        const map = JSON.parse(raw) as Record<string, ZahvalnicaTemplateSettings>
+        return map && typeof map === "object" ? map : {}
+    } catch {
+        return {}
+    }
+}
+
+export const saveTemplateSettingsFor = (templateId: string, settings: ZahvalnicaTemplateSettings) => {
+    if (!templateId) return
+    try {
+        const all = loadAllTemplateSettings()
+        all[templateId] = settings
+        localStorage.setItem(ZAHVALNICA_TEMPLATE_SETTINGS_KEY, JSON.stringify(all))
+    } catch {
+        /* quota — drop custom font from this template and retry */
+        try {
+            const all = loadAllTemplateSettings()
+            all[templateId] = { ...settings, customTitleFontData: null, customTitleFontName: "" }
+            localStorage.setItem(ZAHVALNICA_TEMPLATE_SETTINGS_KEY, JSON.stringify(all))
+        } catch {
+            /* ignore */
+        }
+    }
+}
+
+export const loadTemplateSettingsFor = (templateId: string): ZahvalnicaTemplateSettings | null => {
+    if (!templateId) return null
+    return loadAllTemplateSettings()[templateId] || null
+}
+
+/** Rebuild draft for reprint from history row. */
+export const draftFromIssue = (issue: ZahvalnicaIssue, fallback: ZahvalnicaDraft): ZahvalnicaDraft => {
+    if (issue.snapshot) {
+        return {
+            ...fallback,
+            ...issue.snapshot,
+            volunteerName: issue.volunteerName,
+            volunteerUsername: issue.volunteerUsername,
+            number: issue.number,
+            dateLabel: issue.dateLabel,
+            place: issue.place || issue.snapshot.place,
+            contribution: issue.contribution,
+            presidentName: issue.presidentName || issue.snapshot.presidentName,
+            typography: issue.snapshot.typography
+                ? {
+                      org: { ...fallback.typography.org, ...issue.snapshot.typography.org },
+                      title: { ...fallback.typography.title, ...issue.snapshot.typography.title },
+                      name: { ...fallback.typography.name, ...issue.snapshot.typography.name },
+                      body: { ...fallback.typography.body, ...issue.snapshot.typography.body },
+                      sign: { ...fallback.typography.sign, ...issue.snapshot.typography.sign },
+                      meta: { ...fallback.typography.meta, ...issue.snapshot.typography.meta },
+                  }
+                : fallback.typography,
+        }
+    }
+    return {
+        ...fallback,
+        volunteerName: issue.volunteerName,
+        volunteerUsername: issue.volunteerUsername,
+        number: issue.number,
+        dateLabel: issue.dateLabel,
+        place: issue.place || fallback.place,
+        contribution: issue.contribution,
+        presidentName: issue.presidentName || fallback.presidentName,
+    }
+}
+
 export const loadSavedBackgrounds = (): SavedBackground[] => {
     let custom: SavedBackground[] = []
     try {
@@ -507,6 +691,15 @@ export const addSavedBackground = (name: string, src: string): SavedBackground[]
 export const removeSavedBackground = (id: string): SavedBackground[] => {
     const next = loadSavedBackgrounds().filter((b) => b.id !== id || b.builtin)
     persistCustomBackgrounds(next)
+    try {
+        const all = loadAllTemplateSettings()
+        if (all[id]) {
+            delete all[id]
+            localStorage.setItem(ZAHVALNICA_TEMPLATE_SETTINGS_KEY, JSON.stringify(all))
+        }
+    } catch {
+        /* ignore */
+    }
     return loadSavedBackgrounds()
 }
 
