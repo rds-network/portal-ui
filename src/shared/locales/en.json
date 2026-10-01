@@ -1810,7 +1810,7 @@
         "finish": "Done",
         "welcome": {
             "title": "What's new on the portal",
-            "body": "A short guide to the desktop, ideas board, leave, tasks, and reports. Take it now or reopen later via the sparkle in the header."
+            "body": "A short guide to the desktop, ideas board, leave, achievements, tasks, and reports. Take it now or reopen later via the sparkle in the header."
         },
         "desktop": {
             "title": "Desktop",
@@ -1851,6 +1851,10 @@
         "leave": {
             "title": "Leave — why and how",
             "body": "Approved days do not count toward the hour quota and do not increase report delay. Pick dates, optional reason — after approval, leave shows in the hours history on the desktop."
+        },
+        "achievements": {
+            "title": "My achievements",
+            "body": "Points for consistency and quality: +10 for a visit once a week, −10 if you miss a week (soft penalty), +5 for a report accepted without remarks. You also see how many inbox messages recipients actually opened. Menu item: My achievements."
         },
         "tasks": {
             "title": "Tasks board",

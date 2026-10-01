@@ -1,5 +1,5 @@
 /** Bump when the tour steps change so users see the tour again. */
-export const WHATS_NEW_VERSION = "2026-09-30-v2"
+export const WHATS_NEW_VERSION = "2026-10-01-v1"
 export const WHATS_NEW_STORAGE_KEY = "portal.whatsNew.seen"
 export const WHATS_NEW_START_EVENT = "portal-whats-new-start"
 
@@ -112,6 +112,13 @@ export const WHATS_NEW_STEPS: WhatsNewStep[] = [
         target: '[data-tour-id="leave-form"]',
         titleId: "whatsNew.leave.title",
         bodyId: "whatsNew.leave.body",
+    },
+    {
+        id: "achievements",
+        route: "/achievements",
+        target: '[data-tour-id="achievements-root"]',
+        titleId: "whatsNew.achievements.title",
+        bodyId: "whatsNew.achievements.body",
     },
     {
         id: "tasks",

@@ -60,7 +60,7 @@ const AchievementsPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className={classes.root}>
+            <div className={classes.root} data-tour-id="achievements-root">
                 <Loader size="sm" />
             </div>
         )
@@ -68,7 +68,7 @@ const AchievementsPage: React.FC = () => {
 
     if (isError || !data) {
         return (
-            <div className={classes.root}>
+            <div className={classes.root} data-tour-id="achievements-root">
                 <Title order={2}>
                     <FormattedMessage id="pages.achievements.title" />
                 </Title>
@@ -80,7 +80,7 @@ const AchievementsPage: React.FC = () => {
     }
 
     return (
-        <div className={classes.root}>
+        <div className={classes.root} data-tour-id="achievements-root">
             <div>
                 <Title order={2}>
                     <FormattedMessage id="pages.achievements.title" />

@@ -1810,7 +1810,7 @@
         "finish": "Gotovo",
         "welcome": {
             "title": "Šta je novo na portalu",
-            "body": "Kratak vodič kroz radni sto, ideje, odmor, zadatke i izveštaje. Sada ili kasnije — zvezdica u zaglavlju."
+            "body": "Kratak vodič kroz radni sto, ideje, odmor, dostignuća, zadatke i izveštaje. Sada ili kasnije — zvezdica u zaglavlju."
         },
         "desktop": {
             "title": "Radni sto",
@@ -1851,6 +1851,10 @@
         "leave": {
             "title": "Odmor — zašto i kako",
             "body": "Odobreni dani ne ulaze u satnu normu i ne uvećavaju kašnjenje izveštaja. Unesite datume, po želji razlog — posle odobrenja odmor se vidi u istoriji sati na stolu."
+        },
+        "achievements": {
+            "title": "Moja dostignuća",
+            "body": "Bodovi za redovnost i kvalitet: +10 za posetu jednom nedeljno, −10 ako ste propustili nedelju (mekani minus), +5 za izveštaj bez primedbi. Ovde vidite i koliko poruka iz LK primaoci stvarno otvore. Stavka u meniju: Moja dostignuća."
         },
         "tasks": {
             "title": "Tabla zadataka",
