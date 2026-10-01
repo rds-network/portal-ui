@@ -1371,6 +1371,7 @@
                 "soft": "Svetloplava",
                 "navy": "Teget"
             },
+            "bgOpacity": "Providnost pozadine: {value}%",
             "uploadLogo": "Sopstveni logo",
             "defaultLogo": "Logo RDS",
             "uploadBg": "Pozadinska slika",

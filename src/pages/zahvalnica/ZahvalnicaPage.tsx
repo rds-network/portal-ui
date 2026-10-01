@@ -3,6 +3,7 @@ import {
     FileButton,
     Flex,
     Select,
+    Slider,
     Text,
     Textarea,
     TextInput,
@@ -72,30 +73,35 @@ export const ZahvalnicaPage: React.FC = () => {
     const previewStyle = useMemo(() => {
         const map: Record<ZahvalnicaBackground, string> = {
             white: "#ffffff",
-            parchment: "#faf4e6",
             navy: "#122444",
             soft: "#e8f0f8",
         }
         const textMap: Record<ZahvalnicaBackground, string> = {
             white: "#14233c",
-            parchment: "#2d2319",
             navy: "#fafafa",
             soft: "#142846",
         }
         const accentMap: Record<ZahvalnicaBackground, string> = {
             white: "#1a365d",
-            parchment: "#78461e",
             navy: "#dcbe64",
             soft: "#285a8c",
         }
+        const bg: ZahvalnicaBackground =
+            draft.background === "white" || draft.background === "navy" || draft.background === "soft"
+                ? draft.background
+                : "white"
         return {
-            background: draft.backgroundImageSrc
-                ? `linear-gradient(rgba(250,244,230,0.88), rgba(250,244,230,0.88)), url(${draft.backgroundImageSrc}) center/cover`
-                : map[draft.background],
-            color: textMap[draft.background],
-            accent: accentMap[draft.background],
+            page: map[bg],
+            color: textMap[bg],
+            accent: accentMap[bg],
         }
-    }, [draft.background, draft.backgroundImageSrc])
+    }, [draft.background])
+
+    const watermarkSrc = draft.backgroundImageSrc || DEFAULT_LOGO
+    const themeValue: ZahvalnicaBackground =
+        draft.background === "white" || draft.background === "navy" || draft.background === "soft"
+            ? draft.background
+            : "white"
 
     if (!canManage) return null
 
@@ -238,15 +244,36 @@ export const ZahvalnicaPage: React.FC = () => {
                     </Title>
                     <Select
                         label={intl.formatMessage({ id: "pages.zahvalnica.background" })}
-                        value={draft.background}
+                        value={themeValue}
                         data={[
-                            { value: "parchment", label: intl.formatMessage({ id: "pages.zahvalnica.bg.parchment" }) },
                             { value: "white", label: intl.formatMessage({ id: "pages.zahvalnica.bg.white" }) },
                             { value: "soft", label: intl.formatMessage({ id: "pages.zahvalnica.bg.soft" }) },
                             { value: "navy", label: intl.formatMessage({ id: "pages.zahvalnica.bg.navy" }) },
                         ]}
                         onChange={(v) => v && patch({ background: v as ZahvalnicaBackground })}
                     />
+                    <div>
+                        <Text size="sm" fw={500} mb={6}>
+                            <FormattedMessage
+                                id="pages.zahvalnica.bgOpacity"
+                                values={{ value: draft.backgroundOpacity }}
+                            />
+                        </Text>
+                        <Slider
+                            min={0}
+                            max={60}
+                            step={1}
+                            value={draft.backgroundOpacity}
+                            onChange={(value) => patch({ backgroundOpacity: value })}
+                            marks={[
+                                { value: 0, label: "0%" },
+                                { value: 12, label: "12%" },
+                                { value: 30, label: "30%" },
+                                { value: 60, label: "60%" },
+                            ]}
+                            mb="lg"
+                        />
+                    </div>
                     <Flex gap="sm" wrap="wrap" align="center">
                         <FileButton
                             accept="image/png,image/jpeg,image/webp"
@@ -261,7 +288,10 @@ export const ZahvalnicaPage: React.FC = () => {
                                 </Button>
                             )}
                         </FileButton>
-                        <Button variant="subtle" onClick={() => patch({ logoSrc: DEFAULT_LOGO })}>
+                        <Button
+                            variant="subtle"
+                            onClick={() => patch({ logoSrc: DEFAULT_LOGO, backgroundImageSrc: DEFAULT_LOGO })}
+                        >
                             <FormattedMessage id="pages.zahvalnica.defaultLogo" />
                         </Button>
                         <FileButton
@@ -292,38 +322,48 @@ export const ZahvalnicaPage: React.FC = () => {
                     <article
                         className={classes.preview}
                         style={{
-                            background: previewStyle.background,
+                            backgroundColor: previewStyle.page,
                             color: previewStyle.color,
                             borderColor: previewStyle.accent,
                         }}
                     >
-                        <img src={draft.logoSrc} alt="" className={classes.previewLogo} />
-                        <p className={classes.org} style={{ color: previewStyle.accent }}>
-                            {draft.orgTitle}
-                        </p>
-                        <h1 className={classes.docTitle}>{draft.title}</h1>
-                        <div className={classes.rule} style={{ background: previewStyle.accent }} />
-                        <p className={classes.name} style={{ color: previewStyle.accent }}>
-                            {draft.volunteerName || "—"}
-                        </p>
-                        <p className={classes.body}>{draft.intro}</p>
-                        {draft.contribution.trim() && (
-                            <p className={classes.body}>
-                                Посебну захвалност изражавамо за {draft.contribution.trim()}.
-                            </p>
+                        {watermarkSrc && draft.backgroundOpacity > 0 && (
+                            <img
+                                src={watermarkSrc}
+                                alt=""
+                                className={classes.watermark}
+                                style={{ opacity: draft.backgroundOpacity / 100 }}
+                            />
                         )}
-                        <p className={classes.body}>{draft.closing}</p>
-                        <div className={classes.sign}>
-                            <span>{draft.presidentLabel}</span>
-                            <strong style={{ color: previewStyle.accent }}>
-                                {draft.presidentName || "—"}
-                            </strong>
-                        </div>
-                        <div className={classes.meta}>
-                            <span>
-                                {draft.place}, {draft.dateLabel}
-                            </span>
-                            <span>Број: {draft.number}</span>
+                        <div className={classes.previewContent}>
+                            <img src={draft.logoSrc} alt="" className={classes.previewLogo} />
+                            <p className={classes.org} style={{ color: previewStyle.accent }}>
+                                {draft.orgTitle}
+                            </p>
+                            <h1 className={classes.docTitle}>{draft.title}</h1>
+                            <div className={classes.rule} style={{ background: previewStyle.accent }} />
+                            <p className={classes.name} style={{ color: previewStyle.accent }}>
+                                {draft.volunteerName || "—"}
+                            </p>
+                            <p className={classes.body}>{draft.intro}</p>
+                            {draft.contribution.trim() && (
+                                <p className={classes.body}>
+                                    Посебну захвалност изражавамо за {draft.contribution.trim()}.
+                                </p>
+                            )}
+                            <p className={classes.body}>{draft.closing}</p>
+                            <div className={classes.sign}>
+                                <span>{draft.presidentLabel}</span>
+                                <strong style={{ color: previewStyle.accent }}>
+                                    {draft.presidentName || "—"}
+                                </strong>
+                            </div>
+                            <div className={classes.meta}>
+                                <span>
+                                    {draft.place}, {draft.dateLabel}
+                                </span>
+                                <span>Број: {draft.number}</span>
+                            </div>
                         </div>
                     </article>
                 </aside>

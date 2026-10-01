@@ -1371,6 +1371,7 @@
                 "soft": "Soft blue",
                 "navy": "Navy"
             },
+            "bgOpacity": "Background opacity: {value}%",
             "uploadLogo": "Custom logo",
             "defaultLogo": "RDS logo",
             "uploadBg": "Background image",

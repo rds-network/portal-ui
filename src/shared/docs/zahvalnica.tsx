@@ -4,32 +4,59 @@ import { MONTSERRAT_BOLD_BOLD } from "src/shared/docs/fonts/Montserrat-Bold-bold
 import { MONTSERRAT_MEDIUM_NORMAL } from "src/shared/docs/fonts/Montserrat-Medium-normal"
 import {
     BACKGROUND_COLORS,
+    DEFAULT_LOGO,
     ZahvalnicaDraft,
     saveZahvalnicaDraft,
 } from "src/shared/docs/zahvalnicaDraft"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 
-const loadImageAsDataUrl = async (src: string): Promise<string | null> => {
+const loadImageElement = async (src: string): Promise<HTMLImageElement | null> => {
     try {
-        if (src.startsWith("data:")) return src
-        const res = await fetch(src)
-        if (!res.ok) return null
-        const blob = await res.blob()
+        const url = src.startsWith("data:")
+            ? src
+            : await (async () => {
+                  const res = await fetch(src)
+                  if (!res.ok) return null
+                  const blob = await res.blob()
+                  return await new Promise<string>((resolve, reject) => {
+                      const reader = new FileReader()
+                      reader.onload = () => resolve(String(reader.result))
+                      reader.onerror = reject
+                      reader.readAsDataURL(blob)
+                  })
+              })()
+        if (!url) return null
         return await new Promise((resolve, reject) => {
-            const reader = new FileReader()
-            reader.onload = () => resolve(String(reader.result))
-            reader.onerror = reject
-            reader.readAsDataURL(blob)
+            const img = new Image()
+            img.onload = () => resolve(img)
+            img.onerror = reject
+            img.src = url
         })
     } catch {
         return null
     }
 }
 
-const imageFormat = (dataUrl: string): "JPEG" | "PNG" | "WEBP" => {
-    if (dataUrl.includes("image/png")) return "PNG"
-    if (dataUrl.includes("image/webp")) return "WEBP"
-    return "JPEG"
+/** Rasterize image with alpha for jsPDF (no reliable GState opacity). */
+const imageDataUrlWithOpacity = async (
+    src: string,
+    opacity: number,
+    maxPx = 1600
+): Promise<string | null> => {
+    const img = await loadImageElement(src)
+    if (!img) return null
+    const scale = Math.min(1, maxPx / Math.max(img.width, img.height))
+    const w = Math.max(1, Math.round(img.width * scale))
+    const h = Math.max(1, Math.round(img.height * scale))
+    const canvas = document.createElement("canvas")
+    canvas.width = w
+    canvas.height = h
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return null
+    ctx.clearRect(0, 0, w, h)
+    ctx.globalAlpha = Math.min(1, Math.max(0, opacity / 100))
+    ctx.drawImage(img, 0, 0, w, h)
+    return canvas.toDataURL("image/png")
 }
 
 export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft) {
@@ -57,28 +84,28 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft) {
 
     const pageW = pdf.internal.pageSize.getWidth()
     const pageH = pdf.internal.pageSize.getHeight()
-    const colors = BACKGROUND_COLORS[draft.background]
+    const colors = BACKGROUND_COLORS[draft.background] || BACKGROUND_COLORS.white
     const [pr, pg, pb] = colors.page
     const [tr, tg, tb] = colors.text
     const [ar, ag, ab] = colors.accent
 
-    // Background: solid theme, or custom image (photo fills page; theme used for text colors)
-    if (draft.backgroundImageSrc) {
-        const bg = await loadImageAsDataUrl(draft.backgroundImageSrc)
-        if (bg) {
+    pdf.setFillColor(pr, pg, pb)
+    pdf.rect(0, 0, pageW, pageH, "F")
+
+    const watermarkSrc = draft.backgroundImageSrc || DEFAULT_LOGO
+    const opacity = draft.backgroundOpacity ?? 12
+    if (watermarkSrc && opacity > 0) {
+        const faded = await imageDataUrlWithOpacity(watermarkSrc, opacity)
+        if (faded) {
             try {
-                pdf.addImage(bg, imageFormat(bg), 0, 0, pageW, pageH, undefined, "FAST")
+                // Centered watermark, ~55% of page width
+                const wmW = pageW * 0.55
+                const wmH = wmW
+                pdf.addImage(faded, "PNG", (pageW - wmW) / 2, (pageH - wmH) / 2 - 8, wmW, wmH, undefined, "FAST")
             } catch {
-                pdf.setFillColor(pr, pg, pb)
-                pdf.rect(0, 0, pageW, pageH, "F")
+                /* ignore */
             }
-        } else {
-            pdf.setFillColor(pr, pg, pb)
-            pdf.rect(0, 0, pageW, pageH, "F")
         }
-    } else {
-        pdf.setFillColor(pr, pg, pb)
-        pdf.rect(0, 0, pageW, pageH, "F")
     }
 
     pdf.setDrawColor(ar, ag, ab)
@@ -91,21 +118,18 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft) {
     const contentW = pageW - marginX * 2
     let y = 28
 
-    const logoData = await loadImageAsDataUrl(draft.logoSrc || "/resources/zahvalnica-logo.jpg")
-    if (logoData) {
+    const logoImg = await loadImageElement(draft.logoSrc || DEFAULT_LOGO)
+    if (logoImg) {
         try {
-            const logoW = 28
-            const logoH = 28
-            pdf.addImage(
-                logoData,
-                imageFormat(logoData),
-                (pageW - logoW) / 2,
-                y,
-                logoW,
-                logoH,
-                undefined,
-                "FAST"
-            )
+            const canvas = document.createElement("canvas")
+            canvas.width = logoImg.width
+            canvas.height = logoImg.height
+            const ctx = canvas.getContext("2d")
+            ctx?.drawImage(logoImg, 0, 0)
+            const logoData = canvas.toDataURL("image/png")
+            const logoW = 32
+            const logoH = 32
+            pdf.addImage(logoData, "PNG", (pageW - logoW) / 2, y, logoW, logoH, undefined, "FAST")
             y += logoH + 8
         } catch {
             y += 4

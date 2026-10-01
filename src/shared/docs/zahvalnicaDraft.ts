@@ -1,4 +1,4 @@
-export type ZahvalnicaBackground = "white" | "parchment" | "navy" | "soft"
+export type ZahvalnicaBackground = "white" | "navy" | "soft"
 
 export type ZahvalnicaDraft = {
     orgTitle: string
@@ -15,13 +15,15 @@ export type ZahvalnicaDraft = {
     background: ZahvalnicaBackground
     /** data URL or public path */
     logoSrc: string
-    /** optional custom background image data URL */
+    /** optional custom background / watermark image */
     backgroundImageSrc: string | null
+    /** 0–100 opacity for background/watermark image */
+    backgroundOpacity: number
 }
 
 export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
 export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
-export const DEFAULT_LOGO = "/resources/zahvalnica-logo.jpg"
+export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png"
 
 export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
     const today = new Date()
@@ -48,9 +50,11 @@ export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): Za
         place: "У Новом Саду",
         dateLabel: `${dd}.${mm}.${yyyy}.`,
         number: String(nextNumber),
-        background: "parchment",
+        background: "white",
         logoSrc: DEFAULT_LOGO,
-        backgroundImageSrc: null,
+        // Logo as soft watermark by default
+        backgroundImageSrc: DEFAULT_LOGO,
+        backgroundOpacity: 12,
         ...overrides,
     }
 }
@@ -88,11 +92,36 @@ export const TEXT_TEMPLATES: { id: string; labelId: string; patch: Partial<Zahva
     },
 ]
 
+const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
+    const base = defaultZahvalnicaDraft()
+    const merged = { ...base, ...raw }
+    // Drop old yellow parchment theme and old square jpg logo from saved drafts
+    if ((raw as { background?: string }).background === "parchment") {
+        merged.background = "white"
+    }
+    if (
+        !raw.logoSrc ||
+        raw.logoSrc.includes("zahvalnica-logo.jpg") ||
+        raw.logoSrc.includes("zahvalnica-logo.jpg")
+    ) {
+        merged.logoSrc = DEFAULT_LOGO
+    }
+    if (raw.backgroundOpacity == null || Number.isNaN(Number(raw.backgroundOpacity))) {
+        merged.backgroundOpacity = 12
+    } else {
+        merged.backgroundOpacity = Math.min(100, Math.max(0, Number(raw.backgroundOpacity)))
+    }
+    if (raw.backgroundImageSrc === undefined) {
+        merged.backgroundImageSrc = DEFAULT_LOGO
+    }
+    return merged
+}
+
 export const loadZahvalnicaDraft = (): ZahvalnicaDraft => {
     try {
         const raw = localStorage.getItem(ZAHVALNICA_STORAGE_KEY)
         if (!raw) return defaultZahvalnicaDraft()
-        return { ...defaultZahvalnicaDraft(), ...JSON.parse(raw) }
+        return migrateDraft(JSON.parse(raw))
     } catch {
         return defaultZahvalnicaDraft()
     }
@@ -110,10 +139,11 @@ export const saveZahvalnicaDraft = (draft: ZahvalnicaDraft) => {
     }
 }
 
-export const BACKGROUND_COLORS: Record<ZahvalnicaBackground, { page: [number, number, number]; text: [number, number, number]; accent: [number, number, number] }> =
-    {
-        white: { page: [255, 255, 255], text: [20, 35, 60], accent: [26, 54, 93] },
-        parchment: { page: [250, 244, 230], text: [45, 35, 25], accent: [120, 70, 30] },
-        navy: { page: [18, 36, 68], text: [250, 250, 250], accent: [220, 190, 100] },
-        soft: { page: [232, 240, 248], text: [20, 40, 70], accent: [40, 90, 140] },
-    }
+export const BACKGROUND_COLORS: Record<
+    ZahvalnicaBackground,
+    { page: [number, number, number]; text: [number, number, number]; accent: [number, number, number] }
+> = {
+    white: { page: [255, 255, 255], text: [20, 35, 60], accent: [26, 54, 93] },
+    navy: { page: [18, 36, 68], text: [250, 250, 250], accent: [220, 190, 100] },
+    soft: { page: [232, 240, 248], text: [20, 40, 70], accent: [40, 90, 140] },
+}
