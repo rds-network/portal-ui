@@ -1349,6 +1349,7 @@
             "close": "Close",
             "needLogin": "Sign in to open your card.",
             "notOfficial": "Association card. Not an official government document.",
+            "nameHint": "On the card: {name}. Change full name in <link>account settings</link> (Authentik), not in the portal profile editor.",
             "partners": "Погодности код партнера / Partner benefits",
             "verifyTitle": "VOL-ID verification",
             "verifyDescription": "The QR code shows the volunteer card details.",

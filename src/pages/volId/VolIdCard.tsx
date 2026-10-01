@@ -23,10 +23,8 @@ export const VolIdCard: React.FC<Props> = ({ card, qrDataUrl, side, large }) => 
                     <header className={classes.header}>
                         <img src={VOL_ID_LOGO} alt="" className={classes.logo} />
                         <div className={classes.titles}>
+                            <div className={classes.mainTitle}>VOLUNTEER ID CARD</div>
                             <div className={classes.org}>{card.orgTitle}</div>
-                            <div className={classes.subtitle}>
-                                ВОЛОНТЕРСКА КАРТИЦА / VOLUNTEER CARD
-                            </div>
                         </div>
                         <div className={classes.volMark}>VOL-ID</div>
                     </header>
@@ -41,38 +39,32 @@ export const VolIdCard: React.FC<Props> = ({ card, qrDataUrl, side, large }) => 
                                 </div>
                             )}
                         </div>
-                        <ol className={classes.fields}>
-                            <li>
-                                <span className={classes.fieldInner}>
-                                    <span className={classes.label}>Име и презиме / Name</span>
-                                    <strong className={classes.name}>{card.name}</strong>
-                                </span>
-                            </li>
-                            <li>
-                                <span className={classes.fieldInner}>
-                                    <span className={classes.label}>Број картице / Card number</span>
-                                    <span className={classes.valueMono}>{card.cardNumber}</span>
-                                </span>
-                            </li>
-                            <li>
-                                <span className={classes.fieldInner}>
-                                    <span className={classes.label}>Волонтер од / Volunteer since</span>
-                                    <span className={classes.value}>{card.sinceYear}</span>
-                                </span>
-                            </li>
-                            <li>
-                                <span className={classes.fieldInner}>
-                                    <span className={classes.label}>Издата / Issued</span>
-                                    <span className={classes.value}>{card.issuedLabel}</span>
-                                </span>
-                            </li>
-                            <li>
-                                <span className={classes.fieldInner}>
-                                    <span className={classes.label}>Важи до / Valid until</span>
-                                    <span className={classes.value}>{card.validUntilLabel}</span>
-                                </span>
-                            </li>
-                        </ol>
+                        <div className={classes.fields}>
+                            <div className={classes.field}>
+                                <span className={classes.label}>Име и презиме / Name</span>
+                                <strong className={classes.name}>{card.name}</strong>
+                            </div>
+                            <div className={classes.field}>
+                                <span className={classes.label}>Број картице / Card number</span>
+                                <span className={classes.valueMono}>{card.cardNumber}</span>
+                            </div>
+                            <div className={classes.field}>
+                                <span className={classes.label}>Волонтер од / Volunteer since</span>
+                                <span className={classes.value}>{card.sinceYear}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={classes.dates}>
+                        <div className={classes.dateItem}>
+                            <span className={classes.label}>Издата / Issued</span>
+                            <span className={classes.value}>{card.issuedLabel}</span>
+                        </div>
+                        <div className={classes.dateDivider} aria-hidden />
+                        <div className={classes.dateItem}>
+                            <span className={classes.label}>Важи до / Valid until</span>
+                            <span className={classes.value}>{card.validUntilLabel}</span>
+                        </div>
                     </div>
                 </>
             ) : (

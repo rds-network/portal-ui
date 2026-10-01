@@ -1,4 +1,4 @@
-import { Button, Flex, Text, Title } from "@mantine/core"
+import { Anchor, Button, Flex, Text, Title } from "@mantine/core"
 import { IconId, IconRefresh, IconX } from "@tabler/icons-react"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -14,6 +14,8 @@ import {
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { VolIdCard } from "./VolIdCard"
 import classes from "./VolIdPage.module.scss"
+
+const ACCOUNT_SETTINGS_URL = "https://id.russian.rs/if/user/#/settings"
 
 const VolIdPage: React.FC = () => {
     setDocumentTitleByLocale("pages.volId.title")
@@ -99,6 +101,19 @@ const VolIdPage: React.FC = () => {
 
             <Text size="xs" c="dimmed" ta="center" mt="sm">
                 {card.cardNumber} · {intl.formatMessage({ id: "pages.volId.notOfficial" })}
+            </Text>
+            <Text size="xs" c="dimmed" ta="center" maw={420} className={classes.nameHint}>
+                <FormattedMessage
+                    id="pages.volId.nameHint"
+                    values={{
+                        name: <strong>{card.name}</strong>,
+                        link: (chunks) => (
+                            <Anchor href={ACCOUNT_SETTINGS_URL} target="_blank" size="xs">
+                                {chunks}
+                            </Anchor>
+                        ),
+                    }}
+                />
             </Text>
 
             {presenting && (
