@@ -399,7 +399,7 @@ export const ApplicationView = () => {
                             variant="outline"
                             rightSection={<IconPencil size={14} />}
                             onClick={openDrawer}
-                            disabled={isUpdating || application.status === ApplicationStatus.DONE}
+                            disabled={isUpdating}
                         >
                             <FormattedMessage id="pages.profile.buttons.edit" />
                         </Button>

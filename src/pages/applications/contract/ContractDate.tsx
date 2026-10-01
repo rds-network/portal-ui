@@ -10,7 +10,6 @@ import { FormattedMessage, useIntl } from "react-intl"
 import classes from "src/pages/applications/contract/ContractDate.module.scss"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
 import { ContractTypeSelect } from "src/shared/ui/contractTypeSelect/ContractTypeSelect"
-import { ApplicationStatus } from "src/shared/user/applications"
 import { v4 } from "uuid"
 import { z } from "zod"
 import { locales } from "./lib/locales"
@@ -25,8 +24,6 @@ interface ContractEditModalProps {
 export const ContractDate = ({ application, onChange, className, disabled }: ContractEditModalProps) => {
     const intl = useIntl()
     const [opened, { close, toggle }] = useDisclosure(false)
-
-    const isApplicationCompleted = application.status === ApplicationStatus.DONE
 
     const initialContract: ContractDto = application.contract || {
         id: v4(),
@@ -92,7 +89,7 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
                     color={application.contract ? "blue" : "gray"}
                     onClick={toggle}
                     className={className}
-                    disabled={disabled || isApplicationCompleted}
+                    disabled={disabled}
                     size="xs"
                     h={28}
                     px="sm"
