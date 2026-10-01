@@ -117,22 +117,20 @@
 
 .body {
     display: grid;
-    grid-template-columns: 0.44fr 1fr;
-    gap: 3%;
-    padding: 0.5% 10% 2.5% 2.8%;
-    align-items: stretch;
-    height: calc(100% - 18%);
+    grid-template-columns: 22% 1fr;
+    gap: 3.2%;
+    padding: 1% 10% 3% 2.8%;
+    align-items: start;
 }
 
 .photoWrap {
     width: 100%;
-    height: 100%;
-    min-height: 0;
-    border-radius: 4px;
+    aspect-ratio: 3 / 4;
+    border-radius: 3px;
     overflow: hidden;
-    border: 1px solid rgba(26, 58, 107, 0.2);
+    border: 1px solid rgba(26, 58, 107, 0.22);
     background: #dbe4f2;
-    align-self: stretch;
+    align-self: start;
 }
 
 .photo {
@@ -140,16 +138,16 @@
     height: 100%;
     object-fit: cover;
     object-position: center top;
+    display: block;
 }
 
 .photoPlaceholder {
     width: 100%;
     height: 100%;
-    min-height: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: clamp(18px, 5vw, 28px);
     font-weight: 800;
     color: var(--vol-blue);
     font-family: system-ui, sans-serif;
@@ -161,26 +159,27 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 4.5%;
+    gap: clamp(3px, 0.9vw, 6px);
     counter-reset: field;
     min-width: 0;
+    justify-content: flex-start;
 }
 
 .fields li {
     counter-increment: field;
     display: flex;
-    gap: 7px;
+    gap: 6px;
     align-items: flex-start;
 }
 
 .fields li::before {
     content: counter(field) ".";
-    font-size: clamp(10px, 2.3vw, 13px);
+    font-size: clamp(9px, 2vw, 12px);
     color: var(--vol-muted);
     font-family: system-ui, sans-serif;
     font-weight: 700;
-    margin-top: 1px;
-    line-height: 1.2;
+    margin-top: 0;
+    line-height: 1.1;
 }
 
 .fieldInner {
@@ -188,37 +187,37 @@
     flex-direction: column;
     min-width: 0;
     flex: 1;
-    gap: 1px;
+    gap: 0;
 }
 
 .label {
-    font-size: clamp(9px, 2.1vw, 11px);
+    font-size: clamp(8px, 1.7vw, 10px);
     color: var(--vol-muted);
     font-family: system-ui, sans-serif;
-    line-height: 1.15;
+    line-height: 1.05;
 }
 
 .name,
 .value,
 .valueMono {
-    line-height: 1.15;
+    line-height: 1.1;
 }
 
 .name {
-    font-size: clamp(15px, 4vw, 22px);
+    font-size: clamp(13px, 3.2vw, 18px);
     font-weight: 800;
     color: var(--vol-blue);
     letter-spacing: 0.01em;
 }
 
 .value {
-    font-size: clamp(13px, 3.1vw, 17px);
+    font-size: clamp(12px, 2.7vw, 15px);
     font-weight: 700;
     font-family: system-ui, sans-serif;
 }
 
 .valueMono {
-    font-size: clamp(13px, 3.1vw, 17px);
+    font-size: clamp(12px, 2.7vw, 15px);
     font-weight: 700;
     font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
     letter-spacing: 0.02em;
