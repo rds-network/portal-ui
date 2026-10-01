@@ -1,5 +1,7 @@
 export type ZahvalnicaBackground = "white" | "navy" | "soft"
 
+export type ZahvalnicaTitleFont = "marck" | "magnolia" | "montserrat"
+
 export type TextStyle = {
     size: number
     color: string
@@ -32,15 +34,27 @@ export type ZahvalnicaDraft = {
     logoSrc: string
     backgroundImageSrc: string | null
     backgroundOpacity: number
+    /** Percent of page width used by watermark (40–140). */
+    watermarkScale: number
+    /** Line-height multiplier for body paragraphs. */
+    bodyLineHeight: number
+    titleFont: ZahvalnicaTitleFont
+    showStamp: boolean
+    showSignature: boolean
+    showQr: boolean
+    stampSrc: string
+    signatureSrc: string
     typography: ZahvalnicaTypography
 }
 
 export type ZahvalnicaIssue = {
     id: string
+    verifyToken: string
     volunteerName: string
     volunteerUsername: string | null
     number: string
     dateLabel: string
+    place: string
     contribution: string
     presidentName: string
     issuedAt: string
@@ -52,10 +66,20 @@ export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
 export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
 export const ZAHVALNICA_HISTORY_KEY = "portal.zahvalnica.history"
 export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png"
+export const DEFAULT_STAMP = "/resources/zahvalnica-stamp.png"
+export const DEFAULT_SIGNATURE = "/resources/zahvalnica-signature.png"
+export const MARCK_FONT_URL = "/resources/fonts/MarckScript-Regular.ttf"
+export const MAGNOLIA_FONT_URL = "/resources/fonts/MagnoliaScript.otf"
+
+export const TITLE_FONT_CSS: Record<ZahvalnicaTitleFont, string> = {
+    marck: '"Marck Script", cursive',
+    magnolia: '"Magnolia Script", cursive',
+    montserrat: '"Montserrat", sans-serif',
+}
 
 export const defaultTypography = (): ZahvalnicaTypography => ({
     org: { size: 11, color: "#1a365d", bold: true },
-    title: { size: 26, color: "#14233c", bold: true },
+    title: { size: 34, color: "#14233c", bold: false },
     name: { size: 18, color: "#1a365d", bold: true },
     body: { size: 11, color: "#14233c", bold: false },
     sign: { size: 12, color: "#1a365d", bold: true },
@@ -92,6 +116,14 @@ export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): Za
         logoSrc: DEFAULT_LOGO,
         backgroundImageSrc: DEFAULT_LOGO,
         backgroundOpacity: 12,
+        watermarkScale: 95,
+        bodyLineHeight: 1.55,
+        titleFont: "marck",
+        showStamp: true,
+        showSignature: true,
+        showQr: true,
+        stampSrc: DEFAULT_STAMP,
+        signatureSrc: DEFAULT_SIGNATURE,
         typography: defaultTypography(),
         ...overrides,
     }
@@ -143,6 +175,8 @@ const migrateTypography = (raw?: Partial<ZahvalnicaTypography>): ZahvalnicaTypog
     }
 }
 
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+
 const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
     const base = defaultZahvalnicaDraft()
     const merged = { ...base, ...raw, typography: migrateTypography(raw.typography) }
@@ -155,12 +189,30 @@ const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
     if (raw.backgroundOpacity == null || Number.isNaN(Number(raw.backgroundOpacity))) {
         merged.backgroundOpacity = 12
     } else {
-        merged.backgroundOpacity = Math.min(100, Math.max(0, Number(raw.backgroundOpacity)))
+        merged.backgroundOpacity = clamp(Number(raw.backgroundOpacity), 0, 100)
     }
     if (raw.backgroundImageSrc === undefined) {
         merged.backgroundImageSrc = DEFAULT_LOGO
     }
     if (raw.volunteerUsername === undefined) merged.volunteerUsername = null
+    if (raw.watermarkScale == null || Number.isNaN(Number(raw.watermarkScale))) {
+        merged.watermarkScale = 95
+    } else {
+        merged.watermarkScale = clamp(Number(raw.watermarkScale), 40, 140)
+    }
+    if (raw.bodyLineHeight == null || Number.isNaN(Number(raw.bodyLineHeight))) {
+        merged.bodyLineHeight = 1.55
+    } else {
+        merged.bodyLineHeight = clamp(Number(raw.bodyLineHeight), 1.1, 2.4)
+    }
+    if (raw.titleFont !== "marck" && raw.titleFont !== "magnolia" && raw.titleFont !== "montserrat") {
+        merged.titleFont = "marck"
+    }
+    if (raw.showStamp == null) merged.showStamp = true
+    if (raw.showSignature == null) merged.showSignature = true
+    if (raw.showQr == null) merged.showQr = true
+    if (!raw.stampSrc) merged.stampSrc = DEFAULT_STAMP
+    if (!raw.signatureSrc) merged.signatureSrc = DEFAULT_SIGNATURE
     return merged
 }
 
@@ -176,7 +228,6 @@ export const loadZahvalnicaDraft = (): ZahvalnicaDraft => {
 
 export const saveZahvalnicaDraft = (draft: ZahvalnicaDraft) => {
     try {
-        // Do not persist huge data-URLs for logo/bg forever if too large — keep paths when possible
         localStorage.setItem(ZAHVALNICA_STORAGE_KEY, JSON.stringify(draft))
         const n = Number(draft.number)
         if (!Number.isNaN(n) && n > 0) {
@@ -201,14 +252,18 @@ export const loadZahvalnicaHistory = (): ZahvalnicaIssue[] => {
 export const recordZahvalnicaIssue = (
     draft: ZahvalnicaDraft,
     issuedBy: string,
-    channel: "pdf" | "print"
+    channel: "pdf" | "print",
+    verifyToken: string,
+    issueId: string
 ): ZahvalnicaIssue[] => {
     const issue: ZahvalnicaIssue = {
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: issueId,
+        verifyToken,
         volunteerName: draft.volunteerName.trim(),
         volunteerUsername: draft.volunteerUsername,
         number: draft.number,
         dateLabel: draft.dateLabel,
+        place: draft.place,
         contribution: draft.contribution.trim(),
         presidentName: draft.presidentName.trim(),
         issuedAt: new Date().toISOString(),

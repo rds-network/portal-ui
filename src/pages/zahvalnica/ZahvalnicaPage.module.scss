@@ -1,3 +1,19 @@
+@font-face {
+    font-family: "Marck Script";
+    src: url("/resources/fonts/MarckScript-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Magnolia Script";
+    src: url("/resources/fonts/MagnoliaScript.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
 .root {
     display: flex;
     flex-direction: column;
@@ -49,8 +65,7 @@
     position: absolute;
     left: 50%;
     top: 48%;
-    width: 72%;
-    max-width: 320px;
+    width: 95%;
     transform: translate(-50%, -50%);
     pointer-events: none;
     user-select: none;
@@ -86,8 +101,9 @@
 .docTitle {
     margin: 10px 0 0;
     font-size: 28px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
 }
 
 .rule {
@@ -106,16 +122,45 @@
 .body {
     margin: 0 0 10px;
     font-size: 13px;
-    line-height: 1.45;
+    line-height: 1.55;
     max-width: 34em;
 }
 
-.sign {
+.signBlock {
+    position: relative;
     margin-top: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    min-height: 90px;
+}
+
+.sign {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 4px;
     font-size: 12px;
+    z-index: 1;
+}
+
+.signatureImg {
+    width: 140px;
+    height: auto;
+    margin: 2px 0;
+    object-fit: contain;
+}
+
+.stampImg {
+    position: absolute;
+    right: 12%;
+    bottom: 0;
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+    opacity: 0.92;
+    pointer-events: none;
 }
 
 .meta {
@@ -123,7 +168,20 @@
     margin-top: 18px;
     display: flex;
     justify-content: space-between;
+    align-items: flex-end;
     opacity: 0.9;
+}
+
+.metaLeft {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.qrImg {
+    width: 52px;
+    height: 52px;
+    image-rendering: pixelated;
 }
 
 .history {

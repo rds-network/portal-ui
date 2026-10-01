@@ -7,6 +7,7 @@ import {
     NumberInput,
     Select,
     Slider,
+    Switch,
     Table,
     Text,
     Textarea,
@@ -17,16 +18,20 @@ import { IconAward, IconDownload, IconPhoto, IconPrinter, IconRefresh, IconTrash
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useNavigate } from "react-router"
+import { Link, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import generateZahvalnicaPdf from "src/shared/docs/zahvalnica"
 import {
     DEFAULT_LOGO,
+    DEFAULT_SIGNATURE,
+    DEFAULT_STAMP,
     TEXT_TEMPLATES,
+    TITLE_FONT_CSS,
     TextStyle,
     ZahvalnicaBackground,
     ZahvalnicaDraft,
     ZahvalnicaIssue,
+    ZahvalnicaTitleFont,
     ZahvalnicaTypography,
     clearZahvalnicaHistory,
     defaultZahvalnicaDraft,
@@ -34,6 +39,8 @@ import {
     loadZahvalnicaHistory,
     saveZahvalnicaDraft,
 } from "src/shared/docs/zahvalnicaDraft"
+import { makeQrDataUrl } from "src/shared/docs/zahvalnicaQr"
+import { buildZahvalnicaVerifyUrl, encodeZahvalnicaVerifyToken } from "src/shared/docs/zahvalnicaVerify"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
 import { hasPermission } from "src/shared/user/roles"
@@ -62,7 +69,7 @@ const StyleRow: React.FC<{
             label="pt"
             w={70}
             min={8}
-            max={48}
+            max={56}
             value={value.size}
             onChange={(v) => onChange({ ...value, size: typeof v === "number" ? v : value.size })}
         />
@@ -92,6 +99,7 @@ export const ZahvalnicaPage: React.FC = () => {
     const [draft, setDraft] = useState<ZahvalnicaDraft>(() => loadZahvalnicaDraft())
     const [history, setHistory] = useState<ZahvalnicaIssue[]>(() => loadZahvalnicaHistory())
     const [busy, setBusy] = useState(false)
+    const [previewQr, setPreviewQr] = useState<string | null>(null)
 
     useEffect(() => {
         if (!canManage) navigate("/", { replace: true })
@@ -105,6 +113,37 @@ export const ZahvalnicaPage: React.FC = () => {
             return next
         })
     }, [user?.fullName])
+
+    useEffect(() => {
+        if (!draft.showQr) {
+            setPreviewQr(null)
+            return
+        }
+        try {
+            const token = encodeZahvalnicaVerifyToken({
+                v: 1,
+                id: "preview",
+                name: draft.volunteerName.trim() || "—",
+                number: draft.number,
+                date: draft.dateLabel,
+                place: draft.place,
+                contribution: draft.contribution.trim(),
+                president: draft.presidentName.trim(),
+                issuedAt: new Date().toISOString(),
+            })
+            setPreviewQr(makeQrDataUrl(buildZahvalnicaVerifyUrl(token), 2, 1))
+        } catch {
+            setPreviewQr(null)
+        }
+    }, [
+        draft.showQr,
+        draft.volunteerName,
+        draft.number,
+        draft.dateLabel,
+        draft.place,
+        draft.contribution,
+        draft.presidentName,
+    ])
 
     const patch = (partial: Partial<ZahvalnicaDraft>) => {
         setDraft((d) => {
@@ -141,6 +180,7 @@ export const ZahvalnicaPage: React.FC = () => {
             ? draft.background
             : "white"
     const ty = draft.typography
+    const titleFontCss = TITLE_FONT_CSS[draft.titleFont] || TITLE_FONT_CSS.marck
 
     const issue = async (mode: "pdf" | "print") => {
         setBusy(true)
@@ -150,7 +190,6 @@ export const ZahvalnicaPage: React.FC = () => {
                 print: mode === "print",
             })
             setHistory(loadZahvalnicaHistory())
-            // prepare next number for a new certificate
             const n = Number(draft.number)
             if (!Number.isNaN(n)) {
                 patch({ number: String(n + 1) })
@@ -308,6 +347,33 @@ export const ZahvalnicaPage: React.FC = () => {
                     <Text size="xs" c="dimmed" mb={6}>
                         <FormattedMessage id="pages.zahvalnica.fontsHint" />
                     </Text>
+                    <Select
+                        label={intl.formatMessage({ id: "pages.zahvalnica.titleFont" })}
+                        value={draft.titleFont}
+                        data={[
+                            { value: "marck", label: "Marck Script" },
+                            { value: "magnolia", label: "Magnolia Script" },
+                            { value: "montserrat", label: "Montserrat" },
+                        ]}
+                        onChange={(v) => v && patch({ titleFont: v as ZahvalnicaTitleFont })}
+                        mb="sm"
+                    />
+                    <div>
+                        <Text size="sm" fw={500} mb={6}>
+                            <FormattedMessage
+                                id="pages.zahvalnica.lineHeight"
+                                values={{ value: draft.bodyLineHeight.toFixed(2) }}
+                            />
+                        </Text>
+                        <Slider
+                            min={1.1}
+                            max={2.2}
+                            step={0.05}
+                            value={draft.bodyLineHeight}
+                            onChange={(value) => patch({ bodyLineHeight: value })}
+                            mb="md"
+                        />
+                    </div>
                     <StyleRow
                         label={intl.formatMessage({ id: "pages.zahvalnica.fontOrg" })}
                         value={ty.org}
@@ -365,6 +431,22 @@ export const ZahvalnicaPage: React.FC = () => {
                             step={1}
                             value={draft.backgroundOpacity}
                             onChange={(value) => patch({ backgroundOpacity: value })}
+                            mb="md"
+                        />
+                    </div>
+                    <div>
+                        <Text size="sm" fw={500} mb={6}>
+                            <FormattedMessage
+                                id="pages.zahvalnica.bgScale"
+                                values={{ value: draft.watermarkScale }}
+                            />
+                        </Text>
+                        <Slider
+                            min={40}
+                            max={140}
+                            step={1}
+                            value={draft.watermarkScale}
+                            onChange={(value) => patch({ watermarkScale: value })}
                             mb="lg"
                         />
                     </div>
@@ -407,6 +489,73 @@ export const ZahvalnicaPage: React.FC = () => {
                             </Button>
                         )}
                     </Flex>
+
+                    <Title order={4} mt="md">
+                        <FormattedMessage id="pages.zahvalnica.onlineBlock" />
+                    </Title>
+                    <Text size="xs" c="dimmed" mb="sm">
+                        <FormattedMessage id="pages.zahvalnica.onlineHint" />
+                    </Text>
+                    <Switch
+                        label={intl.formatMessage({ id: "pages.zahvalnica.showSignature" })}
+                        checked={draft.showSignature}
+                        onChange={(e) => patch({ showSignature: e.currentTarget.checked })}
+                        mb={8}
+                    />
+                    <Switch
+                        label={intl.formatMessage({ id: "pages.zahvalnica.showStamp" })}
+                        checked={draft.showStamp}
+                        onChange={(e) => patch({ showStamp: e.currentTarget.checked })}
+                        mb={8}
+                    />
+                    <Switch
+                        label={intl.formatMessage({ id: "pages.zahvalnica.showQr" })}
+                        checked={draft.showQr}
+                        onChange={(e) => patch({ showQr: e.currentTarget.checked })}
+                        mb="sm"
+                    />
+                    <Flex gap="sm" wrap="wrap">
+                        <FileButton
+                            accept="image/png,image/jpeg,image/webp"
+                            onChange={async (file) => {
+                                if (!file) return
+                                patch({ signatureSrc: await readFileAsDataUrl(file) })
+                            }}
+                        >
+                            {(props) => (
+                                <Button {...props} variant="light" size="compact-sm">
+                                    <FormattedMessage id="pages.zahvalnica.uploadSignature" />
+                                </Button>
+                            )}
+                        </FileButton>
+                        <Button
+                            variant="subtle"
+                            size="compact-sm"
+                            onClick={() => patch({ signatureSrc: DEFAULT_SIGNATURE })}
+                        >
+                            <FormattedMessage id="pages.zahvalnica.defaultSignature" />
+                        </Button>
+                        <FileButton
+                            accept="image/png,image/jpeg,image/webp"
+                            onChange={async (file) => {
+                                if (!file) return
+                                patch({ stampSrc: await readFileAsDataUrl(file) })
+                            }}
+                        >
+                            {(props) => (
+                                <Button {...props} variant="light" size="compact-sm">
+                                    <FormattedMessage id="pages.zahvalnica.uploadStamp" />
+                                </Button>
+                            )}
+                        </FileButton>
+                        <Button
+                            variant="subtle"
+                            size="compact-sm"
+                            onClick={() => patch({ stampSrc: DEFAULT_STAMP })}
+                        >
+                            <FormattedMessage id="pages.zahvalnica.defaultStamp" />
+                        </Button>
+                    </Flex>
                 </section>
 
                 <aside className={classes.previewPane}>
@@ -425,7 +574,11 @@ export const ZahvalnicaPage: React.FC = () => {
                                 src={watermarkSrc}
                                 alt=""
                                 className={classes.watermark}
-                                style={{ opacity: draft.backgroundOpacity / 100 }}
+                                style={{
+                                    opacity: draft.backgroundOpacity / 100,
+                                    width: `${draft.watermarkScale}%`,
+                                    maxWidth: "none",
+                                }}
                             />
                         )}
                         <div className={classes.previewContent}>
@@ -445,7 +598,8 @@ export const ZahvalnicaPage: React.FC = () => {
                                 style={{
                                     color: ty.title.color,
                                     fontSize: ty.title.size * 1.15,
-                                    fontWeight: ty.title.bold ? 800 : 600,
+                                    fontWeight: ty.title.bold ? 700 : 400,
+                                    fontFamily: titleFontCss,
                                 }}
                             >
                                 {draft.title}
@@ -467,6 +621,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                     color: ty.body.color,
                                     fontSize: ty.body.size,
                                     fontWeight: ty.body.bold ? 700 : 400,
+                                    lineHeight: draft.bodyLineHeight,
                                 }}
                             >
                                 {draft.intro}
@@ -478,6 +633,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                         color: ty.body.color,
                                         fontSize: ty.body.size,
                                         fontWeight: ty.body.bold ? 700 : 400,
+                                        lineHeight: draft.bodyLineHeight,
                                     }}
                                 >
                                     Посебну захвалност изражавамо за {draft.contribution.trim()}.
@@ -489,29 +645,46 @@ export const ZahvalnicaPage: React.FC = () => {
                                     color: ty.body.color,
                                     fontSize: ty.body.size,
                                     fontWeight: ty.body.bold ? 700 : 400,
+                                    lineHeight: draft.bodyLineHeight,
                                 }}
                             >
                                 {draft.closing}
                             </p>
-                            <div className={classes.sign}>
-                                <span
-                                    style={{
-                                        color: ty.sign.color,
-                                        fontSize: Math.max(10, ty.sign.size - 2),
-                                        fontWeight: 400,
-                                    }}
-                                >
-                                    {draft.presidentLabel}
-                                </span>
-                                <strong
-                                    style={{
-                                        color: ty.sign.color,
-                                        fontSize: ty.sign.size,
-                                        fontWeight: ty.sign.bold ? 700 : 500,
-                                    }}
-                                >
-                                    {draft.presidentName || "—"}
-                                </strong>
+                            <div className={classes.signBlock}>
+                                <div className={classes.sign}>
+                                    <span
+                                        style={{
+                                            color: ty.sign.color,
+                                            fontSize: Math.max(10, ty.sign.size - 2),
+                                            fontWeight: 400,
+                                        }}
+                                    >
+                                        {draft.presidentLabel}
+                                    </span>
+                                    {draft.showSignature && (
+                                        <img
+                                            src={draft.signatureSrc || DEFAULT_SIGNATURE}
+                                            alt=""
+                                            className={classes.signatureImg}
+                                        />
+                                    )}
+                                    <strong
+                                        style={{
+                                            color: ty.sign.color,
+                                            fontSize: ty.sign.size,
+                                            fontWeight: ty.sign.bold ? 700 : 500,
+                                        }}
+                                    >
+                                        {draft.presidentName || "—"}
+                                    </strong>
+                                </div>
+                                {draft.showStamp && (
+                                    <img
+                                        src={draft.stampSrc || DEFAULT_STAMP}
+                                        alt=""
+                                        className={classes.stampImg}
+                                    />
+                                )}
                             </div>
                             <div
                                 className={classes.meta}
@@ -521,9 +694,14 @@ export const ZahvalnicaPage: React.FC = () => {
                                     fontWeight: ty.meta.bold ? 700 : 400,
                                 }}
                             >
-                                <span>
-                                    {draft.place}, {draft.dateLabel}
-                                </span>
+                                <div className={classes.metaLeft}>
+                                    {draft.showQr && previewQr && (
+                                        <img src={previewQr} alt="" className={classes.qrImg} />
+                                    )}
+                                    <span>
+                                        {draft.place}, {draft.dateLabel}
+                                    </span>
+                                </div>
                                 <span>Број: {draft.number}</span>
                             </div>
                         </div>
@@ -580,6 +758,9 @@ export const ZahvalnicaPage: React.FC = () => {
                                 <Table.Th>
                                     <FormattedMessage id="pages.zahvalnica.channel" />
                                 </Table.Th>
+                                <Table.Th>
+                                    <FormattedMessage id="pages.zahvalnica.verifyLink" />
+                                </Table.Th>
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
@@ -601,6 +782,18 @@ export const ZahvalnicaPage: React.FC = () => {
                                         {row.channel === "print"
                                             ? intl.formatMessage({ id: "pages.zahvalnica.print" })
                                             : "PDF"}
+                                    </Table.Td>
+                                    <Table.Td>
+                                        {row.verifyToken ? (
+                                            <Link
+                                                to={`/zahvalnica/verify?t=${encodeURIComponent(row.verifyToken)}`}
+                                                target="_blank"
+                                            >
+                                                <FormattedMessage id="pages.zahvalnica.openVerify" />
+                                            </Link>
+                                        ) : (
+                                            "—"
+                                        )}
                                     </Table.Td>
                                 </Table.Tr>
                             ))}
