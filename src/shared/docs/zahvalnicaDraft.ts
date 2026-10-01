@@ -116,8 +116,8 @@ export const TITLE_FONT_CSS: Record<ZahvalnicaTitleFont, string> = {
 
 /** Base signature width in mm at signatureScale=100. */
 export const SIGNATURE_BASE_WIDTH_MM = 42
-/** Base stamp size in mm at stampScale=100. */
-export const STAMP_BASE_SIZE_MM = 38
+/** Base stamp size in mm at stampScale=100 (standard wet stamp 40×40). */
+export const STAMP_BASE_SIZE_MM = 40
 
 export const defaultTypography = (): ZahvalnicaTypography => ({
     org: { size: 11, color: "#1a365d", bold: true },
@@ -171,7 +171,7 @@ export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): Za
         signatureScale: 35,
         signatureOffsetX: 0,
         signatureOffsetY: 0,
-        stampScale: 85,
+        stampScale: 100,
         stampOffsetX: 18,
         stampOffsetY: -8,
         typography: defaultTypography(),
@@ -298,7 +298,10 @@ const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
         merged.signatureOffsetY = clamp(Number(raw.signatureOffsetY), -30, 30)
     }
     if (raw.stampScale == null || Number.isNaN(Number(raw.stampScale))) {
-        merged.stampScale = 85
+        merged.stampScale = 100
+    } else if (Number(raw.stampScale) === 85) {
+        // Previous default made stamp ~32mm; migrate to true 40×40 at 100%
+        merged.stampScale = 100
     } else {
         merged.stampScale = clamp(Number(raw.stampScale), 20, 140)
     }

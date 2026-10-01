@@ -234,12 +234,13 @@
 
 .stampImg {
     position: absolute;
-    right: 12%;
+    right: 10%;
     bottom: 0;
-    width: 82px;
-    height: 82px;
+    width: 80px;
+    height: 80px;
     object-fit: contain;
-    opacity: 0.92;
+    object-position: center;
+    opacity: 0.95;
     pointer-events: none;
 }
 

@@ -116,6 +116,31 @@ const toPngDataUrl = (img: HTMLImageElement, knockoutBlack = false): string => {
     return canvas.toDataURL("image/png")
 }
 
+/**
+ * Pad image into a square without stretching, so a circular stamp stays circular
+ * even if the source PNG is slightly non-square. Optionally punch near-black/white.
+ */
+const toSquareContainPng = (img: HTMLImageElement, knockoutPaper = false): string => {
+    const side = Math.max(img.width, img.height, 1)
+    const canvas = document.createElement("canvas")
+    canvas.width = side
+    canvas.height = side
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return toPngDataUrl(img, false)
+    ctx.clearRect(0, 0, side, side)
+    ctx.drawImage(img, (side - img.width) / 2, (side - img.height) / 2)
+    if (knockoutPaper) {
+        const data = ctx.getImageData(0, 0, side, side)
+        const px = data.data
+        for (let i = 0; i < px.length; i += 4) {
+            if (px[i] <= 28 && px[i + 1] <= 28 && px[i + 2] <= 28) px[i + 3] = 0
+            if (px[i] >= 245 && px[i + 1] >= 245 && px[i + 2] >= 245) px[i + 3] = 0
+        }
+        ctx.putImageData(data, 0, 0)
+    }
+    return canvas.toDataURL("image/png")
+}
+
 const imageDataUrlWithOpacity = async (
     src: string,
     opacity: number,
@@ -416,12 +441,12 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
         const stamp = await loadImageElement(draft.stampSrc || DEFAULT_STAMP)
         if (stamp) {
             try {
-                const stampData = toPngDataUrl(stamp, true)
-                const stampScale = Math.min(140, Math.max(20, draft.stampScale ?? 85)) / 100
-                const stampW = STAMP_BASE_SIZE_MM * stampScale
+                const stampData = toSquareContainPng(stamp, true)
+                const stampScale = Math.min(140, Math.max(20, draft.stampScale ?? 100)) / 100
+                const stampSize = STAMP_BASE_SIZE_MM * stampScale
                 const stampX = signCenterX + (draft.stampOffsetX ?? 18)
-                const stampY = sigBottom + (draft.stampOffsetY ?? -8) - stampW * 0.55
-                pdf.addImage(stampData, "PNG", stampX, stampY, stampW, stampW, undefined, "FAST")
+                const stampY = sigBottom + (draft.stampOffsetY ?? -8) - stampSize * 0.55
+                pdf.addImage(stampData, "PNG", stampX, stampY, stampSize, stampSize, undefined, "FAST")
             } catch {
                 /* ignore */
             }
