@@ -123,8 +123,15 @@
     margin-top: 18px;
     display: flex;
     justify-content: space-between;
-    font-size: 11px;
-    opacity: 0.85;
+    opacity: 0.9;
+}
+
+.history {
+    margin-top: 8px;
+    padding: 16px 18px;
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: 12px;
+    background: var(--mantine-color-body);
 }
 
 @media (max-width: 960px) {
@@ -134,5 +141,33 @@
 
     .previewPane {
         position: static;
+    }
+}
+
+@media print {
+    .noPrint {
+        display: none !important;
+    }
+
+    .root {
+        padding: 0;
+    }
+
+    .layout {
+        display: block;
+    }
+
+    .previewPane {
+        position: static;
+    }
+
+    .preview {
+        box-shadow: none;
+        border-width: 1px;
+        min-height: auto;
+        width: 100%;
+        max-width: 190mm;
+        margin: 0 auto;
+        break-inside: avoid;
     }
 }
