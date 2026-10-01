@@ -42,11 +42,15 @@ import {
     clearZahvalnicaHistory,
     compressImageDataUrl,
     defaultZahvalnicaDraft,
+    deleteZahvalnicaIssue,
     loadSavedBackgrounds,
     loadZahvalnicaDraft,
     loadZahvalnicaHistory,
     removeSavedBackground,
+    restoreZahvalnicaIssue,
     saveZahvalnicaDraft,
+    voidAllZahvalnicaIssues,
+    voidZahvalnicaIssue,
 } from "src/shared/docs/zahvalnicaDraft"
 import { makeQrDataUrl } from "src/shared/docs/zahvalnicaQr"
 import { buildZahvalnicaVerifyUrl, encodeZahvalnicaVerifyToken } from "src/shared/docs/zahvalnicaVerify"
@@ -1008,23 +1012,49 @@ export const ZahvalnicaPage: React.FC = () => {
             </div>
 
             <section className={`${classes.history} ${classes.noPrint}`}>
-                <Flex justify="space-between" align="center" mb="sm">
+                <Flex justify="space-between" align="center" mb="sm" gap="sm" wrap="wrap">
                     <Title order={4}>
                         <FormattedMessage id="pages.zahvalnica.history" />
                     </Title>
                     {history.length > 0 && (
-                        <Button
-                            variant="subtle"
-                            color="red"
-                            size="compact-sm"
-                            leftSection={<IconTrash size={14} />}
-                            onClick={() => {
-                                clearZahvalnicaHistory()
-                                setHistory([])
-                            }}
-                        >
-                            <FormattedMessage id="pages.zahvalnica.clearHistory" />
-                        </Button>
+                        <Flex gap="sm" wrap="wrap">
+                            <Button
+                                variant="light"
+                                color="orange"
+                                size="compact-sm"
+                                onClick={() => {
+                                    if (
+                                        !window.confirm(
+                                            intl.formatMessage({ id: "pages.zahvalnica.voidAllConfirm" })
+                                        )
+                                    ) {
+                                        return
+                                    }
+                                    setHistory(voidAllZahvalnicaIssues())
+                                }}
+                            >
+                                <FormattedMessage id="pages.zahvalnica.voidAll" />
+                            </Button>
+                            <Button
+                                variant="subtle"
+                                color="red"
+                                size="compact-sm"
+                                leftSection={<IconTrash size={14} />}
+                                onClick={() => {
+                                    if (
+                                        !window.confirm(
+                                            intl.formatMessage({ id: "pages.zahvalnica.clearHistoryConfirm" })
+                                        )
+                                    ) {
+                                        return
+                                    }
+                                    clearZahvalnicaHistory()
+                                    setHistory([])
+                                }}
+                            >
+                                <FormattedMessage id="pages.zahvalnica.clearHistory" />
+                            </Button>
+                        </Flex>
                     )}
                 </Flex>
                 <Text size="sm" c="dimmed" mb="sm">
@@ -1057,13 +1087,22 @@ export const ZahvalnicaPage: React.FC = () => {
                                     <FormattedMessage id="pages.zahvalnica.channel" />
                                 </Table.Th>
                                 <Table.Th>
+                                    <FormattedMessage id="pages.zahvalnica.statusCol" />
+                                </Table.Th>
+                                <Table.Th>
                                     <FormattedMessage id="pages.zahvalnica.verifyLink" />
+                                </Table.Th>
+                                <Table.Th>
+                                    <FormattedMessage id="pages.zahvalnica.actions" />
                                 </Table.Th>
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
                             {history.map((row) => (
-                                <Table.Tr key={row.id}>
+                                <Table.Tr
+                                    key={row.id}
+                                    style={row.voided ? { opacity: 0.55 } : undefined}
+                                >
                                     <Table.Td>{row.number}</Table.Td>
                                     <Table.Td>
                                         {row.volunteerName}
@@ -1082,6 +1121,17 @@ export const ZahvalnicaPage: React.FC = () => {
                                             : "PDF"}
                                     </Table.Td>
                                     <Table.Td>
+                                        {row.voided ? (
+                                            <Text size="sm" c="red" fw={600}>
+                                                <FormattedMessage id="pages.zahvalnica.statusVoided" />
+                                            </Text>
+                                        ) : (
+                                            <Text size="sm" c="teal">
+                                                <FormattedMessage id="pages.zahvalnica.statusValid" />
+                                            </Text>
+                                        )}
+                                    </Table.Td>
+                                    <Table.Td>
                                         {row.verifyToken ? (
                                             <Link
                                                 to={`/zahvalnica/verify?t=${encodeURIComponent(row.verifyToken)}`}
@@ -1092,6 +1142,36 @@ export const ZahvalnicaPage: React.FC = () => {
                                         ) : (
                                             "—"
                                         )}
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <Flex gap={6} wrap="wrap">
+                                            {row.voided ? (
+                                                <Button
+                                                    variant="subtle"
+                                                    size="compact-xs"
+                                                    onClick={() => setHistory(restoreZahvalnicaIssue(row.id))}
+                                                >
+                                                    <FormattedMessage id="pages.zahvalnica.restoreIssue" />
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    variant="light"
+                                                    color="orange"
+                                                    size="compact-xs"
+                                                    onClick={() => setHistory(voidZahvalnicaIssue(row.id))}
+                                                >
+                                                    <FormattedMessage id="pages.zahvalnica.voidIssue" />
+                                                </Button>
+                                            )}
+                                            <Button
+                                                variant="subtle"
+                                                color="red"
+                                                size="compact-xs"
+                                                onClick={() => setHistory(deleteZahvalnicaIssue(row.id))}
+                                            >
+                                                <FormattedMessage id="pages.zahvalnica.deleteIssue" />
+                                            </Button>
+                                        </Flex>
                                     </Table.Td>
                                 </Table.Tr>
                             ))}

@@ -1,7 +1,8 @@
-import { Card, Stack, Text, Title } from "@mantine/core"
+import { Badge, Card, Stack, Text, Title } from "@mantine/core"
 import React, { useMemo } from "react"
 import { FormattedMessage } from "react-intl"
 import { useSearchParams } from "react-router"
+import { isZahvalnicaVoided } from "src/shared/docs/zahvalnicaDraft"
 import { decodeZahvalnicaVerifyToken } from "src/shared/docs/zahvalnicaVerify"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import classes from "./ZahvalnicaVerifyPage.module.scss"
@@ -12,6 +13,7 @@ export const ZahvalnicaVerifyPage: React.FC = () => {
     const token = params.get("t") || ""
 
     const payload = useMemo(() => (token ? decodeZahvalnicaVerifyToken(token) : null), [token])
+    const voided = useMemo(() => (payload ? isZahvalnicaVoided(payload.id) : false), [payload])
 
     return (
         <div className={classes.root}>
@@ -36,8 +38,25 @@ export const ZahvalnicaVerifyPage: React.FC = () => {
                         </Text>
                     )}
 
+                    {payload && voided && (
+                        <div className={classes.voidBanner}>
+                            <Badge color="red" size="lg" variant="filled">
+                                <FormattedMessage id="pages.zahvalnica.verifyVoidedBadge" />
+                            </Badge>
+                            <Text size="sm" mt={8}>
+                                <FormattedMessage id="pages.zahvalnica.verifyVoidedHint" />
+                            </Text>
+                        </div>
+                    )}
+
+                    {payload && !voided && (
+                        <Badge color="teal" size="lg" variant="light" w="fit-content">
+                            <FormattedMessage id="pages.zahvalnica.verifyValidBadge" />
+                        </Badge>
+                    )}
+
                     {payload && (
-                        <dl className={classes.dl}>
+                        <dl className={`${classes.dl} ${voided ? classes.dlVoided : ""}`}>
                             <div>
                                 <dt>
                                     <FormattedMessage id="pages.zahvalnica.volunteerName" />

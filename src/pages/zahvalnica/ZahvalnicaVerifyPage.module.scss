@@ -41,3 +41,20 @@
         color: #14233c;
     }
 }
+
+.dlVoided {
+    opacity: 0.72;
+
+    dd {
+        text-decoration: line-through;
+        text-decoration-thickness: 1px;
+    }
+}
+
+.voidBanner {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.25);
+}
+

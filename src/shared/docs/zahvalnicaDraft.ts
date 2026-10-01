@@ -72,11 +72,15 @@ export type ZahvalnicaIssue = {
     issuedAt: string
     issuedBy: string
     channel: "pdf" | "print"
+    /** Marked invalid; verify page shows «недействительно», link still opens. */
+    voided?: boolean
+    voidedAt?: string
 }
 
 export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
 export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
 export const ZAHVALNICA_HISTORY_KEY = "portal.zahvalnica.history"
+export const ZAHVALNICA_VOIDED_KEY = "portal.zahvalnica.voidedIds"
 export const ZAHVALNICA_BACKGROUNDS_KEY = "portal.zahvalnica.backgrounds"
 export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png?v=2"
 export const DEFAULT_BACKGROUND = "/resources/zahvalnica-bg.jpg"
@@ -371,6 +375,7 @@ export const recordZahvalnicaIssue = (
         issuedAt: new Date().toISOString(),
         issuedBy,
         channel,
+        voided: false,
     }
     const next = [issue, ...loadZahvalnicaHistory()].slice(0, 500)
     try {
@@ -391,6 +396,72 @@ export const clearZahvalnicaHistory = () => {
     } catch {
         /* ignore */
     }
+}
+
+const persistHistory = (list: ZahvalnicaIssue[]) => {
+    try {
+        localStorage.setItem(ZAHVALNICA_HISTORY_KEY, JSON.stringify(list))
+    } catch {
+        /* ignore */
+    }
+}
+
+export const loadVoidedZahvalnicaIds = (): string[] => {
+    try {
+        const raw = localStorage.getItem(ZAHVALNICA_VOIDED_KEY)
+        if (!raw) return []
+        const list = JSON.parse(raw) as string[]
+        return Array.isArray(list) ? list.filter((id) => typeof id === "string") : []
+    } catch {
+        return []
+    }
+}
+
+const persistVoidedIds = (ids: string[]) => {
+    try {
+        localStorage.setItem(ZAHVALNICA_VOIDED_KEY, JSON.stringify([...new Set(ids)].slice(0, 2000)))
+    } catch {
+        /* ignore */
+    }
+}
+
+export const isZahvalnicaVoided = (issueId: string | null | undefined): boolean => {
+    if (!issueId) return false
+    return loadVoidedZahvalnicaIds().includes(issueId)
+}
+
+export const voidZahvalnicaIssue = (issueId: string): ZahvalnicaIssue[] => {
+    const voidedAt = new Date().toISOString()
+    persistVoidedIds([...loadVoidedZahvalnicaIds(), issueId])
+    const next = loadZahvalnicaHistory().map((row) =>
+        row.id === issueId ? { ...row, voided: true, voidedAt } : row
+    )
+    persistHistory(next)
+    return next
+}
+
+export const voidAllZahvalnicaIssues = (): ZahvalnicaIssue[] => {
+    const voidedAt = new Date().toISOString()
+    const list = loadZahvalnicaHistory()
+    persistVoidedIds([...loadVoidedZahvalnicaIds(), ...list.map((r) => r.id)])
+    const next = list.map((row) => ({ ...row, voided: true, voidedAt: row.voidedAt || voidedAt }))
+    persistHistory(next)
+    return next
+}
+
+export const restoreZahvalnicaIssue = (issueId: string): ZahvalnicaIssue[] => {
+    persistVoidedIds(loadVoidedZahvalnicaIds().filter((id) => id !== issueId))
+    const next = loadZahvalnicaHistory().map((row) =>
+        row.id === issueId ? { ...row, voided: false, voidedAt: undefined } : row
+    )
+    persistHistory(next)
+    return next
+}
+
+export const deleteZahvalnicaIssue = (issueId: string): ZahvalnicaIssue[] => {
+    const next = loadZahvalnicaHistory().filter((row) => row.id !== issueId)
+    persistHistory(next)
+    return next
 }
 
 export const loadSavedBackgrounds = (): SavedBackground[] => {
