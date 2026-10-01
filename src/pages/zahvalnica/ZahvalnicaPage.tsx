@@ -16,12 +16,13 @@ import {
 } from "@mantine/core"
 import { IconAward, IconDownload, IconPhoto, IconPrinter, IconRefresh, IconTrash } from "@tabler/icons-react"
 import dayjs from "dayjs"
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import generateZahvalnicaPdf from "src/shared/docs/zahvalnica"
 import {
+    A4_WIDTH_MM,
     DEFAULT_BACKGROUND,
     DEFAULT_LOGO,
     DEFAULT_SIGNATURE,
@@ -50,6 +51,8 @@ import {
     loadTemplateSettingsFor,
     loadZahvalnicaDraft,
     loadZahvalnicaHistory,
+    mmToPreviewPx,
+    ptToPreviewPx,
     removeSavedBackground,
     restoreZahvalnicaIssue,
     saveTemplateSettingsFor,
@@ -119,6 +122,8 @@ export const ZahvalnicaPage: React.FC = () => {
     const [backgrounds, setBackgrounds] = useState<SavedBackground[]>(() => loadSavedBackgrounds())
     const [busy, setBusy] = useState(false)
     const [previewQr, setPreviewQr] = useState<string | null>(null)
+    const [pxPerMm, setPxPerMm] = useState(PREVIEW_PX_PER_MM)
+    const previewRef = useRef<HTMLArticleElement | null>(null)
     const [activeTemplateId, setActiveTemplateId] = useState<string>(() => {
         const d = loadZahvalnicaDraft()
         const bgs = loadSavedBackgrounds()
@@ -128,6 +133,19 @@ export const ZahvalnicaPage: React.FC = () => {
     useEffect(() => {
         if (!canManage) navigate("/", { replace: true })
     }, [canManage, navigate])
+
+    useEffect(() => {
+        const el = previewRef.current
+        if (!el || typeof ResizeObserver === "undefined") return
+        const update = () => {
+            const w = el.getBoundingClientRect().width
+            if (w > 40) setPxPerMm(w / A4_WIDTH_MM)
+        }
+        update()
+        const ro = new ResizeObserver(update)
+        ro.observe(el)
+        return () => ro.disconnect()
+    }, [])
 
     useEffect(() => {
         setDraft((d) => {
@@ -256,12 +274,16 @@ export const ZahvalnicaPage: React.FC = () => {
             : "white"
     const ty = draft.typography
     const titleFontCss = TITLE_FONT_CSS[draft.titleFont] || TITLE_FONT_CSS.marck
+    const pt = (size: number) => ptToPreviewPx(size, pxPerMm)
+    const mm = (size: number) => mmToPreviewPx(size, pxPerMm)
     const sigPreviewW = Math.round(
-        SIGNATURE_BASE_WIDTH_MM * (Math.min(120, Math.max(10, draft.signatureScale)) / 100) * PREVIEW_PX_PER_MM
+        SIGNATURE_BASE_WIDTH_MM * (Math.min(120, Math.max(10, draft.signatureScale)) / 100) * pxPerMm
     )
     const stampPreviewSize = Math.round(
-        STAMP_BASE_SIZE_MM * (Math.min(140, Math.max(20, draft.stampScale)) / 100) * PREVIEW_PX_PER_MM
+        STAMP_BASE_SIZE_MM * (Math.min(140, Math.max(20, draft.stampScale)) / 100) * pxPerMm
     )
+    const logoPreviewSize = Math.round(mm(32))
+    const qrPreviewSize = Math.round(mm(18))
     const selectedBgId =
         backgrounds.find((b) => b.src === draft.backgroundImageSrc)?.id ||
         (draft.backgroundImageSrc ? null : "builtin-default")
@@ -929,10 +951,12 @@ export const ZahvalnicaPage: React.FC = () => {
                         <FormattedMessage id="pages.zahvalnica.preview" />
                     </Text>
                     <article
+                        ref={previewRef}
                         className={classes.preview}
                         style={{
                             backgroundColor: previewStyle.page,
                             borderColor: ty.title.color,
+                            padding: `${mm(12)}px ${mm(14)}px ${mm(10)}px`,
                         }}
                     >
                         {watermarkSrc && draft.backgroundOpacity > 0 && (
@@ -947,12 +971,17 @@ export const ZahvalnicaPage: React.FC = () => {
                             />
                         )}
                         <div className={classes.previewContent}>
-                            <img src={draft.logoSrc} alt="" className={classes.previewLogo} style={{ width: 32 * PREVIEW_PX_PER_MM, height: 32 * PREVIEW_PX_PER_MM }} />
+                            <img
+                                src={draft.logoSrc}
+                                alt=""
+                                className={classes.previewLogo}
+                                style={{ width: logoPreviewSize, height: logoPreviewSize }}
+                            />
                             <p
                                 className={classes.org}
                                 style={{
                                     color: ty.org.color,
-                                    fontSize: ty.org.size * (96 / 72),
+                                    fontSize: pt(ty.org.size),
                                     fontWeight: ty.org.bold ? 700 : 500,
                                 }}
                             >
@@ -962,7 +991,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.docTitle}
                                 style={{
                                     color: ty.title.color,
-                                    fontSize: ty.title.size * (96 / 72),
+                                    fontSize: pt(ty.title.size),
                                     fontWeight: ty.title.bold ? 700 : 400,
                                     fontFamily: titleFontCss,
                                 }}
@@ -974,7 +1003,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.name}
                                 style={{
                                     color: ty.name.color,
-                                    fontSize: ty.name.size * (96 / 72),
+                                    fontSize: pt(ty.name.size),
                                     fontWeight: ty.name.bold ? 700 : 500,
                                 }}
                             >
@@ -984,7 +1013,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.body}
                                 style={{
                                     color: ty.body.color,
-                                    fontSize: ty.body.size * (96 / 72),
+                                    fontSize: pt(ty.body.size),
                                     fontWeight: ty.body.bold ? 700 : 400,
                                     lineHeight: draft.bodyLineHeight,
                                 }}
@@ -996,7 +1025,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                     className={classes.body}
                                     style={{
                                         color: ty.body.color,
-                                        fontSize: ty.body.size * (96 / 72),
+                                        fontSize: pt(ty.body.size),
                                         fontWeight: ty.body.bold ? 700 : 400,
                                         lineHeight: draft.bodyLineHeight,
                                     }}
@@ -1008,7 +1037,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.body}
                                 style={{
                                     color: ty.body.color,
-                                    fontSize: ty.body.size * (96 / 72),
+                                    fontSize: pt(ty.body.size),
                                     fontWeight: ty.body.bold ? 700 : 400,
                                     lineHeight: draft.bodyLineHeight,
                                 }}
@@ -1020,7 +1049,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                     <span
                                         style={{
                                             color: ty.sign.color,
-                                            fontSize: Math.max(10, (ty.sign.size - 2) * (96 / 72)),
+                                            fontSize: pt(Math.max(8, ty.sign.size - 2)),
                                             fontWeight: 400,
                                         }}
                                     >
@@ -1033,14 +1062,14 @@ export const ZahvalnicaPage: React.FC = () => {
                                             className={classes.signatureImg}
                                             style={{
                                                 width: `${sigPreviewW}px`,
-                                                transform: `translate(${draft.signatureOffsetX * PREVIEW_PX_PER_MM}px, ${draft.signatureOffsetY * PREVIEW_PX_PER_MM}px)`,
+                                                transform: `translate(${mm(draft.signatureOffsetX)}px, ${mm(draft.signatureOffsetY)}px)`,
                                             }}
                                         />
                                     )}
                                     <strong
                                         style={{
                                             color: ty.sign.color,
-                                            fontSize: ty.sign.size * (96 / 72),
+                                            fontSize: pt(ty.sign.size),
                                             fontWeight: ty.sign.bold ? 700 : 500,
                                         }}
                                     >
@@ -1055,7 +1084,7 @@ export const ZahvalnicaPage: React.FC = () => {
                                         style={{
                                             width: `${stampPreviewSize}px`,
                                             height: `${stampPreviewSize}px`,
-                                            transform: `translate(${draft.stampOffsetX * PREVIEW_PX_PER_MM}px, ${draft.stampOffsetY * PREVIEW_PX_PER_MM}px)`,
+                                            transform: `translate(${mm(draft.stampOffsetX)}px, ${mm(draft.stampOffsetY)}px)`,
                                         }}
                                     />
                                 )}
@@ -1064,13 +1093,18 @@ export const ZahvalnicaPage: React.FC = () => {
                                 className={classes.meta}
                                 style={{
                                     color: ty.meta.color,
-                                    fontSize: ty.meta.size * (96 / 72),
+                                    fontSize: pt(ty.meta.size),
                                     fontWeight: ty.meta.bold ? 700 : 400,
                                 }}
                             >
                                 <div className={classes.metaLeft}>
                                     {draft.showQr && previewQr && (
-                                        <img src={previewQr} alt="" className={classes.qrImg} />
+                                        <img
+                                            src={previewQr}
+                                            alt=""
+                                            className={classes.qrImg}
+                                            style={{ width: qrPreviewSize, height: qrPreviewSize }}
+                                        />
                                     )}
                                     <span>
                                         {draft.place}, {draft.dateLabel}

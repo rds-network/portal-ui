@@ -123,10 +123,18 @@ export const MARCK_FONT_URL = "/resources/fonts/MarckScript-Regular.ttf"
 export const MAGNOLIA_FONT_URL = "/resources/fonts/MagnoliaScript.otf"
 
 /**
- * Preview panel is ~420px wide for A4 (210mm) → ~2 px/mm.
- * Use the same constant for signature/stamp so preview matches PDF.
+ * Preview panel targets ~420px wide for A4 (210mm) → ~2 px/mm.
+ * Measure actual preview width when possible: pxPerMm = widthPx / 210.
  */
 export const PREVIEW_PX_PER_MM = 2
+export const A4_WIDTH_MM = 210
+
+/** Convert jsPDF point size to CSS px on a preview scaled at `pxPerMm`. */
+export const ptToPreviewPx = (pt: number, pxPerMm = PREVIEW_PX_PER_MM): number =>
+    (pt * 25.4 * pxPerMm) / 72
+
+/** Convert millimetres to CSS px on the same preview scale. */
+export const mmToPreviewPx = (mm: number, pxPerMm = PREVIEW_PX_PER_MM): number => mm * pxPerMm
 
 export type SavedBackground = {
     id: string

@@ -53,6 +53,7 @@
 
 .preview {
     position: relative;
+    box-sizing: border-box;
     border: 2px solid;
     border-radius: 8px;
     /* A4 aspect so preview matches PDF proportions (~420×594 at 2px/mm) */
@@ -61,7 +62,7 @@
     aspect-ratio: 210 / 297;
     height: auto;
     min-height: 0;
-    padding: 24px 18px 16px;
+    padding: 0;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
     margin-inline: auto;
@@ -172,7 +173,6 @@
 
 .org {
     margin: 0;
-    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -180,7 +180,6 @@
 
 .docTitle {
     margin: 10px 0 0;
-    font-size: 28px;
     font-weight: 400;
     letter-spacing: 0.02em;
     line-height: 1.15;
@@ -195,14 +194,11 @@
 
 .name {
     margin: 0 0 12px;
-    font-size: 20px;
     font-weight: 700;
 }
 
 .body {
     margin: 0 0 10px;
-    font-size: 13px;
-    line-height: 1.55;
     max-width: 34em;
 }
 
@@ -260,9 +256,10 @@
 }
 
 .qrImg {
-    width: 52px;
-    height: 52px;
+    width: 36px;
+    height: 36px;
     image-rendering: pixelated;
+    flex-shrink: 0;
 }
 
 .history {
