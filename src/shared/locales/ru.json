@@ -1693,6 +1693,31 @@
                 "SCHEDULER": "Планировщик",
                 "SYNC": "Синхронизация"
             }
+        },
+        "achievements": {
+            "title": "Мои достижения",
+            "description": "Баллы и награды за активность на портале RDS.",
+            "unlocked": "Разблокировано: {unlocked} / {total}",
+            "points": "баллов RDS: {points}",
+            "weekLabel": "Эта неделя",
+            "weekVisited": "Визит есть (+10)",
+            "weekMissed": "Ещё не заходили",
+            "weekHint": "Раз в 7 дней: +10 за визит, −10 если пропустили прошлую неделю (мягкий минус, не блокировка).",
+            "inboxLabel": "Сообщения ЛК",
+            "inboxValue": "Получено {delivered} из {sent}",
+            "inboxPending": "Не открыто получателем: {pending}",
+            "balanceLabel": "Баланс",
+            "balanceHint": "Сумма всех начислений и штрафов",
+            "progress": "Прогресс: {progress} / {target}",
+            "recentTitle": "Недавние начисления",
+            "unavailable": "API достижений ещё не на сервере. После деплоя бэкенда страница заработает.",
+            "categories": {
+                "presence": "Присутствие",
+                "onboarding": "База: онбординг",
+                "reports": "Отчёты",
+                "trust": "Доверие",
+                "other": "Прочее"
+            }
         }
     },
     "errors": {
@@ -1754,7 +1779,8 @@
         "leave": "Отпуск",
         "dissolutionRequests": "Заявление на расторжение",
         "chat": "Чат",
-        "ideas": "Идеи и таланты"
+        "ideas": "Идеи и таланты",
+        "achievements": "Мои достижения"
     },
     "impersonation": {
         "banner": "Вы смотрите как {name}",

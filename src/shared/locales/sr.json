@@ -1693,6 +1693,31 @@
                 "SCHEDULER": "Planer",
                 "SYNC": "Sinhronizacija"
             }
+        },
+        "achievements": {
+            "title": "Moja dostignuća",
+            "description": "Bodovi i nagrade za aktivnost na RDS portalu.",
+            "unlocked": "Otključano: {unlocked} / {total}",
+            "points": "RDS bodova: {points}",
+            "weekLabel": "Ova nedelja",
+            "weekVisited": "Poseta ima (+10)",
+            "weekMissed": "Još niste ušli",
+            "weekHint": "Jednom u 7 dana: +10 za posetu, −10 ako ste propustili prethodnu nedelju (mekani minus, nije blokada).",
+            "inboxLabel": "Poruke LK",
+            "inboxValue": "Primljeno {delivered} od {sent}",
+            "inboxPending": "Nije otvoreno: {pending}",
+            "balanceLabel": "Bilans",
+            "balanceHint": "Zbir svih bodova i kazni",
+            "progress": "Napredak: {progress} / {target}",
+            "recentTitle": "Nedavna dodela",
+            "unavailable": "API dostignuća još nije na serveru. Stranica će raditi posle deploy-a backend-a.",
+            "categories": {
+                "presence": "Prisustvo",
+                "onboarding": "Baza: onboarding",
+                "reports": "Izveštaji",
+                "trust": "Poverenje",
+                "other": "Ostalo"
+            }
         }
     },
     "errors": {
@@ -1754,7 +1779,8 @@
         "leave": "Odmor",
         "dissolutionRequests": "Zahtev za raskid",
         "chat": "Ćaskanje",
-        "ideas": "Ideje i talenti"
+        "ideas": "Ideje i talenti",
+        "achievements": "Moja dostignuća"
     },
     "impersonation": {
         "banner": "Gledate kao {name}",

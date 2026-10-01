@@ -1693,6 +1693,31 @@
                 "SCHEDULER": "Scheduler",
                 "SYNC": "Sync"
             }
+        },
+        "achievements": {
+            "title": "My achievements",
+            "description": "Points and rewards for activity on the RDS portal.",
+            "unlocked": "Unlocked: {unlocked} / {total}",
+            "points": "RDS points: {points}",
+            "weekLabel": "This week",
+            "weekVisited": "Visited (+10)",
+            "weekMissed": "Not visited yet",
+            "weekHint": "Once per 7 days: +10 for a visit, −10 if you missed the previous week (soft penalty, not a lock).",
+            "inboxLabel": "Inbox messages",
+            "inboxValue": "Delivered {delivered} of {sent}",
+            "inboxPending": "Not opened by recipient: {pending}",
+            "balanceLabel": "Balance",
+            "balanceHint": "Sum of all awards and penalties",
+            "progress": "Progress: {progress} / {target}",
+            "recentTitle": "Recent awards",
+            "unavailable": "Achievements API is not on the server yet. The page will work after backend deploy.",
+            "categories": {
+                "presence": "Presence",
+                "onboarding": "Base: onboarding",
+                "reports": "Reports",
+                "trust": "Trust",
+                "other": "Other"
+            }
         }
     },
     "errors": {
@@ -1754,7 +1779,8 @@
         "leave": "Leave",
         "dissolutionRequests": "Termination request",
         "chat": "Chat",
-        "ideas": "Ideas & talents"
+        "ideas": "Ideas & talents",
+        "achievements": "My achievements"
     },
     "impersonation": {
         "banner": "You are viewing as {name}",
