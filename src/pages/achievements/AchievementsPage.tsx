@@ -47,7 +47,9 @@ const AchievementsPage: React.FC = () => {
             bucket.push(item)
             map.set(key, bucket)
         }
-        const ordered = CATEGORY_ORDER.filter((c) => map.has(c)).map((c) => [c, map.get(c)!] as const)
+        const ordered: Array<[string, AchievementDto[]]> = CATEGORY_ORDER.filter((c) => map.has(c)).map(
+            (c) => [c, map.get(c)!]
+        )
         for (const [key, items] of map) {
             if (!(CATEGORY_ORDER as readonly string[]).includes(key)) {
                 ordered.push([key, items])
