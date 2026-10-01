@@ -1,6 +1,6 @@
 import React from "react"
 import { FormattedMessage } from "react-intl"
-import { VOL_ID_BG, VOL_ID_LOGO, VolIdCardData } from "src/shared/docs/volId"
+import { VOL_ID_BG, VolIdCardData } from "src/shared/docs/volId"
 import classes from "./VolIdCard.module.scss"
 
 type Props = {
@@ -9,6 +9,12 @@ type Props = {
     side: "front" | "back"
     large?: boolean
 }
+
+const CountryBadge = ({ code }: { code: string }) => (
+    <div className={classes.countryBadge} aria-label={code}>
+        <span className={classes.countryCode}>{code}</span>
+    </div>
+)
 
 export const VolIdCard: React.FC<Props> = ({ card, qrDataUrl, side, large }) => {
     return (
@@ -21,7 +27,7 @@ export const VolIdCard: React.FC<Props> = ({ card, qrDataUrl, side, large }) => 
             {side === "front" ? (
                 <>
                     <header className={classes.header}>
-                        <img src={VOL_ID_LOGO} alt="" className={classes.logo} />
+                        <CountryBadge code={card.countryCode} />
                         <div className={classes.titles}>
                             <div className={classes.mainTitle}>VOLUNTEER ID CARD</div>
                             <div className={classes.org}>{card.orgTitle}</div>
@@ -76,7 +82,7 @@ export const VolIdCard: React.FC<Props> = ({ card, qrDataUrl, side, large }) => 
             ) : (
                 <>
                     <header className={classes.header}>
-                        <img src={VOL_ID_LOGO} alt="" className={classes.logo} />
+                        <CountryBadge code={card.countryCode} />
                         <div className={classes.titles}>
                             <div className={classes.orgBack}>VOL-ID · ПРОВЕРА / VERIFICATION</div>
                         </div>

@@ -1350,6 +1350,12 @@
             "needLogin": "Prijavite se da otvorite karticu.",
             "notOfficial": "Kartica udruženja. Nije javna isprava.",
             "nameHint": "Na kartici: {name}. Ime i prezime menjate u <link>podešavanjima naloga</link> (Authentik). Posle čuvanja osvežite portal — ime se povlači samo (potreban deploy backenda).",
+            "countryLabel": "Kod zemlje na kartici",
+            "countryHint": "Kao na euro ID: slova umesto logotipa. SRB — Srbija, RUS — Rusija. Možete izabrati ručno.",
+            "country": {
+                "SRB": "SRB · Srbija",
+                "RUS": "RUS · Rusija"
+            },
             "partners": "Погодности код партнера / Partner benefits",
             "verifyTitle": "Provera VOL-ID",
             "verifyDescription": "Preko QR koda možete videti podatke volonterske kartice.",

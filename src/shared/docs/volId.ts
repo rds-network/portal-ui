@@ -1,6 +1,8 @@
 import { UserInfoDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 
+export type VolIdCountryCode = "SRB" | "RUS"
+
 export type VolIdVerifyPayload = {
     v: 1
     id: string
@@ -10,6 +12,7 @@ export type VolIdVerifyPayload = {
     issued: string
     validUntil: string
     issuedAt: string
+    country?: VolIdCountryCode
 }
 
 export type VolIdCardData = {
@@ -21,11 +24,44 @@ export type VolIdCardData = {
     issuedLabel: string
     validUntilLabel: string
     orgTitle: string
+    countryCode: VolIdCountryCode
 }
 
 export const VOL_ID_ORG = "РУСКА ДИЈАСПОРА У СРБИЈИ"
-export const VOL_ID_LOGO = "/resources/zahvalnica-logo.png?v=2"
 export const VOL_ID_BG = "/resources/vol-id-bg.jpg"
+export const VOL_ID_COUNTRY_OPTIONS: VolIdCountryCode[] = ["SRB", "RUS"]
+
+const COUNTRY_STORAGE_PREFIX = "vol-id-country:"
+
+export const loadVolIdCountry = (username: string): VolIdCountryCode | null => {
+    try {
+        const raw = localStorage.getItem(`${COUNTRY_STORAGE_PREFIX}${username}`)
+        if (raw === "SRB" || raw === "RUS") return raw
+    } catch {
+        /* ignore */
+    }
+    return null
+}
+
+export const saveVolIdCountry = (username: string, code: VolIdCountryCode) => {
+    try {
+        localStorage.setItem(`${COUNTRY_STORAGE_PREFIX}${username}`, code)
+    } catch {
+        /* ignore */
+    }
+}
+
+/** Guess ISO-style code from residence-permit nationality text. */
+export const guessVolIdCountry = (user: UserInfoDto): VolIdCountryCode => {
+    const raw = (user.residencePermits || [])
+        .map((p) => p.nationality || "")
+        .join(" ")
+        .toLowerCase()
+    if (/рус|ross|russia|russian|рф\b|rf\b/.test(raw)) return "RUS"
+    if (/срб|serb|srbija|serbia/.test(raw)) return "SRB"
+    // Issuing association operates in Serbia — default SRB for Euro-style badge
+    return "SRB"
+}
 
 /** Stable card number from portal account id. */
 export const cardNumberFromUserId = (id: number): string =>
@@ -52,7 +88,10 @@ const pickPrimaryContract = (user: UserInfoDto) => {
     return [...list].sort((a, b) => b.start.valueOf() - a.start.valueOf())[0]
 }
 
-export const buildVolIdCardData = (user: UserInfoDto): VolIdCardData => {
+export const buildVolIdCardData = (
+    user: UserInfoDto,
+    countryOverride?: VolIdCountryCode | null
+): VolIdCardData => {
     const contract = pickPrimaryContract(user)
     const issued = contract?.start.isValid() ? contract.start : dayjs()
     let validUntilLabel: string
@@ -63,6 +102,8 @@ export const buildVolIdCardData = (user: UserInfoDto): VolIdCardData => {
     } else {
         validUntilLabel = contract.end.format("DD.MM.YYYY.")
     }
+    const countryCode =
+        countryOverride || loadVolIdCountry(user.username) || guessVolIdCountry(user)
     return {
         cardNumber: cardNumberFromUserId(user.id),
         name: (user.fullName || user.username || "—").trim(),
@@ -72,6 +113,7 @@ export const buildVolIdCardData = (user: UserInfoDto): VolIdCardData => {
         issuedLabel: issued.format("DD.MM.YYYY."),
         validUntilLabel,
         orgTitle: VOL_ID_ORG,
+        countryCode,
     }
 }
 
@@ -120,4 +162,5 @@ export const buildVolIdPayload = (card: VolIdCardData): VolIdVerifyPayload => ({
     issued: card.issuedLabel,
     validUntil: card.validUntilLabel,
     issuedAt: new Date().toISOString(),
+    country: card.countryCode,
 })

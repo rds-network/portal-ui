@@ -1350,6 +1350,12 @@
             "needLogin": "Sign in to open your card.",
             "notOfficial": "Association card. Not an official government document.",
             "nameHint": "On the card: {name}. Change full name in <link>account settings</link> (Authentik). After saving, reload the portal — the name syncs automatically (needs backend deploy).",
+            "countryLabel": "Country code on the card",
+            "countryHint": "Euro-ID style letters instead of a logo. SRB = Serbia, RUS = Russia. You can override it.",
+            "country": {
+                "SRB": "SRB · Serbia",
+                "RUS": "RUS · Russia"
+            },
             "partners": "Погодности код партнера / Partner benefits",
             "verifyTitle": "VOL-ID verification",
             "verifyDescription": "The QR code shows the volunteer card details.",

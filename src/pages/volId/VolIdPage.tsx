@@ -1,4 +1,4 @@
-import { Anchor, Button, Flex, Text, Title } from "@mantine/core"
+import { Anchor, Button, Flex, SegmentedControl, Text, Title } from "@mantine/core"
 import { IconId, IconRefresh, IconX } from "@tabler/icons-react"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -6,10 +6,15 @@ import { useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { makeQrDataUrl } from "src/shared/docs/zahvalnicaQr"
 import {
+    VOL_ID_COUNTRY_OPTIONS,
+    VolIdCountryCode,
     buildVolIdCardData,
     buildVolIdPayload,
     buildVolIdVerifyUrl,
     encodeVolIdVerifyToken,
+    guessVolIdCountry,
+    loadVolIdCountry,
+    saveVolIdCountry,
 } from "src/shared/docs/volId"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { VolIdCard } from "./VolIdCard"
@@ -24,8 +29,17 @@ const VolIdPage: React.FC = () => {
     const [params, setParams] = useSearchParams()
     const [side, setSide] = useState<"front" | "back">("front")
     const presenting = params.get("present") === "1"
+    const [countryCode, setCountryCode] = useState<VolIdCountryCode>("SRB")
 
-    const card = useMemo(() => (user ? buildVolIdCardData(user) : null), [user])
+    useEffect(() => {
+        if (!user) return
+        setCountryCode(loadVolIdCountry(user.username) || guessVolIdCountry(user))
+    }, [user])
+
+    const card = useMemo(
+        () => (user ? buildVolIdCardData(user, countryCode) : null),
+        [user, countryCode]
+    )
 
     const qrDataUrl = useMemo(() => {
         if (!card) return null
@@ -55,6 +69,12 @@ const VolIdPage: React.FC = () => {
         setParams({}, { replace: true })
     }
 
+    const onCountryChange = (value: string) => {
+        const code = value as VolIdCountryCode
+        setCountryCode(code)
+        if (user) saveVolIdCountry(user.username, code)
+    }
+
     if (!user || !card) {
         return (
             <div className={classes.root}>
@@ -76,16 +96,30 @@ const VolIdPage: React.FC = () => {
                 </Text>
             </div>
 
+            <div className={classes.countryPicker}>
+                <Text size="sm" fw={500} mb={6}>
+                    <FormattedMessage id="pages.volId.countryLabel" />
+                </Text>
+                <SegmentedControl
+                    fullWidth
+                    value={countryCode}
+                    onChange={onCountryChange}
+                    data={VOL_ID_COUNTRY_OPTIONS.map((value) => ({
+                        value,
+                        label: intl.formatMessage({ id: `pages.volId.country.${value}` }),
+                    }))}
+                />
+                <Text size="xs" c="dimmed" mt={6}>
+                    <FormattedMessage id="pages.volId.countryHint" />
+                </Text>
+            </div>
+
             <div className={classes.preview}>
                 <VolIdCard card={card} qrDataUrl={qrDataUrl} side={side} />
             </div>
 
             <Flex gap="sm" wrap="wrap" justify="center" className={classes.actions}>
-                <Button
-                    size="md"
-                    leftSection={<IconId size={18} />}
-                    onClick={openPresent}
-                >
+                <Button size="md" leftSection={<IconId size={18} />} onClick={openPresent}>
                     <FormattedMessage id="pages.volId.present" />
                 </Button>
                 <Button
