@@ -1,6 +1,6 @@
 import React from "react"
 import { FormattedMessage } from "react-intl"
-import { VOL_ID_LOGO, VolIdCardData } from "src/shared/docs/volId"
+import { VOL_ID_BG, VOL_ID_LOGO, VolIdCardData } from "src/shared/docs/volId"
 import classes from "./VolIdCard.module.scss"
 
 type Props = {
@@ -16,8 +16,7 @@ export const VolIdCard: React.FC<Props> = ({ card, qrDataUrl, side, large }) => 
             className={`${classes.card} ${large ? classes.large : ""} ${side === "back" ? classes.back : classes.front}`}
             aria-label={side === "front" ? "VOL-ID front" : "VOL-ID back"}
         >
-            <div className={classes.guilloche} aria-hidden />
-            <div className={classes.landscape} aria-hidden />
+            <img src={VOL_ID_BG} alt="" className={classes.bg} />
 
             {side === "front" ? (
                 <>
@@ -104,7 +103,6 @@ export const VolIdCard: React.FC<Props> = ({ card, qrDataUrl, side, large }) => 
                     <footer className={classes.footer}>
                         <span>Картица удружења. Није јавна исправа.</span>
                     </footer>
-                    <div className={classes.folkStripe} aria-hidden />
                 </>
             )}
         </article>

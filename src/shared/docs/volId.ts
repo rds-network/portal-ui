@@ -25,6 +25,7 @@ export type VolIdCardData = {
 
 export const VOL_ID_ORG = "РУСКА ДИЈАСПОРА У СРБИЈИ"
 export const VOL_ID_LOGO = "/resources/zahvalnica-logo.png?v=2"
+export const VOL_ID_BG = "/resources/vol-id-bg.jpg"
 
 /** Stable card number from portal account id. */
 export const cardNumberFromUserId = (id: number): string =>
