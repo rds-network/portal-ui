@@ -101,6 +101,7 @@
     object-fit: contain;
     margin-bottom: 10px;
     border-radius: 50%;
+    background: transparent;
 }
 
 .org {
@@ -159,7 +160,7 @@
 }
 
 .signatureImg {
-    width: 140px;
+    width: 48px;
     height: auto;
     margin: 2px 0;
     object-fit: contain;
@@ -169,8 +170,8 @@
     position: absolute;
     right: 12%;
     bottom: 0;
-    width: 96px;
-    height: 96px;
+    width: 82px;
+    height: 82px;
     object-fit: contain;
     opacity: 0.92;
     pointer-events: none;

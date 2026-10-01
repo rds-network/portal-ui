@@ -11,6 +11,8 @@ import {
     DEFAULT_STAMP,
     MAGNOLIA_FONT_URL,
     MARCK_FONT_URL,
+    SIGNATURE_BASE_WIDTH_MM,
+    STAMP_BASE_SIZE_MM,
     TextStyle,
     TITLE_FONT_CSS,
     ZahvalnicaDraft,
@@ -83,6 +85,37 @@ const loadImageElement = async (src: string): Promise<HTMLImageElement | null> =
     }
 }
 
+/** Make near-black pixels transparent so print/PDF don't show a black square. */
+export const punchNearBlackToTransparent = (
+    img: HTMLImageElement,
+    threshold = 28
+): string => {
+    const canvas = document.createElement("canvas")
+    canvas.width = img.width
+    canvas.height = img.height
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return canvas.toDataURL("image/png")
+    ctx.drawImage(img, 0, 0)
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const px = data.data
+    for (let i = 0; i < px.length; i += 4) {
+        if (px[i] <= threshold && px[i + 1] <= threshold && px[i + 2] <= threshold) {
+            px[i + 3] = 0
+        }
+    }
+    ctx.putImageData(data, 0, 0)
+    return canvas.toDataURL("image/png")
+}
+
+const toPngDataUrl = (img: HTMLImageElement, knockoutBlack = false): string => {
+    if (knockoutBlack) return punchNearBlackToTransparent(img)
+    const canvas = document.createElement("canvas")
+    canvas.width = img.width
+    canvas.height = img.height
+    canvas.getContext("2d")?.drawImage(img, 0, 0)
+    return canvas.toDataURL("image/png")
+}
+
 const imageDataUrlWithOpacity = async (
     src: string,
     opacity: number,
@@ -128,6 +161,7 @@ const rasterizeTitle = async (
     const cssFamily = TITLE_FONT_CSS[font]
     if (font === "marck") await ensureWebFont("Marck Script", MARCK_FONT_URL)
     if (font === "magnolia") await ensureWebFont("Magnolia Script", MAGNOLIA_FONT_URL)
+    // custom font must already be loaded via ensureWebFont("ZahvalnicaCustomTitle", ...)
 
     const pxPerMm = 96 / 25.4
     const fontPx = Math.round(style.size * (96 / 72) * 1.35)
@@ -199,6 +233,7 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
     pdf.addFont("Montserrat-Bold-bold.ttf", "Montserrat-Bold", "bold")
 
     let hasMarck = false
+    let hasCustomTitle = false
     if (draft.titleFont === "marck") {
         const marck = await loadFontBase64(MARCK_FONT_URL)
         if (marck) {
@@ -206,6 +241,27 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
             pdf.addFont("MarckScript-Regular.ttf", "MarckScript", "normal")
             hasMarck = true
         }
+    }
+    if (draft.titleFont === "custom" && draft.customTitleFontData) {
+        const isTtf =
+            draft.customTitleFontData.includes("font/ttf") ||
+            draft.customTitleFontData.includes("application/x-font-ttf") ||
+            /\.ttf/i.test(draft.customTitleFontName) ||
+            draft.customTitleFontData.startsWith("data:application/octet-stream")
+        const isOtf = /\.otf/i.test(draft.customTitleFontName) || draft.customTitleFontData.includes("font/otf")
+        if (isTtf && !isOtf) {
+            try {
+                const b64 = draft.customTitleFontData.includes(",")
+                    ? draft.customTitleFontData.split(",")[1]
+                    : draft.customTitleFontData
+                pdf.addFileToVFS("CustomTitle.ttf", b64)
+                pdf.addFont("CustomTitle.ttf", "CustomTitle", "normal")
+                hasCustomTitle = true
+            } catch {
+                hasCustomTitle = false
+            }
+        }
+        await ensureWebFont("ZahvalnicaCustomTitle", draft.customTitleFontData)
     }
 
     const pageW = pdf.internal.pageSize.getWidth()
@@ -246,11 +302,7 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
     const logoImg = await loadImageElement(draft.logoSrc || DEFAULT_LOGO)
     if (logoImg) {
         try {
-            const canvas = document.createElement("canvas")
-            canvas.width = logoImg.width
-            canvas.height = logoImg.height
-            canvas.getContext("2d")?.drawImage(logoImg, 0, 0)
-            const logoData = canvas.toDataURL("image/png")
+            const logoData = toPngDataUrl(logoImg, true)
             const logoW = 32
             pdf.addImage(logoData, "PNG", (pageW - logoW) / 2, y, logoW, logoW, undefined, "FAST")
             y += logoW + 8
@@ -267,12 +319,24 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
         applyStyle(pdf, ty.title, "MarckScript")
         pdf.text(draft.title, pageW / 2, y, { align: "center", maxWidth: contentW })
         y += Math.max(14, ty.title.size * 0.5 + 4)
+    } else if (draft.titleFont === "custom" && hasCustomTitle) {
+        pdf.setFont("CustomTitle", "normal")
+        pdf.setFontSize(ty.title.size)
+        const [r, g, b] = hexToRgb(ty.title.color)
+        pdf.setTextColor(r, g, b)
+        pdf.text(draft.title, pageW / 2, y, { align: "center", maxWidth: contentW })
+        y += Math.max(14, ty.title.size * 0.5 + 4)
     } else if (draft.titleFont === "montserrat") {
         applyStyle(pdf, ty.title)
         pdf.text(draft.title, pageW / 2, y, { align: "center", maxWidth: contentW })
         y += Math.max(12, ty.title.size * 0.45 + 4)
     } else {
-        const raster = await rasterizeTitle(draft.title, draft.titleFont, ty.title, contentW)
+        const rasterFont: ZahvalnicaTitleFont =
+            draft.titleFont === "custom" ? "custom" : draft.titleFont === "magnolia" ? "magnolia" : "marck"
+        if (draft.titleFont === "custom" && draft.customTitleFontData) {
+            await ensureWebFont("ZahvalnicaCustomTitle", draft.customTitleFontData)
+        }
+        const raster = await rasterizeTitle(draft.title, rasterFont, ty.title, contentW)
         if (raster) {
             pdf.addImage(
                 raster.dataUrl,
@@ -322,27 +386,23 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
     pdf.text(draft.presidentLabel, signCenterX, y, { align: "center" })
     y += 4
 
+    const sigScale = Math.min(120, Math.max(10, draft.signatureScale ?? 35)) / 100
+    const sigOffX = draft.signatureOffsetX ?? 0
+    const sigOffY = draft.signatureOffsetY ?? 0
+    let sigBottom = y
+
     if (draft.showSignature) {
         const sig = await loadImageElement(draft.signatureSrc || DEFAULT_SIGNATURE)
         if (sig) {
             try {
-                const canvas = document.createElement("canvas")
-                canvas.width = sig.width
-                canvas.height = sig.height
-                canvas.getContext("2d")?.drawImage(sig, 0, 0)
-                const sigW = 42
+                const sigData = toPngDataUrl(sig, false)
+                const sigW = SIGNATURE_BASE_WIDTH_MM * sigScale
                 const sigH = (sig.height / sig.width) * sigW
-                pdf.addImage(
-                    canvas.toDataURL("image/png"),
-                    "PNG",
-                    signCenterX - sigW / 2,
-                    y,
-                    sigW,
-                    sigH,
-                    undefined,
-                    "FAST"
-                )
-                y += sigH + 2
+                const sigX = signCenterX - sigW / 2 + sigOffX
+                const sigY = y + sigOffY
+                pdf.addImage(sigData, "PNG", sigX, sigY, sigW, sigH, undefined, "FAST")
+                sigBottom = Math.max(sigBottom, sigY + sigH)
+                y = Math.max(y + 2, sigY + sigH + 2)
             } catch {
                 y += 2
             }
@@ -356,21 +416,12 @@ export default async function generateZahvalnicaPdf(draft: ZahvalnicaDraft, opts
         const stamp = await loadImageElement(draft.stampSrc || DEFAULT_STAMP)
         if (stamp) {
             try {
-                const canvas = document.createElement("canvas")
-                canvas.width = stamp.width
-                canvas.height = stamp.height
-                canvas.getContext("2d")?.drawImage(stamp, 0, 0)
-                const stampW = 38
-                pdf.addImage(
-                    canvas.toDataURL("image/png"),
-                    "PNG",
-                    signCenterX + 18,
-                    y - 28,
-                    stampW,
-                    stampW,
-                    undefined,
-                    "FAST"
-                )
+                const stampData = toPngDataUrl(stamp, true)
+                const stampScale = Math.min(140, Math.max(20, draft.stampScale ?? 85)) / 100
+                const stampW = STAMP_BASE_SIZE_MM * stampScale
+                const stampX = signCenterX + (draft.stampOffsetX ?? 18)
+                const stampY = sigBottom + (draft.stampOffsetY ?? -8) - stampW * 0.55
+                pdf.addImage(stampData, "PNG", stampX, stampY, stampW, stampW, undefined, "FAST")
             } catch {
                 /* ignore */
             }

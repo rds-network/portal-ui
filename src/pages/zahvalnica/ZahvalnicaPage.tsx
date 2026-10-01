@@ -116,6 +116,23 @@ export const ZahvalnicaPage: React.FC = () => {
     }, [user?.fullName])
 
     useEffect(() => {
+        if (!draft.customTitleFontData) return
+        let cancelled = false
+        ;(async () => {
+            try {
+                const face = new FontFace("ZahvalnicaCustomTitle", `url(${draft.customTitleFontData})`)
+                await face.load()
+                if (!cancelled) document.fonts.add(face)
+            } catch {
+                /* ignore */
+            }
+        })()
+        return () => {
+            cancelled = true
+        }
+    }, [draft.customTitleFontData])
+
+    useEffect(() => {
         if (!draft.showQr) {
             setPreviewQr(null)
             return
@@ -355,10 +372,58 @@ export const ZahvalnicaPage: React.FC = () => {
                             { value: "marck", label: "Marck Script" },
                             { value: "magnolia", label: "Magnolia Script" },
                             { value: "montserrat", label: "Montserrat" },
+                            {
+                                value: "custom",
+                                label: draft.customTitleFontName
+                                    ? `⬆ ${draft.customTitleFontName}`
+                                    : intl.formatMessage({ id: "pages.zahvalnica.customFont" }),
+                            },
                         ]}
                         onChange={(v) => v && patch({ titleFont: v as ZahvalnicaTitleFont })}
                         mb="sm"
                     />
+                    <Flex gap="sm" wrap="wrap" mb="sm" align="center">
+                        <FileButton
+                            accept=".ttf,.otf,font/ttf,font/otf,application/x-font-ttf,application/font-sfnt"
+                            onChange={async (file) => {
+                                if (!file) return
+                                const data = await readFileAsDataUrl(file)
+                                patch({
+                                    titleFont: "custom",
+                                    customTitleFontData: data,
+                                    customTitleFontName: file.name,
+                                })
+                                try {
+                                    const face = new FontFace("ZahvalnicaCustomTitle", `url(${data})`)
+                                    await face.load()
+                                    document.fonts.add(face)
+                                } catch {
+                                    /* ignore */
+                                }
+                            }}
+                        >
+                            {(props) => (
+                                <Button {...props} variant="light" size="compact-sm">
+                                    <FormattedMessage id="pages.zahvalnica.uploadFont" />
+                                </Button>
+                            )}
+                        </FileButton>
+                        {draft.customTitleFontData && (
+                            <Button
+                                variant="subtle"
+                                size="compact-sm"
+                                onClick={() =>
+                                    patch({
+                                        customTitleFontData: null,
+                                        customTitleFontName: "",
+                                        titleFont: "marck",
+                                    })
+                                }
+                            >
+                                <FormattedMessage id="pages.zahvalnica.clearFont" />
+                            </Button>
+                        )}
+                    </Flex>
                     <div>
                         <Text size="sm" fw={500} mb={6}>
                             <FormattedMessage
@@ -456,7 +521,38 @@ export const ZahvalnicaPage: React.FC = () => {
                             accept="image/png,image/jpeg,image/webp"
                             onChange={async (file) => {
                                 if (!file) return
-                                patch({ logoSrc: await readFileAsDataUrl(file) })
+                                const raw = await readFileAsDataUrl(file)
+                                // Knock out black squares so print keeps transparency
+                                try {
+                                    const img = new Image()
+                                    const dataUrl = await new Promise<string>((resolve, reject) => {
+                                        img.onload = () => {
+                                            const canvas = document.createElement("canvas")
+                                            canvas.width = img.width
+                                            canvas.height = img.height
+                                            const ctx = canvas.getContext("2d")
+                                            if (!ctx) {
+                                                resolve(raw)
+                                                return
+                                            }
+                                            ctx.drawImage(img, 0, 0)
+                                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+                                            const px = imageData.data
+                                            for (let i = 0; i < px.length; i += 4) {
+                                                if (px[i] <= 28 && px[i + 1] <= 28 && px[i + 2] <= 28) {
+                                                    px[i + 3] = 0
+                                                }
+                                            }
+                                            ctx.putImageData(imageData, 0, 0)
+                                            resolve(canvas.toDataURL("image/png"))
+                                        }
+                                        img.onerror = reject
+                                        img.src = raw
+                                    })
+                                    patch({ logoSrc: dataUrl })
+                                } catch {
+                                    patch({ logoSrc: raw })
+                                }
                             }}
                         >
                             {(props) => (
@@ -512,12 +608,104 @@ export const ZahvalnicaPage: React.FC = () => {
                         onChange={(e) => patch({ showSignature: e.currentTarget.checked })}
                         mb={8}
                     />
+                    {draft.showSignature && (
+                        <>
+                            <Text size="sm" fw={500} mb={6}>
+                                <FormattedMessage
+                                    id="pages.zahvalnica.signatureScale"
+                                    values={{ value: draft.signatureScale }}
+                                />
+                            </Text>
+                            <Slider
+                                min={10}
+                                max={100}
+                                step={1}
+                                value={draft.signatureScale}
+                                onChange={(value) => patch({ signatureScale: value })}
+                                mb="sm"
+                            />
+                            <Text size="sm" fw={500} mb={6}>
+                                <FormattedMessage
+                                    id="pages.zahvalnica.signatureOffsetX"
+                                    values={{ value: draft.signatureOffsetX }}
+                                />
+                            </Text>
+                            <Slider
+                                min={-40}
+                                max={40}
+                                step={1}
+                                value={draft.signatureOffsetX}
+                                onChange={(value) => patch({ signatureOffsetX: value })}
+                                mb="sm"
+                            />
+                            <Text size="sm" fw={500} mb={6}>
+                                <FormattedMessage
+                                    id="pages.zahvalnica.signatureOffsetY"
+                                    values={{ value: draft.signatureOffsetY }}
+                                />
+                            </Text>
+                            <Slider
+                                min={-30}
+                                max={30}
+                                step={1}
+                                value={draft.signatureOffsetY}
+                                onChange={(value) => patch({ signatureOffsetY: value })}
+                                mb="md"
+                            />
+                        </>
+                    )}
                     <Switch
                         label={intl.formatMessage({ id: "pages.zahvalnica.showStamp" })}
                         checked={draft.showStamp}
                         onChange={(e) => patch({ showStamp: e.currentTarget.checked })}
                         mb={8}
                     />
+                    {draft.showStamp && (
+                        <>
+                            <Text size="sm" fw={500} mb={6}>
+                                <FormattedMessage
+                                    id="pages.zahvalnica.stampScale"
+                                    values={{ value: draft.stampScale }}
+                                />
+                            </Text>
+                            <Slider
+                                min={20}
+                                max={140}
+                                step={1}
+                                value={draft.stampScale}
+                                onChange={(value) => patch({ stampScale: value })}
+                                mb="sm"
+                            />
+                            <Text size="sm" fw={500} mb={6}>
+                                <FormattedMessage
+                                    id="pages.zahvalnica.stampOffsetX"
+                                    values={{ value: draft.stampOffsetX }}
+                                />
+                            </Text>
+                            <Slider
+                                min={-40}
+                                max={60}
+                                step={1}
+                                value={draft.stampOffsetX}
+                                onChange={(value) => patch({ stampOffsetX: value })}
+                                mb="sm"
+                            />
+                            <Text size="sm" fw={500} mb={6}>
+                                <FormattedMessage
+                                    id="pages.zahvalnica.stampOffsetY"
+                                    values={{ value: draft.stampOffsetY }}
+                                />
+                            </Text>
+                            <Slider
+                                min={-40}
+                                max={40}
+                                step={1}
+                                value={draft.stampOffsetY}
+                                onChange={(value) => patch({ stampOffsetY: value })}
+                                mb="md"
+                            />
+                        </>
+                    )}
                     <Switch
                         label={intl.formatMessage({ id: "pages.zahvalnica.showQr" })}
                         checked={draft.showQr}
@@ -675,6 +863,10 @@ export const ZahvalnicaPage: React.FC = () => {
                                             src={draft.signatureSrc || DEFAULT_SIGNATURE}
                                             alt=""
                                             className={classes.signatureImg}
+                                            style={{
+                                                width: `${Math.round(140 * (draft.signatureScale / 100))}px`,
+                                                transform: `translate(${draft.signatureOffsetX * 2}px, ${draft.signatureOffsetY * 2}px)`,
+                                            }}
                                         />
                                     )}
                                     <strong
@@ -692,6 +884,11 @@ export const ZahvalnicaPage: React.FC = () => {
                                         src={draft.stampSrc || DEFAULT_STAMP}
                                         alt=""
                                         className={classes.stampImg}
+                                        style={{
+                                            width: `${Math.round(96 * (draft.stampScale / 100))}px`,
+                                            height: `${Math.round(96 * (draft.stampScale / 100))}px`,
+                                            transform: `translate(${draft.stampOffsetX * 1.5}px, ${draft.stampOffsetY * 1.5}px)`,
+                                        }}
                                     />
                                 )}
                             </div>

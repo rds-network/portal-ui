@@ -1,6 +1,6 @@
 export type ZahvalnicaBackground = "white" | "navy" | "soft"
 
-export type ZahvalnicaTitleFont = "marck" | "magnolia" | "montserrat"
+export type ZahvalnicaTitleFont = "marck" | "magnolia" | "montserrat" | "custom"
 
 export type TextStyle = {
     size: number
@@ -39,11 +39,23 @@ export type ZahvalnicaDraft = {
     /** Line-height multiplier for body paragraphs. */
     bodyLineHeight: number
     titleFont: ZahvalnicaTitleFont
+    /** Uploaded TTF/OTF as data-URL when titleFont === "custom". */
+    customTitleFontData: string | null
+    customTitleFontName: string
     showStamp: boolean
     showSignature: boolean
     showQr: boolean
     stampSrc: string
     signatureSrc: string
+    /** Signature width as % of previous default (42mm); 35 ≈ 3× smaller. */
+    signatureScale: number
+    /** Horizontal offset in mm (negative = left). */
+    signatureOffsetX: number
+    /** Vertical offset in mm (negative = up). */
+    signatureOffsetY: number
+    stampScale: number
+    stampOffsetX: number
+    stampOffsetY: number
     typography: ZahvalnicaTypography
 }
 
@@ -65,7 +77,7 @@ export type ZahvalnicaIssue = {
 export const ZAHVALNICA_STORAGE_KEY = "portal.zahvalnica.draft"
 export const ZAHVALNICA_NUMBER_KEY = "portal.zahvalnica.lastNumber"
 export const ZAHVALNICA_HISTORY_KEY = "portal.zahvalnica.history"
-export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png"
+export const DEFAULT_LOGO = "/resources/zahvalnica-logo.png?v=2"
 export const DEFAULT_BACKGROUND = "/resources/zahvalnica-bg.jpg"
 export const DEFAULT_STAMP = "/resources/zahvalnica-stamp.png"
 export const DEFAULT_SIGNATURE = "/resources/zahvalnica-signature.png"
@@ -76,7 +88,13 @@ export const TITLE_FONT_CSS: Record<ZahvalnicaTitleFont, string> = {
     marck: '"Marck Script", cursive',
     magnolia: '"Magnolia Script", cursive',
     montserrat: '"Montserrat", sans-serif',
+    custom: '"ZahvalnicaCustomTitle", cursive',
 }
+
+/** Base signature width in mm at signatureScale=100. */
+export const SIGNATURE_BASE_WIDTH_MM = 42
+/** Base stamp size in mm at stampScale=100. */
+export const STAMP_BASE_SIZE_MM = 38
 
 export const defaultTypography = (): ZahvalnicaTypography => ({
     org: { size: 11, color: "#1a365d", bold: true },
@@ -120,11 +138,19 @@ export const defaultZahvalnicaDraft = (overrides?: Partial<ZahvalnicaDraft>): Za
         watermarkScale: 100,
         bodyLineHeight: 1.55,
         titleFont: "marck",
+        customTitleFontData: null,
+        customTitleFontName: "",
         showStamp: true,
         showSignature: true,
         showQr: true,
         stampSrc: DEFAULT_STAMP,
         signatureSrc: DEFAULT_SIGNATURE,
+        signatureScale: 35,
+        signatureOffsetX: 0,
+        signatureOffsetY: 0,
+        stampScale: 85,
+        stampOffsetX: 18,
+        stampOffsetY: -8,
         typography: defaultTypography(),
         ...overrides,
     }
@@ -218,14 +244,51 @@ const migrateDraft = (raw: Partial<ZahvalnicaDraft>): ZahvalnicaDraft => {
     } else {
         merged.bodyLineHeight = clamp(Number(raw.bodyLineHeight), 1.1, 2.4)
     }
-    if (raw.titleFont !== "marck" && raw.titleFont !== "magnolia" && raw.titleFont !== "montserrat") {
+    if (
+        raw.titleFont !== "marck" &&
+        raw.titleFont !== "magnolia" &&
+        raw.titleFont !== "montserrat" &&
+        raw.titleFont !== "custom"
+    ) {
         merged.titleFont = "marck"
     }
+    if (raw.customTitleFontData === undefined) merged.customTitleFontData = null
+    if (raw.customTitleFontName === undefined) merged.customTitleFontName = ""
     if (raw.showStamp == null) merged.showStamp = true
     if (raw.showSignature == null) merged.showSignature = true
     if (raw.showQr == null) merged.showQr = true
     if (!raw.stampSrc) merged.stampSrc = DEFAULT_STAMP
     if (!raw.signatureSrc) merged.signatureSrc = DEFAULT_SIGNATURE
+    if (raw.signatureScale == null || Number.isNaN(Number(raw.signatureScale))) {
+        merged.signatureScale = 35
+    } else {
+        merged.signatureScale = clamp(Number(raw.signatureScale), 10, 120)
+    }
+    if (raw.signatureOffsetX == null || Number.isNaN(Number(raw.signatureOffsetX))) {
+        merged.signatureOffsetX = 0
+    } else {
+        merged.signatureOffsetX = clamp(Number(raw.signatureOffsetX), -40, 40)
+    }
+    if (raw.signatureOffsetY == null || Number.isNaN(Number(raw.signatureOffsetY))) {
+        merged.signatureOffsetY = 0
+    } else {
+        merged.signatureOffsetY = clamp(Number(raw.signatureOffsetY), -30, 30)
+    }
+    if (raw.stampScale == null || Number.isNaN(Number(raw.stampScale))) {
+        merged.stampScale = 85
+    } else {
+        merged.stampScale = clamp(Number(raw.stampScale), 20, 140)
+    }
+    if (raw.stampOffsetX == null || Number.isNaN(Number(raw.stampOffsetX))) {
+        merged.stampOffsetX = 18
+    } else {
+        merged.stampOffsetX = clamp(Number(raw.stampOffsetX), -40, 60)
+    }
+    if (raw.stampOffsetY == null || Number.isNaN(Number(raw.stampOffsetY))) {
+        merged.stampOffsetY = -8
+    } else {
+        merged.stampOffsetY = clamp(Number(raw.stampOffsetY), -40, 40)
+    }
     return merged
 }
 
