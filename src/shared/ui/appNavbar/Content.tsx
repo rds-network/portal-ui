@@ -27,6 +27,7 @@ import {
     IconBulb,
     IconFileDescription,
     IconAward,
+    IconId,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -44,6 +45,12 @@ export const Content: NavSection[] = [
                 label: "navbar.desktop",
                 icon: IconHome,
                 link: "/",
+            },
+            {
+                label: "navbar.volId",
+                icon: IconId,
+                link: "/vol-id",
+                dataTourId: "nav-vol-id",
             },
             {
                 label: "navbar.reports.tasks",

@@ -1339,6 +1339,28 @@
                 "CANCELLED": "Cancelled"
             }
         },
+        "volId": {
+            "title": "VOL-ID",
+            "description": "RDS volunteer card. Present it to a partner or show the QR for verification.",
+            "present": "Present card",
+            "presentHint": "Show the screen to a partner. Flip the card to reveal the QR.",
+            "showBack": "Back / QR",
+            "showFront": "Front side",
+            "close": "Close",
+            "needLogin": "Sign in to open your card.",
+            "notOfficial": "Association card. Not an official government document.",
+            "partners": "Погодности код партнера / Partner benefits",
+            "verifyTitle": "VOL-ID verification",
+            "verifyDescription": "The QR code shows the volunteer card details.",
+            "verifyMissing": "Verification data is missing from the link.",
+            "verifyInvalid": "This link is damaged or invalid.",
+            "verifyValidBadge": "Valid",
+            "fieldName": "Name",
+            "fieldNumber": "Card number",
+            "fieldSince": "Volunteer since",
+            "fieldIssued": "Issued",
+            "fieldValidUntil": "Valid until"
+        },
         "zahvalnica": {
             "title": "Certificate of thanks",
             "description": "Thank-you letter for a volunteer: edit text, logo and background, then download a PDF.",
@@ -1678,6 +1700,14 @@
             "system": "System"
         },
         "desktop": "Desktop",
+        "volId": "VOL-ID",
+        "mobile": {
+            "home": "Home",
+            "tasks": "Tasks",
+            "volId": "ID card",
+            "messages": "Inbox",
+            "chat": "Chats"
+        },
         "reports": {
             "reporting": "Reporting",
             "my-reports": "My reports",

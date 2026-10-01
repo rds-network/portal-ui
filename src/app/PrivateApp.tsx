@@ -11,6 +11,7 @@ import AppHeader from "src/shared/ui/appHeader/AppHeader"
 import { AppNavbar } from "src/shared/ui/appNavbar/AppNavbar"
 import { ChatNotifyWatcher } from "src/shared/ui/chat/ChatNotifyWatcher"
 import { InboxAckGuard } from "src/shared/ui/inbox/InboxAckGuard"
+import { PortalMobileBottomNav } from "src/shared/ui/mobileBottomNav/PortalMobileBottomNav"
 import { ProfileValidationGuard } from "src/shared/ui/profileValidation/ProfileValidationGuard"
 import { ProfileValidationModal } from "src/shared/ui/profileValidation/ProfileValidationModal"
 import { WhatsNewTour } from "src/shared/ui/whatsNew/WhatsNewTour"
@@ -31,6 +32,7 @@ const PrivateAppShell = () => {
                     </ScrollArea>
                 </AppShell.Main>
             </AppShell>
+            <PortalMobileBottomNav />
             <ProfileValidationModal />
             <WhatsNewTour
                 blocked={showProfileModal}

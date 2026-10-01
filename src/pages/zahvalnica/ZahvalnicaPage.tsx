@@ -125,7 +125,7 @@ export const ZahvalnicaPage: React.FC = () => {
     const [busy, setBusy] = useState(false)
     const [previewQr, setPreviewQr] = useState<string | null>(null)
     const [pxPerMm, setPxPerMm] = useState(PREVIEW_PX_PER_MM)
-    const previewRef = useRef<HTMLArticleElement | null>(null)
+    const previewRef = useRef<HTMLElement | null>(null)
     const [activeTemplateId, setActiveTemplateId] = useState<string>(() => {
         const d = loadZahvalnicaDraft()
         const bgs = loadSavedBackgrounds()

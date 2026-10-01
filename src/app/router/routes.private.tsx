@@ -38,6 +38,7 @@ const ApplicationJoinSettingsPage = lazy(
     () => import("src/pages/application/joinSettings/ApplicationJoinSettingsPage")
 )
 const ZahvalnicaPage = lazy(() => import("src/pages/zahvalnica/ZahvalnicaPage"))
+const VolIdPage = lazy(() => import("src/pages/volId/VolIdPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -171,6 +172,10 @@ export const routes: RouteProps[] = [
     {
         path: "/zahvalnica",
         element: <ZahvalnicaPage />,
+    },
+    {
+        path: "/vol-id",
+        element: <VolIdPage />,
     },
     {
         path: "/curators",

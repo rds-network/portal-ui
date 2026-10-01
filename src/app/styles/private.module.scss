@@ -1,53 +1,105 @@
-.appShell {
-    --portal-navbar-width: 292px;
-    --portal-shell-inset: 0;
-    --portal-page-top-gap: 0;
-    display: flex;
-    position: fixed;
-    inset: 0;
-    padding: 0;
-    gap: 0;
-}
-.appShellMain {
-    flex: 1;
-    min-width: 0;
-    padding: calc(80px + var(--portal-banner-height, 0px)) 20px 20px;
-    height: 100%;
-    min-height: 0;
-}
-.appShellMainScroll {
-    height: 100%;
-    width: 100%;
-
-    :global(.mantine-ScrollArea-viewport) {
-        height: 100% !important;
-    }
-
-    :global(.mantine-ScrollArea-viewport > div) {
-        height: 100% !important;
-        min-height: 100% !important;
-        display: block !important;
-    }
-}
-.divider {
-    width: 100%;
-    margin: 1rem 0;
-    border-top: 1px solid var(--portal-border);
-}
-@media (max-width: 64em) {
-    .appShell {
-        inset: calc(72px + var(--portal-banner-height, 0px)) 0 0;
-    }
-
-    .appShellMain {
-        padding: 0;
-    }
-
-    .appShellMainScroll {
-        :global(.mantine-ScrollArea-viewport > div) {
-            height: auto !important;
-            min-height: 100% !important;
-        }
-    }
-}
-
+.appShell {
+
+    --portal-navbar-width: 292px;
+
+    --portal-shell-inset: 0;
+
+    --portal-page-top-gap: 0;
+
+    display: flex;
+
+    position: fixed;
+
+    inset: 0;
+
+    padding: 0;
+
+    gap: 0;
+
+}
+
+.appShellMain {
+
+    flex: 1;
+
+    min-width: 0;
+
+    padding: calc(80px + var(--portal-banner-height, 0px)) 20px 20px;
+
+    height: 100%;
+
+    min-height: 0;
+
+}
+
+.appShellMainScroll {
+
+    height: 100%;
+
+    width: 100%;
+
+
+
+    :global(.mantine-ScrollArea-viewport) {
+
+        height: 100% !important;
+
+    }
+
+
+
+    :global(.mantine-ScrollArea-viewport > div) {
+
+        height: 100% !important;
+
+        min-height: 100% !important;
+
+        display: block !important;
+
+    }
+
+}
+
+.divider {
+
+    width: 100%;
+
+    margin: 1rem 0;
+
+    border-top: 1px solid var(--portal-border);
+
+}
+
+@media (max-width: 64em) {
+
+    .appShell {
+
+        inset: calc(72px + var(--portal-banner-height, 0px)) 0 0;
+
+    }
+
+
+
+    .appShellMain {
+
+        padding: 0 0 calc(72px + env(safe-area-inset-bottom));
+
+    }
+
+
+
+    .appShellMainScroll {
+
+        :global(.mantine-ScrollArea-viewport > div) {
+
+            height: auto !important;
+
+            min-height: 100% !important;
+
+        }
+
+    }
+
+}
+
+

@@ -1339,6 +1339,28 @@
                 "CANCELLED": "Povučen"
             }
         },
+        "volId": {
+            "title": "VOL-ID",
+            "description": "Volonterska kartica RDS. Pokažite je partneru ili QR za proveru.",
+            "present": "Pokaži karticu",
+            "presentHint": "Pokažite ekran partneru. Okrenite karticu za QR.",
+            "showBack": "Poleđina / QR",
+            "showFront": "Prednja strana",
+            "close": "Zatvori",
+            "needLogin": "Prijavite se da otvorite karticu.",
+            "notOfficial": "Kartica udruženja. Nije javna isprava.",
+            "partners": "Погодности код партнера / Partner benefits",
+            "verifyTitle": "Provera VOL-ID",
+            "verifyDescription": "Preko QR koda možete videti podatke volonterske kartice.",
+            "verifyMissing": "U linku nema podataka za proveru.",
+            "verifyInvalid": "Link je oštećen ili nevažeći.",
+            "verifyValidBadge": "Važeća",
+            "fieldName": "Ime",
+            "fieldNumber": "Broj kartice",
+            "fieldSince": "Volonter od",
+            "fieldIssued": "Izdato",
+            "fieldValidUntil": "Važi do"
+        },
         "zahvalnica": {
             "title": "Zahvalnica",
             "description": "Zahvalnica volonteru: uredite tekst, logo i pozadinu, zatim preuzmite PDF.",
@@ -1678,6 +1700,14 @@
             "system": "Sistem"
         },
         "desktop": "Radni sto",
+        "volId": "VOL-ID",
+        "mobile": {
+            "home": "Pregled",
+            "tasks": "Zadaci",
+            "volId": "Kartica",
+            "messages": "Poruke",
+            "chat": "Četovi"
+        },
         "reports": {
             "reporting": "Izveštavanje",
             "my-reports": "Moji izveštaji",

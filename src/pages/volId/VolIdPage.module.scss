@@ -1,0 +1,73 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 12px 96px;
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.intro {
+    width: 100%;
+    text-align: center;
+}
+
+.preview {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 8px 0;
+}
+
+.actions {
+    width: 100%;
+}
+
+.present {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: radial-gradient(ellipse at 50% 30%, #1a2744 0%, #0b1220 70%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 12px calc(24px + env(safe-area-inset-bottom));
+}
+
+.close {
+    position: absolute;
+    top: calc(12px + env(safe-area-inset-top));
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.presentCard {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    animation: rise 0.35s ease-out;
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
