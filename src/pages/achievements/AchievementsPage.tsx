@@ -1,4 +1,4 @@
-import { Button, Loader, Tabs, Text, Title } from "@mantine/core"
+import { Button, Loader, Tabs, Text, TextInput, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import {
     IconCheck,
@@ -50,11 +50,19 @@ const SHOWCASE_PREVIEW = [
 
 const MissionCard: React.FC<{
     mission: PointMissionDto
-    claiming: boolean
+    busy: boolean
     onClaim: (id: string) => void
-}> = ({ mission, claiming, onClaim }) => {
+    onSubmit: (id: string, proofText: string) => void
+}> = ({ mission, busy, onClaim, onSubmit }) => {
     const intl = useIntl()
+    const [proof, setProof] = useState(mission.proofText || "")
     const isCover = (mission.visualType || "").toUpperCase() === "COVER" && !!mission.imageUrl
+    const needsReview = mission.requiresReview !== false
+    const status = (mission.submissionStatus || "").toUpperCase()
+    const pending = status === "PENDING"
+    const rejected = status === "REJECTED"
+    const done = !!mission.claimed || status === "APPROVED"
+
     return (
         <article className={classes.missionCard}>
             <MissionVisualCover
@@ -103,19 +111,69 @@ const MissionCard: React.FC<{
                             <FormattedMessage id="pages.achievements.missionOpen" />
                         </Button>
                     )}
-                    <Button
-                        size="sm"
-                        className={mission.claimed ? undefined : classes.primaryBtn}
-                        variant={mission.claimed ? "light" : "filled"}
-                        color={mission.claimed ? "gray" : undefined}
-                        disabled={!!mission.claimed || claiming}
-                        onClick={() => onClaim(mission.id)}
-                        fullWidth
-                    >
-                        {mission.claimed
-                            ? intl.formatMessage({ id: "pages.achievements.missionDone" })
-                            : intl.formatMessage({ id: "pages.achievements.missionClaim" })}
-                    </Button>
+
+                    {needsReview && !done && !pending && (
+                        <>
+                            <TextInput
+                                size="sm"
+                                label={
+                                    mission.proofLabel ||
+                                    intl.formatMessage({ id: "pages.achievements.missionProofDefault" })
+                                }
+                                placeholder={intl.formatMessage({
+                                    id: "pages.achievements.missionProofPlaceholder",
+                                })}
+                                value={proof}
+                                onChange={(e) => setProof(e.currentTarget.value)}
+                                error={
+                                    rejected
+                                        ? mission.rejectReason ||
+                                          intl.formatMessage({ id: "pages.achievements.missionRejected" })
+                                        : undefined
+                                }
+                            />
+                            <Button
+                                size="sm"
+                                className={classes.primaryBtn}
+                                disabled={busy || proof.trim().length < 2}
+                                loading={busy}
+                                onClick={() => onSubmit(mission.id, proof.trim())}
+                                fullWidth
+                            >
+                                <FormattedMessage id="pages.achievements.missionSubmit" />
+                            </Button>
+                        </>
+                    )}
+
+                    {needsReview && pending && (
+                        <Text size="sm" c="dimmed" ta="center">
+                            <FormattedMessage id="pages.achievements.missionPending" />
+                            {mission.proofText ? `: ${mission.proofText}` : ""}
+                        </Text>
+                    )}
+
+                    {needsReview && done && (
+                        <Button size="sm" variant="light" color="gray" disabled fullWidth>
+                            <FormattedMessage id="pages.achievements.missionDone" />
+                        </Button>
+                    )}
+
+                    {!needsReview && (
+                        <Button
+                            size="sm"
+                            className={done ? undefined : classes.primaryBtn}
+                            variant={done ? "light" : "filled"}
+                            color={done ? "gray" : undefined}
+                            disabled={done || busy}
+                            loading={busy}
+                            onClick={() => onClaim(mission.id)}
+                            fullWidth
+                        >
+                            {done
+                                ? intl.formatMessage({ id: "pages.achievements.missionDone" })
+                                : intl.formatMessage({ id: "pages.achievements.missionClaim" })}
+                        </Button>
+                    )}
                 </div>
             </div>
         </article>
@@ -161,6 +219,26 @@ const AchievementsPage: React.FC = () => {
             )
         },
     })
+
+    const { mutate: submitMission, isPending: submitting } = useMutation({
+        mutationFn: ({ id, proofText }: { id: string; proofText: string }) =>
+            PointMissionApiService.submit(id, proofText),
+        onSuccess: (result) => {
+            queryClient.invalidateQueries({ queryKey: ["point-missions"] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        {result.alreadyClaimed
+                            ? intl.formatMessage({ id: "pages.achievements.missionAlready" })
+                            : intl.formatMessage({ id: "pages.achievements.missionSubmitted" })}
+                    </Text>,
+                    null
+                )
+            )
+        },
+    })
+
+    const missionBusy = claiming || submitting
 
     const byCategory = useMemo(() => {
         const list = data?.achievements ?? []
@@ -373,8 +451,9 @@ const AchievementsPage: React.FC = () => {
                                     <MissionCard
                                         key={m.id}
                                         mission={m}
-                                        claiming={claiming}
+                                        busy={missionBusy}
                                         onClaim={claimMission}
+                                        onSubmit={(id, proofText) => submitMission({ id, proofText })}
                                     />
                                 ))}
                             </div>
@@ -507,8 +586,9 @@ const AchievementsPage: React.FC = () => {
                                     <MissionCard
                                         key={m.id}
                                         mission={m}
-                                        claiming={claiming}
+                                        busy={missionBusy}
                                         onClaim={claimMission}
+                                        onSubmit={(id, proofText) => submitMission({ id, proofText })}
                                     />
                                 ))}
                             </div>

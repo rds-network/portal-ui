@@ -13,7 +13,7 @@ import {
 } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { IconPlus, IconTrash, IconUpload } from "@tabler/icons-react"
+import { IconCheck, IconPlus, IconTrash, IconUpload, IconX } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import React, { useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -43,6 +43,8 @@ type FormValues = {
     visualType: MissionVisualType
     visualKey: string
     imageUrl: string
+    requiresReview: boolean
+    proofLabel: string
 }
 
 const PointMissionsAdminPage: React.FC = () => {
@@ -66,6 +68,8 @@ const PointMissionsAdminPage: React.FC = () => {
             visualType: "PICTOGRAM",
             visualKey: "star",
             imageUrl: "",
+            requiresReview: true,
+            proofLabel: "",
         },
         validate: {
             title: (v) =>
@@ -84,6 +88,13 @@ const PointMissionsAdminPage: React.FC = () => {
                 if (!/^https?:\/\//i.test(t)) return intl.formatMessage({ id: "pages.pointMissionsAdmin.badUrl" })
                 return null
             },
+            proofLabel: (v, values) => {
+                if (!values.requiresReview) return null
+                if (v.trim().length < 2) {
+                    return intl.formatMessage({ id: "pages.pointMissionsAdmin.proofLabelRequired" })
+                }
+                return null
+            },
         },
     })
 
@@ -92,7 +103,16 @@ const PointMissionsAdminPage: React.FC = () => {
         queryFn: () => PointMissionApiService.adminList(),
     })
 
-    const refresh = () => queryClient.invalidateQueries({ queryKey: ["admin-point-missions"] })
+    const { data: pending = [] } = useQuery({
+        queryKey: ["admin-point-missions-pending"],
+        queryFn: () => PointMissionApiService.pendingSubmissions(),
+        refetchInterval: 30_000,
+    })
+
+    const refresh = () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-point-missions"] })
+        queryClient.invalidateQueries({ queryKey: ["admin-point-missions-pending"] })
+    }
 
     const { mutate: save, isPending } = useMutation({
         mutationFn: (payload: PointMissionWriteRequest) =>
@@ -118,6 +138,45 @@ const PointMissionsAdminPage: React.FC = () => {
         onSuccess: refresh,
     })
 
+    const { mutate: approve, isPending: approving } = useMutation({
+        mutationFn: (id: string) => PointMissionApiService.approveSubmission(id),
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.pointMissionsAdmin.approved" />
+                    </Text>,
+                    null
+                )
+            )
+            refresh()
+            queryClient.invalidateQueries({ queryKey: ["point-missions"] })
+            queryClient.invalidateQueries({ queryKey: ["achievements"] })
+        },
+    })
+
+    const { mutate: reject, isPending: rejecting } = useMutation({
+        mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+            PointMissionApiService.rejectSubmission(id, reason),
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.pointMissionsAdmin.rejected" />
+                    </Text>,
+                    null
+                )
+            )
+            refresh()
+        },
+    })
+
+    const askReject = (id: string) => {
+        const reason = window.prompt(intl.formatMessage({ id: "pages.pointMissionsAdmin.rejectPrompt" }))
+        if (reason === null) return
+        reject({ id, reason: reason.trim() || undefined })
+    }
+
     const openCreate = () => {
         setEdit(null)
         form.reset()
@@ -137,6 +196,8 @@ const PointMissionsAdminPage: React.FC = () => {
             visualType: ((item.visualType as MissionVisualType) || "PICTOGRAM") as MissionVisualType,
             visualKey: item.visualKey || "star",
             imageUrl: item.imageUrl || "",
+            requiresReview: item.requiresReview !== false,
+            proofLabel: item.proofLabel || "",
         })
         setOpen(true)
     }
@@ -164,6 +225,8 @@ const PointMissionsAdminPage: React.FC = () => {
         visualType: values.visualType,
         visualKey: values.visualType === "PICTOGRAM" ? values.visualKey : null,
         imageUrl: values.visualType === "PICTOGRAM" ? null : values.imageUrl.trim() || null,
+        requiresReview: values.requiresReview,
+        proofLabel: values.requiresReview ? values.proofLabel.trim() || null : null,
     })
 
     return (
@@ -182,66 +245,133 @@ const PointMissionsAdminPage: React.FC = () => {
                 </Button>
             </Flex>
 
-            {isFetching && items.length === 0 ? (
-                <Text c="dimmed" size="sm">
-                    …
-                </Text>
-            ) : items.length === 0 ? (
-                <Text c="dimmed" size="sm">
-                    <FormattedMessage id="pages.pointMissionsAdmin.empty" />
-                </Text>
-            ) : (
-                <div className={classes.list}>
-                    {items.map((item) => (
-                        <div key={item.id} className={classes.row}>
-                            <MissionVisualMark
-                                visualType={item.visualType}
-                                visualKey={item.visualKey}
-                                imageUrl={item.imageUrl}
-                                size={48}
-                            />
-                            <div className={classes.meta}>
-                                <Text fw={700}>
-                                    {item.title}{" "}
-                                    <Text span c="teal" fw={700}>
-                                        +{item.points}
-                                    </Text>
-                                </Text>
-                                <Text size="sm" c="dimmed">
-                                    {item.description || "—"}
-                                </Text>
-                                <Text size="xs" c="dimmed">
-                                    {intl.formatMessage({
-                                        id: `pages.pointMissionsAdmin.visual.${(item.visualType || "PICTOGRAM").toLowerCase()}`,
-                                    })}
-                                    {" · "}
-                                    {item.active
-                                        ? intl.formatMessage({ id: "pages.pointMissionsAdmin.active" })
-                                        : intl.formatMessage({ id: "pages.pointMissionsAdmin.inactive" })}
-                                    {" · "}
-                                    {item.oneTime
-                                        ? intl.formatMessage({ id: "pages.pointMissionsAdmin.oneTime" })
-                                        : intl.formatMessage({ id: "pages.pointMissionsAdmin.repeatable" })}
-                                </Text>
-                            </div>
-                            <Flex gap="xs">
-                                <Button size="xs" variant="light" onClick={() => openEdit(item)}>
-                                    <FormattedMessage id="pages.pointMissionsAdmin.edit" />
-                                </Button>
-                                <Button
-                                    size="xs"
-                                    color="red"
-                                    variant="light"
-                                    leftSection={<IconTrash size={14} />}
-                                    onClick={() => remove(item.id)}
-                                >
-                                    <FormattedMessage id="pages.pointMissionsAdmin.delete" />
-                                </Button>
-                            </Flex>
-                        </div>
-                    ))}
+            <section className={classes.section}>
+                <div className={classes.sectionTitle}>
+                    <FormattedMessage id="pages.pointMissionsAdmin.pendingTitle" />
+                    {pending.length > 0 && <span className={classes.badge}>{pending.length}</span>}
                 </div>
-            )}
+                {pending.length === 0 ? (
+                    <Text c="dimmed" size="sm">
+                        <FormattedMessage id="pages.pointMissionsAdmin.pendingEmpty" />
+                    </Text>
+                ) : (
+                    <div className={classes.list}>
+                        {pending.map((item) => (
+                            <div key={item.id} className={classes.row}>
+                                <div className={classes.meta}>
+                                    <Text fw={700}>
+                                        {item.missionTitle}{" "}
+                                        <Text span c="teal" fw={700}>
+                                            +{item.points}
+                                        </Text>
+                                    </Text>
+                                    <Text size="sm">
+                                        <FormattedMessage
+                                            id="pages.pointMissionsAdmin.pendingFrom"
+                                            values={{ user: item.username }}
+                                        />
+                                    </Text>
+                                    <Text size="sm" className={classes.proof}>
+                                        {item.proofText}
+                                    </Text>
+                                    <Text size="xs" c="dimmed">
+                                        {item.createdAt}
+                                    </Text>
+                                </div>
+                                <Flex gap="xs">
+                                    <Button
+                                        size="xs"
+                                        color="teal"
+                                        leftSection={<IconCheck size={14} />}
+                                        loading={approving}
+                                        onClick={() => approve(item.id)}
+                                    >
+                                        <FormattedMessage id="pages.pointMissionsAdmin.approve" />
+                                    </Button>
+                                    <Button
+                                        size="xs"
+                                        color="red"
+                                        variant="light"
+                                        leftSection={<IconX size={14} />}
+                                        loading={rejecting}
+                                        onClick={() => askReject(item.id)}
+                                    >
+                                        <FormattedMessage id="pages.pointMissionsAdmin.reject" />
+                                    </Button>
+                                </Flex>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
+
+            <section className={classes.section}>
+                <div className={classes.sectionTitle}>
+                    <FormattedMessage id="pages.pointMissionsAdmin.missionsTitle" />
+                </div>
+                {isFetching && items.length === 0 ? (
+                    <Text c="dimmed" size="sm">
+                        …
+                    </Text>
+                ) : items.length === 0 ? (
+                    <Text c="dimmed" size="sm">
+                        <FormattedMessage id="pages.pointMissionsAdmin.empty" />
+                    </Text>
+                ) : (
+                    <div className={classes.list}>
+                        {items.map((item) => (
+                            <div key={item.id} className={classes.row}>
+                                <MissionVisualMark
+                                    visualType={item.visualType}
+                                    visualKey={item.visualKey}
+                                    imageUrl={item.imageUrl}
+                                    size={48}
+                                />
+                                <div className={classes.meta}>
+                                    <Text fw={700}>
+                                        {item.title}{" "}
+                                        <Text span c="teal" fw={700}>
+                                            +{item.points}
+                                        </Text>
+                                    </Text>
+                                    <Text size="sm" c="dimmed">
+                                        {item.description || "—"}
+                                    </Text>
+                                    <Text size="xs" c="dimmed">
+                                        {item.requiresReview !== false
+                                            ? intl.formatMessage({
+                                                  id: "pages.pointMissionsAdmin.withReview",
+                                              })
+                                            : intl.formatMessage({
+                                                  id: "pages.pointMissionsAdmin.instantClaim",
+                                              })}
+                                        {" · "}
+                                        {item.active
+                                            ? intl.formatMessage({ id: "pages.pointMissionsAdmin.active" })
+                                            : intl.formatMessage({
+                                                  id: "pages.pointMissionsAdmin.inactive",
+                                              })}
+                                    </Text>
+                                </div>
+                                <Flex gap="xs">
+                                    <Button size="xs" variant="light" onClick={() => openEdit(item)}>
+                                        <FormattedMessage id="pages.pointMissionsAdmin.edit" />
+                                    </Button>
+                                    <Button
+                                        size="xs"
+                                        color="red"
+                                        variant="light"
+                                        leftSection={<IconTrash size={14} />}
+                                        onClick={() => remove(item.id)}
+                                    >
+                                        <FormattedMessage id="pages.pointMissionsAdmin.delete" />
+                                    </Button>
+                                </Flex>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
 
             <Modal
                 opened={open}
@@ -274,6 +404,25 @@ const PointMissionsAdminPage: React.FC = () => {
                             placeholder="https://"
                             {...form.getInputProps("link")}
                         />
+
+                        <Checkbox
+                            label={intl.formatMessage({ id: "pages.pointMissionsAdmin.fieldRequiresReview" })}
+                            description={intl.formatMessage({
+                                id: "pages.pointMissionsAdmin.fieldRequiresReviewHint",
+                            })}
+                            {...form.getInputProps("requiresReview", { type: "checkbox" })}
+                        />
+                        {form.values.requiresReview && (
+                            <TextInput
+                                label={intl.formatMessage({
+                                    id: "pages.pointMissionsAdmin.fieldProofLabel",
+                                })}
+                                placeholder={intl.formatMessage({
+                                    id: "pages.pointMissionsAdmin.fieldProofLabelPlaceholder",
+                                })}
+                                {...form.getInputProps("proofLabel")}
+                            />
+                        )}
 
                         <div>
                             <Text size="sm" fw={600} mb={6}>

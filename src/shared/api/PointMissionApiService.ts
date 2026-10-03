@@ -13,7 +13,12 @@ export type PointMissionDto = {
     visualType?: MissionVisualType | string
     visualKey?: string | null
     imageUrl?: string | null
+    requiresReview?: boolean
+    proofLabel?: string | null
     claimed?: boolean
+    submissionStatus?: string | null
+    proofText?: string | null
+    rejectReason?: string | null
 }
 
 export type PointMissionWriteRequest = {
@@ -27,6 +32,8 @@ export type PointMissionWriteRequest = {
     visualType: MissionVisualType
     visualKey?: string | null
     imageUrl?: string | null
+    requiresReview: boolean
+    proofLabel?: string | null
 }
 
 export type PointMissionClaimResult = {
@@ -34,6 +41,21 @@ export type PointMissionClaimResult = {
     points: number
     balance: number
     alreadyClaimed: boolean
+    submissionStatus?: string | null
+}
+
+export type PointMissionSubmissionDto = {
+    id: string
+    missionId: string
+    missionTitle: string
+    points: number
+    username: string
+    proofText: string
+    status: string
+    rejectReason?: string | null
+    reviewedBy?: string | null
+    reviewedAt?: string | null
+    createdAt: string
 }
 
 const alive = (status: number) => status === 200 || status === 204 || status === 404 || status >= 500
@@ -52,12 +74,43 @@ export const PointMissionApiService = {
         return response.data
     },
 
+    async submit(id: string, proofText: string): Promise<PointMissionClaimResult> {
+        const response = await RequestHttp.post<PointMissionClaimResult>(`/point-missions/${id}/submit`, {
+            proofText,
+        })
+        return response.data
+    },
+
     async adminList(): Promise<PointMissionDto[]> {
         const response = await RequestHttp.get<PointMissionDto[]>("/admin/point-missions", {
             validateStatus: alive,
         })
         if (response.status !== 200) return []
         return response.data ?? []
+    },
+
+    async pendingSubmissions(): Promise<PointMissionSubmissionDto[]> {
+        const response = await RequestHttp.get<PointMissionSubmissionDto[]>(
+            "/admin/point-missions/submissions/pending",
+            { validateStatus: alive }
+        )
+        if (response.status !== 200) return []
+        return response.data ?? []
+    },
+
+    async approveSubmission(id: string): Promise<PointMissionSubmissionDto> {
+        const response = await RequestHttp.post<PointMissionSubmissionDto>(
+            `/admin/point-missions/submissions/${id}/approve`
+        )
+        return response.data
+    },
+
+    async rejectSubmission(id: string, reason?: string): Promise<PointMissionSubmissionDto> {
+        const response = await RequestHttp.post<PointMissionSubmissionDto>(
+            `/admin/point-missions/submissions/${id}/reject`,
+            { reason: reason || null }
+        )
+        return response.data
     },
 
     async create(payload: PointMissionWriteRequest): Promise<PointMissionDto> {
