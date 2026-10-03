@@ -28,7 +28,7 @@ import {
     IconFileDescription,
     IconAward,
     IconId,
-    IconTrophy,
+    IconStar,
     IconTargetArrow,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
@@ -56,7 +56,7 @@ export const Content: NavSection[] = [
             },
             {
                 label: "navbar.achievements",
-                icon: IconTrophy,
+                icon: IconStar,
                 link: "/achievements",
                 dataTourId: "nav-achievements",
             },

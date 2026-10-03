@@ -1702,10 +1702,23 @@
             }
         },
         "achievements": {
-            "title": "My achievements",
-            "description": "Points and rewards for activity on the RDS portal.",
+            "title": "Points and rewards",
+            "description": "Earn points for activity and get ready to exchange them for rewards.",
             "unlocked": "Unlocked: {unlocked} / {total}",
             "points": "RDS points: {points}",
+            "balanceCardLabel": "Your balance",
+            "balanceCardValue": "{points} points",
+            "monthCardLabel": "Earned this month",
+            "monthCardValue": "+{points} points",
+            "badgesCardLabel": "My achievements",
+            "badgesCardValue": "{count} badges",
+            "badgesForever": "Merits are kept forever",
+            "tabs": {
+                "overview": "Overview",
+                "missions": "Tasks",
+                "showcase": "Reward showcase",
+                "history": "History"
+            },
             "weekLabel": "This week",
             "weekVisited": "Visited (+10)",
             "weekMissed": "Not visited yet",
@@ -1717,6 +1730,7 @@
             "balanceHint": "Sum of all awards and penalties",
             "progress": "Progress: {progress} / {target}",
             "recentTitle": "Recent awards",
+            "historyEmpty": "No credits yet",
             "unavailable": "Achievements API is not on the server yet. The page will work after backend deploy.",
             "categories": {
                 "presence": "Presence",
@@ -1726,13 +1740,29 @@
                 "trust": "Trust",
                 "other": "Other"
             },
-            "missionsTitle": "Missions — earn points",
-            "missionsHint": "Open the link, complete the action, then tap Claim points. Once per mission when one-time.",
-            "missionOpen": "Open",
+            "missionsTitle": "Earn points",
+            "missionsHint": "Open the link, complete the action, then tap Claim points.",
+            "missionsEmpty": "No active tasks yet",
+            "allMissions": "All tasks",
+            "missionOpen": "Open task",
             "missionClaim": "Claim points",
             "missionDone": "Claimed",
             "missionClaimed": "Awarded +{points}",
-            "missionAlready": "Already claimed"
+            "missionAlready": "Already claimed",
+            "showcasePreviewTitle": "Reward showcase",
+            "showcaseTitle": "Reward showcase",
+            "showcaseComing": "Point exchange is coming soon: this showcase is for preview, buttons are inactive for now.",
+            "showcaseCost": "{points} points",
+            "showcaseStock": "{count} left",
+            "showcaseShort": "{points} points short",
+            "showcaseSoon": "Soon",
+            "showcaseItems": {
+                "book": "Book of choice",
+                "coffee": "Gift coffee",
+                "masterclass": "Master class",
+                "subscription": "Month of subscription"
+            },
+            "howItWorks": "Points are credited after the task is confirmed. Reward exchange comes next."
         },
         "pointMissionsAdmin": {
             "title": "Point missions",
@@ -1821,7 +1851,7 @@
         "dissolutionRequests": "Termination request",
         "chat": "Chat",
         "ideas": "Ideas & talents",
-        "achievements": "My achievements",
+        "achievements": "Points and rewards",
         "pointMissions": "Point missions"
     },
     "impersonation": {
@@ -1895,8 +1925,8 @@
             "body": "Approved days do not count toward the hour quota and do not increase report delay. Pick dates, optional reason — after approval, leave shows in the hours history on the desktop."
         },
         "achievements": {
-            "title": "My achievements",
-            "body": "Points for consistency and quality: +10 for a visit once a week, −10 if you miss a week (soft penalty), +5 for a report accepted without remarks. You also see how many inbox messages recipients actually opened. Menu item: My achievements."
+            "title": "Points and rewards",
+            "body": "Points for consistency and quality: +10 for a visit once a week, −10 if you miss a week (soft penalty), +5 for a report accepted without remarks. Tasks give extra points. Menu item: Points and rewards."
         },
         "tasks": {
             "title": "Tasks board",

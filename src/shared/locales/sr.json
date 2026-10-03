@@ -1702,10 +1702,23 @@
             }
         },
         "achievements": {
-            "title": "Moja dostignuća",
-            "description": "Bodovi i nagrade za aktivnost na RDS portalu.",
+            "title": "Bodovi i nagrade",
+            "description": "Zarađujte bodove za aktivnost i spremite se da ih menjate za nagrade.",
             "unlocked": "Otključano: {unlocked} / {total}",
             "points": "RDS bodova: {points}",
+            "balanceCardLabel": "Vaš bilans",
+            "balanceCardValue": "{points} bodova",
+            "monthCardLabel": "Zarađeno ovog meseca",
+            "monthCardValue": "+{points} bodova",
+            "badgesCardLabel": "Moja dostignuća",
+            "badgesCardValue": "{count} bedževa",
+            "badgesForever": "Zasluge ostaju zauvek",
+            "tabs": {
+                "overview": "Pregled",
+                "missions": "Zadaci",
+                "showcase": "Izlog nagrada",
+                "history": "Istorija"
+            },
             "weekLabel": "Ova nedelja",
             "weekVisited": "Poseta ima (+10)",
             "weekMissed": "Još niste ušli",
@@ -1717,6 +1730,7 @@
             "balanceHint": "Zbir svih bodova i kazni",
             "progress": "Napredak: {progress} / {target}",
             "recentTitle": "Nedavna dodela",
+            "historyEmpty": "Još nema bodova",
             "unavailable": "API dostignuća još nije na serveru. Stranica će raditi posle deploy-a backend-a.",
             "categories": {
                 "presence": "Prisustvo",
@@ -1726,13 +1740,29 @@
                 "trust": "Poverenje",
                 "other": "Ostalo"
             },
-            "missionsTitle": "Misije — zaradi bodove",
-            "missionsHint": "Otvorite link, uradite akciju i kliknite „Uzmi bodove“. Jednom po misiji ako je jednokratna.",
-            "missionOpen": "Otvori",
+            "missionsTitle": "Zaradi bodove",
+            "missionsHint": "Otvorite link, uradite akciju i kliknite „Uzmi bodove“.",
+            "missionsEmpty": "Još nema aktivnih zadataka",
+            "allMissions": "Svi zadaci",
+            "missionOpen": "Otvori zadatak",
             "missionClaim": "Uzmi bodove",
             "missionDone": "Uzeto",
             "missionClaimed": "Dodato +{points}",
-            "missionAlready": "Već uzeto"
+            "missionAlready": "Već uzeto",
+            "showcasePreviewTitle": "Izlog nagrada",
+            "showcaseTitle": "Izlog nagrada",
+            "showcaseComing": "Razmena bodova uskoro: izlog je za pregled, dugmad su za sada neaktivna.",
+            "showcaseCost": "{points} bodova",
+            "showcaseStock": "Preostalo {count}",
+            "showcaseShort": "Nedostaje {points} bodova",
+            "showcaseSoon": "Uskoro",
+            "showcaseItems": {
+                "book": "Knjiga po izboru",
+                "coffee": "Poklon kafa",
+                "masterclass": "Master-klas",
+                "subscription": "Mesec pretplate"
+            },
+            "howItWorks": "Bodovi se dodeljuju posle potvrde zadatka. Razmena za nagrade je sledeći korak."
         },
         "pointMissionsAdmin": {
             "title": "Misije za bodove",
@@ -1821,7 +1851,7 @@
         "dissolutionRequests": "Zahtev za raskid",
         "chat": "Ćaskanje",
         "ideas": "Ideje i talenti",
-        "achievements": "Moja dostignuća",
+        "achievements": "Bodovi i nagrade",
         "pointMissions": "Misije (bodovi)"
     },
     "impersonation": {
@@ -1895,8 +1925,8 @@
             "body": "Odobreni dani ne ulaze u satnu normu i ne uvećavaju kašnjenje izveštaja. Unesite datume, po želji razlog — posle odobrenja odmor se vidi u istoriji sati na stolu."
         },
         "achievements": {
-            "title": "Moja dostignuća",
-            "body": "Bodovi za redovnost i kvalitet: +10 za posetu jednom nedeljno, −10 ako ste propustili nedelju (mekani minus), +5 za izveštaj bez primedbi. Ovde vidite i koliko poruka iz LK primaoci stvarno otvore. Stavka u meniju: Moja dostignuća."
+            "title": "Bodovi i nagrade",
+            "body": "Bodovi za redovnost i kvalitet: +10 za posetu jednom nedeljno, −10 ako ste propustili nedelju (mekani minus), +5 za izveštaj bez primedbi. Zadaci daju dodatne bodove. Stavka u meniju: Bodovi i nagrade."
         },
         "tasks": {
             "title": "Tabla zadataka",

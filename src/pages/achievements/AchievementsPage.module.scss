@@ -2,45 +2,139 @@
 
 .root {
     @include s.page;
-    max-width: 1080px;
+    max-width: 1100px;
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.summary {
+.heroRow {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr 1.15fr;
+    gap: 12px;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.heroCard {
     display: flex;
-    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 18px 16px;
+    border-radius: 16px;
+    border: 1px solid light-dark(#e2e8f0, var(--mantine-color-dark-4));
+    background: light-dark(#fff, var(--mantine-color-dark-7));
+    min-height: 112px;
+}
+
+.heroBalance {
+    background: light-dark(
+        linear-gradient(145deg, #0f3d4c 0%, #164e63 55%, #0b7285 100%),
+        linear-gradient(145deg, #0b2e38 0%, #134e5e 100%)
+    );
+    border: none;
+    color: #fff;
+}
+
+.heroIcon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
     align-items: center;
-    gap: 16px 28px;
-    padding: 14px 18px;
-    border-radius: 14px;
-    background: light-dark(#fff8e6, rgba(250, 204, 21, 0.12));
-    border: 1px solid light-dark(#f5e0a8, rgba(250, 204, 21, 0.25));
-}
-
-.summaryIcon {
-    color: light-dark(#c9a227, #fbbf24);
+    justify-content: center;
     flex-shrink: 0;
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
 }
 
-.summaryText {
+.heroIconSoft {
+    background: light-dark(#ecfdf5, rgba(16, 185, 129, 0.15));
+    color: light-dark(#0f766e, #6ee7b7);
+}
+
+.heroIconGold {
+    background: light-dark(#fff7ed, rgba(251, 191, 36, 0.15));
+    color: light-dark(#d97706, #fbbf24);
+}
+
+.heroLabel {
+    font-size: 0.82rem;
+    opacity: 0.85;
+    margin-bottom: 2px;
+}
+
+.heroBalance .heroLabel {
+    opacity: 0.8;
+}
+
+.heroValue {
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.heroValueDark {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: light-dark(#0f172a, #f8fafc);
+}
+
+.heroAchievements {
+    min-width: 0;
+    flex: 1;
+}
+
+.heroHint {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: light-dark(#64748b, var(--mantine-color-dark-2));
+}
+
+.badgeStrip {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px 24px;
-    align-items: baseline;
-    font-size: 0.95rem;
+    gap: 6px;
+    margin-top: 8px;
 }
 
-.summaryPoints {
-    font-weight: 700;
-    color: light-dark(#1d4ed8, #93c5fd);
+.badgeDot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: light-dark(#ecfeff, rgba(34, 211, 238, 0.2));
+    color: light-dark(#0e7490, #67e8f9);
+}
+
+.tabs {
+    :global(.mantine-Tabs-list) {
+        gap: 4px;
+        border-bottom: 1px solid light-dark(#e2e8f0, var(--mantine-color-dark-4));
+    }
+
+    :global(.mantine-Tabs-tab) {
+        font-weight: 600;
+        color: light-dark(#64748b, var(--mantine-color-dark-2));
+    }
+
+    :global(.mantine-Tabs-tab[data-active]) {
+        color: light-dark(#0f766e, #5eead4);
+    }
 }
 
 .statsRow {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
+    margin-bottom: 8px;
 
     @media (max-width: 720px) {
         grid-template-columns: 1fr;
@@ -65,7 +159,7 @@
 }
 
 .statValue {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 700;
 }
 
@@ -74,31 +168,82 @@
     color: light-dark(#64748b, var(--mantine-color-dark-2));
 }
 
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.sectionHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.sectionTitle {
+    font-size: 1.05rem;
+    font-weight: 750;
+    color: light-dark(#0f172a, #f8fafc);
+}
+
+.linkBtn {
+    border: 0;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: light-dark(#0f766e, #5eead4);
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
 .missions {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 
-    @media (max-width: 720px) {
+    @media (max-width: 900px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 560px) {
         grid-template-columns: 1fr;
     }
 }
 
 .missionCard {
-    padding: 14px;
-    border-radius: 14px;
-    border: 1px solid light-dark(#bfdbfe, #1d4ed8);
-    background: light-dark(#f8fbff, rgba(37, 99, 235, 0.12));
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid light-dark(#d1e7e4, #134e5e);
+    background: light-dark(#fff, var(--mantine-color-dark-7));
     display: flex;
     flex-direction: column;
     gap: 8px;
+    min-height: 160px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 .missionTop {
     display: flex;
     justify-content: space-between;
     gap: 10px;
-    align-items: baseline;
+    align-items: flex-start;
+}
+
+.missionPts {
+    flex-shrink: 0;
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: light-dark(#0f766e, #5eead4);
+    background: light-dark(#ecfdf5, rgba(15, 118, 110, 0.2));
+    padding: 2px 8px;
+    border-radius: 999px;
 }
 
 .missionActions {
@@ -110,6 +255,14 @@
     margin-top: auto;
 }
 
+.primaryBtn {
+    background: light-dark(#0f766e, #0d9488) !important;
+
+    &:hover {
+        background: light-dark(#0d9488, #14b8a6) !important;
+    }
+}
+
 .ok {
     color: light-dark(#15803d, #86efac);
 }
@@ -118,18 +271,62 @@
     color: light-dark(#b45309, #fcd34d);
 }
 
-.category {
+.showcaseBanner {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    background: light-dark(#f0fdfa, rgba(15, 118, 110, 0.12));
+    border: 1px solid light-dark(#99f6e4, rgba(45, 212, 191, 0.25));
+    color: light-dark(#0f766e, #5eead4);
 }
 
-.categoryTitle {
-    font-size: 0.78rem;
+.showcaseGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+
+    @media (max-width: 960px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 520px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.rewardCard {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 16px;
+    border: 1px solid light-dark(#e5e7eb, var(--mantine-color-dark-4));
+    background: light-dark(#fff, var(--mantine-color-dark-7));
+    min-height: 190px;
+}
+
+.rewardIcon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: light-dark(#ecfdf5, rgba(15, 118, 110, 0.18));
+    color: light-dark(#0f766e, #5eead4);
+}
+
+.rewardCost {
     font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: light-dark(#475569, var(--mantine-color-dark-1));
+    color: light-dark(#0f172a, #f8fafc);
+}
+
+.rewardStock {
+    font-size: 0.78rem;
+    color: light-dark(#64748b, var(--mantine-color-dark-2));
 }
 
 .grid {
@@ -159,8 +356,8 @@
 }
 
 .cardUnlocked {
-    border-color: light-dark(#93c5fd, #1d4ed8);
-    background: light-dark(#eff6ff, rgba(37, 99, 235, 0.15));
+    border-color: light-dark(#99f6e4, #0f766e);
+    background: light-dark(#f0fdfa, rgba(15, 118, 110, 0.14));
 }
 
 .cardLocked {
@@ -173,7 +370,7 @@
     right: 14px;
     font-weight: 700;
     font-size: 0.9rem;
-    color: light-dark(#2563eb, #93c5fd);
+    color: light-dark(#0f766e, #5eead4);
 }
 
 .iconWrap {
@@ -187,7 +384,7 @@
 }
 
 .iconUnlocked {
-    background: light-dark(#2563eb, #1d4ed8);
+    background: light-dark(#0f766e, #0d9488);
     color: #fff;
 }
 
@@ -264,6 +461,12 @@
     font-size: 0.78rem;
     color: light-dark(#94a3b8, var(--mantine-color-dark-2));
     width: 100%;
+}
+
+.footerNote {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: light-dark(#64748b, var(--mantine-color-dark-2));
 }
 
 .unavailable {
