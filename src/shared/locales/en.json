@@ -758,6 +758,10 @@
             "comment": "Comment",
             "comment-required": "When rejecting report comment is required",
             "comments": "Report's comments",
+            "curator-gratitude": "Curator gratitude (+15)",
+            "curator-gratitude-hint": "For specific help or high-quality work. Appears in the volunteer's My achievements.",
+            "manager-gratitude": "Manager gratitude (+40)",
+            "manager-gratitude-hint": "For a significant contribution to the organization. Leaders only.",
             "moderator": "Portal Moderator",
             "moderator-short": "Moderator",
             "delete": "Delete report",
@@ -1715,6 +1719,7 @@
                 "presence": "Presence",
                 "onboarding": "Base: onboarding",
                 "reports": "Reports",
+                "gratitude": "Gratitudes",
                 "trust": "Trust",
                 "other": "Other"
             }

@@ -758,6 +758,10 @@
             "comment": "Komentar",
             "comment-required": "Komentar je obavezan kada odbijete izveštaj",
             "comments": "Komentari o izveštaju",
+            "curator-gratitude": "Zahvalnica kuratora (+15)",
+            "curator-gratitude-hint": "Za konkretnu pomoć ili kvalitetan rad. Pojavljuje se u „Moja dostignuća“ volontera.",
+            "manager-gratitude": "Zahvalnica rukovodioca (+40)",
+            "manager-gratitude-hint": "Za značajan doprinos organizaciji. Samo za rukovodioce.",
             "moderator": "Moderator Portala",
             "moderator-short": "Moderator",
             "delete": "Izbrišite izveštaj",
@@ -1715,6 +1719,7 @@
                 "presence": "Prisustvo",
                 "onboarding": "Baza: onboarding",
                 "reports": "Izveštaji",
+                "gratitude": "Zahvalnice",
                 "trust": "Poverenje",
                 "other": "Ostalo"
             }

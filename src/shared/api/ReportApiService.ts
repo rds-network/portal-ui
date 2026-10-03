@@ -16,3 +16,15 @@ export const updateReportAssignment = async (id: string, payload: ReportAssignme
     const response = await RequestHttp.patch<ReportDto>(`/report/${id}/assignment`, payload)
     return response.data
 }
+
+/** Приёмка/отклонение с опциональной благодарностью (поля gratitude / managerGratitude). */
+export type ChangeReportStatusPayload = {
+    status: string
+    note?: string | null
+    gratitude?: boolean
+    managerGratitude?: boolean
+}
+
+export const changeReportStatus = async (id: string, payload: ChangeReportStatusPayload): Promise<void> => {
+    await RequestHttp.post(`/report/${id}/status`, payload)
+}

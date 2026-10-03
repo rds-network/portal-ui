@@ -1,4 +1,4 @@
-import { ActionIcon, Alert, Anchor, Avatar, Badge, Button, Flex, Loader, Text, Textarea } from "@mantine/core"
+import { ActionIcon, Alert, Anchor, Avatar, Badge, Button, Checkbox, Flex, Loader, Text, Textarea } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { ReportDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import {
@@ -26,7 +26,7 @@ import { ProjectSelectInline } from "src/pages/profile/select/ProjectSelect"
 import { locales } from "src/pages/report/lib/locales"
 import { ReportNote } from "src/pages/report/note/ReportNote"
 import { TaskCard } from "src/pages/report/task/TaskCard"
-import { ReportApiService, updateReportAssignment } from "src/shared/api/ReportApiService"
+import { changeReportStatus, ReportApiService, updateReportAssignment } from "src/shared/api/ReportApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { reportControllerNameOf, reportControlOf, resolveUsers } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -58,6 +58,8 @@ export const ReportPage = () => {
 
     const [statusChanging, setStatusChanging] = useState(false)
     const [comment, setComment] = useState("")
+    const [curatorGratitude, setCuratorGratitude] = useState(false)
+    const [managerGratitude, setManagerGratitude] = useState(false)
 
     const [submitDelete, setSubmitDelete] = useState<boolean>(false)
     const [deleting, setDeleting] = useState(false)
@@ -116,9 +118,26 @@ export const ReportPage = () => {
             return
         }
         setStatusChanging(true)
-        ReportApiService.changeStatus(report.id, { status: status, note: comment }).then((response) => {
-            window.location.reload()
+        const accepting = status === ReportStatus.ACCEPTED
+        changeReportStatus(report.id, {
+            status,
+            note: comment,
+            gratitude: accepting && curatorGratitude ? true : undefined,
+            managerGratitude: accepting && managerGratitude ? true : undefined,
         })
+            .then(() => {
+                window.location.reload()
+            })
+            .catch(() => {
+                setStatusChanging(false)
+                notifications.show(
+                    ErrorNotification(
+                        <Text size="sm">
+                            <FormattedMessage id="errors.request" />
+                        </Text>
+                    )
+                )
+            })
     }
 
     const onDelete = () => {
@@ -172,6 +191,12 @@ export const ReportPage = () => {
     const canEditAssignment =
         hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER]) ||
         canAcceptReport
+    const canAwardManagerGratitude = hasPermission(currentUser, [
+        UserGroup.ADMIN,
+        UserGroup.ADMIN_SSO,
+        UserGroup.ADMIN_VOLUNTEER,
+        UserGroup.MAIN_VOLUNTEER,
+    ])
 
     return (
         <Flex className={classes.root}>
@@ -342,6 +367,22 @@ export const ReportPage = () => {
                         onChange={(e) => setComment(e.target.value)}
                         label={intl.formatMessage({ id: locales.comment })}
                     ></Textarea>
+                    <Checkbox
+                        checked={curatorGratitude}
+                        disabled={statusChanging}
+                        onChange={(e) => setCuratorGratitude(e.currentTarget.checked)}
+                        label={intl.formatMessage({ id: locales.curatorGratitude })}
+                        description={intl.formatMessage({ id: locales.curatorGratitudeHint })}
+                    />
+                    {canAwardManagerGratitude && (
+                        <Checkbox
+                            checked={managerGratitude}
+                            disabled={statusChanging}
+                            onChange={(e) => setManagerGratitude(e.currentTarget.checked)}
+                            label={intl.formatMessage({ id: locales.managerGratitude })}
+                            description={intl.formatMessage({ id: locales.managerGratitudeHint })}
+                        />
+                    )}
                     <Flex className={classes.acceptRejectSection}>
                         <Button
                             className={classes.acceptButton}

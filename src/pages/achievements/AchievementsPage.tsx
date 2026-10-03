@@ -11,7 +11,7 @@ import {
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import classes from "./AchievementsPage.module.scss"
 
-const CATEGORY_ORDER = ["presence", "onboarding", "reports", "trust"] as const
+const CATEGORY_ORDER = ["presence", "onboarding", "reports", "gratitude", "trust"] as const
 
 const categoryLabelId = (category: string) => {
     switch (category) {
@@ -21,6 +21,8 @@ const categoryLabelId = (category: string) => {
             return "pages.achievements.categories.onboarding"
         case "reports":
             return "pages.achievements.categories.reports"
+        case "gratitude":
+            return "pages.achievements.categories.gratitude"
         case "trust":
             return "pages.achievements.categories.trust"
         default:
