@@ -1,4 +1,5 @@
 import { RequestHttp } from "src/shared/http/RequestHttp"
+import type { MissionVisualType } from "src/shared/missions/missionVisuals"
 
 export type PointMissionDto = {
     id: string
@@ -9,6 +10,9 @@ export type PointMissionDto = {
     active: boolean
     oneTime: boolean
     sortOrder: number
+    visualType?: MissionVisualType | string
+    visualKey?: string | null
+    imageUrl?: string | null
     claimed?: boolean
 }
 
@@ -20,6 +24,9 @@ export type PointMissionWriteRequest = {
     active: boolean
     oneTime: boolean
     sortOrder: number
+    visualType: MissionVisualType
+    visualKey?: string | null
+    imageUrl?: string | null
 }
 
 export type PointMissionClaimResult = {

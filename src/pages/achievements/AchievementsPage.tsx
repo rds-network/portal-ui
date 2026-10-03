@@ -1,8 +1,7 @@
-import { Anchor, Button, Loader, Tabs, Text, Title } from "@mantine/core"
+import { Button, Loader, Tabs, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import {
     IconCheck,
-    IconExternalLink,
     IconGift,
     IconLock,
     IconMedal,
@@ -19,6 +18,7 @@ import {
 } from "src/shared/api/AchievementsApiService"
 import { PointMissionApiService, PointMissionDto } from "src/shared/api/PointMissionApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
+import { MissionVisualCover, MissionVisualMark } from "src/shared/missions/missionVisuals"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import classes from "./AchievementsPage.module.scss"
 
@@ -54,32 +54,69 @@ const MissionCard: React.FC<{
     onClaim: (id: string) => void
 }> = ({ mission, claiming, onClaim }) => {
     const intl = useIntl()
+    const isCover = (mission.visualType || "").toUpperCase() === "COVER" && !!mission.imageUrl
     return (
         <article className={classes.missionCard}>
-            <div className={classes.missionTop}>
-                <div className={classes.cardTitle}>{mission.title}</div>
-                <span className={classes.missionPts}>+{mission.points}</span>
-            </div>
-            {mission.description && <div className={classes.cardDesc}>{mission.description}</div>}
-            <div className={classes.missionActions}>
-                {mission.link && (
-                    <Anchor href={mission.link} target="_blank" rel="noreferrer" size="sm">
-                        <IconExternalLink size={14} style={{ marginRight: 4 }} />
-                        <FormattedMessage id="pages.achievements.missionOpen" />
-                    </Anchor>
-                )}
-                <Button
-                    size="sm"
-                    className={mission.claimed ? undefined : classes.primaryBtn}
-                    variant={mission.claimed ? "light" : "filled"}
-                    color={mission.claimed ? "gray" : undefined}
-                    disabled={!!mission.claimed || claiming}
-                    onClick={() => onClaim(mission.id)}
-                >
-                    {mission.claimed
-                        ? intl.formatMessage({ id: "pages.achievements.missionDone" })
-                        : intl.formatMessage({ id: "pages.achievements.missionClaim" })}
-                </Button>
+            <MissionVisualCover
+                visualType={mission.visualType}
+                imageUrl={mission.imageUrl}
+                coverClassName={classes.missionCover}
+            />
+            <div className={classes.missionBody}>
+                <div className={classes.missionHead}>
+                    {!isCover && (
+                        <MissionVisualMark
+                            visualType={mission.visualType}
+                            visualKey={mission.visualKey}
+                            imageUrl={mission.imageUrl}
+                            size={56}
+                        />
+                    )}
+                    <div className={classes.missionText}>
+                        <div className={classes.cardTitle}>{mission.title}</div>
+                        <div className={classes.missionPts}>
+                            <span className={classes.missionPtsStar}>
+                                <IconStar size={12} />
+                            </span>
+                            <FormattedMessage
+                                id="pages.achievements.missionPoints"
+                                values={{ points: mission.points }}
+                            />
+                        </div>
+                        {mission.description && (
+                            <div className={classes.cardDesc}>{mission.description}</div>
+                        )}
+                    </div>
+                </div>
+                <div className={classes.missionActions}>
+                    {mission.link && (
+                        <Button
+                            component="a"
+                            href={mission.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            size="sm"
+                            variant="outline"
+                            className={classes.outlineBtn}
+                            fullWidth
+                        >
+                            <FormattedMessage id="pages.achievements.missionOpen" />
+                        </Button>
+                    )}
+                    <Button
+                        size="sm"
+                        className={mission.claimed ? undefined : classes.primaryBtn}
+                        variant={mission.claimed ? "light" : "filled"}
+                        color={mission.claimed ? "gray" : undefined}
+                        disabled={!!mission.claimed || claiming}
+                        onClick={() => onClaim(mission.id)}
+                        fullWidth
+                    >
+                        {mission.claimed
+                            ? intl.formatMessage({ id: "pages.achievements.missionDone" })
+                            : intl.formatMessage({ id: "pages.achievements.missionClaim" })}
+                    </Button>
+                </div>
             </div>
         </article>
     )

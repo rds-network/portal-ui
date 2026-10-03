@@ -1749,6 +1749,7 @@
             "missionDone": "Claimed",
             "missionClaimed": "Awarded +{points}",
             "missionAlready": "Already claimed",
+            "missionPoints": "+{points} points",
             "showcasePreviewTitle": "Reward showcase",
             "showcaseTitle": "Reward showcase",
             "showcaseComing": "Point exchange is coming soon: this showcase is for preview, buttons are inactive for now.",
@@ -1766,7 +1767,7 @@
         },
         "pointMissionsAdmin": {
             "title": "Point missions",
-            "description": "Create actions: Instagram follow, survey, event. Volunteers see them in My achievements and earn points. An exchange marketplace comes next.",
+            "description": "Create tasks: Instagram follow, survey, event. Choose a pictogram, logo, or cover image.",
             "create": "New mission",
             "createTitle": "New mission",
             "editTitle": "Edit mission",
@@ -1778,6 +1779,7 @@
             "required": "Title is required",
             "badPoints": "Points must be greater than 0",
             "badUrl": "Link must start with http:// or https://",
+            "imageRequired": "Upload an image or paste a URL",
             "active": "Active",
             "inactive": "Off",
             "oneTime": "once",
@@ -1788,7 +1790,31 @@
             "fieldLink": "Link (optional)",
             "fieldSort": "Sort order",
             "fieldActive": "Active (visible to volunteers)",
-            "fieldOneTime": "Once per volunteer"
+            "fieldOneTime": "Once per volunteer",
+            "fieldVisual": "Card visual",
+            "fieldImageUrl": "Image URL",
+            "upload": "Upload",
+            "logoHint": "Circular logo on the task card",
+            "coverHint": "Rectangular cover at the top of the card",
+            "visual": {
+                "pictogram": "Pictogram",
+                "logo": "Logo",
+                "cover": "Cover"
+            },
+            "icons": {
+                "instagram": "Instagram",
+                "survey": "Survey",
+                "event": "Event",
+                "star": "Star",
+                "heart": "Heart",
+                "users": "People",
+                "book": "Book",
+                "leaf": "Sprout",
+                "handshake": "Handshake",
+                "gift": "Gift",
+                "camera": "Camera",
+                "link": "Link"
+            }
         }
     },
     "errors": {

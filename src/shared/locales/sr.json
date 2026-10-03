@@ -1749,6 +1749,7 @@
             "missionDone": "Uzeto",
             "missionClaimed": "Dodato +{points}",
             "missionAlready": "Već uzeto",
+            "missionPoints": "+{points} bodova",
             "showcasePreviewTitle": "Izlog nagrada",
             "showcaseTitle": "Izlog nagrada",
             "showcaseComing": "Razmena bodova uskoro: izlog je za pregled, dugmad su za sada neaktivna.",
@@ -1766,7 +1767,7 @@
         },
         "pointMissionsAdmin": {
             "title": "Misije za bodove",
-            "description": "Kreirajte zadatke: Instagram, anketa, događaj. Volonteri ih vide u Dostignućima i dobijaju bodove. Berza razmene je sledeći korak.",
+            "description": "Kreirajte zadatke: Instagram, anketa, događaj. Izaberite piktogram, logo ili naslovnu sliku.",
             "create": "Nova misija",
             "createTitle": "Nova misija",
             "editTitle": "Izmeni misiju",
@@ -1778,6 +1779,7 @@
             "required": "Naslov je obavezan",
             "badPoints": "Bodovi moraju biti veći od 0",
             "badUrl": "Link mora počinjati sa http:// ili https://",
+            "imageRequired": "Otpremite sliku ili unesite URL",
             "active": "Aktivna",
             "inactive": "Isključena",
             "oneTime": "jednom",
@@ -1788,7 +1790,31 @@
             "fieldLink": "Link (opciono)",
             "fieldSort": "Redosled",
             "fieldActive": "Aktivna (vidljiva volonterima)",
-            "fieldOneTime": "Jednom po volonteru"
+            "fieldOneTime": "Jednom po volonteru",
+            "fieldVisual": "Vizuel kartice",
+            "fieldImageUrl": "URL slike",
+            "upload": "Otpremi",
+            "logoHint": "Okrugli logo na kartici zadatka",
+            "coverHint": "Pravougaona naslovna slika na vrhu kartice",
+            "visual": {
+                "pictogram": "Piktogram",
+                "logo": "Logo",
+                "cover": "Naslovna"
+            },
+            "icons": {
+                "instagram": "Instagram",
+                "survey": "Anketa",
+                "event": "Događaj",
+                "star": "Zvezda",
+                "heart": "Srce",
+                "users": "Ljudi",
+                "book": "Knjiga",
+                "leaf": "Klica",
+                "handshake": "Rukovanje",
+                "gift": "Poklon",
+                "camera": "Kamera",
+                "link": "Link"
+            }
         }
     },
     "errors": {

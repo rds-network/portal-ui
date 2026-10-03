@@ -17,6 +17,7 @@
 .row {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
     gap: 12px;
     padding: 12px 14px;
@@ -31,4 +32,50 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+}
+
+.pictogramGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+
+    @media (max-width: 560px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.pictogramBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 6px;
+    border-radius: 12px;
+    border: 1px solid light-dark(#e2e8f0, var(--mantine-color-dark-4));
+    background: light-dark(#fff, var(--mantine-color-dark-6));
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.72rem;
+    color: light-dark(#475569, var(--mantine-color-dark-1));
+
+    &:hover {
+        border-color: light-dark(#99f6e4, #0f766e);
+    }
+}
+
+.pictogramSelected {
+    border-color: light-dark(#0f766e, #5eead4);
+    box-shadow: 0 0 0 2px light-dark(rgba(15, 118, 110, 0.18), rgba(94, 234, 212, 0.25));
+}
+
+.preview {
+    padding: 8px 0;
+}
+
+.previewCover {
+    width: 100%;
+    max-height: 140px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
 }
