@@ -23,12 +23,11 @@ import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { UserSearch } from "src/shared/ui/userSearch/UserSearch"
-import { hasPermission } from "src/shared/user/roles"
+import { ANNOUNCEMENTS_ADMIN_ROLES, hasPermission } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { z } from "zod"
 import classes from "./AnnouncementsAdminPage.module.scss"
 
-const ADMIN_ROLES = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"]
 
 type AudienceChoice = AnnouncementAudience | "USER"
 
@@ -110,7 +109,7 @@ export const AnnouncementsAdminPage: React.FC = () => {
         queryFn: () => ProgramCuratorApiService.me(),
         enabled: !!user,
     })
-    const isManager = hasPermission(user, ADMIN_ROLES)
+    const isManager = hasPermission(user, ANNOUNCEMENTS_ADMIN_ROLES)
     const curatorPrograms = curatorMe?.programs || []
     const isCuratorOnly = !isManager && !!curatorMe?.curator
 
