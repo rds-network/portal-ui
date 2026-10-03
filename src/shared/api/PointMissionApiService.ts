@@ -58,6 +58,18 @@ export type PointMissionSubmissionDto = {
     createdAt: string
 }
 
+export type PointMissionAwardDto = {
+    id: string
+    username: string
+    missionId?: string | null
+    missionTitle: string
+    points: number
+    proofText?: string | null
+    reviewedBy?: string | null
+    awardedAt: string
+    source: string
+}
+
 const alive = (status: number) => status === 200 || status === 204 || status === 404 || status >= 500
 
 export const PointMissionApiService = {
@@ -94,6 +106,14 @@ export const PointMissionApiService = {
             "/admin/point-missions/submissions/pending",
             { validateStatus: alive }
         )
+        if (response.status !== 200) return []
+        return response.data ?? []
+    },
+
+    async awardHistory(): Promise<PointMissionAwardDto[]> {
+        const response = await RequestHttp.get<PointMissionAwardDto[]>("/admin/point-missions/awards", {
+            validateStatus: alive,
+        })
         if (response.status !== 200) return []
         return response.data ?? []
     },

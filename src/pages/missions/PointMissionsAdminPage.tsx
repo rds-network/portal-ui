@@ -109,9 +109,15 @@ const PointMissionsAdminPage: React.FC = () => {
         refetchInterval: 30_000,
     })
 
+    const { data: awards = [] } = useQuery({
+        queryKey: ["admin-point-missions-awards"],
+        queryFn: () => PointMissionApiService.awardHistory(),
+    })
+
     const refresh = () => {
         queryClient.invalidateQueries({ queryKey: ["admin-point-missions"] })
         queryClient.invalidateQueries({ queryKey: ["admin-point-missions-pending"] })
+        queryClient.invalidateQueries({ queryKey: ["admin-point-missions-awards"] })
     }
 
     const { mutate: save, isPending } = useMutation({
@@ -299,6 +305,50 @@ const PointMissionsAdminPage: React.FC = () => {
                                         <FormattedMessage id="pages.pointMissionsAdmin.reject" />
                                     </Button>
                                 </Flex>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </section>
+
+            <section className={classes.section}>
+                <div className={classes.sectionTitle}>
+                    <FormattedMessage id="pages.pointMissionsAdmin.historyTitle" />
+                </div>
+                {awards.length === 0 ? (
+                    <Text c="dimmed" size="sm">
+                        <FormattedMessage id="pages.pointMissionsAdmin.historyEmpty" />
+                    </Text>
+                ) : (
+                    <div className={classes.list}>
+                        {awards.map((item) => (
+                            <div key={item.id} className={classes.row}>
+                                <div className={classes.meta}>
+                                    <Text fw={700}>
+                                        {item.username}{" "}
+                                        <Text span c="teal" fw={700}>
+                                            +{item.points}
+                                        </Text>
+                                    </Text>
+                                    <Text size="sm">{item.missionTitle}</Text>
+                                    {item.proofText && (
+                                        <Text size="sm" className={classes.proof}>
+                                            {item.proofText}
+                                        </Text>
+                                    )}
+                                    <Text size="xs" c="dimmed">
+                                        {item.awardedAt}
+                                        {" · "}
+                                        {item.source === "REVIEW"
+                                            ? intl.formatMessage(
+                                                  { id: "pages.pointMissionsAdmin.historyReviewed" },
+                                                  { by: item.reviewedBy || "—" }
+                                              )
+                                            : intl.formatMessage({
+                                                  id: "pages.pointMissionsAdmin.historyInstant",
+                                              })}
+                                    </Text>
+                                </div>
                             </div>
                         ))}
                     </div>
