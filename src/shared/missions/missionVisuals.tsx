@@ -1,10 +1,11 @@
 import {
+    Icon,
     IconBook,
     IconBrandInstagram,
     IconCamera,
     IconClipboardList,
+    IconFriends,
     IconGift,
-    IconHandshake,
     IconHeart,
     IconHeartHandshake,
     IconLink,
@@ -33,10 +34,7 @@ export const MISSION_PICTOGRAMS = [
 
 export type MissionPictogramKey = (typeof MISSION_PICTOGRAMS)[number]
 
-const PICTOGRAM_META: Record<
-    MissionPictogramKey,
-    { bg: string; color: string; Icon: React.ComponentType<{ size?: number; stroke?: number }> }
-> = {
+const PICTOGRAM_META: Record<MissionPictogramKey, { bg: string; color: string; Icon: Icon }> = {
     instagram: { bg: "linear-gradient(135deg,#f58529,#dd2a7b,#8134af)", color: "#fff", Icon: IconBrandInstagram },
     survey: { bg: "#d1fae5", color: "#047857", Icon: IconClipboardList },
     event: { bg: "#ffe4e6", color: "#be123c", Icon: IconHeartHandshake },
@@ -45,7 +43,7 @@ const PICTOGRAM_META: Record<
     users: { bg: "#dbeafe", color: "#1d4ed8", Icon: IconUsers },
     book: { bg: "#e2e8f0", color: "#334155", Icon: IconBook },
     leaf: { bg: "#dcfce7", color: "#15803d", Icon: IconPlant2 },
-    handshake: { bg: "#ffedd5", color: "#c2410c", Icon: IconHandshake },
+    handshake: { bg: "#ffedd5", color: "#c2410c", Icon: IconFriends },
     gift: { bg: "#fce7f3", color: "#be185d", Icon: IconGift },
     camera: { bg: "#e0e7ff", color: "#4338ca", Icon: IconCamera },
     link: { bg: "#ecfeff", color: "#0e7490", Icon: IconLink },
