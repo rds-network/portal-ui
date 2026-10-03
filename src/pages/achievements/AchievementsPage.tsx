@@ -1,6 +1,7 @@
-import { Loader, Text, Title } from "@mantine/core"
-import { IconCheck, IconLock, IconTrophy } from "@tabler/icons-react"
-import { useQuery } from "@tanstack/react-query"
+import { Anchor, Button, Loader, Text, Title } from "@mantine/core"
+import { notifications } from "@mantine/notifications"
+import { IconCheck, IconExternalLink, IconLock, IconTrophy } from "@tabler/icons-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useMemo } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -8,7 +9,9 @@ import {
     AchievementDto,
     AchievementsApiService,
 } from "src/shared/api/AchievementsApiService"
+import { PointMissionApiService } from "src/shared/api/PointMissionApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
+import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import classes from "./AchievementsPage.module.scss"
 
 const CATEGORY_ORDER = ["presence", "onboarding", "reports", "gratitude", "trust"] as const
@@ -32,12 +35,41 @@ const categoryLabelId = (category: string) => {
 
 const AchievementsPage: React.FC = () => {
     const intl = useIntl()
+    const queryClient = useQueryClient()
     setDocumentTitleByLocale("pages.achievements.title")
 
     const { data, isLoading, isError } = useQuery({
         queryKey: ["achievements", "me"],
         queryFn: () => AchievementsApiService.me(),
         staleTime: 60_000,
+    })
+
+    const { data: missions = [] } = useQuery({
+        queryKey: ["point-missions"],
+        queryFn: () => PointMissionApiService.listActive(),
+        staleTime: 30_000,
+        enabled: !!data,
+    })
+
+    const { mutate: claimMission, isPending: claiming } = useMutation({
+        mutationFn: (id: string) => PointMissionApiService.claim(id),
+        onSuccess: (result) => {
+            queryClient.invalidateQueries({ queryKey: ["point-missions"] })
+            queryClient.invalidateQueries({ queryKey: ["achievements", "me"] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        {result.alreadyClaimed
+                            ? intl.formatMessage({ id: "pages.achievements.missionAlready" })
+                            : intl.formatMessage(
+                                  { id: "pages.achievements.missionClaimed" },
+                                  { points: result.points }
+                              )}
+                    </Text>,
+                    null
+                )
+            )
+        },
     })
 
     const byCategory = useMemo(() => {
@@ -154,6 +186,47 @@ const AchievementsPage: React.FC = () => {
                     </span>
                 </div>
             </div>
+
+            {missions.length > 0 && (
+                <section className={classes.category}>
+                    <div className={classes.categoryTitle}>
+                        <FormattedMessage id="pages.achievements.missionsTitle" />
+                    </div>
+                    <Text size="sm" c="dimmed" mb={4}>
+                        <FormattedMessage id="pages.achievements.missionsHint" />
+                    </Text>
+                    <div className={classes.missions}>
+                        {missions.map((m) => (
+                            <article key={m.id} className={classes.missionCard}>
+                                <div className={classes.missionTop}>
+                                    <div className={classes.cardTitle}>{m.title}</div>
+                                    <span className={classes.summaryPoints}>+{m.points}</span>
+                                </div>
+                                {m.description && <div className={classes.cardDesc}>{m.description}</div>}
+                                <div className={classes.missionActions}>
+                                    {m.link && (
+                                        <Anchor href={m.link} target="_blank" rel="noreferrer" size="sm">
+                                            <IconExternalLink size={14} style={{ marginRight: 4 }} />
+                                            <FormattedMessage id="pages.achievements.missionOpen" />
+                                        </Anchor>
+                                    )}
+                                    <Button
+                                        size="xs"
+                                        variant={m.claimed ? "light" : "filled"}
+                                        color={m.claimed ? "gray" : "blue"}
+                                        disabled={!!m.claimed || claiming}
+                                        onClick={() => claimMission(m.id)}
+                                    >
+                                        {m.claimed
+                                            ? intl.formatMessage({ id: "pages.achievements.missionDone" })
+                                            : intl.formatMessage({ id: "pages.achievements.missionClaim" })}
+                                    </Button>
+                                </div>
+                            </article>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {byCategory.map(([category, items]) => (
                 <section key={category} className={classes.category}>

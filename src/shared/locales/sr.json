@@ -1722,7 +1722,40 @@
                 "gratitude": "Zahvalnice",
                 "trust": "Poverenje",
                 "other": "Ostalo"
-            }
+            },
+            "missionsTitle": "Misije — zaradi bodove",
+            "missionsHint": "Otvorite link, uradite akciju i kliknite „Uzmi bodove“. Jednom po misiji ako je jednokratna.",
+            "missionOpen": "Otvori",
+            "missionClaim": "Uzmi bodove",
+            "missionDone": "Uzeto",
+            "missionClaimed": "Dodato +{points}",
+            "missionAlready": "Već uzeto"
+        },
+        "pointMissionsAdmin": {
+            "title": "Misije za bodove",
+            "description": "Kreirajte zadatke: Instagram, anketa, događaj. Volonteri ih vide u Dostignućima i dobijaju bodove. Berza razmene je sledeći korak.",
+            "create": "Nova misija",
+            "createTitle": "Nova misija",
+            "editTitle": "Izmeni misiju",
+            "edit": "Izmeni",
+            "delete": "Obriši",
+            "save": "Sačuvaj",
+            "saved": "Misija sačuvana",
+            "empty": "Još nema misija. Napravite prvu — npr. Instagram.",
+            "required": "Naslov je obavezan",
+            "badPoints": "Bodovi moraju biti veći od 0",
+            "badUrl": "Link mora počinjati sa http:// ili https://",
+            "active": "Aktivna",
+            "inactive": "Isključena",
+            "oneTime": "jednom",
+            "repeatable": "ponovljivo",
+            "fieldTitle": "Naslov",
+            "fieldDescription": "Opis",
+            "fieldPoints": "Bodovi",
+            "fieldLink": "Link (opciono)",
+            "fieldSort": "Redosled",
+            "fieldActive": "Aktivna (vidljiva volonterima)",
+            "fieldOneTime": "Jednom po volonteru"
         }
     },
     "errors": {
@@ -1785,7 +1818,8 @@
         "dissolutionRequests": "Zahtev za raskid",
         "chat": "Ćaskanje",
         "ideas": "Ideje i talenti",
-        "achievements": "Moja dostignuća"
+        "achievements": "Moja dostignuća",
+        "pointMissions": "Misije (bodovi)"
     },
     "impersonation": {
         "banner": "Gledate kao {name}",

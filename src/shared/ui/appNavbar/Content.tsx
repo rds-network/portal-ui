@@ -29,6 +29,7 @@ import {
     IconAward,
     IconId,
     IconTrophy,
+    IconTargetArrow,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -58,6 +59,12 @@ export const Content: NavSection[] = [
                 icon: IconTrophy,
                 link: "/achievements",
                 dataTourId: "nav-achievements",
+            },
+            {
+                label: "navbar.pointMissions",
+                icon: IconTargetArrow,
+                link: "/achievements/missions",
+                roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
             },
             {
                 label: "navbar.reports.tasks",

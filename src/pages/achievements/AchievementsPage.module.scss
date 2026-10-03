@@ -74,6 +74,42 @@
     color: light-dark(#64748b, var(--mantine-color-dark-2));
 }
 
+.missions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+
+    @media (max-width: 720px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.missionCard {
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid light-dark(#bfdbfe, #1d4ed8);
+    background: light-dark(#f8fbff, rgba(37, 99, 235, 0.12));
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.missionTop {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: baseline;
+}
+
+.missionActions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+}
+
 .ok {
     color: light-dark(#15803d, #86efac);
 }

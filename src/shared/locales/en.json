@@ -1722,7 +1722,40 @@
                 "gratitude": "Gratitudes",
                 "trust": "Trust",
                 "other": "Other"
-            }
+            },
+            "missionsTitle": "Missions — earn points",
+            "missionsHint": "Open the link, complete the action, then tap Claim points. Once per mission when one-time.",
+            "missionOpen": "Open",
+            "missionClaim": "Claim points",
+            "missionDone": "Claimed",
+            "missionClaimed": "Awarded +{points}",
+            "missionAlready": "Already claimed"
+        },
+        "pointMissionsAdmin": {
+            "title": "Point missions",
+            "description": "Create actions: Instagram follow, survey, event. Volunteers see them in My achievements and earn points. An exchange marketplace comes next.",
+            "create": "New mission",
+            "createTitle": "New mission",
+            "editTitle": "Edit mission",
+            "edit": "Edit",
+            "delete": "Delete",
+            "save": "Save",
+            "saved": "Mission saved",
+            "empty": "No missions yet. Create the first one — e.g. Instagram follow.",
+            "required": "Title is required",
+            "badPoints": "Points must be greater than 0",
+            "badUrl": "Link must start with http:// or https://",
+            "active": "Active",
+            "inactive": "Off",
+            "oneTime": "once",
+            "repeatable": "repeatable",
+            "fieldTitle": "Title",
+            "fieldDescription": "Description",
+            "fieldPoints": "Points",
+            "fieldLink": "Link (optional)",
+            "fieldSort": "Sort order",
+            "fieldActive": "Active (visible to volunteers)",
+            "fieldOneTime": "Once per volunteer"
         }
     },
     "errors": {
@@ -1785,7 +1818,8 @@
         "dissolutionRequests": "Termination request",
         "chat": "Chat",
         "ideas": "Ideas & talents",
-        "achievements": "My achievements"
+        "achievements": "My achievements",
+        "pointMissions": "Point missions"
     },
     "impersonation": {
         "banner": "You are viewing as {name}",
