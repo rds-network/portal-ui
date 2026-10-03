@@ -178,12 +178,12 @@
         "announcements": {
             "admin": {
                 "title": "Broadcast notifications",
-                "description": "Sent in your name. Bell — in-portal notifications. Banner — a yellow bar at the top. No email.",
+                "description": "Always delivered to the bell (in-portal notifications). Optionally check the box to also show a yellow banner at the top. No email.",
                 "fields": {
                     "title": "Title",
                     "body": "Message",
                     "bodyHint": "Simple HTML is supported: <p>, <b>, <a href=\"...\">",
-                    "placement": "Where to show",
+                    "placement": "Extra",
                     "audience": "Audience",
                     "program": "Program",
                     "programPlaceholder": "Select a program",
@@ -196,7 +196,10 @@
                 },
                 "placement": {
                     "bell": "In the bell",
-                    "banner": "Yellow banner at the top"
+                    "banner": "Yellow banner at the top",
+                    "bannerExtra": "Also show yellow banner at the top",
+                    "bannerExtraHint": "By default the notification already goes to the bell. The checkbox adds a yellow bar at the top of the screen.",
+                    "bellAndBanner": "Bell + banner"
                 },
                 "bannerNoPerson": "The top banner cannot be sent to one person",
                 "publish": "Publish",

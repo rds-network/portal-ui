@@ -178,12 +178,12 @@
         "announcements": {
             "admin": {
                 "title": "Slanje obaveštenja",
-                "description": "U vaše ime. Zvonce — obaveštenja na portalu. Traka — žuta traka na vrhu. Bez email-a.",
+                "description": "Uvek stiže u zvonce (obaveštenja na portalu). Po želji označite kvačicu — dodatno žuta traka na vrhu. Bez email-a.",
                 "fields": {
                     "title": "Naslov",
                     "body": "Tekst",
                     "bodyHint": "Podržan je jednostavan HTML: <p>, <b>, <a href=\"...\">",
-                    "placement": "Gde prikazati",
+                    "placement": "Dodatno",
                     "audience": "Publika",
                     "program": "Program",
                     "programPlaceholder": "Izaberite program",
@@ -196,7 +196,10 @@
                 },
                 "placement": {
                     "bell": "U zvonce",
-                    "banner": "Žuta traka na vrhu"
+                    "banner": "Žuta traka na vrhu",
+                    "bannerExtra": "Takođe žuta traka na vrhu",
+                    "bannerExtraHint": "Podrazumevano obaveštenje već ide u zvonce. Kvačica dodaje žutu traku na vrhu ekrana.",
+                    "bellAndBanner": "Zvonce + traka"
                 },
                 "bannerNoPerson": "Gornja traka ne može da se pošalje jednoj osobi",
                 "publish": "Objavi",
