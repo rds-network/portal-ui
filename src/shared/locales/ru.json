@@ -261,6 +261,7 @@
             "openMap": "Открыть на экомапе →",
             "openEkomapa": "Открыть экомапу",
             "eventDescription": "Описание",
+            "eventNoDescription": "Описание не указано",
             "eventType": {
                 "CALL": "Созвон",
                 "SUBBOTNIK": "Субботник",

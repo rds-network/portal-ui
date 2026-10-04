@@ -211,6 +211,15 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                     >
                         {weeks.map((weekItem) => {
                             const tone = getSquareColor(weekItem)
+                            const hours = weekItem.hoursWorked ?? 0
+                            const mark =
+                                tone === "leave"
+                                    ? "О"
+                                    : hours > 0
+                                      ? Number.isInteger(hours)
+                                          ? String(hours)
+                                          : String(Math.round(hours * 10) / 10)
+                                      : ""
                             return (
                             <HoverCard
                                 key={weekItem.week}
@@ -228,8 +237,8 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                                         title={getSquareInfoLabel(weekItem)}
                                         className={`${classes.compactSquare} ${classes[tone]}`}
                                     >
-                                        {tone === "leave" ? (
-                                            <span className={classes.leaveMark}>О</span>
+                                        {mark ? (
+                                            <span className={classes.compactMark}>{mark}</span>
                                         ) : null}
                                     </Box>
                                 </HoverCard.Target>

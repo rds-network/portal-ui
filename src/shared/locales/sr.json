@@ -261,6 +261,7 @@
             "openMap": "Otvori na ekomapi →",
             "openEkomapa": "Otvori ekomapu",
             "eventDescription": "Opis",
+            "eventNoDescription": "Opis nije naveden",
             "eventType": {
                 "CALL": "Poziv",
                 "SUBBOTNIK": "Subotnik",

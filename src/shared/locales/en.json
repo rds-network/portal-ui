@@ -261,6 +261,7 @@
             "openMap": "Open on Ekomapa →",
             "openEkomapa": "Open Ekomapa",
             "eventDescription": "Description",
+            "eventNoDescription": "No description",
             "eventType": {
                 "CALL": "Call",
                 "SUBBOTNIK": "Cleanup",

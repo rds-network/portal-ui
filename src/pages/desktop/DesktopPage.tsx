@@ -53,6 +53,7 @@ export const DesktopPage: React.FC = () => {
     const { programs, projects } = useProgramProjectFilter(null, null)
     const [eventOpen, setEventOpen] = useState(false)
     const [editingEventId, setEditingEventId] = useState<string | null>(null)
+    const [viewingEvent, setViewingEvent] = useState<PortalEventDto | null>(null)
 
     const { data: curatorMe } = useQuery({
         queryKey: ["program-curators", "me"],
@@ -426,6 +427,7 @@ export const DesktopPage: React.FC = () => {
                         canManage={canManageEvents}
                         onAdd={openCreateEvent}
                         onEdit={openEditEvent}
+                        onView={setViewingEvent}
                     />
                 </div>
 
@@ -433,6 +435,89 @@ export const DesktopPage: React.FC = () => {
                     <CurrentUserHeatmap compact />
                 </section>
             </div>
+
+            <Modal
+                opened={!!viewingEvent}
+                onClose={() => setViewingEvent(null)}
+                title={viewingEvent?.title || ""}
+            >
+                {viewingEvent && (
+                    <Flex direction="column" gap="sm">
+                        <Badge
+                            color={
+                                viewingEvent.type === "SUBBOTNIK"
+                                    ? "teal"
+                                    : viewingEvent.type === "CALL"
+                                      ? "blue"
+                                      : viewingEvent.type === "MEETING"
+                                        ? "violet"
+                                        : viewingEvent.type === "LECTURE"
+                                          ? "cyan"
+                                          : "gray"
+                            }
+                            variant="light"
+                            w="fit-content"
+                        >
+                            <FormattedMessage
+                                id={`pages.desktop.eventType.${viewingEvent.type}`}
+                                defaultMessage={viewingEvent.type}
+                            />
+                        </Badge>
+                        <Text size="sm" fw={600}>
+                            {dayjs(viewingEvent.startsAt).format("D MMMM YYYY, HH:mm")}
+                        </Text>
+                        {(ekomapaLocationLabel(viewingEvent.location) || viewingEvent.location) && (
+                            <div>
+                                <Text size="xs" c="dimmed">
+                                    <FormattedMessage id="pages.desktop.eventWhere" />
+                                </Text>
+                                {viewingEvent.location &&
+                                (/^https?:\/\//i.test(viewingEvent.location) ||
+                                    isEkomapaMapUrl(viewingEvent.location)) ? (
+                                    <a
+                                        href={
+                                            viewingEvent.location.startsWith("http")
+                                                ? viewingEvent.location
+                                                : `https://${viewingEvent.location}`
+                                        }
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        {ekomapaLocationLabel(viewingEvent.location) ||
+                                            viewingEvent.location}
+                                    </a>
+                                ) : (
+                                    <Text size="sm">
+                                        {ekomapaLocationLabel(viewingEvent.location) ||
+                                            viewingEvent.location}
+                                    </Text>
+                                )}
+                            </div>
+                        )}
+                        {viewingEvent.description ? (
+                            <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+                                {viewingEvent.description}
+                            </Text>
+                        ) : (
+                            <Text size="sm" c="dimmed">
+                                <FormattedMessage id="pages.desktop.eventNoDescription" />
+                            </Text>
+                        )}
+                        {canManageEvents && (
+                            <Button
+                                variant="light"
+                                onClick={() => {
+                                    const event = viewingEvent
+                                    setViewingEvent(null)
+                                    openEditEvent(event)
+                                }}
+                            >
+                                <FormattedMessage id="pages.desktop.editEvent" />
+                            </Button>
+                        )}
+                    </Flex>
+                )}
+            </Modal>
 
             <Modal
                 opened={eventOpen}

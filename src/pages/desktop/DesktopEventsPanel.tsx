@@ -29,9 +29,10 @@ type Props = {
     canManage: boolean
     onAdd: () => void
     onEdit: (event: PortalEventDto) => void
+    onView: (event: PortalEventDto) => void
 }
 
-export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, onEdit }) => {
+export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, onEdit, onView }) => {
     const intl = useIntl()
     const [month, setMonth] = useState<Date>(dayjs().startOf("month").toDate())
     const [selectedDay, setSelectedDay] = useState<Date | null>(null)
@@ -200,6 +201,15 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                     <article
                                         key={event.id}
                                         className={`${classes.eventCard} ${isNew ? classes.eventNew : ""}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => onView(event)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault()
+                                                onView(event)
+                                            }
+                                        }}
                                     >
                                         <div
                                             className={`${classes.eventWhen} ${
@@ -238,7 +248,10 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                                         aria-label={intl.formatMessage({
                                                             id: "pages.desktop.editEvent",
                                                         })}
-                                                        onClick={() => onEdit(event)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            onEdit(event)
+                                                        }}
                                                     >
                                                         <IconPencil size={12} />
                                                     </ActionIcon>
@@ -263,6 +276,7 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                                     }
                                                     target="_blank"
                                                     rel="noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <FormattedMessage id="pages.desktop.openMap" />
                                                 </a>
