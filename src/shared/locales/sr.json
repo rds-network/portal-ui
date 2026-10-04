@@ -119,7 +119,7 @@
             "empty": "Nema obaveštenja",
             "new": "Novo",
             "dismiss": "Zatvori",
-            "dismissHint": "Da nastavite, zatvorite obaveštenje krstićem u gornjem desnom uglu"
+            "dismissHint": "Da nastavite, pritisnite „Zatvori“ ispod ili krstić desno"
         },
         "ticket-modal": {
             "modalTitle": "Kreirati tiket",

@@ -1,4 +1,4 @@
-import { ActionIcon, Text } from "@mantine/core"
+import { ActionIcon, Button, Text } from "@mantine/core"
 import { IconX } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import parse from "html-react-parser"
@@ -24,7 +24,20 @@ export const AnnouncementBanner: React.FC = () => {
         return () => document.documentElement.style.setProperty("--portal-banner-height", "0px")
     }, [banner])
 
-    const { mutate: dismiss } = useMutation({
+    // Recalculate height when content layout settles (images/fonts).
+    useEffect(() => {
+        if (!banner || !boxRef.current) return
+        const el = boxRef.current
+        const sync = () => {
+            document.documentElement.style.setProperty("--portal-banner-height", `${el.offsetHeight}px`)
+        }
+        sync()
+        const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(sync) : null
+        ro?.observe(el)
+        return () => ro?.disconnect()
+    }, [banner])
+
+    const { mutate: dismiss, isPending } = useMutation({
         mutationFn: (id: string) => AnnouncementApiService.markAnnouncementRead(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["announcements"] })
@@ -33,29 +46,44 @@ export const AnnouncementBanner: React.FC = () => {
 
     if (!banner) return null
 
+    const close = () => dismiss(banner.id)
+
     return (
         <div className={classes.banner} role="status" ref={boxRef}>
-            <div className={classes.text}>
-                <Text fw={700} size="sm">
-                    {banner.title}
-                </Text>
-                <Text size="sm" component="div" className={classes.body}>
-                    {parse(sanitizeHtml(banner.body))}
-                </Text>
-                <Text size="xs" className={classes.hint}>
-                    <FormattedMessage id="common.announcements.dismissHint" />
-                </Text>
+            <div className={classes.top}>
+                <div className={classes.text}>
+                    <Text fw={700} size="sm">
+                        {banner.title}
+                    </Text>
+                    <Text size="sm" component="div" className={classes.body}>
+                        {parse(sanitizeHtml(banner.body))}
+                    </Text>
+                    <Text size="xs" className={classes.hint}>
+                        <FormattedMessage id="common.announcements.dismissHint" />
+                    </Text>
+                </div>
+                <ActionIcon
+                    className={classes.close}
+                    variant="filled"
+                    size="lg"
+                    aria-label={intl.formatMessage({ id: "common.announcements.dismiss" })}
+                    onClick={close}
+                    disabled={isPending}
+                >
+                    <IconX size={20} stroke={2.5} />
+                </ActionIcon>
             </div>
-            <ActionIcon
-                className={classes.close}
-                variant="filled"
-                color="yellow"
-                size="lg"
-                aria-label={intl.formatMessage({ id: "common.announcements.dismiss" })}
-                onClick={() => dismiss(banner.id)}
-            >
-                <IconX size={18} />
-            </ActionIcon>
+            <div className={classes.actions}>
+                <Button
+                    className={classes.dismissBtn}
+                    size="compact-sm"
+                    radius="md"
+                    loading={isPending}
+                    onClick={close}
+                >
+                    <FormattedMessage id="common.announcements.dismiss" />
+                </Button>
+            </div>
         </div>
     )
 }

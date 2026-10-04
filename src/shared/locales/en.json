@@ -119,7 +119,7 @@
             "empty": "No notifications",
             "new": "New",
             "dismiss": "Dismiss",
-            "dismissHint": "To continue, close this notice with the X in the top-right corner"
+            "dismissHint": "To continue, tap “Dismiss” below or the X on the right"
         },
         "ticket-modal": {
             "modalTitle": "Create Ticket",
