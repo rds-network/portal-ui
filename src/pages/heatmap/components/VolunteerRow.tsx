@@ -393,11 +393,23 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
             </div>
 
             <div className={classes.weekSquares}>
-                {weeks.map((week) => (
+                {weeks.map((week) => {
+                    const tone = getSquareColor(week.weekNumber)
+                    const weekData = weekByNumber.get(week.weekNumber)
+                    const hours = weekData?.hoursWorked ?? 0
+                    const mark =
+                        tone === "leave"
+                            ? "О"
+                            : hours > 0
+                              ? Number.isInteger(hours)
+                                  ? String(hours)
+                                  : String(Math.round(hours * 10) / 10)
+                              : ""
+                    return (
                     <HoverCard key={week.weekNumber} position="top" withArrow shadow="md" withinPortal>
                         <HoverCard.Target>
                             <Box
-                                className={`${classes.weekSquare} ${classes[getSquareColor(week.weekNumber)]}`}
+                                className={`${classes.weekSquare} ${classes[tone]}`}
                                 style={{ cursor: canOpenReports ? "pointer" : "default" }}
                                 title={
                                     canOpenReports
@@ -412,7 +424,9 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                     e.stopPropagation()
                                     openWeekReports(week.weekNumber)
                                 }}
-                            />
+                            >
+                                {mark ? <span className={classes.squareMark}>{mark}</span> : null}
+                            </Box>
                         </HoverCard.Target>
 
                         <HoverCard.Dropdown>
@@ -429,7 +443,8 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                             )}
                         </HoverCard.Dropdown>
                     </HoverCard>
-                ))}
+                    )
+                })}
             </div>
         </div>
     )

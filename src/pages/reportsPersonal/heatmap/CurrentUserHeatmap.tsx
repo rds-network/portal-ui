@@ -172,7 +172,9 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                         </Text>
                     </Flex>
                     <Flex align="center" gap={4}>
-                        <Box className={`${classes.legendSquare} ${classes.leave}`} />
+                        <Box className={`${classes.legendSquare} ${classes.leave}`}>
+                            <span className={classes.leaveMark}>О</span>
+                        </Box>
                         <Text size="xs">
                             <FormattedMessage id="pages.heat-map.leave" />
                         </Text>
@@ -207,7 +209,9 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                         className={classes.compactWeekSquares}
                         style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(9px, 1fr))` }}
                     >
-                        {weeks.map((weekItem) => (
+                        {weeks.map((weekItem) => {
+                            const tone = getSquareColor(weekItem)
+                            return (
                             <HoverCard
                                 key={weekItem.week}
                                 position="top"
@@ -222,14 +226,19 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                                         tabIndex={0}
                                         aria-label={getSquareInfoLabel(weekItem)}
                                         title={getSquareInfoLabel(weekItem)}
-                                        className={`${classes.compactSquare} ${classes[getSquareColor(weekItem)]}`}
-                                    />
+                                        className={`${classes.compactSquare} ${classes[tone]}`}
+                                    >
+                                        {tone === "leave" ? (
+                                            <span className={classes.leaveMark}>О</span>
+                                        ) : null}
+                                    </Box>
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown>
                                     <Text size="xs">{getSquareInfoLabel(weekItem)}</Text>
                                 </HoverCard.Dropdown>
                             </HoverCard>
-                        ))}
+                            )
+                        })}
                     </div>
                 </div>
             </div>
@@ -277,7 +286,9 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                 </Flex>
 
                 <Flex align="center" gap={4}>
-                    <Box className={`${classes.legendSquare} ${classes.leave}`} />
+                    <Box className={`${classes.legendSquare} ${classes.leave}`}>
+                        <span className={classes.leaveMark}>О</span>
+                    </Box>
                     <Text size="xs">
                         <FormattedMessage id="pages.heat-map.leave" />
                     </Text>
@@ -346,7 +357,13 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                                             className={`${classes.weekSquare} ${classes[getSquareColor(weekItem)]}`}
                                         >
                                             <Text size="xs" fw={500} className={classes.weekNumber}>
-                                                {weekItem.week}
+                                                {getSquareColor(weekItem) === "leave"
+                                                    ? "О"
+                                                    : weekItem.hoursWorked > 0
+                                                      ? Number.isInteger(weekItem.hoursWorked)
+                                                          ? weekItem.hoursWorked
+                                                          : Math.round(weekItem.hoursWorked * 10) / 10
+                                                      : weekItem.week}
                                             </Text>
                                         </Box>
                                     </HoverCard.Target>

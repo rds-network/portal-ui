@@ -11,9 +11,19 @@
 }
 .legendSquare {
     flex-shrink: 0;
-    width: 9px;
-    height: 9px;
+    width: 14px;
+    height: 14px;
     border-radius: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.leaveMark {
+    color: #854d0e;
+    font-size: 9px;
+    font-weight: 800;
+    line-height: 1;
 }
 .year {
     border-top: 1px solid var(--portal-border);
@@ -106,7 +116,11 @@
     background: #25566a;
 }
 .leave {
-    background: var(--mantine-color-green-6);
+    background: #facc15;
+    border: 1px solid #ca8a04;
+    .weekNumber {
+        color: #854d0e;
+    }
 }
 .na {
     background: light-dark(#dfe7e8, #3a515a);
@@ -209,7 +223,21 @@
         background: var(--mantine-color-blue-9);
     }
     .leave {
-        background: var(--mantine-color-green-6);
+        background: #facc15;
+        border: 1px solid #ca8a04;
+    }
+
+    .leaveMark {
+        color: #854d0e;
+        font-size: 8px;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .legendSquare {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .na {
         background: var(--mantine-color-gray-4);

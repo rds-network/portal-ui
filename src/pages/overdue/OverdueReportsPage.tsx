@@ -198,7 +198,7 @@ export const OverdueReportsPage: React.FC = () => {
                         <Legend color="partialReports" label="pages.heat-map.partial-reports" />
                         <Legend color="fullReports" label="pages.heat-map.full-reports" />
                         <Legend color="overtimeReports" label="pages.heat-map.overtime-reports" />
-                        <Legend color="leave" label="pages.heat-map.leave" />
+                        <Legend color="leave" label="pages.heat-map.leave" mark="О" />
                         <Legend color="na" label="pages.heat-map.na" />
                         <Legend color="waiting" label="pages.heat-map.pending" />
                     </Group>
@@ -353,13 +353,27 @@ export const OverdueReportsPage: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className={classes.weekSquares} style={weekGridStyle}>
-                                    {(item.recentWeeks ?? []).map((week) => (
+                                    {(item.recentWeeks ?? []).map((week) => {
+                                        const tone = weekTone(week)
+                                        const hours = week.hoursWorked ?? 0
+                                        const mark =
+                                            tone === "leave"
+                                                ? "О"
+                                                : hours > 0
+                                                  ? Number.isInteger(hours)
+                                                      ? String(hours)
+                                                      : String(Math.round(hours * 10) / 10)
+                                                  : ""
+                                        return (
                                         <span
                                             key={week.weekStart}
-                                            className={`${classes.weekSquare} ${classes[weekTone(week)]}`}
+                                            className={`${classes.weekSquare} ${classes[tone]}`}
                                             title={`${dayjs(week.weekStart).format("DD.MM.YYYY")}: ${week.hoursWorked}/${week.hoursRequired}`}
-                                        />
-                                    ))}
+                                        >
+                                            {mark ? <span className={classes.squareMark}>{mark}</span> : null}
+                                        </span>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         ))}
@@ -370,9 +384,15 @@ export const OverdueReportsPage: React.FC = () => {
     )
 }
 
-const Legend: React.FC<{ color: keyof typeof classes; label: string }> = ({ color, label }) => (
+const Legend: React.FC<{ color: keyof typeof classes; label: string; mark?: string }> = ({
+    color,
+    label,
+    mark,
+}) => (
     <Flex align="center" gap={6}>
-        <span className={`${classes.legendSquare} ${classes[color]}`} />
+        <span className={`${classes.legendSquare} ${classes[color]}`}>
+            {mark ? <span className={classes.legendLeaveMark}>{mark}</span> : null}
+        </span>
         <Text size="xs">
             <FormattedMessage id={label} />
         </Text>
