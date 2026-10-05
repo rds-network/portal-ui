@@ -1,9 +1,12 @@
 import { PageRequest, PageResponse, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
 
+export const SORT_SUBMITTED = "submittedAt;desc"
+export const SORT_ACCEPTED = "acceptedAt;desc"
+
 export const defaultPage: PageRequest = {
     pageNumber: 0,
     pageSize: 10,
-    sort: ["createTime;desc"],
+    sort: [SORT_SUBMITTED],
 }
 
 export const defaultPageResponse: PageResponse = {

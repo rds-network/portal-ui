@@ -770,6 +770,9 @@
             "moderator-short": "Moderator",
             "delete": "Delete report",
             "delete-submit": "Press again to delete",
+            "return-to-work": "Return to work",
+            "return-to-work-submit": "Press again to cancel acceptance",
+            "return-to-work-hint": "The report will become “Created” again and return to the review queue. You can add a comment.",
             "auto-report": "Report created automatically based on data from an external system",
             "control-visa-required": "Control approval required: {name}. Only this person can accept or reject the report.",
             "assignment-saved": "Report program updated"
@@ -875,7 +878,10 @@
             "digest-title": "Week summary",
             "week-short": "wk. {week}",
             "show-tasks": "What was done",
-            "remark": "Remark:"
+            "remark": "Remark:",
+            "sort": "Sort",
+            "sort-submitted": "Latest submitted",
+            "sort-accepted": "Latest accepted"
         },
         "heat-map": {
             "description": "Volunteers with a current regular or associated contract. Associated members have no hour quota or overdue notices; they are marked on the map.",

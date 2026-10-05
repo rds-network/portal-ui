@@ -108,6 +108,18 @@
     }
 }
 
+.returnToWorkSection {
+    width: 36rem;
+
+    @media (max-width: $mantine-breakpoint-md) {
+        width: 100%;
+    }
+
+    & {
+        width: 100%;
+    }
+}
+
 .deleteReportSection {
     width: 36rem;
     justify-content: center;

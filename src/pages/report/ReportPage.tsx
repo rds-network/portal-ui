@@ -2,6 +2,7 @@ import { ActionIcon, Alert, Anchor, Avatar, Badge, Button, Checkbox, Flex, Loade
 import { notifications } from "@mantine/notifications"
 import { ReportDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import {
+    IconArrowBackUp,
     IconCalendar,
     IconCheck,
     IconClock,
@@ -63,6 +64,7 @@ export const ReportPage = () => {
 
     const [submitDelete, setSubmitDelete] = useState<boolean>(false)
     const [deleting, setDeleting] = useState(false)
+    const [submitReturn, setSubmitReturn] = useState(false)
 
     const [emailDrawerOpen, setEmailDrawerOpen] = useState<boolean>(false)
 
@@ -197,6 +199,9 @@ export const ReportPage = () => {
         UserGroup.ADMIN_VOLUNTEER,
         UserGroup.MAIN_VOLUNTEER,
     ])
+    const canReturnToWork =
+        report.status === ReportStatus.ACCEPTED &&
+        (canAcceptReport || hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]))
 
     return (
         <Flex className={classes.root}>
@@ -409,6 +414,39 @@ export const ReportPage = () => {
                             <FormattedMessage id={locales.reject} />
                         </Button>
                     </Flex>
+                </Flex>
+            )}
+            {canReturnToWork && (
+                <Flex direction="column" rowGap="sm" className={classes.returnToWorkSection}>
+                    <Text size="sm" c="dimmed">
+                        <FormattedMessage id={locales.returnToWorkHint} />
+                    </Text>
+                    <Textarea
+                        className={classes.comment}
+                        value={comment}
+                        autosize={true}
+                        disabled={statusChanging}
+                        onChange={(e) => setComment(e.target.value)}
+                        label={intl.formatMessage({ id: locales.comment })}
+                    />
+                    <Button
+                        disabled={statusChanging}
+                        variant={submitReturn ? "filled" : "outline"}
+                        color="orange"
+                        size="sm"
+                        leftSection={
+                            statusChanging ? <Loader size={16} color="orange" /> : <IconArrowBackUp size={16} />
+                        }
+                        onClick={() => {
+                            if (!submitReturn) {
+                                setSubmitReturn(true)
+                                return
+                            }
+                            onStatusChange(ReportStatus.CREATED)
+                        }}
+                    >
+                        <FormattedMessage id={submitReturn ? locales.returnToWorkSubmit : locales.returnToWork} />
+                    </Button>
                 </Flex>
             )}
             {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && (

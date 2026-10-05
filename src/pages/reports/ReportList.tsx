@@ -1,4 +1,4 @@
-import { Anchor, Badge, Button, Collapse, Flex, Pagination, Text } from "@mantine/core"
+import { Anchor, Badge, Button, Collapse, Flex, Pagination, Select, Text } from "@mantine/core"
 import { PageRequest, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconArrowLeft, IconFilterEdit, IconFilterOff, IconUfo } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
@@ -21,7 +21,14 @@ import { WeekPicker } from "src/shared/ui/weekPicker/WeekPicker"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
-import { defaultFilter, defaultPage, defaultPageResponse, defaultUser } from "./lib/defaults"
+import {
+    defaultFilter,
+    defaultPage,
+    defaultPageResponse,
+    defaultUser,
+    SORT_ACCEPTED,
+    SORT_SUBMITTED,
+} from "./lib/defaults"
 import { locales } from "./lib/locales"
 import { allowedRoles } from "./lib/roles"
 import { heatmapReturnPath } from "src/pages/heatmap/lib/openWeekReports"
@@ -41,10 +48,12 @@ export const ReportList = () => {
 
     const [resetKey, setResetKey] = useState(0)
     const [filtersOpened, setFiltersOpened] = useState(false)
+    const sortFromUrl = searchParams.get("sort") === "accepted" ? SORT_ACCEPTED : SORT_SUBMITTED
     const [pageRequest, setPageRequest] = useState<PageRequest>({
         ...defaultPage,
         pageNumber: Math.max(0, parseInt(searchParams.get("page") || "1") - 1),
         pageSize: isMobile ? 10 : 25,
+        sort: [sortFromUrl],
     })
     const [filter, setFilter] = useState<ReportFilter>({
         ...defaultFilter(loginParam),
@@ -86,7 +95,12 @@ export const ReportList = () => {
         setSelectedProgram(urlProgram)
         setSelectedProject(urlProject)
 
-        setPageRequest((prevPageRequest) => ({ ...prevPageRequest, pageNumber: urlPage }))
+        const urlSort = searchParams.get("sort") === "accepted" ? SORT_ACCEPTED : SORT_SUBMITTED
+        setPageRequest((prevPageRequest) => ({
+            ...prevPageRequest,
+            pageNumber: urlPage,
+            sort: [urlSort],
+        }))
         setResetKey((prev) => prev + 1)
     }
 
@@ -109,7 +123,8 @@ export const ReportList = () => {
         newFilter: ReportFilter,
         newProgram: string | null,
         newProject: string | null,
-        newPage: number = 0
+        newPage: number = 0,
+        sortValue: string = pageRequest.sort?.[0] || SORT_SUBMITTED
     ) => {
         const params = new URLSearchParams()
 
@@ -137,6 +152,10 @@ export const ReportList = () => {
             params.set("project", newProject)
         }
 
+        if (sortValue === SORT_ACCEPTED) {
+            params.set("sort", "accepted")
+        }
+
         // Добавляем параметр page только если это не первая страница
         if (newPage > 0) {
             const userPageNumber = newPage + 1
@@ -149,6 +168,30 @@ export const ReportList = () => {
 
         setSearchParams(params)
     }
+
+    const onSortChange = (value: string | null) => {
+        const sort = value === SORT_ACCEPTED ? SORT_ACCEPTED : SORT_SUBMITTED
+        setPageRequest({ ...pageRequest, pageNumber: 0, sort: [sort] })
+        updateUrlParams(filter, selectedProgram, selectedProject, 0, sort)
+    }
+
+    const sortSelect = (
+        <Flex direction="column">
+            <Text size="xs" c="dimmed" mb={4}>
+                <FormattedMessage id={locales.sort} />
+            </Text>
+            <Select
+                value={pageRequest.sort?.[0] || SORT_SUBMITTED}
+                onChange={onSortChange}
+                data={[
+                    { value: SORT_SUBMITTED, label: intl.formatMessage({ id: locales.sortSubmitted }) },
+                    { value: SORT_ACCEPTED, label: intl.formatMessage({ id: locales.sortAccepted }) },
+                ]}
+                allowDeselect={false}
+                w={220}
+            />
+        </Flex>
+    )
 
     const handleProjectChange = (newProject: string | null) => {
         const projectChanged = newProject !== selectedProject
@@ -318,9 +361,9 @@ export const ReportList = () => {
         setFilter(resetFilter)
         setSelectedProgram(null)
         setSelectedProject(null)
-        setPageRequest({ ...pageRequest, pageNumber: 0 })
+        setPageRequest({ ...pageRequest, pageNumber: 0, sort: [SORT_SUBMITTED] })
         setResetKey((prev) => prev + 1)
-        updateUrlParams(resetFilter, null, null, 0)
+        updateUrlParams(resetFilter, null, null, 0, SORT_SUBMITTED)
     }
 
     const cards = reports.map((report) => {
@@ -407,6 +450,7 @@ export const ReportList = () => {
                                         onChange={onStatusChange}
                                         value={filter.status}
                                     />
+                                    {sortSelect}
                                     <Flex direction="column">
                                         <Text size="xs" c="dimmed" mb={4}>
                                             <FormattedMessage id={locales.programFilter} />
@@ -486,6 +530,7 @@ export const ReportList = () => {
                                 onChange={onStatusChange}
                                 value={filter.status}
                             />
+                            {sortSelect}
                             <Flex direction="column">
                                 <Text size="xs" c="dimmed" mb={4}>
                                     <FormattedMessage id={locales.programFilter} />

@@ -770,6 +770,9 @@
             "moderator-short": "Moderator",
             "delete": "Izbrišite izveštaj",
             "delete-submit": "Dodirnite ponovo da biste uklonili",
+            "return-to-work": "Vrati u rad",
+            "return-to-work-submit": "Pritisnite još jednom da otkažete prihvatanje",
+            "return-to-work-hint": "Izveštaj će ponovo biti „Kreiran“ i vratiti se na prijem. Možete dodati komentar.",
             "auto-report": "Izveštaj je automatski kreiran na osnovu podataka iz eksternog sistema",
             "control-visa-required": "Potrebna je viza kontrole: {name}. Samo ta osoba može da prihvati ili odbije izveštaj.",
             "assignment-saved": "Program izveštaja je ažuriran"
@@ -875,7 +878,10 @@
             "digest-title": "Pregled nedelje",
             "week-short": "ned. {week}",
             "show-tasks": "Šta je urađeno",
-            "remark": "Napomena:"
+            "remark": "Napomena:",
+            "sort": "Sortiranje",
+            "sort-submitted": "Poslednji predati",
+            "sort-accepted": "Poslednji prihvaćeni"
         },
         "heat-map": {
             "description": "Volonteri sa važećim redovnim ili asociranim ugovorom. Asocirani nemaju obavezne sate ni kašnjenja; označeni su na karti.",
