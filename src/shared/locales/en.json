@@ -1171,7 +1171,10 @@
             "menu": {
                 "actions": "Application actions",
                 "view": "View",
-                "contact": "Contact"
+                "contact": "Email applicant",
+                "ask-assignee": "Ask responsible",
+                "ask-subject": "Question about application: {name}",
+                "ask-body": "Hello!\n\nCould you clarify the application for {name} ({email})?\n\n\n\nLink: {link}"
             },
             "view": {
                 "title": "Application Form",

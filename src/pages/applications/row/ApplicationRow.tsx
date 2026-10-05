@@ -10,6 +10,7 @@ import { ApplicationMenu } from "src/pages/applications/menu/ApplicationMenu"
 import { useApplicationUpdate } from "src/shared/api/applications/useApplicationUpdate"
 import { ApplicationAssigneeAvatar } from "../assignee/ApplicationAssigneeAvatar"
 import { ApplicationAssigneeSelect } from "../assignee/ApplicationAssigneeSelect"
+import { AskAssigneeButton } from "../assignee/AskAssigneeButton"
 import { CopyText } from "src/shared/ui/copyText/CopyText"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { ApplicationStatusSelect } from "src/shared/ui/select/ApplicationStatusSelect"
@@ -135,7 +136,8 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
                 <Flex className={classes.rowActions} ml="auto" data-row-action>
                     {notesCounter}
                     <ApplicationAssigneeAvatar login={application.assignee} user={assigneeUser} />
-                    <ApplicationMenu applicationDto={application} />
+                    <AskAssigneeButton application={application} assigneeUser={assigneeUser} />
+                    <ApplicationMenu applicationDto={application} assigneeUser={assigneeUser} />
                 </Flex>
             </Flex>
 

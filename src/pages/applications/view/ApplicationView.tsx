@@ -48,6 +48,7 @@ import { ApplicationStatus } from "src/shared/user/applications"
 import { hasPermission } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { ApplicationAssigneeSelect } from "../assignee/ApplicationAssigneeSelect"
+import { AskAssigneeButton } from "../assignee/AskAssigneeButton"
 import { ApplicationStatusReason } from "../row/ApplicationStatusReason"
 import { ApplicationEditDrawer } from "./ApplicationEditDrawer"
 import classes from "./ApplicationView.module.scss"
@@ -88,7 +89,10 @@ export const ApplicationView = () => {
     const isUpdating = useIsMutating({ mutationKey: ["writeApplication"] }) > 0
     setDocumentTitleByString(application?.name)
     const noteLogins = application?.notes?.map((note) => note.createdBy).filter(Boolean) || []
-    const { data: users = {} } = resolveUsers(noteLogins)
+    const userLogins = Array.from(
+        new Set([...noteLogins, application?.assignee].filter(Boolean) as string[])
+    )
+    const { data: users = {} } = resolveUsers(userLogins)
     const program = programs.find((p) => p.code === application?.program)
     const project = projects.find((p) => p.code === application?.project)
     const officialGroup = officialGroups.find((p) => p.code === program?.officialGroup)
@@ -321,6 +325,11 @@ export const ApplicationView = () => {
                 <Flex className={classes.sidebar} direction="column" gap={24}>
                     <Flex gap="md" direction="column" className={classes.controls}>
                         <ApplicationAssigneeSelect application={application} disabled={isUpdating} />
+                        <AskAssigneeButton
+                            application={application}
+                            assigneeUser={application.assignee ? users[application.assignee] : undefined}
+                            variant="button"
+                        />
                         <PropertyBox
                             className={classes.controlField}
                             align="start"

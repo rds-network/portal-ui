@@ -1171,7 +1171,10 @@
             "menu": {
                 "actions": "Radnje za prijavu",
                 "view": "Pogledaj",
-                "contact": "Kontaktiraj"
+                "contact": "Piši kandidatu",
+                "ask-assignee": "Pitaj odgovornog",
+                "ask-subject": "Pitanje o prijavi: {name}",
+                "ask-body": "Zdravo!\n\nMolim te, razjasni situaciju oko prijave {name} ({email}):\n\n\n\nLink: {link}"
             },
             "view": {
                 "title": "Prijavni formular",
