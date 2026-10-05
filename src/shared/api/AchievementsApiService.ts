@@ -35,11 +35,34 @@ export type AchievementsMeDto = {
     thisWeekVisited: boolean
 }
 
+export type PointLeaderDto = {
+    rank: number
+    username: string
+    fullName: string
+    points: number
+    isMe?: boolean
+}
+
+export type AchievementsLeaderboardDto = {
+    leaders: PointLeaderDto[]
+    me: PointLeaderDto | null
+    totalParticipants: number
+}
+
 const alive = (status: number) => status === 200 || status === 404 || status >= 500
 
 export const AchievementsApiService = {
     async me(): Promise<AchievementsMeDto | null> {
         const response = await RequestHttp.get<AchievementsMeDto>("/achievements/me", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return null
+        return response.data ?? null
+    },
+
+    async leaderboard(limit = 100): Promise<AchievementsLeaderboardDto | null> {
+        const response = await RequestHttp.get<AchievementsLeaderboardDto>("/achievements/leaderboard", {
+            params: { limit },
             validateStatus: alive,
         })
         if (response.status !== 200) return null

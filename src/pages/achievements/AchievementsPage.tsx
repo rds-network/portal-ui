@@ -15,6 +15,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import {
     AchievementDto,
     AchievementsApiService,
+    PointLeaderDto,
 } from "src/shared/api/AchievementsApiService"
 import { PointMissionApiService, PointMissionDto } from "src/shared/api/PointMissionApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -199,6 +200,17 @@ const AchievementsPage: React.FC = () => {
         enabled: !!data,
     })
 
+    const { data: board, isFetching: boardLoading } = useQuery({
+        queryKey: ["achievements", "leaderboard"],
+        queryFn: () => AchievementsApiService.leaderboard(100),
+        staleTime: 60_000,
+        enabled: tab === "leaderboard",
+    })
+
+    const podium = useMemo(() => (board?.leaders ?? []).slice(0, 3), [board?.leaders])
+    const restLeaders = useMemo(() => (board?.leaders ?? []).slice(3), [board?.leaders])
+    const showMeBar = Boolean(board?.me && !board.leaders.some((l) => l.isMe))
+
     const { mutate: claimMission, isPending: claiming } = useMutation({
         mutationFn: (id: string) => PointMissionApiService.claim(id),
         onSuccess: (result) => {
@@ -374,6 +386,9 @@ const AchievementsPage: React.FC = () => {
                 <Tabs.List>
                     <Tabs.Tab value="overview">
                         <FormattedMessage id="pages.achievements.tabs.overview" />
+                    </Tabs.Tab>
+                    <Tabs.Tab value="leaderboard" leftSection={<IconChartBar size={14} />}>
+                        <FormattedMessage id="pages.achievements.tabs.leaderboard" />
                     </Tabs.Tab>
                     <Tabs.Tab value="missions">
                         <FormattedMessage id="pages.achievements.tabs.missions" />
@@ -569,6 +584,105 @@ const AchievementsPage: React.FC = () => {
                     <div className={classes.footerNote}>
                         <FormattedMessage id="pages.achievements.howItWorks" />
                     </div>
+                </Tabs.Panel>
+
+                <Tabs.Panel value="leaderboard" pt="md">
+                    <Text className={classes.leaderboardHint}>
+                        <FormattedMessage id="pages.achievements.leaderboardHint" />
+                    </Text>
+                    {boardLoading && !board ? (
+                        <Loader size="sm" />
+                    ) : !board || board.leaders.length === 0 ? (
+                        <Text size="sm" c="dimmed">
+                            <FormattedMessage id="pages.achievements.leaderboardEmpty" />
+                        </Text>
+                    ) : (
+                        <>
+                            {podium.length > 0 && (
+                                <div className={classes.podium}>
+                                    {podium.map((row, index) => (
+                                        <div
+                                            key={row.username}
+                                            className={`${classes.podiumCard} ${
+                                                index === 0
+                                                    ? classes.podiumGold
+                                                    : index === 1
+                                                      ? classes.podiumSilver
+                                                      : classes.podiumBronze
+                                            }`}
+                                        >
+                                            <div className={classes.podiumPlace}>
+                                                <FormattedMessage
+                                                    id={
+                                                        index === 0
+                                                            ? "pages.achievements.podiumGold"
+                                                            : index === 1
+                                                              ? "pages.achievements.podiumSilver"
+                                                              : "pages.achievements.podiumBronze"
+                                                    }
+                                                />
+                                            </div>
+                                            <div className={classes.podiumName}>
+                                                {row.fullName}
+                                                {row.isMe ? " · " : ""}
+                                                {row.isMe && (
+                                                    <FormattedMessage id="pages.achievements.leaderboardYou" />
+                                                )}
+                                            </div>
+                                            <div className={classes.podiumPts}>{row.points}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {restLeaders.length > 0 && (
+                                <table className={classes.leaderTable}>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <FormattedMessage id="pages.achievements.leaderboardPlace" />
+                                            </th>
+                                            <th>
+                                                <FormattedMessage id="pages.achievements.leaderboardName" />
+                                            </th>
+                                            <th style={{ textAlign: "right" }}>
+                                                <FormattedMessage id="pages.achievements.leaderboardPoints" />
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {restLeaders.map((row: PointLeaderDto) => (
+                                            <tr
+                                                key={row.username}
+                                                className={row.isMe ? classes.leaderMe : undefined}
+                                            >
+                                                <td className={classes.leaderRank}>#{row.rank}</td>
+                                                <td>
+                                                    {row.fullName}
+                                                    {row.isMe
+                                                        ? ` (${intl.formatMessage({
+                                                              id: "pages.achievements.leaderboardYou",
+                                                          })})`
+                                                        : ""}
+                                                </td>
+                                                <td className={classes.leaderPts}>{row.points}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                            {showMeBar && board.me && (
+                                <div className={classes.meBar}>
+                                    <span>
+                                        <FormattedMessage
+                                            id="pages.achievements.leaderboardMyRank"
+                                            values={{ rank: board.me.rank, total: board.totalParticipants }}
+                                        />
+                                    </span>
+                                    <strong>{board.me.points}</strong>
+                                </div>
+                            )}
+                        </>
+                    )}
                 </Tabs.Panel>
 
                 <Tabs.Panel value="missions" pt="md">
