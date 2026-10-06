@@ -12,6 +12,7 @@ import { UserContext } from "src/app/providers/UserContext"
 import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUserHeatmap"
 import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/reportsPersonal/lib/constants"
 import { defaultUser } from "src/pages/reports/lib/defaults"
+import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import {
     PortalEventApiService,
@@ -81,6 +82,26 @@ export const DesktopPage: React.FC = () => {
         queryKey: ["work-assignments"],
         queryFn: () => WorkAssignmentApiService.list(),
     })
+
+    const { data: achievements } = useQuery({
+        queryKey: ["achievements", "me"],
+        queryFn: () => AchievementsApiService.me(),
+        staleTime: 60_000,
+        enabled: !!user,
+    })
+
+    const monthEarned = useMemo(() => {
+        if (!achievements?.recent?.length) return 0
+        const start = dayjs().startOf("month")
+        return achievements.recent
+            .filter((ev) => dayjs(ev.createdAt).isAfter(start) || dayjs(ev.createdAt).isSame(start, "day"))
+            .reduce((sum, ev) => sum + (ev.points || 0), 0)
+    }, [achievements?.recent])
+
+    const unlockedBadges = useMemo(
+        () => (achievements?.achievements ?? []).filter((a) => a.unlocked).slice(0, 6),
+        [achievements?.achievements]
+    )
 
     const myTasks = useMemo(() => {
         return assignments
@@ -255,56 +276,120 @@ export const DesktopPage: React.FC = () => {
 
             <div className={classes.grid}>
                 <section className={`${classes.card} ${classes.tasksCard}`} data-tour-id="desktop-tasks">
-                    <div className={classes.cardHeader}>
-                        <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.tasks" />
-                        </Title>
-                        <Link className={classes.cardLink} to="/tasks">
-                            <FormattedMessage id="pages.desktop.openBoard" />
-                        </Link>
-                    </div>
-                    <div className={classes.listScroll}>
-                        {myTasks.length === 0 && (
-                            <Text className={classes.empty}>
-                                <FormattedMessage id="pages.desktop.tasksEmpty" />
-                            </Text>
-                        )}
-                        {myTasks.map((task) => {
-                            const status = String(task.status).toUpperCase()
-                            const isNew =
-                                status === "TODO" || dayjs().diff(dayjs(task.createTime), "hour") < 48
-                            return (
-                                <button
-                                    key={task.id}
-                                    type="button"
-                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
-                                    onClick={() => navigate("/tasks")}
-                                >
-                                    <div className={classes.rowBody}>
-                                        <Text fw={600} lineClamp={1}>
-                                            {task.title}
-                                        </Text>
-                                        <Text className={classes.rowMeta} lineClamp={1}>
-                                            {task.customerName || task.customer || "—"}
-                                            {task.dueDate
-                                                ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
-                                                : ""}
-                                        </Text>
-                                    </div>
-                                    <Badge
-                                        color={STATUS_COLOR[status] || "gray"}
-                                        variant="light"
-                                        radius="md"
-                                        size="sm"
-                                    >
+                    <div className={classes.splitPane}>
+                        <div className={classes.splitHalf} data-tour-id="desktop-tasks-half">
+                            <div className={classes.cardHeader}>
+                                <Title order={2} className={classes.cardTitle}>
+                                    <FormattedMessage id="pages.desktop.tasks" />
+                                </Title>
+                                <Link className={classes.cardLink} to="/tasks">
+                                    <FormattedMessage id="pages.desktop.openBoard" />
+                                </Link>
+                            </div>
+                            <div className={classes.listScroll}>
+                                {myTasks.length === 0 && (
+                                    <Text className={classes.empty}>
+                                        <FormattedMessage id="pages.desktop.tasksEmpty" />
+                                    </Text>
+                                )}
+                                {myTasks.map((task) => {
+                                    const status = String(task.status).toUpperCase()
+                                    const isNew =
+                                        status === "TODO" ||
+                                        dayjs().diff(dayjs(task.createTime), "hour") < 48
+                                    return (
+                                        <button
+                                            key={task.id}
+                                            type="button"
+                                            className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
+                                            onClick={() => navigate("/tasks")}
+                                        >
+                                            <div className={classes.rowBody}>
+                                                <Text fw={600} lineClamp={1}>
+                                                    {task.title}
+                                                </Text>
+                                                <Text className={classes.rowMeta} lineClamp={1}>
+                                                    {task.customerName || task.customer || "—"}
+                                                    {task.dueDate
+                                                        ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
+                                                        : ""}
+                                                </Text>
+                                            </div>
+                                            <Badge
+                                                color={STATUS_COLOR[status] || "gray"}
+                                                variant="light"
+                                                radius="md"
+                                                size="sm"
+                                            >
+                                                <FormattedMessage
+                                                    id={`pages.tasks.status.${status}`}
+                                                    defaultMessage={String(task.status)}
+                                                />
+                                            </Badge>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
+                        <div className={classes.splitDivider} aria-hidden />
+
+                        <div className={classes.splitHalf} data-tour-id="desktop-points-half">
+                            <div className={classes.cardHeader}>
+                                <Title order={2} className={classes.cardTitle}>
+                                    <FormattedMessage id="pages.desktop.points" />
+                                </Title>
+                                <Link className={classes.cardLink} to="/achievements">
+                                    <FormattedMessage id="pages.desktop.openPoints" />
+                                </Link>
+                            </div>
+                            <button
+                                type="button"
+                                className={classes.pointsBody}
+                                onClick={() => navigate("/achievements")}
+                            >
+                                <div className={classes.pointsBalance}>
+                                    <Text className={classes.pointsValue}>
+                                        {achievements?.balance ?? "—"}
+                                    </Text>
+                                    <Text className={classes.pointsUnit}>
+                                        <FormattedMessage id="pages.desktop.pointsUnit" />
+                                    </Text>
+                                </div>
+                                <div className={classes.pointsMetaRow}>
+                                    <Text className={classes.pointsMeta}>
                                         <FormattedMessage
-                                            id={`pages.tasks.status.${status}`}
-                                            defaultMessage={String(task.status)}
+                                            id="pages.desktop.pointsMonth"
+                                            values={{ points: monthEarned }}
                                         />
-                                    </Badge>
-                                </button>
-                            )
-                        })}
+                                    </Text>
+                                    <Text className={classes.pointsMeta}>
+                                        <FormattedMessage
+                                            id="pages.desktop.pointsBadges"
+                                            values={{
+                                                unlocked: achievements?.unlockedCount ?? 0,
+                                                total: achievements?.totalCount ?? 0,
+                                            }}
+                                        />
+                                    </Text>
+                                </div>
+                                {unlockedBadges.length > 0 ? (
+                                    <div className={classes.badgeDots} aria-hidden>
+                                        {unlockedBadges.map((badge) => (
+                                            <span
+                                                key={badge.id}
+                                                className={classes.badgeDot}
+                                                title={badge.title}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <Text className={classes.empty}>
+                                        <FormattedMessage id="pages.desktop.pointsEmpty" />
+                                    </Text>
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </section>
 
