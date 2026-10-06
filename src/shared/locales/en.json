@@ -1730,7 +1730,7 @@
                 "showcase": "Reward showcase",
                 "history": "History"
             },
-            "leaderboardHint": "Portal-wide ranking by points: reports, missions, gratitude, and Ekomapa podium.",
+            "leaderboardHint": "Prize places are public. The full list is for managers only. Points from reports, missions, gratitude, and the Ekomapa podium.",
             "leaderboardEmpty": "No points awarded yet.",
             "leaderboardPlace": "Place",
             "leaderboardName": "Participant",

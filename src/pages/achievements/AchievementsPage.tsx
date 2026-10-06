@@ -208,7 +208,10 @@ const AchievementsPage: React.FC = () => {
     })
 
     const podium = useMemo(() => (board?.leaders ?? []).slice(0, 3), [board?.leaders])
-    const restLeaders = useMemo(() => (board?.leaders ?? []).slice(3), [board?.leaders])
+    const restLeaders = useMemo(
+        () => (board?.fullList ? (board.leaders ?? []).slice(3) : []),
+        [board?.fullList, board?.leaders]
+    )
     const showMeBar = Boolean(board?.me && !board.leaders.some((l) => l.isMe))
 
     const { mutate: claimMission, isPending: claiming } = useMutation({

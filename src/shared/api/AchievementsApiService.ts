@@ -47,6 +47,8 @@ export type AchievementsLeaderboardDto = {
     leaders: PointLeaderDto[]
     me: PointLeaderDto | null
     totalParticipants: number
+    /** Full table beyond podium — managers/admins only. */
+    fullList?: boolean
 }
 
 const alive = (status: number) => status === 200 || status === 404 || status >= 500

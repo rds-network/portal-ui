@@ -1730,7 +1730,7 @@
                 "showcase": "Izlog nagrada",
                 "history": "Istorija"
             },
-            "leaderboardHint": "Opšti rang po bodovima portala: izveštaji, misije, zahvalnice i podium Ekomape.",
+            "leaderboardHint": "Nagradna mesta vide svi. Puna lista je samo za rukovodioce. Bodovi: izveštaji, misije, zahvalnice i podium Ekomape.",
             "leaderboardEmpty": "Još niko nije sakupio bodove.",
             "leaderboardPlace": "Mesto",
             "leaderboardName": "Učesnik",
