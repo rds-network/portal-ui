@@ -1,4 +1,4 @@
-import { Button, Loader, Tabs, Text, TextInput, Title } from "@mantine/core"
+import { Anchor, Button, Loader, Tabs, Text, TextInput, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import {
     IconCheck,
@@ -626,7 +626,13 @@ const AchievementsPage: React.FC = () => {
                                                 />
                                             </div>
                                             <div className={classes.podiumName}>
-                                                {row.fullName}
+                                                <Anchor
+                                                    href={`/profile/${row.username}`}
+                                                    target="_blank"
+                                                    className={classes.leaderLink}
+                                                >
+                                                    {row.fullName}
+                                                </Anchor>
                                                 {row.isMe ? " · " : ""}
                                                 {row.isMe && (
                                                     <FormattedMessage id="pages.achievements.leaderboardYou" />
