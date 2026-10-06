@@ -23,7 +23,7 @@ import { MissionVisualCover, MissionVisualMark } from "src/shared/missions/missi
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import classes from "./AchievementsPage.module.scss"
 
-const CATEGORY_ORDER = ["presence", "onboarding", "reports", "gratitude", "trust"] as const
+const CATEGORY_ORDER = ["presence", "onboarding", "reports", "gratitude", "trust", "ranking"] as const
 
 const categoryLabelId = (category: string) => {
     switch (category) {
@@ -37,6 +37,8 @@ const categoryLabelId = (category: string) => {
             return "pages.achievements.categories.gratitude"
         case "trust":
             return "pages.achievements.categories.trust"
+        case "ranking":
+            return "pages.achievements.categories.ranking"
         default:
             return "pages.achievements.categories.other"
     }
