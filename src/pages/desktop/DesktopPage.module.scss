@@ -92,6 +92,107 @@
     grid-row: 1;
     min-height: 0;
     overflow: hidden;
+    padding: 0;
+}
+
+.splitPane {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+.splitHalf {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    overflow: hidden;
+}
+
+.splitDivider {
+    width: 1px;
+    flex-shrink: 0;
+    background: var(--portal-border);
+    align-self: stretch;
+    margin: 10px 0;
+}
+
+.pointsBody {
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    border-radius: 10px;
+
+    &:hover .pointsValue {
+        color: var(--portal-accent);
+    }
+}
+
+.pointsBalance {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pointsValue {
+    font-size: clamp(28px, 3.2vw, 36px);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--portal-ink);
+    transition: color 0.15s ease;
+}
+
+.pointsUnit {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--portal-muted);
+}
+
+.pointsMetaRow {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pointsMeta {
+    font-size: 12px;
+    color: var(--portal-muted);
+}
+
+.badgeDots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.badgeDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--portal-accent) 75%, #1a6b5c);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--portal-accent) 18%, transparent);
 }
 
 .messagesCard {
@@ -264,5 +365,19 @@
     .messagesCard,
     .tasksCard {
         min-height: 200px;
+    }
+
+    .splitPane {
+        flex-direction: column;
+    }
+
+    .splitDivider {
+        width: auto;
+        height: 1px;
+        margin: 0 12px;
+    }
+
+    .pointsBody {
+        min-height: 96px;
     }
 }
