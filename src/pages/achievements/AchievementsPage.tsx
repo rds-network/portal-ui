@@ -666,7 +666,13 @@ const AchievementsPage: React.FC = () => {
                                             >
                                                 <td className={classes.leaderRank}>#{row.rank}</td>
                                                 <td>
-                                                    {row.fullName}
+                                                    <Anchor
+                                                        href={`/profile/${row.username}`}
+                                                        target="_blank"
+                                                        className={classes.leaderLink}
+                                                    >
+                                                        {row.fullName}
+                                                    </Anchor>
                                                     {row.isMe
                                                         ? ` (${intl.formatMessage({
                                                               id: "pages.achievements.leaderboardYou",
