@@ -15,6 +15,7 @@ import {
     IconMail,
     IconMapPin,
     IconMap,
+    IconIdBadge,
     IconPencil,
     IconPhone,
     IconUserSearch,
@@ -58,6 +59,7 @@ import { ProgramSelectInline } from "../select/ProgramSelect"
 import { ProjectSelectInline } from "../select/ProjectSelect"
 import classes from "./ProfileInfo.module.scss"
 import { IDBadge } from "src/shared/ui/badges/IDBadge"
+import { VolunteerIDCard } from "src/pages/profile/idCard/VolunteerIDCard"
 
 interface ProfileInfoProps {
     userInfo: UserInfoDto | undefined
@@ -69,6 +71,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const { user: currentUser, setUser } = useContext(UserContext)
     const queryClient = useQueryClient()
     const [opened, { open, close }] = useDisclosure(false)
+    const [idCardOpened, { open: openIDCard, close: closeIDCard }] = useDisclosure(false)
     const [mupOpened, { open: openMup, close: closeMup }] = useDisclosure(false)
     const [controlModalOpen, setControlModalOpen] = useState(false)
     const [controllerLogin, setControllerLogin] = useState<string | null>(null)
@@ -892,6 +895,17 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     className={classes.propertyBox}
                 />
             )}
+            {userInfo.active && (
+                <Button
+                    onClick={openIDCard}
+                    className={classes.button}
+                    variant="light"
+                    color="teal"
+                    rightSection={<IconIdBadge size={14} />}
+                >
+                    <FormattedMessage id={"pages.profile.buttons.idCard"} />
+                </Button>
+            )}
             {(userInfo?.id === currentUser?.id ||
                 hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])) && (
                 <Button
@@ -1011,6 +1025,15 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         </Modal>
                     </>
                 )}
+            <Modal
+                opened={idCardOpened}
+                onClose={closeIDCard}
+                title={<FormattedMessage id="pages.profile.idCard.title" />}
+                centered
+                size="auto"
+            >
+                <VolunteerIDCard userInfo={userInfo} />
+            </Modal>
             <Drawer opened={opened} onClose={close} title={<FormattedMessage id="pages.profile.documentTitle" />}>
                 <form
                     onSubmit={(e) => {
