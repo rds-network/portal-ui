@@ -13,7 +13,8 @@ import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUse
 import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/reportsPersonal/lib/constants"
 import { defaultUser } from "src/pages/reports/lib/defaults"
 import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
-import { InboxApiService } from "src/shared/api/InboxApiService"
+import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
+import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import {
     PortalEventApiService,
     PortalEventDto,
@@ -28,6 +29,7 @@ import { ekomapaLocationLabel, isEkomapaMapUrl, normalizeEventLocation } from "s
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
+import { getSpentTimeFromReport } from "src/shared/report/timeSpent"
 import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
@@ -44,6 +46,20 @@ const STATUS_COLOR: Record<string, string> = {
 
 const ACTIVE_TASK_STATUSES = new Set(["TODO", "DOING", "REVIEW", "REDO"])
 const MANAGER_ROLES = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
+
+const isReportInboxKind = (kind?: string | null) =>
+    kind === "REPORT_CUSTOMER" || kind === "REPORT_DECISION"
+
+const reportIdFromBody = (body?: string | null) =>
+    body?.match(/\/report\/([0-9a-fA-F-]{36})/)?.[1] ?? null
+
+const openInboxThread = (item: InboxThreadDto) => {
+    const reportId = item.reportId || reportIdFromBody(item.lastBody)
+    if (isReportInboxKind(item.kind) && reportId) {
+        return `/report/${reportId}`
+    }
+    return `/messages?thread=${encodeURIComponent(item.id)}`
+}
 
 export const DesktopPage: React.FC = () => {
     setDocumentTitleByLocale("pages.desktop.title")
@@ -62,15 +78,19 @@ export const DesktopPage: React.FC = () => {
         enabled: !!user,
     })
     const canManageEvents = hasPermission(user, MANAGER_ROLES) || !!curatorMe?.curator
+    const isAdminDesktop = hasPermission(user, MANAGER_ROLES)
 
     const reportFilter = useMemo(
-        () => ({ ...defaultFilter, login: user?.username || null }),
-        [user?.username]
+        () => ({
+            ...defaultFilter,
+            login: isAdminDesktop ? null : user?.username || null,
+        }),
+        [user?.username, isAdminDesktop]
     )
 
     const { data: reportsResponse } = useQuery({
         enabled: !!user?.username,
-        queryKey: ["desktop-reports", user?.username],
+        queryKey: ["desktop-reports", isAdminDesktop ? "all" : user?.username],
         initialData: { page: defaultPageResponse, content: [] },
         queryFn: () =>
             ReportApiService.getReports({ ...defaultPage, pageSize: 2 }, reportFilter).then((r) => r.data),
@@ -81,6 +101,13 @@ export const DesktopPage: React.FC = () => {
     const { data: assignments = [] } = useQuery({
         queryKey: ["work-assignments"],
         queryFn: () => WorkAssignmentApiService.list(),
+        enabled: !isAdminDesktop,
+    })
+
+    const { data: reviewReports = [] } = useQuery({
+        queryKey: ["customer-reports", "desktop", "CREATED"],
+        queryFn: () => CustomerReportApiService.list("CREATED", 0, 4).then((page) => page.content),
+        enabled: isAdminDesktop && !!user,
     })
 
     const { data: achievements } = useQuery({
@@ -104,6 +131,7 @@ export const DesktopPage: React.FC = () => {
     )
 
     const myTasks = useMemo(() => {
+        if (isAdminDesktop) return []
         return assignments
             .filter(
                 (item) =>
@@ -111,7 +139,7 @@ export const DesktopPage: React.FC = () => {
             )
             .sort((a, b) => dayjs(b.createTime).valueOf() - dayjs(a.createTime).valueOf())
             .slice(0, 4)
-    }, [assignments, user?.username])
+    }, [assignments, user?.username, isAdminDesktop])
 
     const { data: threads = [] } = useQuery({
         queryKey: ["inbox"],
@@ -136,6 +164,7 @@ export const DesktopPage: React.FC = () => {
     const { data: users = {} } = resolveUsers(
         [
             ...reports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
+            ...reviewReports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
             ...messageLogins,
         ].filter((login, index, all) => all.indexOf(login) === index)
     )
@@ -277,58 +306,118 @@ export const DesktopPage: React.FC = () => {
             <div className={classes.grid}>
                 <section className={`${classes.card} ${classes.tasksCard}`} data-tour-id="desktop-tasks">
                     <div className={classes.splitPane}>
-                        <div className={classes.splitHalf} data-tour-id="desktop-tasks-half">
+                        <div
+                            className={classes.splitHalf}
+                            data-tour-id={isAdminDesktop ? "desktop-review-half" : "desktop-tasks-half"}
+                        >
                             <div className={classes.cardHeader}>
                                 <Title order={2} className={classes.cardTitle}>
-                                    <FormattedMessage id="pages.desktop.tasks" />
+                                    <FormattedMessage
+                                        id={
+                                            isAdminDesktop
+                                                ? "pages.desktop.review"
+                                                : "pages.desktop.tasks"
+                                        }
+                                    />
                                 </Title>
-                                <Link className={classes.cardLink} to="/tasks">
-                                    <FormattedMessage id="pages.desktop.openBoard" />
+                                <Link
+                                    className={classes.cardLink}
+                                    to={isAdminDesktop ? "/reports/review" : "/tasks"}
+                                >
+                                    <FormattedMessage
+                                        id={
+                                            isAdminDesktop
+                                                ? "pages.desktop.openReview"
+                                                : "pages.desktop.openBoard"
+                                        }
+                                    />
                                 </Link>
                             </div>
                             <div className={classes.listScroll}>
-                                {myTasks.length === 0 && (
-                                    <Text className={classes.empty}>
-                                        <FormattedMessage id="pages.desktop.tasksEmpty" />
-                                    </Text>
+                                {isAdminDesktop ? (
+                                    <>
+                                        {reviewReports.length === 0 && (
+                                            <Text className={classes.empty}>
+                                                <FormattedMessage id="pages.desktop.reviewEmpty" />
+                                            </Text>
+                                        )}
+                                        {reviewReports.map((report) => {
+                                            const volunteer =
+                                                (report.user && users[report.user]) ||
+                                                defaultUser(report.user || "")
+                                            const program = programs.find((p) => p.code === report.program)
+                                            return (
+                                                <button
+                                                    key={report.id}
+                                                    type="button"
+                                                    className={`${classes.row} ${classes.rowNew}`}
+                                                    onClick={() => navigate(`/report/${report.id}`)}
+                                                >
+                                                    <div className={classes.rowBody}>
+                                                        <Text fw={600} lineClamp={1}>
+                                                            {volunteer.fullName || report.user || "—"}
+                                                        </Text>
+                                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                                            {program
+                                                                ? getLocalizedName(program, intl.locale)
+                                                                : report.program || "—"}
+                                                            {" · "}
+                                                            {getSpentTimeFromReport(report, intl)}
+                                                        </Text>
+                                                    </div>
+                                                    <Badge color="blue" variant="light" radius="md" size="sm">
+                                                        <FormattedMessage id="common.report-status.CREATED" />
+                                                    </Badge>
+                                                </button>
+                                            )
+                                        })}
+                                    </>
+                                ) : (
+                                    <>
+                                        {myTasks.length === 0 && (
+                                            <Text className={classes.empty}>
+                                                <FormattedMessage id="pages.desktop.tasksEmpty" />
+                                            </Text>
+                                        )}
+                                        {myTasks.map((task) => {
+                                            const status = String(task.status).toUpperCase()
+                                            const isNew =
+                                                status === "TODO" ||
+                                                dayjs().diff(dayjs(task.createTime), "hour") < 48
+                                            return (
+                                                <button
+                                                    key={task.id}
+                                                    type="button"
+                                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
+                                                    onClick={() => navigate("/tasks")}
+                                                >
+                                                    <div className={classes.rowBody}>
+                                                        <Text fw={600} lineClamp={1}>
+                                                            {task.title}
+                                                        </Text>
+                                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                                            {task.customerName || task.customer || "—"}
+                                                            {task.dueDate
+                                                                ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
+                                                                : ""}
+                                                        </Text>
+                                                    </div>
+                                                    <Badge
+                                                        color={STATUS_COLOR[status] || "gray"}
+                                                        variant="light"
+                                                        radius="md"
+                                                        size="sm"
+                                                    >
+                                                        <FormattedMessage
+                                                            id={`pages.tasks.status.${status}`}
+                                                            defaultMessage={String(task.status)}
+                                                        />
+                                                    </Badge>
+                                                </button>
+                                            )
+                                        })}
+                                    </>
                                 )}
-                                {myTasks.map((task) => {
-                                    const status = String(task.status).toUpperCase()
-                                    const isNew =
-                                        status === "TODO" ||
-                                        dayjs().diff(dayjs(task.createTime), "hour") < 48
-                                    return (
-                                        <button
-                                            key={task.id}
-                                            type="button"
-                                            className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
-                                            onClick={() => navigate("/tasks")}
-                                        >
-                                            <div className={classes.rowBody}>
-                                                <Text fw={600} lineClamp={1}>
-                                                    {task.title}
-                                                </Text>
-                                                <Text className={classes.rowMeta} lineClamp={1}>
-                                                    {task.customerName || task.customer || "—"}
-                                                    {task.dueDate
-                                                        ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
-                                                        : ""}
-                                                </Text>
-                                            </div>
-                                            <Badge
-                                                color={STATUS_COLOR[status] || "gray"}
-                                                variant="light"
-                                                radius="md"
-                                                size="sm"
-                                            >
-                                                <FormattedMessage
-                                                    id={`pages.tasks.status.${status}`}
-                                                    defaultMessage={String(task.status)}
-                                                />
-                                            </Badge>
-                                        </button>
-                                    )
-                                })}
                             </div>
                         </div>
 
@@ -425,7 +514,7 @@ export const DesktopPage: React.FC = () => {
                                     key={item.id}
                                     type="button"
                                     className={`${classes.row} ${classes.messageRow}`}
-                                    onClick={() => navigate(`/messages`)}
+                                    onClick={() => navigate(openInboxThread(item))}
                                 >
                                     <Avatar
                                         radius="xl"
@@ -460,10 +549,25 @@ export const DesktopPage: React.FC = () => {
                 <section className={`${classes.card} ${classes.reportsCard}`} data-tour-id="desktop-reports">
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.reports" />
+                            <FormattedMessage
+                                id={
+                                    isAdminDesktop
+                                        ? "pages.desktop.reportsAdmin"
+                                        : "pages.desktop.reports"
+                                }
+                            />
                         </Title>
-                        <Link className={classes.cardLink} to="/reports/personal">
-                            <FormattedMessage id="pages.desktop.allReports" />
+                        <Link
+                            className={classes.cardLink}
+                            to={isAdminDesktop ? "/reports" : "/reports/personal"}
+                        >
+                            <FormattedMessage
+                                id={
+                                    isAdminDesktop
+                                        ? "pages.desktop.allReportsAdmin"
+                                        : "pages.desktop.allReports"
+                                }
+                            />
                         </Link>
                     </div>
                     <div className={classes.listScroll}>
@@ -498,7 +602,7 @@ export const DesktopPage: React.FC = () => {
                                             : intl.formatMessage({ id: "pages.user-list.no-project" })
                                     }
                                     currentUser={user}
-                                    hideVolunteer
+                                    hideVolunteer={!isAdminDesktop}
                                     onOpen={() => navigate(`/report/${report.id}`)}
                                 />
                             )

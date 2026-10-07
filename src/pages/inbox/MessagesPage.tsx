@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useNavigate } from "react-router"
+import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -81,9 +81,11 @@ export const MessagesPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const intl = useIntl()
     const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
     const queryClient = useQueryClient()
     const { isMobile } = useScreenSize()
-    const [selectedId, setSelectedId] = useState<string | null>(null)
+    const threadFromUrl = searchParams.get("thread")
+    const [selectedId, setSelectedId] = useState<string | null>(threadFromUrl)
     const [reply, setReply] = useState("")
     const [search, setSearch] = useState("")
     const showList = !isMobile || !selectedId
@@ -128,7 +130,22 @@ export const MessagesPage: React.FC = () => {
     const otherThreads = useMemo(() => sortedThreads.filter((item) => !item.needsAck), [sortedThreads])
 
     useEffect(() => {
+        if (!threadFromUrl) return
+        if (selectedId !== threadFromUrl) {
+            setSelectedId(threadFromUrl)
+            setReply("")
+        }
+    }, [threadFromUrl, selectedId])
+
+    useEffect(() => {
         if (sortedThreads.length === 0) return
+        // Deep-link from desktop / notifications: prefer the requested thread when it exists.
+        if (threadFromUrl && sortedThreads.some((item) => item.id === threadFromUrl)) {
+            if (selectedId !== threadFromUrl) {
+                setSelectedId(threadFromUrl)
+            }
+            return
+        }
         const firstMandatory = sortedThreads.find((item) => item.needsAck)
         if (firstMandatory) {
             const selectedIsMandatory = sortedThreads.some((item) => item.id === selectedId && item.needsAck)
@@ -140,7 +157,7 @@ export const MessagesPage: React.FC = () => {
         if (!isMobile && !selectedId) {
             setSelectedId(sortedThreads[0].id)
         }
-    }, [isMobile, selectedId, sortedThreads])
+    }, [isMobile, selectedId, sortedThreads, threadFromUrl])
 
     const { data: thread } = useQuery({
         queryKey: ["inbox", selectedId],
@@ -192,6 +209,9 @@ export const MessagesPage: React.FC = () => {
     const openThread = (item: InboxThreadDto) => {
         setSelectedId(item.id)
         setReply("")
+        if (searchParams.get("thread") !== item.id) {
+            setSearchParams({ thread: item.id }, { replace: true })
+        }
     }
 
     const heatmapUser = (item?: { kind: string; heatmapUser?: string | null; counterpart?: string | null } | null) => {
@@ -363,15 +383,19 @@ export const MessagesPage: React.FC = () => {
                                         {isReportInboxKind(thread.kind) && (
                                             <Button
                                                 variant="light"
-                                                onClick={() =>
+                                                onClick={() => {
+                                                    const fromBody = thread.messages
+                                                        .map((m) => m.body.match(/\/report\/([0-9a-fA-F-]{36})/)?.[1])
+                                                        .find(Boolean)
+                                                    const reportId = thread.reportId || fromBody
                                                     navigate(
-                                                        thread.reportId
-                                                            ? `/report/${thread.reportId}`
+                                                        reportId
+                                                            ? `/report/${reportId}`
                                                             : thread.kind === "REPORT_CUSTOMER"
                                                               ? "/reports/review"
                                                               : "/messages"
                                                     )
-                                                }
+                                                }}
                                             >
                                                 <FormattedMessage id="pages.review-reports.open" />
                                             </Button>
