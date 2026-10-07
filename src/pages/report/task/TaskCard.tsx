@@ -19,9 +19,11 @@ import classes from "./TaskCard.module.scss"
 interface TaskCardProps {
     task: TaskDto
     users: Record<string, UserInfoDto>
+    highlightMine?: boolean
+    mineLabel?: string
 }
 
-export const TaskCard = ({ task, users }: TaskCardProps) => {
+export const TaskCard = ({ task, users, highlightMine, mineLabel }: TaskCardProps) => {
     const intl = useIntl()
     const hasSerbianTranslation = hasTaskTranslation(task)
     const defaultName = getTaskDisplayName(task, false)
@@ -30,10 +32,15 @@ export const TaskCard = ({ task, users }: TaskCardProps) => {
     const serbianDescription = getTaskDisplayDescription(task, true)
 
     return (
-        <Flex className={classes.task}>
+        <Flex className={`${classes.task} ${highlightMine ? classes.taskMine : ""}`}>
             <Flex className={classes.topArea}>
                 <Text fw="bold" className={classes.name}>
                     {defaultName}
+                    {highlightMine && mineLabel ? (
+                        <Text span size="sm" c="teal" ml="sm" fw={600}>
+                            · {mineLabel}
+                        </Text>
+                    ) : null}
                 </Text>
                 <Flex className={classes.clock}>
                     <IconClock size={14} />
