@@ -28,3 +28,35 @@ export type ChangeReportStatusPayload = {
 export const changeReportStatus = async (id: string, payload: ChangeReportStatusPayload): Promise<void> => {
     await RequestHttp.post(`/report/${id}/status`, payload)
 }
+
+export type ReportCustomerAcceptanceDto = {
+    customer: string
+    customerName?: string | null
+    status?: string | null
+    decidedBy?: string | null
+    decidedAt?: string | null
+}
+
+export type ReportCustomerAcceptancesResponse = {
+    reportId: string
+    multiCustomer: boolean
+    pendingForMe: boolean
+    acceptances: ReportCustomerAcceptanceDto[]
+}
+
+/** Приёмка по заказчикам: несколько кураторов в одном отчёте. */
+export const getReportCustomerAcceptances = async (
+    id: string
+): Promise<ReportCustomerAcceptancesResponse> => {
+    const response = await RequestHttp.get<ReportCustomerAcceptancesResponse>(
+        `/report/${id}/customer-acceptances`
+    )
+    return (
+        response.data ?? {
+            reportId: id,
+            multiCustomer: false,
+            pendingForMe: false,
+            acceptances: [],
+        }
+    )
+}
