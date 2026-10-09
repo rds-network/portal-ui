@@ -37,7 +37,7 @@
             }
         },
         "user-search": {
-            "placeholder": "Name Surname"
+            "placeholder": "Name, email or EVO-32"
         },
         "city-select": {
             "placeholder": "City name in Serbian"
