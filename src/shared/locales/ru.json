@@ -39,6 +39,9 @@
         "user-search": {
             "placeholder": "Имя, email или EVO-32"
         },
+        "linkified": {
+            "photo-link": "ссылка на фото"
+        },
         "city-select": {
             "placeholder": "Название города на сербском языке"
         },

@@ -39,6 +39,9 @@
         "user-search": {
             "placeholder": "Name, email or EVO-32"
         },
+        "linkified": {
+            "photo-link": "photo link"
+        },
         "city-select": {
             "placeholder": "City name in Serbian"
         },

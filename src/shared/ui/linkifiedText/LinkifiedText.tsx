@@ -1,10 +1,12 @@
 import { Anchor, Text, TextProps } from "@mantine/core"
 import React, { Fragment, useMemo } from "react"
+import { IntlShape, useIntl } from "react-intl"
 
 const URL_RE = /https?:\/\/[^\s<>"')\]]+/gi
 
 /** Split plain text so http(s) URLs become clickable external links. */
 export function LinkifiedText({ children, ...textProps }: TextProps & { children?: string | null }) {
+    const intl = useIntl()
     const text = children ?? ""
     const parts = useMemo(() => linkifyParts(text), [text])
 
@@ -13,7 +15,7 @@ export function LinkifiedText({ children, ...textProps }: TextProps & { children
             {parts.map((part, i) =>
                 part.type === "url" ? (
                     <Anchor key={i} href={part.value} target="_blank" rel="noopener noreferrer" inherit>
-                        {part.value}
+                        {shortUrlLabel(part.value, intl)}
                     </Anchor>
                 ) : (
                     <Fragment key={i}>{part.value}</Fragment>
@@ -21,6 +23,14 @@ export function LinkifiedText({ children, ...textProps }: TextProps & { children
             )}
         </Text>
     )
+}
+
+function shortUrlLabel(url: string, intl: IntlShape): string {
+    // Signed MinIO / very long URLs — show a short human label, keep full href.
+    if (url.length > 80 || /minio\.|X-Amz-|trash-points\//i.test(url)) {
+        return intl.formatMessage({ id: "common.linkified.photo-link" })
+    }
+    return url
 }
 
 type Part = { type: "text" | "url"; value: string }
