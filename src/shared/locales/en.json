@@ -1,4 +1,4 @@
-﻿{
+{
     "design": {
         "loading": "Loading…",
         "portal": "Volunteer portal",
@@ -1167,7 +1167,7 @@
             "title": "Applications for Admission",
             "empty": "No applications found",
             "total": "Total: {count}",
-            "search": "Search by name, email or EVO",
+            "search": "Search by name or email",
             "created-and-type": "Created, Type",
             "created-short-and-type-short": "Date, Type",
             "name-and-email": "First and Last Name, E-mail",

@@ -147,7 +147,11 @@ export const ApplicationsDashboard: React.FC<Props> = ({
                         status={status}
                         count={stats.byStatus[status] || 0}
                         active={activeStatus === status}
-                        onClick={() => onSelectStatus(activeStatus === status ? null : status)}
+                        onClick={() => {
+                            // Don't hide the whole list by selecting a zero-count status.
+                            if ((stats.byStatus[status] || 0) === 0 && activeStatus !== status) return
+                            onSelectStatus(activeStatus === status ? null : status)
+                        }}
                     />
                 ))}
                 {TERMINAL_STATUSES.filter((status) => (terminalCounts[status] || 0) > 0).map((status) => (

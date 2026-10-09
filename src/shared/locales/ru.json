@@ -1,4 +1,4 @@
-﻿{
+{
     "design": {
         "loading": "Загрузка…",
         "portal": "Портал волонтёра",
@@ -1167,7 +1167,7 @@
             "title": "Заявки на вступление",
             "empty": "Заявок не найдено",
             "total": "Всего: {count}",
-            "search": "Поиск по имени, email или EVO",
+            "search": "Поиск по имени или email",
             "created-and-type": "Создана, Тип",
             "created-short-and-type-short": "Дата, Тип",
             "name-and-email": "Имя Фамилия, E-mail",

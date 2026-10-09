@@ -1,4 +1,4 @@
-﻿{
+{
     "design": {
         "loading": "Učitavanje…",
         "portal": "Portal volontera",
@@ -1167,7 +1167,7 @@
             "title": "Prijave za članstvo",
             "empty": "Nijedna prijava nije pronađena",
             "total": "Ukupno: {count}",
-            "search": "Pretraga po imenu, e-mailu ili EVO",
+            "search": "Pretraga po imenu ili e-mailu",
             "created-and-type": "Stvoren, Tip",
             "created-short-and-type-short": "Datum, Tip",
             "name-and-email": "Ime i Prezime, E-mail",

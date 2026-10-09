@@ -140,6 +140,8 @@ export const Applications = () => {
     const {
         data: { content, page },
         isFetching,
+        isError,
+        refetch,
     } = useQuery({
         initialData: { content: [], page: defaultPageResponse },
         queryKey: ["getApplications", debouncedSearch, listPageRequest, filter, statusFilter],
@@ -318,12 +320,28 @@ export const Applications = () => {
                     )}
                 </Flex>
 
-                {totalElements === 0 && !isFetching && (
+                {isError && !isFetching && (
+                    <Flex className={classes.emptyState}>
+                        <Text>
+                            <FormattedMessage id="errors.request" defaultMessage="Не удалось загрузить данные" />
+                        </Text>
+                        <Button variant="light" size="sm" onClick={() => refetch()}>
+                            <FormattedMessage id="common.retry" defaultMessage="Повторить" />
+                        </Button>
+                    </Flex>
+                )}
+
+                {totalElements === 0 && !isFetching && !isError && (
                     <Flex className={classes.emptyState}>
                         <IconUfo size={48} />
                         <Text>
                             <FormattedMessage id={locales.empty} />
                         </Text>
+                        {activeFiltersCount > 0 && (
+                            <Button variant="light" size="sm" leftSection={<IconFilterOff size={16} />} onClick={resetFilters}>
+                                <FormattedMessage id={locales.resetFilters} />
+                            </Button>
+                        )}
                     </Flex>
                 )}
             </Flex>
