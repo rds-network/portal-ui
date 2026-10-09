@@ -687,6 +687,14 @@ export const UserList = () => {
                         <Text>
                             <FormattedMessage id={locales.empty} />
                         </Text>
+                        {/^\s*(EVO[-#\s]?\d+|https?:\/\/\S*\/v\/EVO[-#\s]?\d+)\s*$/i.test(debouncedSearch) && (
+                            <Text size="sm" c="dimmed" maw={420} ta="center">
+                                <FormattedMessage
+                                    id="pages.user-list.empty-evo"
+                                    defaultMessage="Код EVO ещё не привязан к аккаунту на портале. После синхронизации с Экомапой (portal:sync-ekomapa-ids) поиск по EVO заработает. Пока ищите по имени или email."
+                                />
+                            </Text>
+                        )}
                     </Flex>
                 )}
             </Flex>

@@ -1,5 +1,6 @@
 import { Avatar, Button, Flex, Select, Text } from "@mantine/core"
 import { ApplicationDto } from "@rds-network/portal-api-axios"
+import { IconUserPlus } from "@tabler/icons-react"
 import { useIsMutating, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -46,17 +47,28 @@ export const ApplicationAssigneeSelect = ({
     }
 
     const me = user?.username
+    const isMine = !!me && !!application.assignee && application.assignee.toLowerCase() === me.toLowerCase()
     const canAssignToMe =
         !!me &&
-        !application.assignee &&
+        !isMine &&
         employees.some((employee) => employee.username.toLowerCase() === me.toLowerCase())
     const busy = disabled || isWriting || isPending || loading || isError
 
     return (
-        <Flex direction="column" gap={6} miw={180} maw={260}>
+        <Flex direction="column" gap={6} miw={200} maw={280}>
             <Select
-                label={intl.formatMessage({ id: "pages.applications.assignee" })}
-                placeholder={intl.formatMessage({ id: "pages.applications.unassigned" })}
+                label={intl.formatMessage({
+                    id: "pages.applications.assigneeHr",
+                    defaultMessage: "Ответственный HR",
+                })}
+                description={intl.formatMessage({
+                    id: "pages.applications.assigneeHrHint",
+                    defaultMessage: "Выберите коллегу, который берёт заявку",
+                })}
+                placeholder={intl.formatMessage({
+                    id: "pages.applications.unassigned",
+                    defaultMessage: "Не назначен",
+                })}
                 searchable
                 searchValue={search}
                 onSearchChange={setSearch}
@@ -87,9 +99,7 @@ export const ApplicationAssigneeSelect = ({
                     return (
                         <Flex gap="sm" align="center">
                             <Avatar size={26} radius="xl" src={employee?.avatar?.link} name={option.label} />
-                            <Text size="sm">
-                                {option.label}
-                            </Text>
+                            <Text size="sm">{option.label}</Text>
                         </Flex>
                     )
                 }}
@@ -98,11 +108,13 @@ export const ApplicationAssigneeSelect = ({
                 <Button
                     size="compact-xs"
                     variant="light"
+                    color="teal"
+                    leftSection={<IconUserPlus size={14} />}
                     disabled={busy}
                     loading={isPending}
                     onClick={() => mutate(me)}
                 >
-                    <FormattedMessage id="pages.applications.assignToMe" />
+                    <FormattedMessage id="pages.applications.assignToMe" defaultMessage="Взять себе" />
                 </Button>
             )}
         </Flex>
