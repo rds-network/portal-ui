@@ -16,7 +16,14 @@ export function LinkifiedText({ children, ...textProps }: TextProps & { children
         <Text {...textProps}>
             {parts.map((part, i) =>
                 part.type === "url" ? (
-                    <Anchor key={i} href={part.href} target="_blank" rel="noopener noreferrer" inherit>
+                    <Anchor
+                        key={i}
+                        href={part.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        inherit
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         {part.label}
                     </Anchor>
                 ) : (
@@ -27,22 +34,21 @@ export function LinkifiedText({ children, ...textProps }: TextProps & { children
     )
 }
 
-function isPhotoLikeUrl(url: string): boolean {
-    return url.length > 80 || /minio\.|X-Amz-|trash-points\/|cleaning|bag/i.test(url)
+/**
+ * Plain-text preview for list cards: replace long/signed photo URLs with short labels
+ * (no clickable href — parent is often a <button>).
+ */
+export function shortenUrlsForPreview(text: string | null | undefined, intl: IntlShape): string {
+    if (!text) {
+        return ""
+    }
+    return linkifyParts(text, intl)
+        .map((part) => (part.type === "url" ? part.label : part.value))
+        .join("")
 }
 
-/** Drop expiring MinIO signature — bucket is public for ekomapa paths. */
-function stabilizeHref(url: string): string {
-    try {
-        const u = new URL(url)
-        if (/minio\.|X-Amz-/i.test(url)) {
-            u.search = ""
-            return u.toString()
-        }
-    } catch {
-        /* keep raw */
-    }
-    return url
+function isPhotoLikeUrl(url: string): boolean {
+    return url.length > 80 || /minio\.|X-Amz-|trash-points\/|cleaning|bag/i.test(url)
 }
 
 type Part = { type: "text"; value: string } | { type: "url"; href: string; label: string }
@@ -65,11 +71,15 @@ function linkifyParts(text: string, intl: IntlShape): Part[] {
     const mdRe = new RegExp(MD_LINK_RE.source, "gi")
     let md: RegExpExecArray | null
     while ((md = mdRe.exec(normalized)) !== null) {
+        const label =
+            md[1].trim() ||
+            intl.formatMessage({ id: "common.linkified.photo-link" }, { n: ++photoIndex })
         matches.push({
             start: md.index,
             end: md.index + md[0].length,
-            href: stabilizeHref(md[2]),
-            label: md[1].trim() || intl.formatMessage({ id: "common.linkified.photo-link" }, { n: 1 }),
+            // Keep full signed URL — MinIO bucket is private without X-Amz-* query.
+            href: md[2],
+            label,
         })
     }
 
@@ -82,13 +92,12 @@ function linkifyParts(text: string, intl: IntlShape): Part[] {
             continue
         }
         const raw = urlMatch[0].replace(/[.,;:!?]+$/u, "")
-        const href = stabilizeHref(raw)
-        let label = href
-        if (isPhotoLikeUrl(raw) || isPhotoLikeUrl(href)) {
+        let label = raw
+        if (isPhotoLikeUrl(raw)) {
             photoIndex += 1
             label = intl.formatMessage({ id: "common.linkified.photo-link" }, { n: photoIndex })
         }
-        matches.push({ start, end: start + raw.length, href, label })
+        matches.push({ start, end: start + raw.length, href: raw, label })
     }
 
     matches.sort((a, b) => a.start - b.start)
