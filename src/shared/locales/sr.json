@@ -39,6 +39,9 @@
         "user-search": {
             "placeholder": "Ime, email ili EVO-32"
         },
+        "linkified": {
+            "photo-link": "link na fotografiju"
+        },
         "city-select": {
             "placeholder": "Naziv grada na srpskom jeziku"
         },
