@@ -40,7 +40,7 @@
             "placeholder": "Имя, email или EVO-32"
         },
         "linkified": {
-            "photo-link": "ссылка на фото"
+            "photo-link": "ссылка фото {n}"
         },
         "city-select": {
             "placeholder": "Название города на сербском языке"
