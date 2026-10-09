@@ -37,7 +37,7 @@
             }
         },
         "user-search": {
-            "placeholder": "Ime Prezime"
+            "placeholder": "Ime, email ili EVO-32"
         },
         "city-select": {
             "placeholder": "Naziv grada na srpskom jeziku"
