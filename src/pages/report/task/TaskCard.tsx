@@ -12,6 +12,7 @@ import {
 } from "src/shared/taskTranslation/lib/taskTranslation"
 import { FileButton } from "src/shared/ui/fileButton/FileButton"
 import { ImagePreview } from "src/shared/ui/imagePreview/ImagePreview"
+import { LinkifiedText } from "src/shared/ui/linkifiedText/LinkifiedText"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { locales } from "./constants"
 import classes from "./TaskCard.module.scss"
@@ -47,9 +48,9 @@ export const TaskCard = ({ task, users, highlightMine, mineLabel }: TaskCardProp
                     <Text size="sm">{getSpentTime(task.timeSpent, intl)}</Text>
                 </Flex>
             </Flex>
-            <Text c="dimmed" className={classes.taskDescription}>
+            <LinkifiedText c="dimmed" className={classes.taskDescription}>
                 {defaultDescription}
-            </Text>
+            </LinkifiedText>
             {hasSerbianTranslation && (
                 <Flex className={classes.serbianTaskView}>
                     <Flex className={classes.serbianTaskViewLabelContainer}>
@@ -62,9 +63,9 @@ export const TaskCard = ({ task, users, highlightMine, mineLabel }: TaskCardProp
                     <Text fw="bold" className={classes.name}>
                         {serbianName}
                     </Text>
-                    <Text c="dimmed" className={classes.taskDescription}>
+                    <LinkifiedText c="dimmed" className={classes.taskDescription}>
                         {serbianDescription}
-                    </Text>
+                    </LinkifiedText>
                 </Flex>
             )}
             <Flex className={classes.taskProperties}>
