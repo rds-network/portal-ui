@@ -579,10 +579,12 @@ const enableEditButton = (report: ReportDto, currentUser: UserInfoDto | null): b
     if (hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER])) {
         return true
     }
-    if (report.status != ReportStatus.REJECTED) {
+    if (currentUser?.username != report.user) {
         return false
     }
-    return currentUser?.username == report.user
+    // CREATED: drafts + auto reports from Ekomapa (volunteer must fix hours/project before submit)
+    // REJECTED: rework after curator rejection
+    return report.status === ReportStatus.CREATED || report.status === ReportStatus.REJECTED
 }
 
 export default ReportPage

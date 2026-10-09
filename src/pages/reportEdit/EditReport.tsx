@@ -177,7 +177,10 @@ export const EditReport = () => {
             if (currentUser?.username != report?.user) {
                 navigate("/unauthorized", { replace: true })
             }
-            if (report.status !== ReportStatus.REJECTED) {
+            // Owner may edit CREATED (incl. auto Ekomapa) and REJECTED reports.
+            const editable =
+                report.status === ReportStatus.CREATED || report.status === ReportStatus.REJECTED
+            if (!editable) {
                 navigate("/unauthorized", { replace: true })
             }
         }
