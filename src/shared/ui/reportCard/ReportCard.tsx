@@ -7,6 +7,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import { getReportStatusColor } from "src/shared/report/status"
 import { getSpentTime, getSpentTimeFromReport } from "src/shared/report/timeSpent"
 import { getTaskDisplayDescription, getTaskDisplayName } from "src/shared/taskTranslation/lib/taskTranslation"
+import { shortenUrlsForPreview } from "src/shared/ui/linkifiedText/LinkifiedText"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./ReportCard.module.scss"
@@ -108,9 +109,9 @@ export const ReportCard: React.FC<Props> = ({
                 {(report.tasks || []).map((task, i) => {
                     const name = getTaskDisplayName(task, false) || "—"
                     const hours = getSpentTime(task.timeSpent, intl)
-                    const description = getTaskDisplayDescription(task, false)
+                    const description = shortenUrlsForPreview(getTaskDisplayDescription(task, false), intl)
                     return (
-                        <Text key={task.id || i} className={classes.taskLine}>
+                        <Text key={task.id || i} className={classes.taskLine} lineClamp={2}>
                             {name} — {hours}
                             {description ? ` · ${description}` : ""}
                         </Text>
