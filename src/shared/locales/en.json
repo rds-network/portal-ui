@@ -1,4 +1,4 @@
-{
+﻿{
     "design": {
         "loading": "Loading…",
         "portal": "Volunteer portal",
@@ -905,7 +905,7 @@
         "heat-map": {
             "description": "Volunteers with a current regular or associated contract. Associated members have no hour quota or overdue notices; they are marked on the map.",
             "filters": "Filters",
-            "search": "Search by name or email",
+            "search": "Search by name, email or EVO",
             "program": "Program",
             "project": "Project",
             "year": "Year",
@@ -959,7 +959,7 @@
         "user-list": {
             "title": "All volunteers",
             "total": "Total: {total}",
-            "search": "Search by name or email",
+            "search": "Search by name, email or EVO",
             "add-user": "Add user",
             "new-user": "New user",
             "first-name": "First name",
@@ -1163,7 +1163,7 @@
             "title": "Applications for Admission",
             "empty": "No applications found",
             "total": "Total: {count}",
-            "search": "Search by name or email",
+            "search": "Search by name, email or EVO",
             "created-and-type": "Created, Type",
             "created-short-and-type-short": "Date, Type",
             "name-and-email": "First and Last Name, E-mail",

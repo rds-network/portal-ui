@@ -1,4 +1,4 @@
-{
+﻿{
     "design": {
         "loading": "Učitavanje…",
         "portal": "Portal volontera",
@@ -905,7 +905,7 @@
         "heat-map": {
             "description": "Volonteri sa važećim redovnim ili asociranim ugovorom. Asocirani nemaju obavezne sate ni kašnjenja; označeni su na karti.",
             "filters": "Filteri",
-            "search": "Pretraga po imenu ili emailu",
+            "search": "Pretraga po imenu, emailu ili EVO",
             "program": "Program",
             "project": "Projekat",
             "year": "Godina",
@@ -959,7 +959,7 @@
         "user-list": {
             "title": "Svi volonteri",
             "total": "Ukupno: {total}",
-            "search": "Pretraga po imenu ili email-u",
+            "search": "Pretraga po imenu, email-u ili EVO",
             "add-user": "Dodaj korisnika",
             "new-user": "Novi volonter",
             "first-name": "Ime",
@@ -1163,7 +1163,7 @@
             "title": "Prijave za članstvo",
             "empty": "Nijedna prijava nije pronađena",
             "total": "Ukupno: {count}",
-            "search": "Pretraga po imenu ili e-mailu",
+            "search": "Pretraga po imenu, e-mailu ili EVO",
             "created-and-type": "Stvoren, Tip",
             "created-short-and-type-short": "Datum, Tip",
             "name-and-email": "Ime i Prezime, E-mail",
