@@ -1,6 +1,6 @@
 import { notifications } from "@mantine/notifications"
 import fontkit from "@pdf-lib/fontkit"
-import { ApplicationDto, GenderEnumDto, ProgramDto } from "@russian-rs/portal-api-axios"
+
 import dayjs from "dayjs"
 import { saveAs } from "file-saver"
 import { PDFDocument, rgb } from "pdf-lib"
@@ -9,10 +9,39 @@ import { MONTSERRAT_MEDIUM_NORMAL } from "src/shared/docs/fonts/Montserrat-Mediu
 import { fillQuestionnairePage } from "src/shared/docs/questionnaire"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 import { getFullAddress } from "src/shared/utils/getFullAddress"
+import { ApplicationDto, GenderEnumDto, ProgramDto } from "@rds-network/portal-api-axios"
+
+const PROJECT_TO_STAT_GROUP: Record<string, string> = {
+    LAWS: "SOCIJALNA_ZASTITA",
+    SMM: "MEDIJI_I_KOMUNIKACIJE",
+    DESIGN: "MEDIJI_I_KOMUNIKACIJE",
+    WEB_FIGMA: "MEDIJI_I_KOMUNIKACIJE",
+    SOCIAL_MEDIA_DESIGN: "MEDIJI_I_KOMUNIKACIJE",
+    MATERIAL_STYLE: "MEDIJI_I_KOMUNIKACIJE",
+    STICKERS: "MEDIJI_I_KOMUNIKACIJE",
+    GUIDE_ILLUSTRATIONS: "MEDIJI_I_KOMUNIKACIJE",
+    BOOK_MURALS: "MEDIJI_I_KOMUNIKACIJE",
+    VIDEO_EDITING: "MEDIJI_I_KOMUNIKACIJE",
+    PHOTO: "MEDIJI_I_KOMUNIKACIJE",
+    GUIDEBOOK: "MEDIJI_I_KOMUNIKACIJE",
+    TRAINING: "MEDIJI_I_KOMUNIKACIJE",
+    COURSE_UPLOAD: "MEDIJI_I_KOMUNIKACIJE",
+    PSYCHOLOGISTS: "MEDIJI_I_KOMUNIKACIJE",
+    BOOK: "KULTURNA_DOBRA",
+    MONITORING: "JAVNE_POVRSINE",
+    CLEAN_CITY: "ZIVOTNA_SREDINA",
+}
 
 const ACTIVITY_CHECKBOX_MAP: Record<string, { x: number; fromTop: number }> = {
-    // TODO: fill in after verifying prijava.pdf visually
+    MEDIJI_I_KOMUNIKACIJE: { x: 87, fromTop: 312 },
+    JAVNE_POVRSINE: { x: 234, fromTop: 312 },
+    ZIVOTNA_SREDINA: { x: 343, fromTop: 312 },
+    KULTURNA_DOBRA: { x: 85, fromTop: 327 },
+    SOCIJALNA_ZASTITA: { x: 441, fromTop: 327 },
 }
+
+const DRUGO_CHECKBOX = { x: 87, fromTop: 356 }
+const DRUGO_TEXT_X = 140
 
 export default async function generateCombinedPdf(application: ApplicationDto, program?: ProgramDto) {
     const fullName = must(application.name, "Name")
@@ -68,7 +97,7 @@ export default async function generateCombinedPdf(application: ApplicationDto, p
     const drawMarkP = (x: number, yFromTop: number) => drawPxP("✔", x, yFromTop, symbolFont, 9)
 
     // 1. Ime i prezime
-    drawPxP(fullName, 185, 125)
+    drawPxP(fullName, 195, 125)
 
     // 2. Пасош
     drawPxP(passport, 142, 142)
@@ -83,7 +112,7 @@ export default async function generateCombinedPdf(application: ApplicationDto, p
     drawPxP(city, 270, 190)
 
     // 6. Адреса седишта
-    drawPxP(address, 194, 222)
+    drawPxP(address, 205, 222)
 
     // 7. Телефон (stripped +381)
     drawPxP(phone, 181, 253)
@@ -91,21 +120,36 @@ export default async function generateCombinedPdf(application: ApplicationDto, p
     // 8. E-mail
     drawPxP(email, 149, 269)
 
-    // 8.1 Телеграм — on the line below e-mail (y=550 native → fromTop 284).
-    // If it appears on the same line as e-mail, move to: drawPxP(telegram, 397, 269)
     drawPxP(telegram, 86, 284)
 
-    // 9. Волонтерске активности — tick the box matching the application's program.
-    if (program?.code && ACTIVITY_CHECKBOX_MAP[program.code]) {
-        const { x, fromTop } = ACTIVITY_CHECKBOX_MAP[program.code]
-        drawMarkP(x, fromTop)
+    // 9. Волонтерске активности — проект обязателен для определения группы.
+    if (!application.project) {
+        notifications.show(
+            ErrorNotification("Project is empty", "Для формирования пријавы необходимо указать проект волонтёра.")
+        )
+        throw new Error("Project is empty")
+    }
+    const statGroup = PROJECT_TO_STAT_GROUP[application.project]
+    if (statGroup) {
+        const entry = ACTIVITY_CHECKBOX_MAP[statGroup]
+        if (entry) {
+            drawMarkP(entry.x, entry.fromTop)
+        } else {
+            drawMarkP(DRUGO_CHECKBOX.x, DRUGO_CHECKBOX.fromTop)
+            const label = program?.nameSr || program?.nameEn || program?.nameRu || statGroup
+            drawPxP(label, DRUGO_TEXT_X, DRUGO_CHECKBOX.fromTop)
+        }
+    } else {
+        drawMarkP(DRUGO_CHECKBOX.x, DRUGO_CHECKBOX.fromTop)
+        const label = program?.nameSr || program?.nameEn || program?.nameRu || application.project
+        drawPxP(label, DRUGO_TEXT_X, DRUGO_CHECKBOX.fromTop)
     }
 
     // 10. Пол/Род
     if (gender === GenderEnumDto.Male) {
-        drawMarkP(157, 386)
+        drawMarkP(230, 383)
     } else if (gender === GenderEnumDto.Female) {
-        drawMarkP(227, 386)
+        drawMarkP(297, 383)
     } else if (gender != null) {
         // Other / Друго — the form has a third checkbox that template.pdf lacks
         drawMarkP(295, 386)
@@ -114,9 +158,11 @@ export default async function generateCombinedPdf(application: ApplicationDto, p
     // Date
 
     const day = dayjs().format("DD")
-    const year2 = dayjs().format("YY")
-    drawPxP(day, 200, 675)
-    drawPxP(year2, 311, 675)
+    const month = dayjs().format("MM")
+    const year = dayjs().format("YY")
+
+    drawPxP(day + "." + month, 180, 643, mediumFont, 11)
+    drawPxP(year, 234, 643, mediumFont, 11)
 
     // Signature
 
