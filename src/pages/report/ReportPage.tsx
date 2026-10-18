@@ -25,7 +25,7 @@ import { UserContext } from "src/app/providers/UserContext"
 import { ProgramSelectInline } from "src/pages/profile/select/ProgramSelect"
 import { ProjectSelectInline } from "src/pages/profile/select/ProjectSelect"
 import { locales } from "src/pages/report/lib/locales"
-import { ReportNote } from "src/pages/report/note/ReportNote"
+import { ReportCommentHistory } from "src/pages/report/history/ReportCommentHistory"
 import { TaskCard } from "src/pages/report/task/TaskCard"
 import {
     changeReportStatus,
@@ -98,6 +98,17 @@ export const ReportPage = () => {
         enabled: !!id && !!report?.id,
     })
 
+    const authorLogin = report?.user
+    const { data: authorReports = [] } = useQuery({
+        queryKey: ["report-comment-history", authorLogin],
+        queryFn: () =>
+            ReportApiService.getReports(
+                { pageNumber: 0, pageSize: 40, sort: ["createTime;desc"] },
+                { login: authorLogin }
+            ).then((r) => r.data.content ?? []),
+        enabled: !!authorLogin,
+    })
+
     const { data: users = {}, isFetching: isFetchingUsers } = resolveUsers(logins)
 
     const program = useMemo(() => programs.find((p) => p.code === report.program), [programs, report.program])
@@ -125,6 +136,15 @@ export const ReportPage = () => {
 
     const isMyTask = (customer?: string | null) =>
         !!customer && myCustomerLogins.has(customer.toLowerCase())
+
+    const historyReports = useMemo(() => {
+        const byId = new Map<string, ReportDto>()
+        for (const row of authorReports) {
+            if (row.id) byId.set(row.id, row)
+        }
+        if (report?.id) byId.set(report.id, report)
+        return Array.from(byId.values())
+    }, [authorReports, report])
 
     if (isFetchingReport || isFetchingUsers) {
         return (
@@ -282,6 +302,8 @@ export const ReportPage = () => {
 
     return (
         <Flex className={classes.root}>
+            <Flex className={classes.layout}>
+            <Flex className={classes.main} direction="column" gap="lg">
             <Flex columnGap="sm" align="center" wrap="wrap">
                 <Text className={classes.title}>
                     <FormattedMessage
@@ -411,20 +433,6 @@ export const ReportPage = () => {
                     />
                 )}
             </Flex>
-            {report.notes && report.notes.length > 0 && (
-                <Flex className={classes.notes}>
-                    <Text fw="bold">
-                        <FormattedMessage id={locales.comments} />
-                    </Text>
-                    {report.notes
-                        .sort((n1, n2) => {
-                            return dayjs(n1.createTime).diff(n2.createTime)
-                        })
-                        .map((note) => (
-                            <ReportNote note={note} key={note.id} />
-                        ))}
-                </Flex>
-            )}
             <Flex className={classes.tasks}>
                 {report.tasks
                     .sort((t1, t2) => {
@@ -571,6 +579,9 @@ export const ReportPage = () => {
                     </Button>
                 </Flex>
             )}
+            </Flex>
+            <ReportCommentHistory currentReport={report} reports={historyReports} />
+            </Flex>
         </Flex>
     )
 }

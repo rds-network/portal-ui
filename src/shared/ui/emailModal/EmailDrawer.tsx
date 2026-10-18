@@ -3,7 +3,7 @@ import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
 import { FileInfoDto } from "@rds-network/portal-api-axios"
 import { IconMailForward } from "@tabler/icons-react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import Highlight from "@tiptap/extension-highlight"
 import SubScript from "@tiptap/extension-subscript"
 import Superscript from "@tiptap/extension-superscript"
@@ -40,10 +40,8 @@ export const EmailDrawer = (props: EmailModalProps) => {
     const [uploadedFiles, setUploadedFiles] = useState<FileInfoDto[]>([])
     const [loadingFiles, setLoadingFiles] = useState<String[]>([])
 
-    const { isFetching: sending, refetch: send } = useQuery({
-        enabled: false,
-        queryKey: ["sendEmail", topic, content],
-        queryFn: () =>
+    const { mutate: send, isPending: sending } = useMutation({
+        mutationFn: () =>
             MailApiService.sendMail(
                 topic,
                 content,
@@ -51,20 +49,21 @@ export const EmailDrawer = (props: EmailModalProps) => {
                 props.recipients[0].email,
                 undefined,
                 uploadedFiles.map((f) => f.id)
-            ).then((_) => {
-                notifications.show(
-                    SuccessNotification(
-                        <Text size="sm">
-                            <FormattedMessage id={locales.success} />
-                        </Text>,
-                        null
-                    )
+            ),
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id={locales.success} />
+                    </Text>,
+                    null
                 )
-                props.close()
-                setTopic("")
-                setContent("")
-                setTemplate("")
-            }),
+            )
+            props.close()
+            setTopic("")
+            setContent("")
+            setTemplate("")
+        },
     })
 
     const editor = useEditor(

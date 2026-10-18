@@ -200,19 +200,20 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
     })
 
     return (
-        <Menu
-            opened={menuOpened}
-            onOpen={() => setMenuOpened(true)}
-            onClose={() => setMenuOpened(false)}
-            shadow="md"
-            width={220}
-            closeOnItemClick={false}
-        >
+        <>
             <EmailDrawer
                 opened={emailDrawerOpen}
                 close={() => setEmailDrawerOpen(false)}
                 recipients={[{ name: user.fullName, email: user.email }]}
             />
+            <Menu
+                opened={menuOpened}
+                onOpen={() => setMenuOpened(true)}
+                onClose={() => setMenuOpened(false)}
+                shadow="md"
+                width={220}
+                closeOnItemClick={false}
+            >
             <Modal
                 centered
                 opened={blockModalOpen}
@@ -397,5 +398,6 @@ export const UserMenu = ({ user, type = "default", onChanged }: UserMenuProps) =
                 )}
             </Menu.Dropdown>
         </Menu>
+        </>
     )
 }

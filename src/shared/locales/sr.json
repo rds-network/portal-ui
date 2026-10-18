@@ -777,6 +777,11 @@
             "comment": "Komentar",
             "comment-required": "Komentar je obavezan kada odbijete izveštaj",
             "comments": "Komentari o izveštaju",
+            "comment-history": "Istorija primedbi",
+            "comment-history-hint": "Prethodne primedbe na izveštaje ovog volontera — da se ne ponavlja isto.",
+            "comment-history-empty": "Još nema primedbi",
+            "comment-history-this": "ovaj izveštaj",
+            "comment-history-from": "izveštaj od {date}",
             "multiCustomerHint": "U izveštaju ima više naručilaca. Vi prihvatate samo svoje zadatke; izveštaj postaje Prihvaćen kada prihvate svi.",
             "acceptanceProgress": "Prihvatanje: {accepted} od {total}",
             "acceptanceWaiting": "Čekaju: {names}",
@@ -1348,7 +1353,7 @@
             "delegates": "Delegati prijema",
             "noDelegates": "Nema delegata",
             "moderatorsTitle": "Moderatori portala",
-            "moderatorsHint": "Uloga ADMIN_VOLUNTEER: dužnici, slanja, svi izveštaji i po potrebi prihvatanje bilo kog izveštaja. Da bi dobili tvoj red «Na prijemu», imenuj moderatora za delegata prijema.",
+            "moderatorsHint": "Uloga ADMIN_VOLUNTEER: dužnici, red «Na raskidu» i pisma MUP-u, slanja, svi izveštaji i po potrebi prihvatanje bilo kog izveštaja. Da bi dobili tvoj red «Na prijemu», imenuj moderatora za delegata prijema.",
             "moderatorsEmpty": "Još nema aktivnih moderatora"
         },
         "dissolutionRequests": {
