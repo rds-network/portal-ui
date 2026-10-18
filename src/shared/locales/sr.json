@@ -1577,7 +1577,21 @@
                 "title": "Naziv",
                 "url": "Link",
                 "description": "Opis"
-            }
+            },
+            "mupCardTitle": "Imenik MUP-a (boravišna dozvola)",
+            "mupCardDescription": "Kontakti odseka za strance po gradovima: adresa, telefon, email — sa pretragom."
+        },
+        "mupDirectory": {
+            "documentTitle": "Imenik MUP-a",
+            "title": "MUP — odseci za strance",
+            "description": "Teritorijalno nadležne policijske uprave za poslove boravišne dozvole. Pronađite grad i pišite ili zovite odgovarajući odsek.",
+            "search": "Pretraga po gradu, adresi ili emailu…",
+            "count": "Pronađeno: {count}",
+            "empty": "Nema rezultata — pokušajte drugo pisanje grada",
+            "back": "← Naši resursi",
+            "copyEmail": "Kopiraj email",
+            "copied": "Kopirano",
+            "source": "Prema podacima MUP RS (poslovi stranaca). Ako se razlikuje, proverite mup.gov.rs."
         },
         "support": {
             "title": "Kontakt podrške",
