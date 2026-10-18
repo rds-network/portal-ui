@@ -777,6 +777,11 @@
             "comment": "Comment",
             "comment-required": "When rejecting report comment is required",
             "comments": "Report's comments",
+            "comment-history": "Comment history",
+            "comment-history-hint": "Previous remarks on this volunteer's reports — so you don't repeat the same feedback.",
+            "comment-history-empty": "No remarks yet",
+            "comment-history-this": "this report",
+            "comment-history-from": "report from {date}",
             "multiCustomerHint": "This report has several customers. You accept only your tasks; the report becomes Accepted when everyone has accepted.",
             "acceptanceProgress": "Acceptance: {accepted} of {total}",
             "acceptanceWaiting": "Waiting: {names}",
@@ -1348,7 +1353,7 @@
             "delegates": "Acceptance delegates",
             "noDelegates": "No delegates",
             "moderatorsTitle": "Portal moderators",
-            "moderatorsHint": "ADMIN_VOLUNTEER role: overdue lists, mailings, all reports, and accepting any report if needed. To get your «Pending acceptance» queue, appoint the moderator as an acceptance delegate.",
+            "moderatorsHint": "ADMIN_VOLUNTEER role: overdue lists, «For termination» queue and MUP letters, mailings, all reports, and accepting any report if needed. To get your «Pending acceptance» queue, appoint the moderator as an acceptance delegate.",
             "moderatorsEmpty": "No active moderators yet"
         },
         "dissolutionRequests": {

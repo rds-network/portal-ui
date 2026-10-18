@@ -1,5 +1,6 @@
 import type { MupLetterReason } from "src/shared/api/MupLetterApiService"
 
+/** Fallback only; draft API picks territorial MUP office by volunteer city. */
 export const MUP_TO = "upravazastrance@mup.gov.rs"
 
 export type { MupLetterReason }

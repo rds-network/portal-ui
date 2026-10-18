@@ -19,6 +19,7 @@ interface ApplicationMenuProps {
 export const ApplicationMenu = ({ applicationDto, assigneeUser }: ApplicationMenuProps) => {
     const intl = useIntl()
     const { user } = useContext(UserContext)
+    const [menuOpened, setMenuOpened] = useState(false)
     const [emailDrawerOpen, setEmailDrawerOpen] = useState(false)
     const [askOpen, setAskOpen] = useState(false)
     const navigate = useNavigate()
@@ -50,7 +51,7 @@ export const ApplicationMenu = ({ applicationDto, assigneeUser }: ApplicationMen
     )
 
     return (
-        <Menu shadow="md" width={240} closeOnItemClick={false}>
+        <>
             <EmailDrawer
                 opened={emailDrawerOpen}
                 from={"Русская Диаспора <apply@russian.rs>"}
@@ -68,41 +69,60 @@ export const ApplicationMenu = ({ applicationDto, assigneeUser }: ApplicationMen
                 />
             )}
 
-            <Menu.Target>
-                <ActionIcon
-                    variant="subtle"
-                    color="gray"
-                    size={24}
-                    aria-label={intl.formatMessage({
-                        id: "pages.applications.menu.actions",
-                        defaultMessage: "Действия с заявкой",
-                    })}
-                >
-                    <IconDotsVertical size={16} aria-hidden="true" />
-                </ActionIcon>
-            </Menu.Target>
+            <Menu
+                opened={menuOpened}
+                onOpen={() => setMenuOpened(true)}
+                onClose={() => setMenuOpened(false)}
+                shadow="md"
+                width={240}
+                closeOnItemClick={false}
+            >
+                <Menu.Target>
+                    <ActionIcon
+                        variant="subtle"
+                        color="gray"
+                        size={24}
+                        aria-label={intl.formatMessage({
+                            id: "pages.applications.menu.actions",
+                            defaultMessage: "Действия с заявкой",
+                        })}
+                    >
+                        <IconDotsVertical size={16} aria-hidden="true" />
+                    </ActionIcon>
+                </Menu.Target>
 
-            <Menu.Dropdown>
-                <Menu.Item
-                    leftSection={<IconEye size={14} />}
-                    onClick={() => navigate(`/application/${applicationDto.id}`)}
-                >
-                    <FormattedMessage id={locales.view} />
-                </Menu.Item>
-                <Menu.Item leftSection={<IconMail size={14} />} onClick={() => setEmailDrawerOpen(true)}>
-                    <FormattedMessage id={locales.contact} />
-                </Menu.Item>
-                {canAskAssignee && askRecipients.length > 0 && (
+                <Menu.Dropdown>
                     <Menu.Item
-                        leftSection={<IconMessageCircle size={14} />}
+                        leftSection={<IconEye size={14} />}
                         onClick={() => {
-                            setAskOpen(true)
+                            setMenuOpened(false)
+                            navigate(`/application/${applicationDto.id}`)
                         }}
                     >
-                        <FormattedMessage id={locales.askAssignee} />
+                        <FormattedMessage id={locales.view} />
                     </Menu.Item>
-                )}
-            </Menu.Dropdown>
-        </Menu>
+                    <Menu.Item
+                        leftSection={<IconMail size={14} />}
+                        onClick={() => {
+                            setMenuOpened(false)
+                            setEmailDrawerOpen(true)
+                        }}
+                    >
+                        <FormattedMessage id={locales.contact} />
+                    </Menu.Item>
+                    {canAskAssignee && askRecipients.length > 0 && (
+                        <Menu.Item
+                            leftSection={<IconMessageCircle size={14} />}
+                            onClick={() => {
+                                setMenuOpened(false)
+                                setAskOpen(true)
+                            }}
+                        >
+                            <FormattedMessage id={locales.askAssignee} />
+                        </Menu.Item>
+                    )}
+                </Menu.Dropdown>
+            </Menu>
+        </>
     )
 }

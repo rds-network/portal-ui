@@ -119,10 +119,20 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
             role="link"
             tabIndex={0}
             onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault()
-                    navigate(applicationPath)
+                if (event.key !== "Enter" && event.key !== " ") return
+                const target = event.target as HTMLElement | null
+                if (
+                    target &&
+                    (target !== event.currentTarget ||
+                        target.isContentEditable ||
+                        target.closest(
+                            'input, textarea, select, [contenteditable="true"], [role="textbox"], [data-row-action]'
+                        ))
+                ) {
+                    return
                 }
+                event.preventDefault()
+                navigate(applicationPath)
             }}
         >
             <Flex className={classes.cardTop}>
