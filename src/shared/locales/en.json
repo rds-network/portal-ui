@@ -1582,7 +1582,21 @@
                 "title": "Title",
                 "url": "Link",
                 "description": "Description"
-            }
+            },
+            "mupCardTitle": "MUP directory (residence permit)",
+            "mupCardDescription": "Foreigners office contacts by city: address, phone, email — with search."
+        },
+        "mupDirectory": {
+            "documentTitle": "MUP directory",
+            "title": "MUP — foreigners affairs offices",
+            "description": "Territorially competent police offices for residence permit matters. Find your city and email or call the right department.",
+            "search": "Search by city, address or email…",
+            "count": "Found: {count}",
+            "empty": "Nothing found — try another spelling of the city",
+            "back": "← Our resources",
+            "copyEmail": "Copy email",
+            "copied": "Copied",
+            "source": "Based on MUP RS (foreigners affairs). If details differ, check mup.gov.rs."
         },
         "support": {
             "title": "Contact support",

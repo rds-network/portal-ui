@@ -25,3 +25,16 @@
 .url {
     word-break: break-all;
 }
+
+.mupCard {
+    text-decoration: none;
+    color: inherit;
+    transition:
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+
+    &:hover {
+        box-shadow: 0 4px 18px light-dark(rgba(15, 23, 42, 0.08), rgba(0, 0, 0, 0.35));
+        transform: translateY(-1px);
+    }
+}

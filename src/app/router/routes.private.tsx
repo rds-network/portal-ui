@@ -26,6 +26,7 @@ const IdeasPage = lazy(() => import("src/pages/ideas/IdeasPage"))
 const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPage"))
 const DissolutionPage = lazy(() => import("src/pages/dissolution/DissolutionPage"))
 const ResourcesPage = lazy(() => import("src/pages/resources/ResourcesPage"))
+const MupDirectoryPage = lazy(() => import("src/pages/resources/mup/MupDirectoryPage"))
 const ActivityPage = lazy(() => import("src/pages/activity/ActivityPage"))
 const CuratorsPage = lazy(() => import("src/pages/curators/CuratorsPage"))
 const CuratorReportsPage = lazy(() => import("src/pages/reportsReview/CuratorReportsPage"))
@@ -158,6 +159,10 @@ export const routes: RouteProps[] = [
     {
         path: "/resources",
         element: <ResourcesPage />,
+    },
+    {
+        path: "/resources/mup",
+        element: <MupDirectoryPage />,
     },
     {
         path: "/activity",
