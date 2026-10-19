@@ -75,22 +75,22 @@ export const MupLetterModal: React.FC<Props> = ({
     })
 
     useEffect(() => {
-        if (!opened) {
-            setReason(initialReason)
+        if (!opened) return
+        setReason(initialReason)
+    }, [opened, initialReason])
+
+    useEffect(() => {
+        if (!opened) return
+        if (draft?.subject && draft.body) {
+            setTo(draft.to || MUP_TO)
+            setSubject(draft.subject)
+            setBody(draft.body)
             return
         }
-        setReason(initialReason)
         setTo(fallback.to)
         setSubject(fallback.subject)
         setBody(fallback.body)
-    }, [fallback, opened, initialReason])
-
-    useEffect(() => {
-        if (!draft?.subject || !draft.body) return
-        setTo(draft.to || MUP_TO)
-        setSubject(draft.subject)
-        setBody(draft.body)
-    }, [draft])
+    }, [opened, draft, fallback])
 
     const { mutate, isPending } = useMutation({
         mutationFn: () =>
