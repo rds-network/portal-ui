@@ -327,8 +327,15 @@ const CandidateRow: React.FC<{
                 {item.mupLetterSentAt && (
                     <Badge color="grape" variant="light" size="sm" mt={4}>
                         <FormattedMessage
-                            id="pages.dissolution.mupNotified"
-                            values={{ date: dayjs(item.mupLetterSentAt).format("DD.MM.YYYY") }}
+                            id={
+                                item.mupLetterOffice
+                                    ? "pages.dissolution.mupNotifiedCity"
+                                    : "pages.dissolution.mupNotified"
+                            }
+                            values={{
+                                date: dayjs(item.mupLetterSentAt).format("DD.MM.YYYY"),
+                                city: item.mupLetterOffice || "",
+                            }}
                         />
                     </Badge>
                 )}

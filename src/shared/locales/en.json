@@ -515,6 +515,7 @@
             "openProfile": "Profile",
             "mupLetter": "MUP letter",
             "mupNotified": "MUP notified · {date}",
+            "mupNotifiedCity": "MUP {city} notified · {date}",
             "pendingRequests": "Termination requests",
             "queueTitle": "Queue",
             "candidatesTitle": "Auto-candidates",

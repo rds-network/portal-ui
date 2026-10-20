@@ -515,6 +515,7 @@
             "openProfile": "Профиль",
             "mupLetter": "Письмо МУП",
             "mupNotified": "МУП уведомлён · {date}",
+            "mupNotifiedCity": "МУП {city} уведомлён · {date}",
             "pendingRequests": "Заявления на расторжение",
             "queueTitle": "Очередь",
             "candidatesTitle": "Автокандидаты",

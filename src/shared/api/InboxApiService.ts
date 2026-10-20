@@ -87,6 +87,8 @@ export type DeactivatedActiveContractDto = {
     contractType?: string | null
     deactivatedReason?: string | null
     mupLetterSentAt?: string | null
+    /** Seat city of the MUP office that was notified (e.g. Novi Sad). */
+    mupLetterOffice?: string | null
 }
 
 export type DissolutionQueueDto = {

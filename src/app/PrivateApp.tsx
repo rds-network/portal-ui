@@ -9,7 +9,6 @@ import PrivateRouter from "src/app/router/PrivateRouter"
 import classes from "src/app/styles/private.module.scss"
 import AppHeader from "src/shared/ui/appHeader/AppHeader"
 import { AppNavbar } from "src/shared/ui/appNavbar/AppNavbar"
-import { ChatNotifyWatcher } from "src/shared/ui/chat/ChatNotifyWatcher"
 import { InboxAckGuard } from "src/shared/ui/inbox/InboxAckGuard"
 import { PortalMobileBottomNav } from "src/shared/ui/mobileBottomNav/PortalMobileBottomNav"
 import { ProfileValidationGuard } from "src/shared/ui/profileValidation/ProfileValidationGuard"
@@ -22,7 +21,6 @@ const PrivateAppShell = () => {
 
     return (
         <>
-            <ChatNotifyWatcher />
             <AppShell className={classes.appShell}>
                 <AppHeader />
                 <AppNavbar />
