@@ -101,19 +101,19 @@ export const MupLetterModal: React.FC<Props> = ({
                 body: body.trim(),
                 reason,
             }),
-        onSuccess: (result) => {
-            notifications.show(
-                SuccessNotification(
-                    <Text size="sm">
-                        <FormattedMessage
-                            id={result.deactivated ? "pages.mup.sent" : "pages.mup.sentKeepAccess"}
-                        />
-                    </Text>,
-                    null
-                )
-            )
-            queryClient.invalidateQueries({ queryKey: ["mup-letters"] })
-            queryClient.invalidateQueries({ queryKey: ["getInfo"] })
+        onSuccess: async (result) => {
+            const message = intl.formatMessage({
+                id: result.deactivated ? "pages.mup.sent" : "pages.mup.sentKeepAccess",
+            })
+            notifications.show(SuccessNotification(message, null))
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["mup-letters"] }),
+                queryClient.invalidateQueries({ queryKey: ["getInfo"] }),
+                queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] }),
+                queryClient.invalidateQueries({ queryKey: ["report-overdue-deactivated"] }),
+                queryClient.invalidateQueries({ queryKey: ["dissolution-requests"] }),
+                queryClient.invalidateQueries({ queryKey: ["report-overdue"] }),
+            ])
             close()
         },
     })

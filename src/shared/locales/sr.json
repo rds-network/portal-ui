@@ -515,6 +515,7 @@
             "openProfile": "Profil",
             "mupLetter": "Pismo MUP",
             "mupNotified": "MUP obavešten · {date}",
+            "mupNotifiedCity": "MUP {city} obavešten · {date}",
             "pendingRequests": "Zahtevi za raskid",
             "queueTitle": "Red",
             "candidatesTitle": "Autokandidati",

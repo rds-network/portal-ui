@@ -22,8 +22,6 @@ import { KOLOBOK_SMILES, kolobokAssetUrl, parseChatBody } from "./kolobok"
 const POLL_MS = 4000
 const MEMBERS_POLL_MS = 15000
 const PRESENCE_MS = 30000
-const SOUND_KEY = "portal.chat.sound.v1"
-const SOUND_URL = "/resources/sounds/aska.mp3"
 
 const formatTime = (value: string) => dayjs(value).format("DD.MM HH:mm")
 
@@ -38,24 +36,6 @@ const roomLabel = (room: ChatRoomDto, locale: string) => {
         locale
     )
     return programName ? `${room.title}` : room.title
-}
-
-const readSoundEnabled = () => {
-    try {
-        const raw = localStorage.getItem(SOUND_KEY)
-        if (raw == null) return true
-        return raw !== "0"
-    } catch {
-        return true
-    }
-}
-
-const writeSoundEnabled = (on: boolean) => {
-    try {
-        localStorage.setItem(SOUND_KEY, on ? "1" : "0")
-    } catch {
-        /* ignore */
-    }
 }
 
 const renderBody = (body: string) => {
@@ -104,16 +84,13 @@ export const ChatPage: React.FC = () => {
     const [createProgram, setCreateProgram] = useState<string | null>(null)
     const [pendingImage, setPendingImage] = useState<{ file: File; preview: string } | null>(null)
     const [uploading, setUploading] = useState(false)
-    const [soundOn, setSoundOn] = useState(readSoundEnabled)
     const [caret, setCaret] = useState(0)
     const [smilesOpen, setSmilesOpen] = useState(false)
     const scrollRef = useRef<HTMLDivElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const fileRef = useRef<HTMLInputElement>(null)
     const stickBottom = useRef(true)
-    const lastSoundId = useRef<string | null>(null)
-    const audioRef = useRef<HTMLAudioElement | null>(null)
-    const soundUnlocked = useRef(false)
+    const lastIncomingId = useRef<string | null>(null)
     const markedReadFor = useRef<string | null>(null)
 
     setDocumentTitleByLocale("pages.chat.title")
@@ -217,19 +194,18 @@ export const ChatPage: React.FC = () => {
         if (!messages.length) return
         const newest = messages[messages.length - 1]
         if (!newest) return
-        if (lastSoundId.current == null) {
-            lastSoundId.current = newest.id
+        if (lastIncomingId.current == null) {
+            lastIncomingId.current = newest.id
             return
         }
-        if (newest.id === lastSoundId.current) return
-        lastSoundId.current = newest.id
-        if (!newest.mine && soundOn) playSound()
+        if (newest.id === lastIncomingId.current) return
+        lastIncomingId.current = newest.id
         if (!newest.mine) {
             ChatApiService.markRead(roomId!).then(() => {
                 queryClient.invalidateQueries({ queryKey: ["chat-unread"] })
             }).catch(() => undefined)
         }
-    }, [messages, soundOn, roomId, queryClient])
+    }, [messages, roomId, queryClient])
 
     useEffect(() => {
         const tick = () => {
@@ -250,60 +226,6 @@ export const ChatPage: React.FC = () => {
         const el = scrollRef.current
         if (!el) return
         stickBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80
-    }
-
-    const ensureAudio = () => {
-        if (!audioRef.current) {
-            audioRef.current = new Audio(SOUND_URL)
-            audioRef.current.preload = "auto"
-            audioRef.current.volume = 0.9
-        }
-        return audioRef.current
-    }
-
-    const unlockSound = () => {
-        if (soundUnlocked.current) return
-        try {
-            const a = ensureAudio()
-            a.muted = true
-            const p = a.play()
-            if (p && typeof p.then === "function") {
-                p.then(() => {
-                    a.pause()
-                    a.currentTime = 0
-                    a.muted = false
-                    soundUnlocked.current = true
-                }).catch(() => {
-                    a.muted = false
-                })
-            } else {
-                a.muted = false
-                soundUnlocked.current = true
-            }
-        } catch {
-            /* ignore */
-        }
-    }
-
-    const playSound = () => {
-        try {
-            const a = ensureAudio()
-            a.currentTime = 0
-            const p = a.play()
-            if (p && typeof p.catch === "function") p.catch(() => undefined)
-        } catch {
-            /* ignore */
-        }
-    }
-
-    const toggleSound = () => {
-        unlockSound()
-        setSoundOn((prev) => {
-            const next = !prev
-            writeSoundEnabled(next)
-            if (next) playSound()
-            return next
-        })
     }
 
     const attachFile = (file: File | null | undefined) => {
@@ -356,7 +278,6 @@ export const ChatPage: React.FC = () => {
     }
 
     const pasteFromClipboard = async () => {
-        unlockSound()
         try {
             const items = await navigator.clipboard.read()
             for (const item of items) {
@@ -440,7 +361,6 @@ export const ChatPage: React.FC = () => {
     const submit = async () => {
         const body = draft.trim()
         if ((!body && !pendingImage) || !roomId || sending || uploading) return
-        unlockSound()
         let imageUrl: string | undefined
         if (pendingImage) {
             setUploading(true)
@@ -556,16 +476,6 @@ export const ChatPage: React.FC = () => {
                             </p>
                         </div>
                         <div className={classes.headTools}>
-                            <button
-                                type="button"
-                                className={`${classes.soundBtn} ${soundOn ? classes.soundBtnOn : ""}`}
-                                onClick={toggleSound}
-                                title={intl.formatMessage({
-                                    id: soundOn ? "pages.chat.soundOn" : "pages.chat.soundOff",
-                                })}
-                            >
-                                <FormattedMessage id={soundOn ? "pages.chat.soundOn" : "pages.chat.soundOff"} />
-                            </button>
                             <Button
                                 size="compact-xs"
                                 variant="subtle"
