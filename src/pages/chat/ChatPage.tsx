@@ -172,7 +172,7 @@ export const ChatPage: React.FC = () => {
     }, [messages, roomId])
 
     useEffect(() => {
-        lastSoundId.current = null
+        lastIncomingId.current = null
         markedReadFor.current = null
         setSmilesOpen(false)
     }, [roomId])
