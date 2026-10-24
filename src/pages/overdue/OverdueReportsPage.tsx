@@ -12,6 +12,7 @@ import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { downloadCsv } from "src/shared/utils/downloadCsv"
+import { weekFullyOnLeave } from "src/shared/utils/leaveWeek"
 import { formatContractEnd } from "src/shared/utils/latestContractEnd"
 import classes from "./OverdueReportsPage.module.scss"
 
@@ -21,7 +22,7 @@ const thisMonday = () => dayjs().startOf("isoWeek").format("YYYY-MM-DD")
 
 const weekTone = (week: OverdueWeekDto) => {
     const current = week.weekStart === thisMonday()
-    if ((week.leaveDays ?? 0) > 0 && !week.hoursRequired) return "leave"
+    if (weekFullyOnLeave(week.weekStart, week.weekEnd, week.leaveDays)) return "leave"
     if (current && week.hoursWorked === 0) return "waiting"
     if (!week.hoursRequired) return "na"
     if (week.hoursWorked === 0) return "noReports"

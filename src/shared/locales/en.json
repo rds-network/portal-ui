@@ -954,7 +954,7 @@
             "no-data": "No data to display",
             "tooltip": {
                 "na": "{name}: N/A — no contract for {from} - {to} ({week})",
-                "leave": "Leave — {from} - {to} ({week})",
+                "leave": "Leave — {from} - {to} ({week}). The {hoursRequired} h norm still counts",
                 "waiting": "{name}: Pending — {from} - {to} ({week})",
                 "no-reports": "{name}: No reports for {from} - {to} ({week})",
                 "reports": "{name}: {hours} out {hoursRequired} {hoursLabel} for {from} - {to} ({week})",

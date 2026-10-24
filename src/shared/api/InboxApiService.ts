@@ -52,6 +52,7 @@ export type InboxThreadDetailDto = {
 
 export type OverdueWeekDto = {
     weekStart: string
+    weekEnd?: string | null
     hoursWorked: number
     hoursRequired: number
     leaveDays?: number

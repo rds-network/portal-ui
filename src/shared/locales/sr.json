@@ -954,7 +954,7 @@
             "no-data": "Nema podataka za prikaz",
             "tooltip": {
                 "na": "{name}: N/A — nema ugovora za {from} - {to} ({week})",
-                "leave": "Odmor — {from} - {to} ({week})",
+                "leave": "Odmor — {from} - {to} ({week}). Norma od {hoursRequired} č. i dalje važi",
                 "waiting": "{name}: Na čekanju — {from} - {to} ({week})",
                 "no-reports": "{name}: Nema izveštaja za {from} - {to} ({week})",
                 "reports": "{name}: {hours} od {hoursRequired} {hoursLabel} za {from} - {to} ({week})",
