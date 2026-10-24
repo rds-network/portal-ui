@@ -1257,7 +1257,8 @@
                 },
                 "notes": "Komentari",
                 "program": "Program",
-                "project": "Projekat"
+                "project": "Projekat",
+                "combinedDownload": "Preuzmi komplet"
             },
             "report": {
                 "contract-from": "Datum početka",

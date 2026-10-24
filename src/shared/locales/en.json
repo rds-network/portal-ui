@@ -1257,7 +1257,8 @@
                 },
                 "notes": "Comments",
                 "program": "Program",
-                "project": "Project"
+                "project": "Project",
+                "combinedDownload": "Download package"
             },
             "report": {
                 "contract-from": "Start Date",

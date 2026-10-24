@@ -9,6 +9,7 @@ import {
     IconBuildings,
     IconCake,
     IconClock,
+    IconClipboard,
     IconContract,
     IconEPassport,
     IconLanguageHiragana,
@@ -35,6 +36,7 @@ import { ApplicationNote } from "src/pages/applications/note/ApplicationNote"
 import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
 import { cacheApplication, useApplicationUpdate } from "src/shared/api/applications/useApplicationUpdate"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
+import generateCombinedPdf from "src/shared/docs/combined"
 import generateContractPdf from "src/shared/docs/contract"
 import generateEnvelopPdf from "src/shared/docs/envelop"
 import generateQuestionnairePdf from "src/shared/docs/questionnaire"
@@ -392,6 +394,16 @@ export const ApplicationView = () => {
                             }}
                         >
                             <FormattedMessage id={locales.questionnaireDownload} />
+                        </Button>
+                        <Button
+                            variant="light"
+                            rightSection={<IconClipboard size={15} />}
+                            disabled={application.contract == null}
+                            onClick={() => {
+                                generateCombinedPdf(application, program)
+                            }}
+                        >
+                            <FormattedMessage id={locales.combinedDownload} />
                         </Button>
                         <Button
                             variant="light"

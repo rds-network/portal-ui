@@ -43,6 +43,7 @@ export const locales = {
 
     contractDownload: "pages.applications.view.contractDownload",
     questionnaireDownload: "pages.applications.view.questionnaireDownload",
+    combinedDownload: "pages.applications.view.combinedDownload",
     envelopDownload: "pages.applications.view.envelopDownload",
 
     editTitle: "pages.applications.view.editTitle",
