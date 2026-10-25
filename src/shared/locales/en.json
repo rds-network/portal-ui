@@ -627,6 +627,8 @@
             "dissolutionDequeuedDone": "Removed from the termination queue",
             "watchlist": "blacklist",
             "curator": "Curator: {programs}",
+            "curatorGratitude": "Curator gratitude",
+            "managerGratitude": "Manager gratitude",
             "reportBlocked": "Report submission on hold: {name}",
             "reportBlockedHint": "Reports are not accepted until the volunteer contacts whoever put the hold.",
             "reportControl": "Control: {name}",

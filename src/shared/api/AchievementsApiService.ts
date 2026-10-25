@@ -25,6 +25,11 @@ export type InboxDeliveryStatsDto = {
     pending: number
 }
 
+export type GratitudeBadgesDto = {
+    curator: number
+    manager: number
+}
+
 export type AchievementsMeDto = {
     balance: number
     unlockedCount: number
@@ -58,6 +63,15 @@ export const AchievementsApiService = {
         const response = await RequestHttp.get<AchievementsMeDto>("/achievements/me", {
             validateStatus: alive,
         })
+        if (response.status !== 200) return null
+        return response.data ?? null
+    },
+
+    async gratitude(username: string): Promise<GratitudeBadgesDto | null> {
+        const response = await RequestHttp.get<GratitudeBadgesDto>(
+            `/achievements/gratitude/${encodeURIComponent(username)}`,
+            { validateStatus: alive }
+        )
         if (response.status !== 200) return null
         return response.data ?? null
     },

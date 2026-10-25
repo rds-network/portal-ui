@@ -29,6 +29,7 @@ import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
 import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
+import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
 import { ImpersonationApiService } from "src/shared/api/ImpersonationApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
@@ -87,6 +88,13 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         queryKey: ["overdue-warnings", userInfo?.username],
         queryFn: () => InboxApiService.overdueWarnings(userInfo!.username),
         enabled: !!userInfo?.username && !!showSensitiveData,
+    })
+
+    const { data: gratitude } = useQuery({
+        queryKey: ["achievements", "gratitude", userInfo?.username],
+        queryFn: () => AchievementsApiService.gratitude(userInfo!.username),
+        enabled: !!userInfo?.username,
+        staleTime: 60_000,
     })
 
     const { data: impersonation } = useQuery({
@@ -699,6 +707,22 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 </Flex>
             </Flex>
             <Text className={classes.userName}>{userInfo?.fullName}</Text>
+            {((gratitude?.curator ?? 0) > 0 || (gratitude?.manager ?? 0) > 0) && (
+                <Flex gap={6} wrap="wrap" mt={8}>
+                    {(gratitude?.curator ?? 0) > 0 && (
+                        <Badge color="teal" radius="md" variant="light">
+                            <FormattedMessage id="pages.profile.curatorGratitude" />
+                            {(gratitude?.curator ?? 0) > 1 ? ` · ${gratitude?.curator}` : ""}
+                        </Badge>
+                    )}
+                    {(gratitude?.manager ?? 0) > 0 && (
+                        <Badge color="yellow" radius="md" variant="light">
+                            <FormattedMessage id="pages.profile.managerGratitude" />
+                            {(gratitude?.manager ?? 0) > 1 ? ` · ${gratitude?.manager}` : ""}
+                        </Badge>
+                    )}
+                </Flex>
+            )}
             {curatorPrograms.length > 0 && (
                 <Badge color="teal" radius="md" variant="light" mt={6} w="fit-content">
                     <FormattedMessage

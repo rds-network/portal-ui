@@ -627,6 +627,8 @@
             "dissolutionDequeuedDone": "Skinut sa reda za raskid",
             "watchlist": "crna lista",
             "curator": "Kustos: {programs}",
+            "curatorGratitude": "Zahvalnica kuratora",
+            "managerGratitude": "Zahvalnica rukovodioca",
             "reportBlocked": "Stop na predaju izveštaja: {name}",
             "reportBlockedHint": "Izveštaji se ne primaju dok se volonter ne javi onome ko je postavio stop.",
             "reportControl": "Kontrola: {name}",

@@ -627,6 +627,8 @@
             "dissolutionDequeuedDone": "Снят с очереди на расторжение",
             "watchlist": "чёрный список",
             "curator": "Куратор: {programs}",
+            "curatorGratitude": "Благодарность куратора",
+            "managerGratitude": "Благодарность руководителя",
             "reportBlocked": "Стоп на сдачу отчётов: {name}",
             "reportBlockedHint": "Отчёты не принимаются, пока волонтёр не свяжется с тем, кто поставил стоп.",
             "reportControl": "Контроль: {name}",
