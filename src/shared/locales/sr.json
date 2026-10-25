@@ -502,7 +502,8 @@
             "openProfile": "Profil",
             "dissolutionEnqueue": "Na raskid",
             "dissolutionDequeue": "Skini sa reda",
-            "dissolutionQueued": "u redu za raskid"
+            "dissolutionQueued": "u redu za raskid",
+            "queuedAuto": "više od 6 izostanaka"
         },
         "dissolution": {
             "title": "Na raskid",
@@ -523,6 +524,10 @@
             "active": "aktivan",
             "deactivated": "deaktiviran",
             "queuedAt": "u redu od {date} · {by}",
+            "queuedAuto": "automatski · više od 6 izostanaka · {date}",
+            "queuedManual": "ručno · {date} · {by}",
+            "legendAuto": "Plavo — sistem stavio posle više od 6 izostanaka",
+            "legendManual": "Narandžasto — stavljeno ručno",
             "dequeue": "Skini sa reda"
         },
         "activity": {

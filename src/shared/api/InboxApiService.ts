@@ -77,6 +77,7 @@ export type ReportOverdueDto = {
     body?: string | null
     accountId?: number | null
     dissolutionQueuedAt?: string | null
+    dissolutionQueuedBy?: string | null
 }
 
 export type DeactivatedActiveContractDto = {

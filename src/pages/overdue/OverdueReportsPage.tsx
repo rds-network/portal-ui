@@ -7,7 +7,7 @@ import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService, OverdueNoticePersonDto, OverdueWeekDto, ReportOverdueDto } from "src/shared/api/InboxApiService"
-import { UserAccountApiService } from "src/shared/api/user/UserApiService"
+import { isAutoDissolution, UserAccountApiService } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
@@ -255,8 +255,18 @@ export const OverdueReportsPage: React.FC = () => {
                                                 </Badge>
                                             )}
                                             {item.dissolutionQueuedAt && (
-                                                <Badge size="sm" color="orange" variant="light">
-                                                    <FormattedMessage id="pages.overdue.dissolutionQueued" />
+                                                <Badge
+                                                    size="sm"
+                                                    color={isAutoDissolution(item.dissolutionQueuedBy) ? "blue" : "orange"}
+                                                    variant="light"
+                                                >
+                                                    <FormattedMessage
+                                                        id={
+                                                            isAutoDissolution(item.dissolutionQueuedBy)
+                                                                ? "pages.overdue.queuedAuto"
+                                                                : "pages.overdue.dissolutionQueued"
+                                                        }
+                                                    />
                                                 </Badge>
                                             )}
                                         </Group>
@@ -319,7 +329,12 @@ export const OverdueReportsPage: React.FC = () => {
                                                     <Button
                                                         size="compact-xs"
                                                         variant={item.dissolutionQueuedAt ? "subtle" : "outline"}
-                                                        color="orange"
+                                                        color={
+                                                            item.dissolutionQueuedAt &&
+                                                            isAutoDissolution(item.dissolutionQueuedBy)
+                                                                ? "blue"
+                                                                : "orange"
+                                                        }
                                                         loading={togglingQueue}
                                                         onClick={(event) => {
                                                             event.stopPropagation()

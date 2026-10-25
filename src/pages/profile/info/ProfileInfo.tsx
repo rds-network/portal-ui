@@ -40,6 +40,7 @@ import {
     reportControlOf,
     mupLetterOf,
     dissolutionQueueOf,
+    isAutoDissolution,
     secondaryProgramCodesOf,
     UserAccountApiService,
     UserApiService,
@@ -631,15 +632,27 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         </Badge>
                     )}
                     {dissolutionQueued && !mupLetterSentLabel && canManageDissolution && (
-                        <Badge color="orange" radius="md" variant="light">
+                        <Badge
+                            color={isAutoDissolution(dissolutionQueue.dissolutionQueuedBy) ? "blue" : "orange"}
+                            radius="md"
+                            variant="light"
+                        >
                             <FormattedMessage
-                                id="pages.profile.dissolutionQueued"
+                                id={
+                                    isAutoDissolution(dissolutionQueue.dissolutionQueuedBy)
+                                        ? "pages.profile.absencesOverLimit"
+                                        : "pages.profile.dissolutionQueued"
+                                }
                                 values={{ date: dissolutionQueuedLabel }}
                             />
                         </Badge>
                     )}
-                    {dissolutionQueued && !mupLetterSentLabel && isOwnProfile && !canManageDissolution && (
-                        <Badge color="orange" radius="md" variant="light">
+                    {dissolutionQueued &&
+                        !mupLetterSentLabel &&
+                        isOwnProfile &&
+                        !canManageDissolution &&
+                        isAutoDissolution(dissolutionQueue.dissolutionQueuedBy) && (
+                        <Badge color="blue" radius="md" variant="light">
                             <FormattedMessage id="pages.profile.absencesOverLimit" />
                         </Badge>
                     )}

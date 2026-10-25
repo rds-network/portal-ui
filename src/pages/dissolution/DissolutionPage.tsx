@@ -12,7 +12,7 @@ import {
     DissolutionQueueDto,
     InboxApiService,
 } from "src/shared/api/InboxApiService"
-import { UserAccountApiService, UserApiService } from "src/shared/api/user/UserApiService"
+import { isAutoDissolution, UserAccountApiService, UserApiService } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { formatContractEnd } from "src/shared/utils/latestContractEnd"
@@ -161,9 +161,19 @@ export const DissolutionPage: React.FC = () => {
                 <Title order={4} mb="sm">
                     <FormattedMessage id="pages.dissolution.queueTitle" />
                 </Title>
-                <Text mb="md">
+                <Text mb="xs">
                     <FormattedMessage id="pages.dissolution.total" values={{ count: queue.length }} />
                 </Text>
+                {queue.length > 0 && (
+                    <Group gap="xs" mb="md">
+                        <Badge color="blue" variant="light">
+                            <FormattedMessage id="pages.dissolution.legendAuto" />
+                        </Badge>
+                        <Badge color="orange" variant="light">
+                            <FormattedMessage id="pages.dissolution.legendManual" />
+                        </Badge>
+                    </Group>
+                )}
                 {(isLoading || isFetching) && queue.length === 0 ? (
                     <Flex align="center" gap="sm" py="lg">
                         <Loader size="sm" />
@@ -240,8 +250,10 @@ const QueueRow: React.FC<{
     onProfile: () => void
     onMup: () => void
     onDequeue: () => void
-}> = ({ item, dequeueing, onProfile, onMup, onDequeue }) => (
-    <div className={classes.row}>
+}> = ({ item, dequeueing, onProfile, onMup, onDequeue }) => {
+    const auto = isAutoDissolution(item.dissolutionQueuedBy)
+    return (
+    <div className={`${classes.row} ${auto ? classes.rowAuto : classes.rowManual}`}>
         <div className={classes.meta}>
             <div className={classes.person}>
                 <Group gap="xs">
@@ -267,9 +279,9 @@ const QueueRow: React.FC<{
                     )}
                 </Text>
                 {item.dissolutionQueuedAt && (
-                    <Badge color="orange" variant="light" size="sm" mt={4}>
+                    <Badge color={auto ? "blue" : "orange"} variant="light" size="sm" mt={4}>
                         <FormattedMessage
-                            id="pages.dissolution.queuedAt"
+                            id={auto ? "pages.dissolution.queuedAuto" : "pages.dissolution.queuedManual"}
                             values={{
                                 date: dayjs(item.dissolutionQueuedAt).format("DD.MM.YYYY"),
                                 by: item.dissolutionQueuedBy || "—",
@@ -277,7 +289,7 @@ const QueueRow: React.FC<{
                         />
                     </Badge>
                 )}
-                {item.dissolutionQueueReason && (
+                {item.dissolutionQueueReason && !auto && (
                     <Text size="xs" c="orange" mt={4}>
                         <FormattedMessage
                             id="pages.dissolution.reason"
@@ -299,7 +311,8 @@ const QueueRow: React.FC<{
             </Group>
         </div>
     </div>
-)
+    )
+}
 
 const CandidateRow: React.FC<{
     item: DeactivatedActiveContractDto

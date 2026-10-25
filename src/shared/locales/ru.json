@@ -502,7 +502,8 @@
             "openProfile": "Профиль",
             "dissolutionEnqueue": "На расторжение",
             "dissolutionDequeue": "Снять с очереди",
-            "dissolutionQueued": "в очереди на расторжение"
+            "dissolutionQueued": "в очереди на расторжение",
+            "queuedAuto": "более 6 пропусков"
         },
         "dissolution": {
             "title": "На расторжение",
@@ -523,6 +524,10 @@
             "active": "активен",
             "deactivated": "деактивирован",
             "queuedAt": "в очереди с {date} · {by}",
+            "queuedAuto": "авто · более 6 пропусков · {date}",
+            "queuedManual": "вручную · {date} · {by}",
+            "legendAuto": "Синий — поставила система, больше 6 пропусков",
+            "legendManual": "Оранжевый — поставили вручную",
             "dequeue": "Снять с очереди"
         },
         "activity": {

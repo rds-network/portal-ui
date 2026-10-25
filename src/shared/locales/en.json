@@ -502,7 +502,8 @@
             "openProfile": "Profile",
             "dissolutionEnqueue": "Queue for termination",
             "dissolutionDequeue": "Remove from queue",
-            "dissolutionQueued": "queued for termination"
+            "dissolutionQueued": "queued for termination",
+            "queuedAuto": "more than 6 missed weeks"
         },
         "dissolution": {
             "title": "For termination",
@@ -523,6 +524,10 @@
             "active": "active",
             "deactivated": "deactivated",
             "queuedAt": "queued since {date} · {by}",
+            "queuedAuto": "automatic · more than 6 missed weeks · {date}",
+            "queuedManual": "manual · {date} · {by}",
+            "legendAuto": "Blue — added by the system after more than 6 missed weeks",
+            "legendManual": "Orange — queued by hand",
             "dequeue": "Remove from queue"
         },
         "activity": {

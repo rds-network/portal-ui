@@ -50,6 +50,9 @@ export type DissolutionQueueInfo = {
     dissolutionQueuedBy?: string | null
 }
 
+export const isAutoDissolution = (queuedBy?: string | null) =>
+    (queuedBy || "").trim().toLowerCase() === "system"
+
 export const dissolutionQueueOf = (user: unknown): DissolutionQueueInfo =>
     (user as DissolutionQueueInfo | null) ?? {}
 
