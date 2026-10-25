@@ -622,6 +622,7 @@
             "dissolutionEnqueue": "На расторжение",
             "dissolutionDequeue": "Снять с очереди",
             "dissolutionQueued": "На расторжение · {date}",
+            "absencesOverLimit": "Более 6 пропусков",
             "dissolutionQueuedDone": "Добавлен в очередь на расторжение",
             "dissolutionDequeuedDone": "Снят с очереди на расторжение",
             "watchlist": "чёрный список",

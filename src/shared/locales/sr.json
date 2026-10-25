@@ -622,6 +622,7 @@
             "dissolutionEnqueue": "Na raskid",
             "dissolutionDequeue": "Skini sa reda",
             "dissolutionQueued": "Na raskid · {date}",
+            "absencesOverLimit": "Više od 6 izostanaka",
             "dissolutionQueuedDone": "Dodat u red za raskid",
             "dissolutionDequeuedDone": "Skinut sa reda za raskid",
             "watchlist": "crna lista",

@@ -504,6 +504,12 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     // Обычные пользователи могут установить программу только если у них ее еще нет
     const isAdmin = hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])
     const isOwnProfile = userInfo?.id === currentUser?.id
+    const canManageDissolution = hasPermission(currentUser, [
+        UserGroup.ADMIN,
+        UserGroup.ADMIN_SSO,
+        UserGroup.ADMIN_VOLUNTEER,
+        UserGroup.MAIN_VOLUNTEER,
+    ])
     const hasProgram = !!programValue
 
     const canEditProgram = isAdmin || (isOwnProfile && !hasProgram)
@@ -616,12 +622,17 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             />
                         </Badge>
                     )}
-                    {dissolutionQueued && !mupLetterSentLabel && (
+                    {dissolutionQueued && !mupLetterSentLabel && canManageDissolution && (
                         <Badge color="orange" radius="md" variant="light">
                             <FormattedMessage
                                 id="pages.profile.dissolutionQueued"
                                 values={{ date: dissolutionQueuedLabel }}
                             />
+                        </Badge>
+                    )}
+                    {dissolutionQueued && !mupLetterSentLabel && isOwnProfile && !canManageDissolution && (
+                        <Badge color="orange" radius="md" variant="light">
+                            <FormattedMessage id="pages.profile.absencesOverLimit" />
                         </Badge>
                     )}
                     {warningCount > 0 && (

@@ -622,6 +622,7 @@
             "dissolutionEnqueue": "Queue for termination",
             "dissolutionDequeue": "Remove from queue",
             "dissolutionQueued": "Queued for termination · {date}",
+            "absencesOverLimit": "More than 6 missed weeks",
             "dissolutionQueuedDone": "Added to the termination queue",
             "dissolutionDequeuedDone": "Removed from the termination queue",
             "watchlist": "blacklist",
