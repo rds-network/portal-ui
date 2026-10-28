@@ -10,6 +10,19 @@ import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 import { getFullAddress } from "src/shared/utils/getFullAddress"
 
 export default async function generateQuestionnairePdf(application: ApplicationDto) {
+    const templateBytes = await fetch("/resources/template.pdf").then((r) => r.arrayBuffer())
+    const pdf = await PDFDocument.load(templateBytes)
+    const fullName = await fillQuestionnairePage(pdf, application)
+    const pdfBytes = await pdf.save()
+    saveAs(
+        new Blob([pdfBytes as BlobPart], { type: "application/pdf" }),
+        `Upitnik_${fullName.replace(/\s+/g, "_")}.pdf`
+    )
+}
+
+/** Fills the first page of `pdf` (loaded from template.pdf) with application data.
+ *  Returns the resolved full name so callers can use it for file naming. */
+export async function fillQuestionnairePage(pdf: PDFDocument, application: ApplicationDto): Promise<string> {
     const fullName = must(application.name, "Name")
     const birthDate = fmt(application.birthDate, "Birth date")
     const passport = must(application.passport, "Passport")
@@ -25,8 +38,6 @@ export default async function generateQuestionnairePdf(application: ApplicationD
     const city = must(application.city, "City")
     const gender = must(application.gender, "Gender") ?? null
     const currentDate = dayjs().format("DD.MM.YYYY")
-    const templateBytes = await fetch("/resources/template.pdf").then((r) => r.arrayBuffer())
-    const pdf = await PDFDocument.load(templateBytes)
 
     const GENDER_MALE_BOX = { x: 134, y: 558 }
     const GENDER_FEMALE_BOX = { x: 186, y: 558 }
@@ -76,11 +87,7 @@ export default async function generateQuestionnairePdf(application: ApplicationD
     }
     drawPx(currentDate, 96, 735)
 
-    const pdfBytes = await pdf.save()
-    saveAs(
-        new Blob([pdfBytes as BlobPart], { type: "application/pdf" }),
-        `Upitnik_${fullName.replace(/\s+/g, "_")}.pdf`
-    )
+    return fullName
 }
 
 function must(value: string | null | undefined, name: string): string {

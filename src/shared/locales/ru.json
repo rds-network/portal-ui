@@ -1265,7 +1265,8 @@
                 },
                 "notes": "Комментарии",
                 "program": "Программа",
-                "project": "Проект"
+                "project": "Проект",
+                "combinedDownload": "Скачать комплект"
             },
             "report": {
                 "contract-from": "Дата начала",
