@@ -15,6 +15,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import {
     AchievementDto,
     AchievementsApiService,
+    PointEventDto,
     PointLeaderDto,
 } from "src/shared/api/AchievementsApiService"
 import { PointMissionApiService, PointMissionDto } from "src/shared/api/PointMissionApiService"
@@ -180,6 +181,35 @@ const MissionCard: React.FC<{
                 </div>
             </div>
         </article>
+    )
+}
+
+const HISTORY_LIMIT = 200
+
+const HistorySummary: React.FC<{ recent: PointEventDto[]; balance: number }> = ({ recent, balance }) => {
+    const sum = recent.reduce((acc, ev) => acc + ev.points, 0)
+    const start = dayjs().startOf("month")
+    const monthRows = recent.filter(
+        (ev) => dayjs(ev.createdAt).isAfter(start) || dayjs(ev.createdAt).isSame(start)
+    )
+    const plus = monthRows.reduce((acc, ev) => acc + (ev.points > 0 ? ev.points : 0), 0)
+    const minus = monthRows.reduce((acc, ev) => acc + (ev.points < 0 ? ev.points : 0), 0)
+    const truncated = recent.length >= HISTORY_LIMIT && sum !== balance
+
+    return (
+        <div className={classes.historySummary}>
+            <div>
+                <FormattedMessage id="pages.achievements.historySum" values={{ sum, balance }} />
+            </div>
+            <div>
+                <FormattedMessage id="pages.achievements.historyMonth" values={{ plus, minus }} />
+            </div>
+            {truncated && (
+                <div>
+                    <FormattedMessage id="pages.achievements.historyTruncated" values={{ count: recent.length }} />
+                </div>
+            )}
+        </div>
     )
 }
 
@@ -354,6 +384,9 @@ const AchievementsPage: React.FC = () => {
                                 id="pages.achievements.monthCardValue"
                                 values={{ points: monthEarned }}
                             />
+                        </div>
+                        <div className={classes.heroHint}>
+                            <FormattedMessage id="pages.achievements.monthCardHint" />
                         </div>
                     </div>
                 </div>
@@ -784,33 +817,39 @@ const AchievementsPage: React.FC = () => {
                 </Tabs.Panel>
 
                 <Tabs.Panel value="history" pt="md">
+                    <div className={classes.historyRules}>
+                        <FormattedMessage id="pages.achievements.historyRules" />
+                    </div>
                     {data.recent.length === 0 ? (
                         <Text c="dimmed" size="sm">
                             <FormattedMessage id="pages.achievements.historyEmpty" />
                         </Text>
                     ) : (
-                        <div className={classes.recent}>
-                            {data.recent.map((ev, idx) => (
-                                <div
-                                    key={`${ev.code}-${ev.refId}-${idx}`}
-                                    className={classes.recentRow}
-                                >
-                                    <span className={classes.recentTitle}>{ev.title || ev.code}</span>
-                                    <span
-                                        className={
-                                            ev.points >= 0
-                                                ? classes.recentPtsPos
-                                                : classes.recentPtsNeg
-                                        }
+                        <>
+                            <HistorySummary recent={data.recent} balance={data.balance} />
+                            <div className={classes.recent}>
+                                {data.recent.map((ev, idx) => (
+                                    <div
+                                        key={`${ev.code}-${ev.refId}-${idx}`}
+                                        className={classes.recentRow}
                                     >
-                                        {ev.points >= 0 ? `+${ev.points}` : ev.points}
-                                    </span>
-                                    <span className={classes.recentDate}>
-                                        {dayjs(ev.createdAt).format("DD.MM.YYYY HH:mm")}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                                        <span className={classes.recentTitle}>{ev.title || ev.code}</span>
+                                        <span
+                                            className={
+                                                ev.points >= 0
+                                                    ? classes.recentPtsPos
+                                                    : classes.recentPtsNeg
+                                            }
+                                        >
+                                            {ev.points >= 0 ? `+${ev.points}` : ev.points}
+                                        </span>
+                                        <span className={classes.recentDate}>
+                                            {dayjs(ev.createdAt).format("DD.MM.YYYY HH:mm")}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
                     )}
                 </Tabs.Panel>
             </Tabs>

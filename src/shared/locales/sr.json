@@ -1777,6 +1777,7 @@
             "balanceCardValue": "{points} bodova",
             "monthCardLabel": "Zarađeno ovog meseca",
             "monthCardValue": "+{points} bodova",
+            "monthCardHint": "Samo plusi ovog meseca, minusi se ne oduzimaju",
             "badgesCardLabel": "Moja dostignuća",
             "badgesCardValue": "{count} bedževa",
             "badgesForever": "Zasluge ostaju zauvek",
@@ -1809,6 +1810,10 @@
             "progress": "Napredak: {progress} / {target}",
             "recentTitle": "Nedavna dodela",
             "historyEmpty": "Još nema bodova",
+            "historyRules": "Stanje je zbir svih redova ispod, uključujući minuse.\n\nU stanje ulazi: +10 za posetu portalu jednom nedeljno; −10 ako ste propustili prošlu nedelju (posle prve posete); +5 za svaki izveštaj primljen bez primedbe; +15 zahvalnica kuratora i +40 zahvalnica rukovodioca; bodovi zadatka — posle odobrenja moderatora.\n\nBrojevi na značkama u pregledu se ne dodaju posebno. To su iste nedeljne posete i značke, a ne druga nagrada.\n\n„Zarađeno ovog meseca“ računa samo pluse ovog meseca i ne oduzima minuse. Stanje oduzima i pamti sve mesece.",
+            "historySum": "Zbir ovih redova: {sum}. Stanje: {balance}.",
+            "historyMonth": "Ovaj mesec u istoriji: +{plus}, odbici {minus}.",
+            "historyTruncated": "Prikazano je poslednjih {count} zapisa. Stanje računa i starije.",
             "unavailable": "API dostignuća još nije na serveru. Stranica će raditi posle deploy-a backend-a.",
             "categories": {
                 "presence": "Prisustvo",
@@ -1848,7 +1853,7 @@
                 "masterclass": "Master-klas",
                 "subscription": "Mesec pretplate"
             },
-            "howItWorks": "Bodovi se dodeljuju posle potvrde zadatka. Razmena za nagrade je sledeći korak."
+            "howItWorks": "Stanje je zbir istorije. Brojevi na značkama se ne dodaju posebno. Pravila su na kartici „Istorija“."
         },
         "pointMissionsAdmin": {
             "title": "Misije za bodove",
