@@ -1810,7 +1810,7 @@
             "progress": "Napredak: {progress} / {target}",
             "recentTitle": "Nedavna dodela",
             "historyEmpty": "Još nema bodova",
-            "historyRules": "Stanje je zbir svih redova ispod, uključujući minuse.\n\nU stanje ulazi: +10 za posetu portalu jednom nedeljno; −10 ako ste propustili prošlu nedelju (posle prve posete); +5 za svaki izveštaj primljen bez primedbe; +15 zahvalnica kuratora i +40 zahvalnica rukovodioca; bodovi zadatka — posle odobrenja moderatora.\n\nBrojevi na značkama u pregledu se ne dodaju posebno. To su iste nedeljne posete i značke, a ne druga nagrada.\n\n„Zarađeno ovog meseca“ računa samo pluse ovog meseca i ne oduzima minuse. Stanje oduzima i pamti sve mesece.",
+            "historyRules": "Stanje je zbir svih redova ispod, uključujući minuse.\n\nU stanje ulazi: +10 za posetu portalu jednom nedeljno; −10 ako ste propustili prošlu nedelju (posle prve posete); +20 jednom za fotografiju profila; +30 jednom za prvi primljeni izveštaj; +5 za svaki izveštaj primljen bez primedbe; +15 zahvalnica kuratora i +40 zahvalnica rukovodioca; bodovi zadatka — posle odobrenja moderatora.\n\nNedeljne značke se ne dodaju drugi put: to su iste nedeljne posete, a ne posebna nagrada.\n\n„Zarađeno ovog meseca“ računa samo pluse ovog meseca i ne oduzima minuse. Stanje oduzima i pamti sve mesece.",
             "historySum": "Zbir ovih redova: {sum}. Stanje: {balance}.",
             "historyMonth": "Ovaj mesec u istoriji: +{plus}, odbici {minus}.",
             "historyTruncated": "Prikazano je poslednjih {count} zapisa. Stanje računa i starije.",
