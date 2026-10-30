@@ -88,7 +88,16 @@ export const AppNavbar = React.memo(function AppNavbar() {
     const impersonating = !!impersonation?.active
     const canShowPrivilegedOps = !impersonating && !!impersonation?.canImpersonate
 
+    const staffOnly = (item: ItemGroupProps) =>
+        !!item.roles?.length ||
+        !!item.showIfCurator ||
+        !!item.showIfPrivilegedOps ||
+        !!item.showIfAccountStatusApprover ||
+        !!item.curatorInbox
+
     const itemVisible = (item: ItemGroupProps) => {
+        // «Смотреть как волонтёр» — без приёмки, кураторов, рассылки и прочих служебных пунктов.
+        if (impersonating && staffOnly(item)) return false
         if (item.showIfPrivilegedOps && impersonating) return false
         return (
             !!item.curatorInbox ||
