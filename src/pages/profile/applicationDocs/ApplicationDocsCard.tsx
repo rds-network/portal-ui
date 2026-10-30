@@ -1,14 +1,16 @@
-import { Anchor, Button, Flex, Loader, Text } from "@mantine/core"
+import { Anchor, Button, Flex, Loader, Modal, Text } from "@mantine/core"
 import { UserInfoDto } from "@rds-network/portal-api-axios"
 import {
     IconClock,
     IconContract,
+    IconEye,
     IconListCheck,
     IconMailFilled,
     IconExternalLink,
 } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import dayjs from "dayjs"
+import { useEffect, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link } from "react-router"
 import { useOfficialGroup } from "src/app/providers/OfficialGroupProvider"
@@ -43,6 +45,56 @@ export const ApplicationDocsCard = ({ userInfo }: ApplicationDocsCardProps) => {
     const officialGroup = officialGroups.find((p) => p.code === program?.officialGroup)
     const hasContract = application?.contract != null
     const searchHref = `/applications?search=${encodeURIComponent(userInfo.email)}&showCompleted=true`
+    const previewUrl = useRef<string | null>(null)
+    const [preview, setPreview] = useState<File | null>(null)
+    const [previewKind, setPreviewKind] = useState<"contract" | "questionnaire" | null>(null)
+    const [frameUrl, setFrameUrl] = useState<string | null>(null)
+    const [opening, setOpening] = useState<"contract" | "questionnaire" | null>(null)
+
+    const closePreview = () => {
+        if (previewUrl.current) URL.revokeObjectURL(previewUrl.current)
+        previewUrl.current = null
+        setFrameUrl(null)
+        setPreview(null)
+        setPreviewKind(null)
+    }
+
+    useEffect(() => closePreview, [])
+
+    const showPreview = async (kind: "contract" | "questionnaire") => {
+        if (!application) return
+        setOpening(kind)
+        try {
+            const file =
+                kind === "contract"
+                    ? await buildContractPdf(application, officialGroup, {
+                          download: false,
+                          knownContracts: userInfo.contracts,
+                      })
+                    : await generateQuestionnairePdf(application, { download: false })
+            const typed = file.type ? file : new File([file], file.name, { type: "application/pdf" })
+            if (previewUrl.current) URL.revokeObjectURL(previewUrl.current)
+            const url = URL.createObjectURL(typed)
+            previewUrl.current = url
+            setPreview(typed)
+            setPreviewKind(kind)
+            setFrameUrl(url)
+        } catch {
+            // Генератор уже показал, какого поля не хватает.
+        } finally {
+            setOpening(null)
+        }
+    }
+
+    const downloadPreview = () => {
+        if (!preview) return
+        const url = URL.createObjectURL(preview)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = preview.name
+        link.click()
+        URL.revokeObjectURL(url)
+    }
 
     return (
         <Flex className={classes.root}>
@@ -130,28 +182,52 @@ export const ApplicationDocsCard = ({ userInfo }: ApplicationDocsCardProps) => {
                         >
                             <FormattedMessage id={locales.open} />
                         </Button>
-                        <Button
-                            variant="gradient"
-                            rightSection={<IconContract size={14} />}
-                            disabled={!hasContract}
-                            className={classes.pdfButton}
-                            onClick={() =>
-                                void buildContractPdf(application, officialGroup, {
-                                    knownContracts: userInfo.contracts,
-                                })
-                            }
-                        >
-                            <FormattedMessage id={locales.contractDownload} />
-                        </Button>
-                        <Button
-                            variant="light"
-                            rightSection={<IconListCheck size={15} />}
-                            disabled={!hasContract}
-                            className={classes.pdfButton}
-                            onClick={() => generateQuestionnairePdf(application)}
-                        >
-                            <FormattedMessage id={locales.questionnaireDownload} />
-                        </Button>
+                        <Flex className={classes.docRow} gap={8}>
+                            <Button
+                                variant="default"
+                                flex={1}
+                                rightSection={<IconEye size={14} />}
+                                disabled={!hasContract}
+                                loading={opening === "contract"}
+                                onClick={() => void showPreview("contract")}
+                            >
+                                <FormattedMessage id={locales.preview} />
+                            </Button>
+                            <Button
+                                variant="gradient"
+                                flex={1}
+                                rightSection={<IconContract size={14} />}
+                                disabled={!hasContract}
+                                onClick={() =>
+                                    void buildContractPdf(application, officialGroup, {
+                                        knownContracts: userInfo.contracts,
+                                    })
+                                }
+                            >
+                                <FormattedMessage id={locales.contractDownload} />
+                            </Button>
+                        </Flex>
+                        <Flex className={classes.docRow} gap={8}>
+                            <Button
+                                variant="default"
+                                flex={1}
+                                rightSection={<IconEye size={14} />}
+                                disabled={!hasContract}
+                                loading={opening === "questionnaire"}
+                                onClick={() => void showPreview("questionnaire")}
+                            >
+                                <FormattedMessage id={locales.preview} />
+                            </Button>
+                            <Button
+                                variant="light"
+                                flex={1}
+                                rightSection={<IconListCheck size={15} />}
+                                disabled={!hasContract}
+                                onClick={() => generateQuestionnairePdf(application)}
+                            >
+                                <FormattedMessage id={locales.questionnaireDownload} />
+                            </Button>
+                        </Flex>
                         <Button
                             variant="light"
                             rightSection={<IconMailFilled size={15} />}
@@ -165,6 +241,28 @@ export const ApplicationDocsCard = ({ userInfo }: ApplicationDocsCardProps) => {
                     </Flex>
                 </>
             )}
+            <Modal
+                opened={frameUrl != null}
+                onClose={closePreview}
+                title={preview?.name}
+                size="xl"
+                centered
+            >
+                {frameUrl && (
+                    <Flex direction="column" gap="sm">
+                        <iframe className={classes.docPreview} src={frameUrl} title={preview?.name} />
+                        <Button onClick={downloadPreview}>
+                            <FormattedMessage
+                                id={
+                                    previewKind === "contract"
+                                        ? locales.contractDownload
+                                        : locales.questionnaireDownload
+                                }
+                            />
+                        </Button>
+                    </Flex>
+                )}
+            </Modal>
         </Flex>
     )
 }

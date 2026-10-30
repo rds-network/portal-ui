@@ -769,7 +769,8 @@
                 "type": "Type",
                 "program": "Program",
                 "skills": "Skills",
-                "goal": "Goal"
+                "goal": "Goal",
+                "preview": "Preview"
             },
             "selectProgram": "Select a program",
             "selectProject": "Select a project"

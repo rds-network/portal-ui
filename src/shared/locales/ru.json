@@ -769,7 +769,8 @@
                 "type": "Тип",
                 "program": "Программа",
                 "skills": "Навыки",
-                "goal": "Цель"
+                "goal": "Цель",
+                "preview": "Просмотр"
             },
             "selectProgram": "Выбор программы",
             "selectProject": "Выбор проекта"
