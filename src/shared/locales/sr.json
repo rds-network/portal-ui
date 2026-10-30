@@ -118,7 +118,10 @@
             "autoDocs": "Ugovor i upitnik su automatski priloženi. Možete ih ukloniti pre slanja.",
             "autoDocsMissing": "Ugovor i upitnik nisu priloženi.",
             "autoDocsSetDates": "Uneti datume ugovora",
-            "attaching": "Prilažemo ugovor i upitnik…"
+            "attaching": "Prilažemo ugovor i upitnik…",
+            "preview": "Pregled",
+            "previewFail": "Fajl nije moguće prikazati",
+            "previewOther": "Ovaj format se ne može pregledati"
         },
         "announcements": {
             "title": "Obaveštenja",
