@@ -1,4 +1,4 @@
-import { Avatar, Badge, Flex, Text, Tooltip, UnstyledButton } from "@mantine/core"
+import { Anchor, Avatar, Badge, Flex, Text, Tooltip, UnstyledButton } from "@mantine/core"
 import { ApplicationDto, ContractDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconMail, IconMessageCircle } from "@tabler/icons-react"
 import dayjs from "dayjs"
@@ -140,6 +140,17 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
                     <FormattedMessage id={`common.application-status.${application.status}`} />
                 </Badge>
                 {typeBadge(application.type)}
+                {application.type === "PROLONGATION" && application.email && (
+                    <Anchor
+                        component={Link}
+                        to={`/volunteers/heatmap?search=${encodeURIComponent(application.email)}`}
+                        size="sm"
+                        data-row-action
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <FormattedMessage id="pages.profile.openHeatmap" />
+                    </Anchor>
+                )}
                 <Text size="sm" c="dimmed">
                     {created}
                 </Text>

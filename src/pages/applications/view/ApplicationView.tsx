@@ -1,4 +1,4 @@
-import { Blockquote, Button, Divider, Flex, Text } from "@mantine/core"
+import { Anchor, Blockquote, Button, Divider, Flex, Text } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { ApplicationDto, ContractDto } from "@rds-network/portal-api-axios"
 import {
@@ -25,7 +25,7 @@ import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import { useContext } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useNavigate, useParams } from "react-router"
+import { Link, useNavigate, useParams } from "react-router"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { useProjects } from "src/app/providers/ProjectsProvider"
 import { UserContext } from "src/app/providers/UserContext"
@@ -34,7 +34,7 @@ import { AddApplicationNote } from "src/pages/applications/note/AddApplicationNo
 import { ApplicationNote } from "src/pages/applications/note/ApplicationNote"
 import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
 import { cacheApplication, useApplicationUpdate } from "src/shared/api/applications/useApplicationUpdate"
-import { resolveUsers } from "src/shared/api/user/UserApiService"
+import { lastSeenOf, resolveUsers, UserApiService } from "src/shared/api/user/UserApiService"
 import { buildContractPdf } from "src/shared/docs/contract"
 import generateEnvelopPdf from "src/shared/docs/envelop"
 import generateQuestionnairePdf from "src/shared/docs/questionnaire"
@@ -94,6 +94,16 @@ export const ApplicationView = () => {
         new Set([...noteLogins, application?.assignee].filter(Boolean) as string[])
     )
     const { data: users = {} } = resolveUsers(userLogins)
+    const prolongation = application?.type === "PROLONGATION" && !!application.email
+    const { data: prolongationUser } = useQuery({
+        queryKey: ["application-account", application?.email],
+        enabled: prolongation,
+        queryFn: () =>
+            UserApiService.searchUsers(application!.email!, { pageNumber: 0, pageSize: 5 }, {}).then((response) => {
+                const email = application!.email!.toLowerCase()
+                return (response.data.content || []).find((item) => item.email?.toLowerCase() === email) ?? null
+            }),
+    })
     const program = programs.find((p) => p.code === application?.program)
     const project = projects.find((p) => p.code === application?.project)
     const officialGroup = officialGroups.find((p) => p.code === program?.officialGroup)
@@ -152,6 +162,28 @@ export const ApplicationView = () => {
                     <Text className={classes.name} variant="gradient">
                         {application.name + (application.patronymic ? ` (${application.patronymic})` : "")}
                     </Text>
+                    {application.type === "PROLONGATION" && (
+                        <Flex align="center" gap="md" wrap="wrap">
+                            <Anchor
+                                component={Link}
+                                to={`/volunteers/heatmap?search=${encodeURIComponent(
+                                    prolongationUser?.username || application.email || ""
+                                )}`}
+                                size="sm"
+                            >
+                                <FormattedMessage id="pages.profile.openHeatmap" />
+                            </Anchor>
+                            {prolongationUser !== undefined && (
+                                <Text size="sm" fw={600}>
+                                    <FormattedMessage id="pages.profile.props.lastSeen" />
+                                    {": "}
+                                    {lastSeenOf(prolongationUser)
+                                        ? dayjs(lastSeenOf(prolongationUser)).format("DD MMM YYYY, HH:mm")
+                                        : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })}
+                                </Text>
+                            )}
+                        </Flex>
+                    )}
                     <Flex className={classes.fields}>
                         <TextPropertyBox
                             name={locales.createdAt}

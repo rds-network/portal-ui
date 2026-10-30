@@ -172,7 +172,12 @@ const drawSlip = (
     )
 }
 
-export const generateUplatnicaPdf = (name: string, city: string, amount: number) => {
+export const generateUplatnicaPdf = (
+    name: string,
+    city: string,
+    amount: number,
+    options?: { download?: boolean }
+): File => {
     const year = String(new Date().getFullYear())
     const payer = `${name.trim().toUpperCase()}, ${city.trim()}`
     const ips = buildIps(`${name.trim()} ${city.trim()}`, amount, year)
@@ -184,5 +189,7 @@ export const generateUplatnicaPdf = (name: string, city: string, amount: number)
     drawSlip(pdf, 12, payer, amount, year, ips)
     drawSlip(pdf, 144, payer, amount, year, ips)
     const fileName = `Uplatnica_${name.trim().replaceAll(" ", "_") || "clanarina"}.pdf`
-    pdf.save(fileName)
+    const file = new File([pdf.output("blob")], fileName, { type: "application/pdf" })
+    if (options?.download !== false) pdf.save(fileName)
+    return file
 }

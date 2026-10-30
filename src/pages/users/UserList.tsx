@@ -27,6 +27,7 @@ import { allowedRoles } from "src/pages/users/lib/roles"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { VolunteersDashboard } from "src/pages/users/VolunteersDashboard"
 import {
+    lastSeenOf,
     reportBlockOf,
     reportControllerNameOf,
     UserAccountApiService,
@@ -424,6 +425,13 @@ export const UserList = () => {
                         <Text size="sm" c="dimmed" truncate="end" title={user.email}>
                             {user.email}
                         </Text>
+                        <Text size="xs" c="dimmed">
+                            <FormattedMessage id="pages.profile.props.lastSeen" />
+                            {": "}
+                            {lastSeenOf(user)
+                                ? dayjs(lastSeenOf(user)).format("DD MMM YYYY, HH:mm")
+                                : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })}
+                        </Text>
                     </Flex>
                     {!user.active && (
                         <Badge color="red" radius="md" variant="light">
@@ -671,6 +679,9 @@ export const UserList = () => {
                                 </Table.Th>
                                 <Table.Th className={classes.columnProject}>
                                     <FormattedMessage id={locales.project} />
+                                </Table.Th>
+                                <Table.Th>
+                                    <FormattedMessage id="pages.profile.props.lastSeen" />
                                 </Table.Th>
                                 <Table.Th className={classes.columnContractDue}>
                                     <FormattedMessage id={locales.contractDue} />
