@@ -1,4 +1,6 @@
-import { ApplicationDto, OfficialGroupDto, UserInfoDto } from "@rds-network/portal-api-axios"
+import { ApplicationDto, OfficialGroupDto, ProgramDto, UserInfoDto } from "@rds-network/portal-api-axios"
+import { OfficialGroupApiService } from "src/shared/api/OfficialGroupApiService"
+import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 import { previousContractEnd } from "src/shared/utils/latestContractEnd"
 import dayjs from "dayjs"
@@ -532,11 +534,12 @@ export async function buildContractPdf(
     officialProgramDto: OfficialGroupDto | undefined,
     options?: { download?: boolean; knownContracts?: UserInfoDto["contracts"] }
 ): Promise<File> {
+    const needAccount = application.type === "PROLONGATION" || !officialProgramDto?.nameSr
+    const account =
+        needAccount && application.email ? await accountByEmail(application.email) : undefined
     let volunteeringFrom: string | null = null
     if (application.type === "PROLONGATION") {
-        const contracts =
-            options?.knownContracts ??
-            (application.email ? await contractsByEmail(application.email) : null)
+        const contracts = options?.knownContracts ?? account?.contracts
         const previousEnd = previousContractEnd(contracts, {
             startDate: application.contract?.startDate,
             endDate: application.contract?.endDate,
@@ -546,18 +549,50 @@ export async function buildContractPdf(
             volunteeringFrom = previousEnd
         }
     }
-    return generateContractPdf(application, officialProgramDto, {
+    const officialProgram = officialProgramDto?.nameSr
+        ? officialProgramDto
+        : await officialProgramFromAccount(application, account)
+    return generateContractPdf(application, officialProgram, {
         download: options?.download,
         volunteeringFrom,
     })
 }
 
-async function contractsByEmail(email: string): Promise<UserInfoDto["contracts"]> {
+async function accountByEmail(email: string): Promise<UserInfoDto | undefined> {
     const response = await UserApiService.searchUsers(email, { pageNumber: 0, pageSize: 5 })
-    const user = response.data.content?.find(
+    return response.data.content?.find(
         (item) => item.email?.trim().toLowerCase() === email.trim().toLowerCase()
     )
-    return user?.contracts
+}
+
+/** Заявка на продление часто без программы: берём её с карточки волонтёра. */
+async function officialProgramFromAccount(
+    application: ApplicationDto,
+    account: UserInfoDto | undefined
+): Promise<OfficialGroupDto | undefined> {
+    const programCode = application.program || account?.program?.code
+    if (!programCode) return undefined
+
+    let program: ProgramDto | undefined =
+        account?.program?.code === programCode ? account.program : undefined
+    if (!program?.officialGroup || !program.nameSr) {
+        const programs = (await ProgramsApiService.getPrograms()).data
+        program = programs.find((item) => item.code === programCode) ?? program
+    }
+
+    if (program?.officialGroup) {
+        const groups = (await OfficialGroupApiService.getOfficialGroup()).data
+        const group = groups.find((item) => item.code === program?.officialGroup)
+        if (group?.nameSr) return group
+    }
+
+    if (!program?.nameSr) return undefined
+    return {
+        code: program.code,
+        nameRu: program.nameRu,
+        nameEn: program.nameEn,
+        nameSr: program.nameSr,
+    }
 }
 
 function parseBoldMarkdown(input: string): Array<{ text: string; bold: boolean }> {
