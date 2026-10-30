@@ -12,7 +12,13 @@ const previewKind = (name: string, type: string): "pdf" | "image" | "other" => {
     return "other"
 }
 
-export const AttachmentPreview = ({ file }: { file: FileInfoDto }) => {
+const withPreviewType = (file: File): File => {
+    if (file.type) return file
+    const pdf = file.name.toLowerCase().endsWith(".pdf")
+    return new File([file], file.name, { type: pdf ? "application/pdf" : "application/octet-stream" })
+}
+
+export const AttachmentPreview = ({ file, source }: { file: FileInfoDto; source?: File }) => {
     const [url, setUrl] = useState<string | null>(null)
     const [kind, setKind] = useState<"pdf" | "image" | "other" | "error" | "loading">("loading")
 
@@ -21,27 +27,46 @@ export const AttachmentPreview = ({ file }: { file: FileInfoDto }) => {
         let objectUrl: string | null = null
         setUrl(null)
         setKind("loading")
+
+        if (source) {
+            const typed = withPreviewType(source)
+            objectUrl = URL.createObjectURL(typed)
+            setKind(previewKind(typed.name, typed.type))
+            setUrl(objectUrl)
+            return () => {
+                if (objectUrl) URL.revokeObjectURL(objectUrl)
+            }
+        }
+
         ;(async () => {
             try {
                 const response = await fetch(file.link)
                 if (!response.ok) throw new Error(response.statusText)
                 const blob = await response.blob()
-                objectUrl = URL.createObjectURL(blob)
+                const typed = blob.type
+                    ? blob
+                    : new Blob([blob], {
+                          type: file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : blob.type,
+                      })
+                objectUrl = URL.createObjectURL(typed)
                 if (cancelled) {
                     URL.revokeObjectURL(objectUrl)
                     return
                 }
-                setKind(previewKind(file.name, blob.type))
+                setKind(previewKind(file.name, typed.type))
                 setUrl(objectUrl)
             } catch {
-                if (!cancelled) setKind("error")
+                if (!cancelled) {
+                    setKind(file.name.toLowerCase().endsWith(".pdf") ? "pdf" : "error")
+                    setUrl(file.name.toLowerCase().endsWith(".pdf") ? file.link : null)
+                }
             }
         })()
         return () => {
             cancelled = true
             if (objectUrl) URL.revokeObjectURL(objectUrl)
         }
-    }, [file.id, file.link, file.name])
+    }, [file.id, file.link, file.name, source])
 
     return (
         <Flex className={classes.preview} direction="column" gap={8}>
@@ -69,7 +94,7 @@ export const AttachmentPreview = ({ file }: { file: FileInfoDto }) => {
                 </Text>
             )}
             {kind === "pdf" && url && (
-                <iframe className={classes.previewFrame} src={url} title={file.name} />
+                <embed className={classes.previewFrame} src={url} type="application/pdf" title={file.name} />
             )}
             {kind === "image" && url && <img className={classes.previewImage} src={url} alt={file.name} />}
         </Flex>
