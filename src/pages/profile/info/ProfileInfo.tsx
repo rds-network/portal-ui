@@ -10,6 +10,7 @@ import {
     IconDeviceFloppy,
     IconGenderMale,
     IconGift,
+    IconClock,
     IconHome,
     IconInfoCircle,
     IconMail,
@@ -38,6 +39,7 @@ import {
     reportBlockOf,
     reportControllerNameOf,
     reportControlOf,
+    lastSeenOf,
     mupLetterOf,
     dissolutionQueueOf,
     isAutoDissolution,
@@ -922,6 +924,18 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     value={userInfo?.email}
                     icon={<IconMail size={18} />}
                     href={`mailto:${userInfo?.email}`}
+                    className={classes.propertyBox}
+                />
+            )}
+            {showSensitiveData && (
+                <TextPropertyBox
+                    name={"pages.profile.props.lastSeen"}
+                    value={
+                        lastSeenOf(userInfo)
+                            ? dayjs(lastSeenOf(userInfo)).format("DD MMM YYYY, HH:mm")
+                            : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })
+                    }
+                    icon={<IconClock size={18} />}
                     className={classes.propertyBox}
                 />
             )}

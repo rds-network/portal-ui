@@ -3,12 +3,15 @@ import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { ApplicationDto, ContractDto, ContractTypeEnum } from "@rds-network/portal-api-axios"
+import { useQuery } from "@tanstack/react-query"
 import { IconCalendarMonth, IconCalendarOff, IconDeviceFloppy, IconPencil, IconPlus } from "@tabler/icons-react"
 import dayjs from "dayjs"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import classes from "src/pages/applications/contract/ContractDate.module.scss"
+import { UserApiService } from "src/shared/api/user/UserApiService"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
+import { previousContractEnd } from "src/shared/utils/latestContractEnd"
 import { ContractTypeSelect } from "src/shared/ui/contractTypeSelect/ContractTypeSelect"
 import { v4 } from "uuid"
 import { z } from "zod"
@@ -33,6 +36,22 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
     }
 
     const [contract, setContract] = useState<ContractDto>(initialContract)
+    const prolongationApplied = useRef(false)
+
+    const { data: previousEnd } = useQuery({
+        queryKey: ["previous-contract-end", application.email],
+        enabled: application.type === "PROLONGATION" && !!application.email && !application.contract,
+        queryFn: async () => {
+            const response = await UserApiService.searchUsers(application.email!, {
+                pageNumber: 0,
+                pageSize: 5,
+            })
+            const user = response.data.content?.find(
+                (item) => item.email?.trim().toLowerCase() === application.email?.trim().toLowerCase()
+            )
+            return previousContractEnd(user?.contracts)
+        },
+    })
 
     const requiredMessage = { message: intl.formatMessage({ id: locales.required }) }
     const validationSchema = z.object({
@@ -71,7 +90,13 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
         },
     })
 
-    const onUpdate = () => {
+    useEffect(() => {
+        if (!previousEnd || application.contract || prolongationApplied.current) return
+        prolongationApplied.current = true
+        const start = dayjs(previousEnd)
+        form.setFieldValue("contractFrom", start.toDate())
+        form.setFieldValue("contractUntil", start.add(1, "year").toDate())
+    }, [previousEnd, application.contract, form])
         if (!form.validate().hasErrors) {
             if (onChange) {
                 onChange(contract)

@@ -5,8 +5,13 @@ import { useContext, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
+import { useOfficialGroup } from "src/app/providers/OfficialGroupProvider"
+import { usePrograms } from "src/app/providers/ProgramsProvider"
+import { buildContractPdf } from "src/shared/docs/contract"
+import generateQuestionnairePdf from "src/shared/docs/questionnaire"
 import { applicationTemplates } from "src/shared/email/templates"
 import { EmailDrawer } from "src/shared/ui/emailModal/EmailDrawer"
+import { ApplicationStatus } from "src/shared/user/applications"
 import { InboxNotifyModal } from "src/shared/ui/inbox/InboxNotifyModal"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { locales } from "./lib/locales"
@@ -18,6 +23,8 @@ interface ApplicationMenuProps {
 
 export const ApplicationMenu = ({ applicationDto, assigneeUser }: ApplicationMenuProps) => {
     const intl = useIntl()
+    const programs = usePrograms()
+    const officialGroups = useOfficialGroup()
     const { user } = useContext(UserContext)
     const [menuOpened, setMenuOpened] = useState(false)
     const [emailDrawerOpen, setEmailDrawerOpen] = useState(false)
@@ -58,6 +65,30 @@ export const ApplicationMenu = ({ applicationDto, assigneeUser }: ApplicationMen
                 close={() => setEmailDrawerOpen(false)}
                 recipients={[{ name: applicationDto.name!!, email: applicationDto.email!! }]}
                 templates={applicationTemplates}
+                prepareAttachments={
+                    applicationDto.status === ApplicationStatus.READY_TO_SEND
+                        ? async () => {
+                              if (!applicationDto.contract) return []
+                              const program = programs.find((p) => p.code === applicationDto.program)
+                              const officialGroup = officialGroups.find((p) => p.code === program?.officialGroup)
+                              const files: File[] = []
+                              try {
+                                  files.push(
+                                      await buildContractPdf(applicationDto, officialGroup, { download: false })
+                                  )
+                              } catch {
+                                  // Поле пустое — уведомление уже показано.
+                              }
+                              try {
+                                  files.push(await generateQuestionnairePdf(applicationDto, { download: false }))
+                              } catch {
+                                  // Поле пустое — уведомление уже показано.
+                              }
+                              if (files.length === 0) throw new Error("pdf")
+                              return files
+                          }
+                        : undefined
+                }
             />
             {canAskAssignee && askRecipients.length > 0 && (
                 <InboxNotifyModal

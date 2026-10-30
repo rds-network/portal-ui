@@ -15,7 +15,7 @@ import { useOfficialGroup } from "src/app/providers/OfficialGroupProvider"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { locales } from "src/pages/profile/applicationDocs/lib/locales"
 import { ApplicationLookupApiService } from "src/shared/api/applications/ApplicationLookupApiService"
-import generateContractPdf from "src/shared/docs/contract"
+import { buildContractPdf } from "src/shared/docs/contract"
 import generateEnvelopPdf from "src/shared/docs/envelop"
 import generateQuestionnairePdf from "src/shared/docs/questionnaire"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
@@ -134,7 +134,11 @@ export const ApplicationDocsCard = ({ userInfo }: ApplicationDocsCardProps) => {
                             rightSection={<IconContract size={14} />}
                             disabled={!hasContract}
                             className={classes.pdfButton}
-                            onClick={() => generateContractPdf(application, officialGroup)}
+                            onClick={() =>
+                                void buildContractPdf(application, officialGroup, {
+                                    knownContracts: userInfo.contracts,
+                                })
+                            }
                         >
                             <FormattedMessage id={locales.contractDownload} />
                         </Button>

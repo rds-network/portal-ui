@@ -12,6 +12,29 @@ const isActiveOn = (contract: ContractLike, on = new Date()): boolean => {
     return true
 }
 
+/** Конец предыдущего договора: самый поздний, кроме договора этой заявки. */
+export const previousContractEnd = (
+    contracts?: ContractLike[] | null,
+    current?: { startDate?: string | null; endDate?: string | null }
+): string | null => {
+    const dates = (contracts ?? [])
+        .filter((contract) => {
+            if (!contract.endDate) return false
+            if (
+                current?.startDate &&
+                current?.endDate &&
+                contract.startDate === current.startDate &&
+                contract.endDate === current.endDate
+            ) {
+                return false
+            }
+            return true
+        })
+        .map((contract) => contract.endDate as string)
+        .sort()
+    return dates.at(-1) ?? null
+}
+
 export const latestContractEnd = (contracts?: ContractLike[] | null): string | null => {
     const dates = (contracts ?? [])
         .filter((contract) => !contract.type || contract.type === "REGULAR")
