@@ -49,6 +49,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
     const [autoDocsNote, setAutoDocsNote] = useState<"attached" | "missing" | null>(null)
     const [attaching, setAttaching] = useState(false)
     const [previewId, setPreviewId] = useState<string | null>(null)
+    const localFiles = useRef<Map<string, File>>(new Map())
     const prepareRef = useRef(props.prepareAttachments)
     prepareRef.current = props.prepareAttachments
 
@@ -105,6 +106,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
             setAutoDocsNote(null)
             setAttaching(false)
             setPreviewId(null)
+            localFiles.current.clear()
             return
         }
         const prepare = prepareRef.current
@@ -122,6 +124,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
                 const uploaded: FileInfoDto[] = []
                 for (const file of files) {
                     const resp = await FilesApiService.uploadFile(file)
+                    localFiles.current.set(resp.data.id, file)
                     uploaded.push(resp.data)
                 }
                 if (!cancelled) {
@@ -323,7 +326,9 @@ export const EmailDrawer = (props: EmailModalProps) => {
                     </Button>
                 </Flex>
             </Flex>
-            {previewFile && <AttachmentPreview file={previewFile} />}
+            {previewFile && (
+                <AttachmentPreview file={previewFile} source={localFiles.current.get(previewFile.id)} />
+            )}
             </div>
         </Drawer>
     )
