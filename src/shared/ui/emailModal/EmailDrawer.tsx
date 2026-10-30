@@ -260,6 +260,9 @@ export const EmailDrawer = (props: EmailModalProps) => {
                     maxFiles={10}
                     maxSize={10}
                     files={uploadedFiles}
+                    onLocalFile={(id, file) => {
+                        localFiles.current.set(id, file)
+                    }}
                     onFilesUploaded={(files) => setUploadedFiles(files)}
                     onFilesLoading={(files) => setLoadingFiles(files)}
                 />

@@ -17,6 +17,8 @@ interface FileUploaderProps {
     files?: FileInfoDto[]
     onFilesUploaded?: (files: FileInfoDto[]) => void
     onFilesLoading?: (files: string[]) => void
+    /** Исходный файл до загрузки — чтобы превью не ходило за ним по ссылке. */
+    onLocalFile?: (id: string, file: File) => void
 }
 
 export interface FileUploaderInterface {
@@ -71,6 +73,7 @@ export const FileUploader = forwardRef<FileUploaderInterface, FileUploaderProps>
                     // грузим по очереди, чтобы прогресс был предсказуем
                     const resp = await FilesApiService.uploadFile(file)
                     const fileInfo = resp.data
+                    props.onLocalFile?.(fileInfo.id, file)
                     // Добавляем к локальному списку
                     setUploadedFiles((prev) => [...prev, fileInfo])
                 } catch (e) {

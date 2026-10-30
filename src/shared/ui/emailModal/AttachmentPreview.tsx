@@ -94,7 +94,7 @@ export const AttachmentPreview = ({ file, source }: { file: FileInfoDto; source?
                 </Text>
             )}
             {kind === "pdf" && url && (
-                <embed className={classes.previewFrame} src={url} type="application/pdf" title={file.name} />
+                <iframe className={classes.previewFrame} src={url} title={file.name} />
             )}
             {kind === "image" && url && <img className={classes.previewImage} src={url} alt={file.name} />}
         </Flex>
