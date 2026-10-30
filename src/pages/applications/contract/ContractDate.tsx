@@ -97,6 +97,8 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
         form.setFieldValue("contractFrom", start.toDate())
         form.setFieldValue("contractUntil", start.add(1, "year").toDate())
     }, [previousEnd, application.contract, form])
+
+    const onUpdate = () => {
         if (!form.validate().hasErrors) {
             if (onChange) {
                 onChange(contract)
