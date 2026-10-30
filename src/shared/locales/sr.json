@@ -769,7 +769,8 @@
                 "type": "Tip",
                 "program": "Program",
                 "skills": "Veštine",
-                "goal": "Cilj"
+                "goal": "Cilj",
+                "preview": "Pregled"
             },
             "selectProgram": "Izaberite program",
             "selectProject": "Izaberite projekat"
