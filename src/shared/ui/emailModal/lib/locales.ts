@@ -8,5 +8,6 @@ export const locales = {
     success: "common.email-drawer.success",
     autoDocs: "common.email-drawer.autoDocs",
     autoDocsMissing: "common.email-drawer.autoDocsMissing",
+    autoDocsSetDates: "common.email-drawer.autoDocsSetDates",
     attaching: "common.email-drawer.attaching",
 }

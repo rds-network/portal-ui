@@ -116,7 +116,8 @@
             "emptyContent": "Prazno telo emaila",
             "success": "Poruka uspešno poslata",
             "autoDocs": "Ugovor i upitnik su automatski priloženi. Možete ih ukloniti pre slanja.",
-            "autoDocsMissing": "Ugovor i upitnik nisu priloženi: unesite datume ugovora.",
+            "autoDocsMissing": "Ugovor i upitnik nisu priloženi.",
+            "autoDocsSetDates": "Uneti datume ugovora",
             "attaching": "Prilažemo ugovor i upitnik…"
         },
         "announcements": {
@@ -1281,7 +1282,10 @@
                 "contract-until-before": "Ranije od datuma početka",
                 "cancel": "Otkaži",
                 "save": "Sačuvaj",
-                "add": "Dodaj"
+                "add": "Dodaj",
+                "previous-contract": "Prethodni ugovor: {from} — {until}",
+                "previous-contract-until": "Prethodni ugovor do {until}",
+                "old-application": "Stara anketa"
             }
         },
         "cleaning": {

@@ -65,6 +65,11 @@ export const ApplicationMenu = ({ applicationDto, assigneeUser }: ApplicationMen
                 close={() => setEmailDrawerOpen(false)}
                 recipients={[{ name: applicationDto.name!!, email: applicationDto.email!! }]}
                 templates={applicationTemplates}
+                datesHref={
+                    applicationDto.status === ApplicationStatus.READY_TO_SEND
+                        ? `/application/${applicationDto.id}?editContract=${applicationDto.id}`
+                        : undefined
+                }
                 prepareAttachments={
                     applicationDto.status === ApplicationStatus.READY_TO_SEND
                         ? async () => {
