@@ -47,6 +47,7 @@ import { ApplicationStatusSelect } from "src/shared/ui/select/ApplicationStatusS
 import { ApplicationStatus } from "src/shared/user/applications"
 import { hasPermission } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import { UplatnicaButton } from "src/pages/applications/uplatnica/UplatnicaButton"
 import { ApplicationAssigneeSelect } from "../assignee/ApplicationAssigneeSelect"
 import { AskAssigneeButton } from "../assignee/AskAssigneeButton"
 import { ApplicationStatusReason } from "../row/ApplicationStatusReason"
@@ -404,6 +405,7 @@ export const ApplicationView = () => {
                         >
                             <FormattedMessage id={locales.envelopDownload} />
                         </Button>
+                        <UplatnicaButton application={application} className={classes.uplatnicaGenerate} />
                         <Button
                             variant="outline"
                             rightSection={<IconPencil size={14} />}

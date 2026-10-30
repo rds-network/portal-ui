@@ -15,6 +15,7 @@ import { useOfficialGroup } from "src/app/providers/OfficialGroupProvider"
 import { usePrograms } from "src/app/providers/ProgramsProvider"
 import { locales } from "src/pages/profile/applicationDocs/lib/locales"
 import { ApplicationLookupApiService } from "src/shared/api/applications/ApplicationLookupApiService"
+import { UplatnicaButton } from "src/pages/applications/uplatnica/UplatnicaButton"
 import { buildContractPdf } from "src/shared/docs/contract"
 import generateEnvelopPdf from "src/shared/docs/envelop"
 import generateQuestionnairePdf from "src/shared/docs/questionnaire"
@@ -160,6 +161,7 @@ export const ApplicationDocsCard = ({ userInfo }: ApplicationDocsCardProps) => {
                         >
                             <FormattedMessage id={locales.envelopDownload} />
                         </Button>
+                        <UplatnicaButton application={application} className={classes.pdfButton} />
                     </Flex>
                 </>
             )}
