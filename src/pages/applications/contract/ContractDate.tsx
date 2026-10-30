@@ -1,4 +1,4 @@
-import { Button, Flex, Popover, Text } from "@mantine/core"
+import { Anchor, Button, Flex, Popover, Text } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
@@ -8,10 +8,12 @@ import { IconCalendarMonth, IconCalendarOff, IconDeviceFloppy, IconPencil, IconP
 import dayjs from "dayjs"
 import { useEffect, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { Link, useSearchParams } from "react-router"
 import classes from "src/pages/applications/contract/ContractDate.module.scss"
+import { ApplicationLookupApiService } from "src/shared/api/applications/ApplicationLookupApiService"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
-import { previousContractEnd } from "src/shared/utils/latestContractEnd"
+import { previousContract } from "src/shared/utils/latestContractEnd"
 import { ContractTypeSelect } from "src/shared/ui/contractTypeSelect/ContractTypeSelect"
 import { v4 } from "uuid"
 import { z } from "zod"
@@ -26,7 +28,9 @@ interface ContractEditModalProps {
 
 export const ContractDate = ({ application, onChange, className, disabled }: ContractEditModalProps) => {
     const intl = useIntl()
-    const [opened, { close, toggle }] = useDisclosure(false)
+    const [opened, { close, toggle, open }] = useDisclosure(false)
+    const [searchParams, setSearchParams] = useSearchParams()
+    const targetRef = useRef<HTMLButtonElement>(null)
 
     const initialContract: ContractDto = application.contract || {
         id: v4(),
@@ -38,9 +42,9 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
     const [contract, setContract] = useState<ContractDto>(initialContract)
     const prolongationApplied = useRef(false)
 
-    const { data: previousEnd } = useQuery({
-        queryKey: ["previous-contract-end", application.email],
-        enabled: application.type === "PROLONGATION" && !!application.email && !application.contract,
+    const { data: reference } = useQuery({
+        queryKey: ["contract-date-reference", application.email, application.id],
+        enabled: !!application.email && (opened || (application.type === "PROLONGATION" && !application.contract)),
         queryFn: async () => {
             const response = await UserApiService.searchUsers(application.email!, {
                 pageNumber: 0,
@@ -49,7 +53,26 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
             const user = response.data.content?.find(
                 (item) => item.email?.trim().toLowerCase() === application.email?.trim().toLowerCase()
             )
-            return previousContractEnd(user?.contracts)
+            const previous = previousContract(user?.contracts, {
+                startDate: application.contract?.startDate,
+                endDate: application.contract?.endDate,
+            })
+            return {
+                username: user?.username ?? null,
+                startDate: previous?.startDate ?? null,
+                endDate: previous?.endDate ?? null,
+            }
+        },
+    })
+    const previousEnd = reference?.endDate
+
+    const { data: oldApplicationId } = useQuery({
+        queryKey: ["contract-date-old-application", reference?.username, application.id],
+        enabled: opened && !!reference?.username,
+        queryFn: async () => {
+            const old = await ApplicationLookupApiService.getForUser(reference!.username!)
+            if (!old?.id || old.id === application.id) return null
+            return old.id
         },
     })
 
@@ -98,6 +121,21 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
         form.setFieldValue("contractUntil", start.add(1, "year").toDate())
     }, [previousEnd, application.contract, form])
 
+    const editContract = searchParams.get("editContract")
+    useEffect(() => {
+        if (editContract !== application.id) return
+        open()
+        targetRef.current?.scrollIntoView({ block: "center", behavior: "smooth" })
+        setSearchParams(
+            (prev) => {
+                const next = new URLSearchParams(prev)
+                next.delete("editContract")
+                return next
+            },
+            { replace: true }
+        )
+    }, [editContract, application.id, open, setSearchParams])
+
     const onUpdate = () => {
         if (!form.validate().hasErrors) {
             if (onChange) {
@@ -111,6 +149,7 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
         <Popover width={350} withArrow shadow="md" opened={opened}>
             <Popover.Target>
                 <Button
+                    ref={targetRef}
                     variant="transparent"
                     rightSection={application.contract ? <IconPencil size={14} /> : <IconPlus size={14} />}
                     color={application.contract ? "blue" : "gray"}
@@ -133,6 +172,40 @@ export const ContractDate = ({ application, onChange, className, disabled }: Con
             </Popover.Target>
             <Popover.Dropdown>
                 <Flex rowGap={8} direction="column">
+                    {(reference?.endDate || oldApplicationId) && (
+                        <Flex direction="column" gap={2}>
+                            {reference?.endDate && (
+                                <Text size="xs" c="dimmed">
+                                    {reference.startDate ? (
+                                        <FormattedMessage
+                                            id={locales.previousContract}
+                                            values={{
+                                                from: dayjs(reference.startDate).format("DD MMM YYYY"),
+                                                until: dayjs(reference.endDate).format("DD MMM YYYY"),
+                                            }}
+                                        />
+                                    ) : (
+                                        <FormattedMessage
+                                            id={locales.previousContractUntil}
+                                            values={{
+                                                until: dayjs(reference.endDate).format("DD MMM YYYY"),
+                                            }}
+                                        />
+                                    )}
+                                </Text>
+                            )}
+                            {oldApplicationId && (
+                                <Anchor
+                                    component={Link}
+                                    to={`/application/${oldApplicationId}`}
+                                    target="_blank"
+                                    size="xs"
+                                >
+                                    <FormattedMessage id={locales.oldApplication} />
+                                </Anchor>
+                            )}
+                        </Flex>
+                    )}
                     <Flex columnGap={8}>
                         <DateInput
                             withAsterisk

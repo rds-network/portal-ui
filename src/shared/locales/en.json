@@ -116,7 +116,8 @@
             "emptyContent": "Empty email body",
             "success": "Message sent successfully",
             "autoDocs": "The contract and questionnaire are attached automatically. You can remove them before sending.",
-            "autoDocsMissing": "The contract and questionnaire were not attached: set the contract dates.",
+            "autoDocsMissing": "The contract and questionnaire were not attached.",
+            "autoDocsSetDates": "Set the contract dates",
             "attaching": "Attaching the contract and questionnaire…"
         },
         "announcements": {
@@ -1281,7 +1282,10 @@
                 "contract-until-before": "Before the start date",
                 "cancel": "Cancel",
                 "save": "Save",
-                "add": "Add"
+                "add": "Add",
+                "previous-contract": "Previous contract: {from} — {until}",
+                "previous-contract-until": "Previous contract until {until}",
+                "old-application": "Previous questionnaire"
             }
         },
         "cleaning": {

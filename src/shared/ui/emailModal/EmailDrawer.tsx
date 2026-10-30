@@ -1,4 +1,4 @@
-import { Button, Drawer, Flex, Loader, Pill, Text, Textarea, TextInput } from "@mantine/core"
+import { Anchor, Button, Drawer, Flex, Loader, Pill, Text, Textarea, TextInput } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
 import { FileInfoDto } from "@rds-network/portal-api-axios"
@@ -13,6 +13,7 @@ import { useEditor } from "@tiptap/react"
 import { StarterKit } from "@tiptap/starter-kit"
 import React, { createRef, useEffect, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { Link as RouterLink } from "react-router"
 import { FilesApiService } from "src/shared/api/FilesApiService"
 import { MailApiService } from "src/shared/api/MailApiService"
 import EmailTemplate from "src/shared/email/EmailTemplate"
@@ -29,6 +30,8 @@ interface EmailModalProps {
     from?: string
     /** Файлы, которые нужно загрузить и приложить при открытии окна. */
     prepareAttachments?: () => Promise<File[]>
+    /** Куда перейти, если договор и анкета не приложились из‑за пустых дат. */
+    datesHref?: string
 }
 
 export const EmailDrawer = (props: EmailModalProps) => {
@@ -246,9 +249,19 @@ export const EmailDrawer = (props: EmailModalProps) => {
                         </Text>
                     </Flex>
                 )}
-                {autoDocsNote && (
-                    <Text size="sm" c={autoDocsNote === "attached" ? "dimmed" : "red"}>
-                        <FormattedMessage id={autoDocsNote === "attached" ? locales.autoDocs : locales.autoDocsMissing} />
+                {autoDocsNote === "attached" && (
+                    <Text size="sm" c="dimmed">
+                        <FormattedMessage id={locales.autoDocs} />
+                    </Text>
+                )}
+                {autoDocsNote === "missing" && (
+                    <Text size="sm" c="red">
+                        <FormattedMessage id={locales.autoDocsMissing} />{" "}
+                        {props.datesHref && (
+                            <Anchor component={RouterLink} to={props.datesHref} inherit onClick={props.close}>
+                                <FormattedMessage id={locales.autoDocsSetDates} />
+                            </Anchor>
+                        )}
                     </Text>
                 )}
                 {(uploadedFiles.length !== 0 || loadingFiles.length !== 0) && (
