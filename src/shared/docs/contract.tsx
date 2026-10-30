@@ -217,8 +217,7 @@ export default function generateContractPdf(
     writeCentered("УГОВОР О ВОЛОНТИРАЊУ", TITLE_PT, 3)
 
     setBody()
-    const documentDate = contractFrom.isBefore(dayjs(), "day") ? contractFrom : dayjs()
-    writeLeftRight(documentDate.format("DD.MM.YYYY"), "град Нови Сад", BODY_PT, 3)
+    writeLeftRight(contractFrom.format("DD.MM.YYYY"), "град Нови Сад", BODY_PT, 3)
 
     writeWrapped("На основу Закoнa о волонтирању („Службени гласник РС“, бр. 36/2010), уговорне стране:", BODY_PT, 2)
 
@@ -528,7 +527,7 @@ export default function generateContractPdf(
 
 /**
  * Для продления «волонтирање од» — конец предыдущего договора.
- * Дата в шапке — сегодня, но не позже начала волонтёрства.
+ * Дата в шапке — то же начало, а не день скачивания.
  * knownContracts — договоры с карточки волонтёра, чтобы не искать учётку ещё раз.
  */
 export async function buildContractPdf(
