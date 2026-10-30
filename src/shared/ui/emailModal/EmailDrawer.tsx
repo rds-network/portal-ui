@@ -19,6 +19,7 @@ import { MailApiService } from "src/shared/api/MailApiService"
 import EmailTemplate from "src/shared/email/EmailTemplate"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { FileUploader, FileUploaderInterface } from "src/shared/ui/fileUploader/FileUploader"
+import { AttachmentPreview } from "./AttachmentPreview"
 import classes from "./EmailDrawer.module.scss"
 import { locales } from "./lib/locales"
 
@@ -47,6 +48,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
     const [loadingFiles, setLoadingFiles] = useState<String[]>([])
     const [autoDocsNote, setAutoDocsNote] = useState<"attached" | "missing" | null>(null)
     const [attaching, setAttaching] = useState(false)
+    const [previewId, setPreviewId] = useState<string | null>(null)
     const prepareRef = useRef(props.prepareAttachments)
     prepareRef.current = props.prepareAttachments
 
@@ -102,6 +104,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
             setLoadingFiles([])
             setAutoDocsNote(null)
             setAttaching(false)
+            setPreviewId(null)
             return
         }
         const prepare = prepareRef.current
@@ -136,6 +139,14 @@ export const EmailDrawer = (props: EmailModalProps) => {
         }
     }, [props.opened])
 
+    useEffect(() => {
+        if (previewId && uploadedFiles.some((file) => file.id === previewId)) return
+        const next = uploadedFiles.find((file) => file.name.toLowerCase().endsWith(".pdf")) ?? uploadedFiles[0]
+        setPreviewId(next?.id ?? null)
+    }, [uploadedFiles, previewId])
+
+    const previewFile = uploadedFiles.find((file) => file.id === previewId) ?? null
+
     const onSend = () => {
         if (topic === "") {
             alert(intl.formatMessage({ id: locales.emptySubject }))
@@ -155,8 +166,9 @@ export const EmailDrawer = (props: EmailModalProps) => {
             title={<FormattedMessage id={locales.title} />}
             offset={16}
             radius="md"
-            size="xl"
+            size={previewFile ? "min(76rem, 96vw)" : "xl"}
         >
+            <div className={previewFile ? `${classes.shell} ${classes.shellSplit}` : classes.shell}>
             <Flex direction="column" className={classes.drawer}>
                 <Textarea
                     label={<FormattedMessage id={locales.recipients} />}
@@ -271,7 +283,13 @@ export const EmailDrawer = (props: EmailModalProps) => {
                                 <Pill
                                     key={file.id}
                                     withRemoveButton
-                                    className={classes.filePill}
+                                    className={
+                                        file.id === previewId
+                                            ? `${classes.filePill} ${classes.filePillActive}`
+                                            : classes.filePill
+                                    }
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => setPreviewId(file.id)}
                                     onRemove={() => fileUploaderRef.current?.delete(file.id)}
                                 >
                                     <Text className={classes.filePillText} truncate="end">
@@ -305,6 +323,8 @@ export const EmailDrawer = (props: EmailModalProps) => {
                     </Button>
                 </Flex>
             </Flex>
+            {previewFile && <AttachmentPreview file={previewFile} />}
+            </div>
         </Drawer>
     )
 }

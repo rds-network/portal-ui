@@ -118,7 +118,10 @@
             "autoDocs": "The contract and questionnaire are attached automatically. You can remove them before sending.",
             "autoDocsMissing": "The contract and questionnaire were not attached.",
             "autoDocsSetDates": "Set the contract dates",
-            "attaching": "Attaching the contract and questionnaire…"
+            "attaching": "Attaching the contract and questionnaire…",
+            "preview": "Preview",
+            "previewFail": "Could not show the file",
+            "previewOther": "This format cannot be previewed"
         },
         "announcements": {
             "title": "Notifications",

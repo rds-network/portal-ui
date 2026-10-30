@@ -10,4 +10,7 @@ export const locales = {
     autoDocsMissing: "common.email-drawer.autoDocsMissing",
     autoDocsSetDates: "common.email-drawer.autoDocsSetDates",
     attaching: "common.email-drawer.attaching",
+    preview: "common.email-drawer.preview",
+    previewFail: "common.email-drawer.previewFail",
+    previewOther: "common.email-drawer.previewOther",
 }
