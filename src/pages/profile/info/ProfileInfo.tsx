@@ -722,6 +722,18 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 </Flex>
             </Flex>
             <Text className={classes.userName}>{userInfo?.fullName}</Text>
+            {showSensitiveData && (
+                <Flex align="center" gap={6} mt={4}>
+                    <IconClock size={16} />
+                    <Text size="sm" fw={600}>
+                        <FormattedMessage id="pages.profile.props.lastSeen" />
+                        {": "}
+                        {lastSeenOf(userInfo)
+                            ? dayjs(lastSeenOf(userInfo)).format("DD MMM YYYY, HH:mm")
+                            : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })}
+                    </Text>
+                </Flex>
+            )}
             {((gratitude?.curator ?? 0) > 0 || (gratitude?.manager ?? 0) > 0) && (
                 <Flex gap={6} wrap="wrap" mt={8}>
                     {(gratitude?.curator ?? 0) > 0 && (
@@ -924,18 +936,6 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     value={userInfo?.email}
                     icon={<IconMail size={18} />}
                     href={`mailto:${userInfo?.email}`}
-                    className={classes.propertyBox}
-                />
-            )}
-            {showSensitiveData && (
-                <TextPropertyBox
-                    name={"pages.profile.props.lastSeen"}
-                    value={
-                        lastSeenOf(userInfo)
-                            ? dayjs(lastSeenOf(userInfo)).format("DD MMM YYYY, HH:mm")
-                            : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })
-                    }
-                    icon={<IconClock size={18} />}
                     className={classes.propertyBox}
                 />
             )}

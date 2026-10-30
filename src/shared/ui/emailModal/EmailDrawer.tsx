@@ -31,6 +31,12 @@ interface EmailModalProps {
     from?: string
     /** Файлы, которые нужно загрузить и приложить при открытии окна. */
     prepareAttachments?: () => Promise<File[]>
+    /** Смена этого значения заново собирает вложения, не закрывая письмо. */
+    attachmentRevision?: string | number
+    /** Кнопки над вложениями, например сумма уплатницы. */
+    attachmentTools?: React.ReactNode
+    /** Текст, если файлы приложились. По умолчанию — про договор и анкету. */
+    attachedMessageId?: string
     /** Куда перейти, если договор и анкета не приложились из‑за пустых дат. */
     datesHref?: string
 }
@@ -140,7 +146,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
         return () => {
             cancelled = true
         }
-    }, [props.opened])
+    }, [props.opened, props.attachmentRevision])
 
     useEffect(() => {
         if (previewId && uploadedFiles.some((file) => file.id === previewId)) return
@@ -248,6 +254,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
                         ))}
                     </Flex>
                 )}
+                {props.attachmentTools}
                 <FileUploader
                     ref={fileUploaderRef}
                     maxFiles={10}
@@ -266,7 +273,7 @@ export const EmailDrawer = (props: EmailModalProps) => {
                 )}
                 {autoDocsNote === "attached" && (
                     <Text size="sm" c="dimmed">
-                        <FormattedMessage id={locales.autoDocs} />
+                        <FormattedMessage id={props.attachedMessageId || locales.autoDocs} />
                     </Text>
                 )}
                 {autoDocsNote === "missing" && (

@@ -22,6 +22,7 @@ import {
     PortalEventWriteRequest,
 } from "src/shared/api/PortalEventApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
@@ -68,7 +69,7 @@ export const DesktopPage: React.FC = () => {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const { programs, projects } = useProgramProjectFilter(null, null)
-    const [reportsTab, setReportsTab] = useState<"new" | "all">("new")
+    const [reportsTab, setReportsTab] = useState<"new" | "all" | "prolongations">("new")
     const [eventOpen, setEventOpen] = useState(false)
     const [editingEventId, setEditingEventId] = useState<string | null>(null)
     const [viewingEvent, setViewingEvent] = useState<PortalEventDto | null>(null)
@@ -110,6 +111,19 @@ export const DesktopPage: React.FC = () => {
             ).then((r) => r.data),
     })
     const newReports = newReportsResponse.content
+
+    const { data: prolongations = [] } = useQuery({
+        enabled: isAdminDesktop && !!user,
+        queryKey: ["desktop-prolongations"],
+        queryFn: () =>
+            PrivateApplicationApiService.getApplications(
+                { pageNumber: 0, pageSize: 500, sort: ["created;desc"] },
+                "",
+                { showCompleted: false }
+            ).then((response) =>
+                (response.data.content || []).filter((item) => item.type === "PROLONGATION")
+            ),
+    })
 
     const { data: assignments = [] } = useQuery({
         queryKey: ["work-assignments"],
@@ -581,6 +595,16 @@ export const DesktopPage: React.FC = () => {
                                 >
                                     <FormattedMessage id="pages.desktop.reportsAdmin" />
                                 </button>
+                                <button
+                                    type="button"
+                                    className={`${classes.tab} ${reportsTab === "prolongations" ? classes.tabActive : ""}`}
+                                    onClick={() => setReportsTab("prolongations")}
+                                >
+                                    <FormattedMessage id="pages.desktop.prolongations" />
+                                    {prolongations.length > 0 && (
+                                        <span className={classes.tabCount}>{prolongations.length}</span>
+                                    )}
+                                </button>
                             </div>
                         ) : (
                             <Title order={2} className={classes.cardTitle}>
@@ -590,26 +614,71 @@ export const DesktopPage: React.FC = () => {
                         <Link
                             className={classes.cardLink}
                             to={
-                                isAdminDesktop
-                                    ? reportsTab === "new"
-                                        ? "/reports/review"
-                                        : "/reports"
-                                    : "/reports/personal"
+                                reportsTab === "prolongations"
+                                    ? "/applications"
+                                    : isAdminDesktop
+                                      ? reportsTab === "new"
+                                          ? "/reports/review"
+                                          : "/reports"
+                                      : "/reports/personal"
                             }
                         >
                             <FormattedMessage
                                 id={
-                                    isAdminDesktop
-                                        ? reportsTab === "new"
-                                            ? "pages.desktop.openReview"
-                                            : "pages.desktop.allReportsAdmin"
-                                        : "pages.desktop.allReports"
+                                    reportsTab === "prolongations"
+                                        ? "pages.desktop.allApplications"
+                                        : isAdminDesktop
+                                          ? reportsTab === "new"
+                                              ? "pages.desktop.openReview"
+                                              : "pages.desktop.allReportsAdmin"
+                                          : "pages.desktop.allReports"
                                 }
                             />
                         </Link>
                     </div>
                     <div className={classes.listScroll}>
-                        {(isAdminDesktop && reportsTab === "new" ? newReports : reports).length === 0 && (
+                        {isAdminDesktop && reportsTab === "prolongations" && prolongations.length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage id="pages.desktop.prolongationsEmpty" />
+                            </Text>
+                        )}
+                        {isAdminDesktop &&
+                            reportsTab === "prolongations" &&
+                            prolongations.map((application) => (
+                                <div
+                                    key={application.id}
+                                    className={classes.row}
+                                    role="link"
+                                    onClick={() => navigate(`/application/${application.id}`)}
+                                >
+                                    <div className={classes.rowBody}>
+                                        <Text className={classes.messageName} lineClamp={1}>
+                                            {application.name}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                            {application.email}
+                                            {" · "}
+                                            <FormattedMessage
+                                                id={`common.application-status.${application.status}`}
+                                            />
+                                            {application.created
+                                                ? ` · ${dayjs(application.created).format("DD MMM YYYY")}`
+                                                : ""}
+                                        </Text>
+                                    </div>
+                                    {application.email && (
+                                        <Link
+                                            className={classes.cardLink}
+                                            to={`/volunteers/heatmap?search=${encodeURIComponent(application.email)}`}
+                                            onClick={(event) => event.stopPropagation()}
+                                        >
+                                            <FormattedMessage id="pages.profile.openHeatmap" />
+                                        </Link>
+                                    )}
+                                </div>
+                            ))}
+                        {reportsTab !== "prolongations" &&
+                            (isAdminDesktop && reportsTab === "new" ? newReports : reports).length === 0 && (
                             <Text className={classes.empty}>
                                 <FormattedMessage
                                     id={
@@ -620,7 +689,8 @@ export const DesktopPage: React.FC = () => {
                                 />
                             </Text>
                         )}
-                        {(isAdminDesktop && reportsTab === "new" ? newReports : reports).map((report) => {
+                        {reportsTab !== "prolongations" &&
+                            (isAdminDesktop && reportsTab === "new" ? newReports : reports).map((report) => {
                             const creator =
                                 (report.user && users[report.user]) || user || defaultUser(report.user || "")
                             const program = programs.find((p) => p.code === report.program)
