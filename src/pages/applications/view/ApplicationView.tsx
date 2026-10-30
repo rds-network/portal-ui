@@ -35,7 +35,7 @@ import { ApplicationNote } from "src/pages/applications/note/ApplicationNote"
 import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
 import { cacheApplication, useApplicationUpdate } from "src/shared/api/applications/useApplicationUpdate"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
-import generateContractPdf from "src/shared/docs/contract"
+import { buildContractPdf } from "src/shared/docs/contract"
 import generateEnvelopPdf from "src/shared/docs/envelop"
 import generateQuestionnairePdf from "src/shared/docs/questionnaire"
 import { setDocumentTitleByString } from "src/shared/hooks/useDocumentTitle"
@@ -377,7 +377,7 @@ export const ApplicationView = () => {
                             disabled={application.contract == null}
                             className={classes.contractGenerate}
                             onClick={() => {
-                                generateContractPdf(application, officialGroup)
+                                void buildContractPdf(application, officialGroup)
                             }}
                         >
                             <FormattedMessage id={locales.contractDownload} />

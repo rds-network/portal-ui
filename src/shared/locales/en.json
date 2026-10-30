@@ -114,7 +114,10 @@
             "send": "Send",
             "emptySubject": "Subject is required",
             "emptyContent": "Empty email body",
-            "success": "Message sent successfully"
+            "success": "Message sent successfully",
+            "autoDocs": "The contract and questionnaire are attached automatically. You can remove them before sending.",
+            "autoDocsMissing": "The contract and questionnaire were not attached: set the contract dates.",
+            "attaching": "Attaching the contract and questionnaire…"
         },
         "announcements": {
             "title": "Notifications",
@@ -229,6 +232,8 @@
             "subtitle": "Reports, tasks and messages in one place.",
             "reports": "My reports",
             "reportsAdmin": "All reports",
+            "reportsNew": "New",
+            "reportsNewEmpty": "No new reports",
             "allReports": "All reports and filters →",
             "allReportsAdmin": "All reports →",
             "tasks": "Tasks",
@@ -659,6 +664,8 @@
                 "gender.notSelected": "Not specified",
                 "phone": "Phone",
                 "email": "Email",
+                "lastSeen": "Last visit",
+                "lastSeenNever": "Has not signed in yet",
                 "telegram": "Telegram"
             },
             "validation": {

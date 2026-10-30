@@ -114,7 +114,10 @@
             "send": "Pošalji",
             "emptySubject": "Tema je obavezna",
             "emptyContent": "Prazno telo emaila",
-            "success": "Poruka uspešno poslata"
+            "success": "Poruka uspešno poslata",
+            "autoDocs": "Ugovor i upitnik su automatski priloženi. Možete ih ukloniti pre slanja.",
+            "autoDocsMissing": "Ugovor i upitnik nisu priloženi: unesite datume ugovora.",
+            "attaching": "Prilažemo ugovor i upitnik…"
         },
         "announcements": {
             "title": "Obaveštenja",
@@ -229,6 +232,8 @@
             "subtitle": "Izveštaji, zadaci i poruke na jednom mestu.",
             "reports": "Moji izveštaji",
             "reportsAdmin": "Svi izveštaji",
+            "reportsNew": "Novi",
+            "reportsNewEmpty": "Nema novih izveštaja",
             "allReports": "Svi izveštaji i filteri →",
             "allReportsAdmin": "Svi izveštaji →",
             "tasks": "Zadaci",
@@ -659,6 +664,8 @@
                 "gender.notSelected": "Nije navedeno",
                 "phone": "Telefon",
                 "email": "Email",
+                "lastSeen": "Poslednja poseta",
+                "lastSeenNever": "Još se nije prijavio",
                 "telegram": "Telegram"
             },
             "validation": {

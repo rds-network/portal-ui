@@ -68,6 +68,7 @@ export const DesktopPage: React.FC = () => {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const { programs, projects } = useProgramProjectFilter(null, null)
+    const [reportsTab, setReportsTab] = useState<"new" | "all">("new")
     const [eventOpen, setEventOpen] = useState(false)
     const [editingEventId, setEditingEventId] = useState<string | null>(null)
     const [viewingEvent, setViewingEvent] = useState<PortalEventDto | null>(null)
@@ -97,6 +98,18 @@ export const DesktopPage: React.FC = () => {
     })
 
     const reports = reportsResponse.content
+
+    const { data: newReportsResponse } = useQuery({
+        enabled: isAdminDesktop && !!user?.username,
+        queryKey: ["desktop-reports", "new"],
+        initialData: { page: defaultPageResponse, content: [] },
+        queryFn: () =>
+            ReportApiService.getReports(
+                { ...defaultPage, pageSize: 8 },
+                { ...defaultFilter, login: null, status: "CREATED" }
+            ).then((r) => r.data),
+    })
+    const newReports = newReportsResponse.content
 
     const { data: assignments = [] } = useQuery({
         queryKey: ["work-assignments"],
@@ -164,6 +177,7 @@ export const DesktopPage: React.FC = () => {
     const { data: users = {} } = resolveUsers(
         [
             ...reports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
+            ...newReports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
             ...reviewReports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
             ...messageLogins,
         ].filter((login, index, all) => all.indexOf(login) === index)
@@ -548,35 +562,65 @@ export const DesktopPage: React.FC = () => {
 
                 <section className={`${classes.card} ${classes.reportsCard}`} data-tour-id="desktop-reports">
                     <div className={classes.cardHeader}>
-                        <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage
-                                id={
-                                    isAdminDesktop
-                                        ? "pages.desktop.reportsAdmin"
-                                        : "pages.desktop.reports"
-                                }
-                            />
-                        </Title>
+                        {isAdminDesktop ? (
+                            <div className={classes.tabs}>
+                                <button
+                                    type="button"
+                                    className={`${classes.tab} ${reportsTab === "new" ? classes.tabActive : ""}`}
+                                    onClick={() => setReportsTab("new")}
+                                >
+                                    <FormattedMessage id="pages.desktop.reportsNew" />
+                                    {(newReportsResponse.page?.totalElements ?? 0) > 0 && (
+                                        <span className={classes.tabCount}>{newReportsResponse.page.totalElements}</span>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${classes.tab} ${reportsTab === "all" ? classes.tabActive : ""}`}
+                                    onClick={() => setReportsTab("all")}
+                                >
+                                    <FormattedMessage id="pages.desktop.reportsAdmin" />
+                                </button>
+                            </div>
+                        ) : (
+                            <Title order={2} className={classes.cardTitle}>
+                                <FormattedMessage id="pages.desktop.reports" />
+                            </Title>
+                        )}
                         <Link
                             className={classes.cardLink}
-                            to={isAdminDesktop ? "/reports" : "/reports/personal"}
+                            to={
+                                isAdminDesktop
+                                    ? reportsTab === "new"
+                                        ? "/reports/review"
+                                        : "/reports"
+                                    : "/reports/personal"
+                            }
                         >
                             <FormattedMessage
                                 id={
                                     isAdminDesktop
-                                        ? "pages.desktop.allReportsAdmin"
+                                        ? reportsTab === "new"
+                                            ? "pages.desktop.openReview"
+                                            : "pages.desktop.allReportsAdmin"
                                         : "pages.desktop.allReports"
                                 }
                             />
                         </Link>
                     </div>
                     <div className={classes.listScroll}>
-                        {reports.length === 0 && (
+                        {(isAdminDesktop && reportsTab === "new" ? newReports : reports).length === 0 && (
                             <Text className={classes.empty}>
-                                <FormattedMessage id="pages.my-reports.empty-reports" />
+                                <FormattedMessage
+                                    id={
+                                        isAdminDesktop && reportsTab === "new"
+                                            ? "pages.desktop.reportsNewEmpty"
+                                            : "pages.my-reports.empty-reports"
+                                    }
+                                />
                             </Text>
                         )}
-                        {reports.map((report) => {
+                        {(isAdminDesktop && reportsTab === "new" ? newReports : reports).map((report) => {
                             const creator =
                                 (report.user && users[report.user]) || user || defaultUser(report.user || "")
                             const program = programs.find((p) => p.code === report.program)

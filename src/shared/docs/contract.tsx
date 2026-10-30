@@ -1,4 +1,6 @@
-import { ApplicationDto, OfficialGroupDto } from "@rds-network/portal-api-axios"
+import { ApplicationDto, OfficialGroupDto, UserInfoDto } from "@rds-network/portal-api-axios"
+import { UserApiService } from "src/shared/api/user/UserApiService"
+import { previousContractEnd } from "src/shared/utils/latestContractEnd"
 import dayjs from "dayjs"
 import { jsPDF as JsPdf } from "jspdf"
 import { MONTSERRAT_BOLD_BOLD } from "src/shared/docs/fonts/Montserrat-Bold-bold"
@@ -9,8 +11,9 @@ import { notifications } from "@mantine/notifications"
 
 export default function generateContractPdf(
     application: ApplicationDto,
-    officialProgramDto: OfficialGroupDto | undefined
-) {
+    officialProgramDto: OfficialGroupDto | undefined,
+    options?: { download?: boolean; volunteeringFrom?: string | null }
+): File {
     const fullName = errorIfEmpty("Name", application.name)
     const birthDate = dayjs(errorIfEmpty("Birth date", application.birthDate)).format("DD.MM.YYYY")
     const passport = errorIfEmpty("Passport", application.passport)
@@ -23,7 +26,12 @@ export default function generateContractPdf(
         errorIfEmpty("City", application.city),
         errorIfEmpty("Address", application.address)
     )
-    const contractFrom = dayjs(errorIfEmpty("Contract start date", application.contract?.startDate))
+    const contractFrom = dayjs(
+        errorIfEmpty(
+            "Contract start date",
+            options?.volunteeringFrom || application.contract?.startDate
+        )
+    )
     const contractUntil = dayjs(errorIfEmpty("Contract end date", application.contract?.endDate))
 
     const pdf = new JsPdf({
@@ -507,7 +515,49 @@ export default function generateContractPdf(
     setBody()
     pdf.text(`потпис __________________ ${fullName}`, rightX, yRight)
 
-    pdf.save(`Ugovor_${fullName.replaceAll(" ", "_")}.pdf`)
+    const fileName = `Ugovor_${fullName.replaceAll(" ", "_")}.pdf`
+    const file = new File([pdf.output("blob")], fileName, { type: "application/pdf" })
+    if (options?.download !== false) {
+        pdf.save(fileName)
+    }
+    return file
+}
+
+/**
+ * Для продления дата на бланке — сегодня, а «волонтирање од» — конец предыдущего договора.
+ * knownContracts — договоры с карточки волонтёра, чтобы не искать учётку ещё раз.
+ */
+export async function buildContractPdf(
+    application: ApplicationDto,
+    officialProgramDto: OfficialGroupDto | undefined,
+    options?: { download?: boolean; knownContracts?: UserInfoDto["contracts"] }
+): Promise<File> {
+    let volunteeringFrom: string | null = null
+    if (application.type === "PROLONGATION") {
+        const contracts =
+            options?.knownContracts ??
+            (application.email ? await contractsByEmail(application.email) : null)
+        const previousEnd = previousContractEnd(contracts, {
+            startDate: application.contract?.startDate,
+            endDate: application.contract?.endDate,
+        })
+        const until = application.contract?.endDate
+        if (previousEnd && (!until || previousEnd < until)) {
+            volunteeringFrom = previousEnd
+        }
+    }
+    return generateContractPdf(application, officialProgramDto, {
+        download: options?.download,
+        volunteeringFrom,
+    })
+}
+
+async function contractsByEmail(email: string): Promise<UserInfoDto["contracts"]> {
+    const response = await UserApiService.searchUsers(email, { pageNumber: 0, pageSize: 5 })
+    const user = response.data.content?.find(
+        (item) => item.email?.trim().toLowerCase() === email.trim().toLowerCase()
+    )
+    return user?.contracts
 }
 
 function parseBoldMarkdown(input: string): Array<{ text: string; bold: boolean }> {

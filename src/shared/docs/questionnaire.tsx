@@ -9,7 +9,10 @@ import { MONTSERRAT_MEDIUM_NORMAL } from "src/shared/docs/fonts/Montserrat-Mediu
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 import { getFullAddress } from "src/shared/utils/getFullAddress"
 
-export default async function generateQuestionnairePdf(application: ApplicationDto) {
+export default async function generateQuestionnairePdf(
+    application: ApplicationDto,
+    options?: { download?: boolean }
+): Promise<File> {
     const fullName = must(application.name, "Name")
     const birthDate = fmt(application.birthDate, "Birth date")
     const passport = must(application.passport, "Passport")
@@ -77,10 +80,12 @@ export default async function generateQuestionnairePdf(application: ApplicationD
     drawPx(currentDate, 96, 735)
 
     const pdfBytes = await pdf.save()
-    saveAs(
-        new Blob([pdfBytes as BlobPart], { type: "application/pdf" }),
-        `Upitnik_${fullName.replace(/\s+/g, "_")}.pdf`
-    )
+    const fileName = `Upitnik_${fullName.replace(/\s+/g, "_")}.pdf`
+    const file = new File([pdfBytes as BlobPart], fileName, { type: "application/pdf" })
+    if (options?.download !== false) {
+        saveAs(file, fileName)
+    }
+    return file
 }
 
 function must(value: string | null | undefined, name: string): string {

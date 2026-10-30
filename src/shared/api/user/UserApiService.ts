@@ -44,6 +44,14 @@ export type MupLetterInfo = {
 
 export const mupLetterOf = (user: unknown): MupLetterInfo => (user as MupLetterInfo | null) ?? {}
 
+/** Последний заход. Поле может прийти раньше обновления сгенерированного клиента. */
+export type LastSeenInfo = {
+    lastSeenAt?: string | null
+}
+
+export const lastSeenOf = (user: unknown): string | null =>
+    (user as LastSeenInfo | null)?.lastSeenAt ?? null
+
 /** Очередь на расторжение — поля могут прийти раньше обновления сгенерированного клиента. */
 export type DissolutionQueueInfo = {
     dissolutionQueuedAt?: string | null
