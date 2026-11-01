@@ -5,7 +5,7 @@ import { notifications } from "@mantine/notifications"
 import { IconExternalLink, IconPlus } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useContext, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
@@ -47,6 +47,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 const ACTIVE_TASK_STATUSES = new Set(["TODO", "DOING", "REVIEW", "REDO"])
 const MANAGER_ROLES = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
+const APPLICATIONS_STAFF_ROLES = [UserGroup.ADMIN_VOLUNTEER, UserGroup.INTERVIEWER]
 
 const isReportInboxKind = (kind?: string | null) =>
     kind === "REPORT_CUSTOMER" || kind === "REPORT_DECISION"
@@ -81,6 +82,13 @@ export const DesktopPage: React.FC = () => {
     })
     const canManageEvents = hasPermission(user, MANAGER_ROLES) || !!curatorMe?.curator
     const isAdminDesktop = hasPermission(user, MANAGER_ROLES)
+    const canViewApplications = hasPermission(user, APPLICATIONS_STAFF_ROLES)
+
+    useEffect(() => {
+        if (!canViewApplications && reportsTab === "prolongations") {
+            setReportsTab("new")
+        }
+    }, [canViewApplications, reportsTab])
 
     const reportFilter = useMemo(
         () => ({
@@ -113,7 +121,7 @@ export const DesktopPage: React.FC = () => {
     const newReports = newReportsResponse.content
 
     const { data: prolongations = [] } = useQuery({
-        enabled: isAdminDesktop && !!user,
+        enabled: isAdminDesktop && !!user && canViewApplications,
         queryKey: ["desktop-prolongations"],
         queryFn: () =>
             PrivateApplicationApiService.getApplications(
@@ -595,16 +603,18 @@ export const DesktopPage: React.FC = () => {
                                 >
                                     <FormattedMessage id="pages.desktop.reportsAdmin" />
                                 </button>
-                                <button
-                                    type="button"
-                                    className={`${classes.tab} ${reportsTab === "prolongations" ? classes.tabActive : ""}`}
-                                    onClick={() => setReportsTab("prolongations")}
-                                >
-                                    <FormattedMessage id="pages.desktop.prolongations" />
-                                    {prolongations.length > 0 && (
-                                        <span className={classes.tabCount}>{prolongations.length}</span>
-                                    )}
-                                </button>
+                                {canViewApplications && (
+                                    <button
+                                        type="button"
+                                        className={`${classes.tab} ${reportsTab === "prolongations" ? classes.tabActive : ""}`}
+                                        onClick={() => setReportsTab("prolongations")}
+                                    >
+                                        <FormattedMessage id="pages.desktop.prolongations" />
+                                        {prolongations.length > 0 && (
+                                            <span className={classes.tabCount}>{prolongations.length}</span>
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <Title order={2} className={classes.cardTitle}>
