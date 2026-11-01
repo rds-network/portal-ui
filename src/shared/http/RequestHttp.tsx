@@ -39,11 +39,6 @@ RequestHttp.interceptors.response.use(
             location.reload()
             return
         }
-        if (status === 403) {
-            history.replace({ pathname: "/unauthorized" })
-            location.reload()
-            return
-        }
         let message: string = error.message
         if (error.response?.data) {
             const errorResponse = error.response.data as ErrorResponse
