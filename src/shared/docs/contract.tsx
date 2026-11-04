@@ -35,6 +35,7 @@ export default function generateContractPdf(
         )
     )
     const contractUntil = dayjs(errorIfEmpty("Contract end date", application.contract?.endDate))
+    const headerDate = contractHeaderDate(signedOnOf(application), contractFrom)
 
     const pdf = new JsPdf({
         orientation: "p",
@@ -217,7 +218,7 @@ export default function generateContractPdf(
     writeCentered("УГОВОР О ВОЛОНТИРАЊУ", TITLE_PT, 3)
 
     setBody()
-    writeLeftRight(contractFrom.format("DD.MM.YYYY"), "град Нови Сад", BODY_PT, 3)
+    writeLeftRight(headerDate.format("DD.MM.YYYY"), "град Нови Сад", BODY_PT, 3)
 
     writeWrapped("На основу Закoнa о волонтирању („Службени гласник РС“, бр. 36/2010), уговорне стране:", BODY_PT, 2)
 
@@ -527,7 +528,7 @@ export default function generateContractPdf(
 
 /**
  * Для продления «волонтирање од» — конец предыдущего договора.
- * Дата в шапке — то же начало, а не день скачивания.
+ * Дата в шапке — день оформления, не позже начала волонтёрства.
  * knownContracts — договоры с карточки волонтёра, чтобы не искать учётку ещё раз.
  */
 export async function buildContractPdf(
@@ -557,6 +558,23 @@ export async function buildContractPdf(
         download: options?.download,
         volunteeringFrom,
     })
+}
+
+/**
+ * Шапка: день, когда договор оформили. Если волонтёрство началось раньше — не позже этой даты.
+ * Если начало ещё впереди, в шапке остаётся день оформления.
+ * Без сохранённой даты (старый ответ API) шапка совпадает с началом, чтобы бланк не прыгал на «сегодня».
+ */
+export function contractHeaderDate(signedOn: dayjs.Dayjs | null, volunteeringFrom: dayjs.Dayjs): dayjs.Dayjs {
+    if (signedOn == null || !signedOn.isValid()) return volunteeringFrom
+    return signedOn.isBefore(volunteeringFrom, "day") ? signedOn : volunteeringFrom
+}
+
+function signedOnOf(application: ApplicationDto): dayjs.Dayjs | null {
+    const raw = (application as { contractDocumentDate?: string | null }).contractDocumentDate
+    if (!raw) return null
+    const signed = dayjs(raw)
+    return signed.isValid() ? signed : null
 }
 
 async function accountByEmail(email: string): Promise<UserInfoDto | undefined> {
