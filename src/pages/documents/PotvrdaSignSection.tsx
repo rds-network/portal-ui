@@ -39,13 +39,38 @@ export const PotvrdaSignSection = ({ draft, onChange }: Props) => {
                 onChange={(e) => patch({ showSignature: e.currentTarget.checked })}
             />
             {draft.showSignature && (
-                <Slider
-                    label={intl.formatMessage({ id: "pages.zahvalnica.signatureScale" }, { value: draft.signatureScale })}
-                    min={10}
-                    max={120}
-                    value={draft.signatureScale}
-                    onChange={(value) => patch({ signatureScale: value })}
-                />
+                <>
+                    <Slider
+                        label={intl.formatMessage(
+                            { id: "pages.zahvalnica.signatureScale" },
+                            { value: draft.signatureScale }
+                        )}
+                        min={10}
+                        max={120}
+                        value={draft.signatureScale}
+                        onChange={(value) => patch({ signatureScale: value })}
+                    />
+                    <Slider
+                        label={intl.formatMessage(
+                            { id: "pages.zahvalnica.signatureOffsetX" },
+                            { value: draft.signatureOffsetX }
+                        )}
+                        min={-40}
+                        max={40}
+                        value={draft.signatureOffsetX}
+                        onChange={(value) => patch({ signatureOffsetX: value })}
+                    />
+                    <Slider
+                        label={intl.formatMessage(
+                            { id: "pages.zahvalnica.signatureOffsetY" },
+                            { value: draft.signatureOffsetY }
+                        )}
+                        min={-40}
+                        max={40}
+                        value={draft.signatureOffsetY}
+                        onChange={(value) => patch({ signatureOffsetY: value })}
+                    />
+                </>
             )}
             <Switch
                 label={<FormattedMessage id="pages.zahvalnica.showStamp" />}
@@ -53,13 +78,29 @@ export const PotvrdaSignSection = ({ draft, onChange }: Props) => {
                 onChange={(e) => patch({ showStamp: e.currentTarget.checked })}
             />
             {draft.showStamp && (
-                <Slider
-                    label={intl.formatMessage({ id: "pages.zahvalnica.stampScale" }, { value: draft.stampScale })}
-                    min={20}
-                    max={140}
-                    value={draft.stampScale}
-                    onChange={(value) => patch({ stampScale: value })}
-                />
+                <>
+                    <Slider
+                        label={intl.formatMessage({ id: "pages.zahvalnica.stampScale" }, { value: draft.stampScale })}
+                        min={20}
+                        max={140}
+                        value={draft.stampScale}
+                        onChange={(value) => patch({ stampScale: value })}
+                    />
+                    <Slider
+                        label={intl.formatMessage({ id: "pages.zahvalnica.stampOffsetX" }, { value: draft.stampOffsetX })}
+                        min={-40}
+                        max={60}
+                        value={draft.stampOffsetX}
+                        onChange={(value) => patch({ stampOffsetX: value })}
+                    />
+                    <Slider
+                        label={intl.formatMessage({ id: "pages.zahvalnica.stampOffsetY" }, { value: draft.stampOffsetY })}
+                        min={-40}
+                        max={40}
+                        value={draft.stampOffsetY}
+                        onChange={(value) => patch({ stampOffsetY: value })}
+                    />
+                </>
             )}
             <Flex gap="sm" wrap="wrap">
                 <Button

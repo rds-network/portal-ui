@@ -41,6 +41,7 @@ const ApplicationJoinSettingsPage = lazy(
 const ZahvalnicaPage = lazy(() => import("src/pages/zahvalnica/ZahvalnicaPage"))
 const VolIdPage = lazy(() => import("src/pages/volId/VolIdPage"))
 const DocumentsPage = lazy(() => import("src/pages/documents/DocumentsPage"))
+const OfficialPotvrdaEditorPage = lazy(() => import("src/pages/documents/OfficialPotvrdaEditorPage"))
 const AchievementsPage = lazy(() => import("src/pages/achievements/AchievementsPage"))
 const PointMissionsAdminPage = lazy(() => import("src/pages/missions/PointMissionsAdminPage"))
 
@@ -188,6 +189,10 @@ export const routes: RouteProps[] = [
     {
         path: "/documents",
         element: <DocumentsPage />,
+    },
+    {
+        path: "/documents/official-potvrda",
+        element: <OfficialPotvrdaEditorPage />,
     },
     {
         path: "/achievements",
