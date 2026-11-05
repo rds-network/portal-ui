@@ -56,7 +56,13 @@ export const PotvrdaSignPreview = ({ draft, input }: Props) => {
     const sigWMm = docxSignatureWidthMm(draft)
     const stampAnchor = potvrdaDocxStampAnchorMm(draft)
     const sigAnchor = potvrdaDocxSignatureAnchorMm(draft)
-    const canvasMinHeight = mm(Math.max(stampMm + stampAnchor.y + 4, 22))
+    const sigHeightMm = Math.min(16, Math.max(8, sigWMm * 0.45))
+    const graphicsBottomMm = Math.max(
+        stampAnchor.y + stampMm,
+        sigAnchor.y + sigHeightMm,
+        draft.showStamp || draft.showSignature ? 18 : 8
+    )
+    const canvasMinHeight = mm(graphicsBottomMm)
 
     return (
         <div ref={previewRef} className={classes.preview}>
