@@ -7,7 +7,7 @@ import { IconFileTypePdf } from "@tabler/icons-react"
 import dayjs from "dayjs"
 import { useQuery } from "@tanstack/react-query"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useContext } from "react"
+import { useContext, useRef } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { UserContext } from "src/app/providers/UserContext"
 import { ApplicationLookupApiService } from "src/shared/api/applications/ApplicationLookupApiService"
@@ -42,14 +42,17 @@ const STAFF = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"]
 
 interface MembershipPotvrdaCardProps {
     user: UserInfoDto
+    volunteerPickRequired?: boolean
 }
 
-export const MembershipPotvrdaCard = ({ user }: MembershipPotvrdaCardProps) => {
+export const MembershipPotvrdaCard = ({ user, volunteerPickRequired = false }: MembershipPotvrdaCardProps) => {
     const intl = useIntl()
     const queryClient = useQueryClient()
     const { user: currentUser } = useContext(UserContext)
     const registerIssues = hasPermission(currentUser, STAFF)
     const [opened, { open, close }] = useDisclosure(false)
+    const issueForUsernameRef = useRef<string | null>(null)
+    const issueForGenderRef = useRef<"MALE" | "FEMALE" | null>(null)
 
     const { data: application, isFetching, isError } = useQuery({
         queryKey: ["applicationForUser", user.username, "potvrda"],
@@ -70,6 +73,8 @@ export const MembershipPotvrdaCard = ({ user }: MembershipPotvrdaCardProps) => {
     })
 
     const openModal = () => {
+        issueForUsernameRef.current = user.username ?? null
+        issueForGenderRef.current = (user.gender as "MALE" | "FEMALE" | undefined) ?? null
         const defaults = defaultPotvrdaFieldsFromProfile(user, application ?? undefined)
         form.setValues({
             fullName: defaults.fullName ?? "",
@@ -85,12 +90,13 @@ export const MembershipPotvrdaCard = ({ user }: MembershipPotvrdaCardProps) => {
 
     const onSubmit = form.onSubmit(async (values) => {
         try {
-            if (registerIssues && user.username) {
+            const volunteerUsername = issueForUsernameRef.current
+            if (registerIssues && volunteerUsername) {
                 const issueDate = toApiDate(values.contractSignedOn) ?? toApiDate(dayjs().format("DD.MM.YYYY."))
                 if (issueDate) {
                     await PotvrdaApiService.create({
                         kind: "MEMBERSHIP",
-                        volunteerUsername: user.username,
+                        volunteerUsername,
                         volunteerFullName: values.fullName,
                         issueDate,
                         periodFrom: toApiDate(values.contractSignedOn),
@@ -103,7 +109,7 @@ export const MembershipPotvrdaCard = ({ user }: MembershipPotvrdaCardProps) => {
             generatePotvrdaMembershipPdf({
                 ...values,
                 validUntil: values.indefinite ? null : values.validUntil.trim(),
-                gender: user.gender ?? null,
+                gender: issueForGenderRef.current ?? null,
             })
             close()
         } catch (err) {
@@ -135,7 +141,12 @@ export const MembershipPotvrdaCard = ({ user }: MembershipPotvrdaCardProps) => {
                     leftSection={<IconFileTypePdf size={18} />}
                     onClick={openModal}
                     loading={isFetching}
-                    disabled={!user.username}
+                    disabled={!user.username || volunteerPickRequired}
+                    title={
+                        volunteerPickRequired
+                            ? intl.formatMessage({ id: "pages.documents.subjectPickRequired" })
+                            : undefined
+                    }
                 >
                     <FormattedMessage id="pages.documents.generatePdf" />
                 </Button>

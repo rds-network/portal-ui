@@ -7,7 +7,7 @@ import { PageRequest, ReportFilter, UserInfoDto } from "@rds-network/portal-api-
 import { IconFileTypeDoc } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
@@ -46,14 +46,19 @@ type FormValues = z.infer<typeof schema>
 
 interface OfficialPotvrdaCardProps {
     user: UserInfoDto
+    volunteerPickRequired?: boolean
 }
 
-export const OfficialPotvrdaCard = ({ user }: OfficialPotvrdaCardProps) => {
+export const OfficialPotvrdaCard = ({ user, volunteerPickRequired = false }: OfficialPotvrdaCardProps) => {
     const intl = useIntl()
     const queryClient = useQueryClient()
     const [opened, { open, close }] = useDisclosure(false)
     const [hoursFrom, setHoursFrom] = useState<Date | null>(null)
     const [hoursTo, setHoursTo] = useState<Date | null>(null)
+    /** Кого оформляем — фиксируем при открытии модалки, чтобы смена поиска не подменила логин. */
+    const issueForUsernameRef = useRef<string | null>(null)
+    const issueForGenderRef = useRef<"MALE" | "FEMALE" | null>(null)
+    const issueForProgramCodeRef = useRef<string | null>(null)
 
     const form = useForm<FormValues>({
         initialValues: {
@@ -114,6 +119,9 @@ export const OfficialPotvrdaCard = ({ user }: OfficialPotvrdaCardProps) => {
     }
 
     const openModal = () => {
+        issueForUsernameRef.current = user.username ?? null
+        issueForGenderRef.current = (user.gender as "MALE" | "FEMALE" | undefined) ?? null
+        issueForProgramCodeRef.current = user.program?.code ?? null
         const defaults = defaultOfficialPotvrdaFields(user)
         const from = user.contracts?.map((c) => c.startDate).filter(Boolean).sort()[0]
         const to = user.contracts?.map((c) => c.endDate).filter(Boolean).sort().at(-1)
@@ -145,25 +153,26 @@ export const OfficialPotvrdaCard = ({ user }: OfficialPotvrdaCardProps) => {
 
     const generateMutation = useMutation({
         mutationFn: async (values: FormValues) => {
+            const volunteerUsername = issueForUsernameRef.current
             const issueDate = toApiDate(values.issueDate)
-            if (!issueDate || !user.username) {
+            if (!issueDate || !volunteerUsername) {
                 throw new Error(intl.formatMessage({ id: "pages.documents.registry.badDate" }))
             }
             const registered = await PotvrdaApiService.create({
                 kind: "OFFICIAL",
-                volunteerUsername: user.username,
+                volunteerUsername,
                 volunteerFullName: values.fullName,
                 issueDate,
                 periodFrom: toApiDate(values.periodFrom),
                 periodTo: toApiDate(values.periodTo),
                 totalHours: values.totalHours,
-                programCode: user.program?.code ?? null,
+                programCode: issueForProgramCodeRef.current,
                 servicesDescription: values.servicesDescription,
             })
             const payload: OfficialPotvrdaInput = {
                 ...values,
                 confirmNumber: registered.confirmNumber,
-                gender: user.gender ?? null,
+                gender: issueForGenderRef.current ?? null,
             }
             await generateOfficialPotvrdaDocx(payload)
             return registered
@@ -195,7 +204,12 @@ export const OfficialPotvrdaCard = ({ user }: OfficialPotvrdaCardProps) => {
                     mt="md"
                     leftSection={<IconFileTypeDoc size={18} />}
                     onClick={openModal}
-                    disabled={!user.username}
+                    disabled={!user.username || volunteerPickRequired}
+                    title={
+                        volunteerPickRequired
+                            ? intl.formatMessage({ id: "pages.documents.subjectPickRequired" })
+                            : undefined
+                    }
                 >
                     <FormattedMessage id="pages.documents.official.generate" />
                 </Button>
