@@ -1624,7 +1624,9 @@
             "subtitle": "Confirmation letters and volunteer hour reports for banks and institutions.",
             "generatePdf": "Download PDF",
             "subjectLabel": "Volunteer",
-            "subjectHint": "Leave empty to issue a document for yourself.",
+            "subjectHint": "Search by name or email and pick from the list — documents below will be issued for that person.",
+            "subjectPickRequired": "Select a volunteer above first, then click Download DOCX or Download PDF.",
+            "subjectActive": "Documents for: {name}",
             "membership": {
                 "title": "Potvrda o volontiranju",
                 "description": "Confirms an active volunteering contract with UDS (Serbian, for banks).",

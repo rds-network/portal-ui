@@ -1624,7 +1624,9 @@
             "subtitle": "Potvrde i izveštaji o volonterskom radu za banku i druge institucije.",
             "generatePdf": "Preuzmi PDF",
             "subjectLabel": "Volonter",
-            "subjectHint": "Ostavite prazno da izdate dokument za sebe.",
+            "subjectHint": "Pretražite po imenu ili email-u i izaberite iz liste — dokumenti ispod su za tu osobu.",
+            "subjectPickRequired": "Prvo izaberite volontera u polju iznad, zatim preuzmite DOCX ili PDF.",
+            "subjectActive": "Dokumenti za: {name}",
             "membership": {
                 "title": "Potvrda o volontiranju",
                 "description": "Potvrda da je ugovor o volontiranju u UDS na snazi (za banku).",
