@@ -44,45 +44,107 @@
     aspect-ratio: 210 / 297;
     border: 1px solid var(--mantine-color-default-border);
     border-radius: 8px;
-    padding: 16px;
+    padding: 10px 12px 8px;
     background: var(--mantine-color-body);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
     margin-inline: auto;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
-.previewSpacer {
+.previewBody {
     flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    font-family: "Times New Roman", Times, serif;
 }
 
-.signBlock {
+.previewParagraph {
+    margin: 0 0 3px;
+    font-size: 6.5px;
+    line-height: 1.22;
+    color: var(--mantine-color-text);
+}
+
+.previewCenter {
+    text-align: center;
+}
+
+.previewStart {
+    text-align: left;
+}
+
+.previewJustify {
+    text-align: justify;
+}
+
+.previewMuted {
+    color: var(--mantine-color-dimmed);
+}
+
+.previewBold {
+    font-weight: 700;
+}
+
+.signFooter {
+    display: grid;
+    grid-template-columns: 38% 16% 46%;
+    gap: 2px;
+    align-items: end;
+    width: 100%;
+    margin-top: 4px;
+    flex-shrink: 0;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.signColTitle {
+    text-align: left;
+    padding-bottom: 2px;
+}
+
+.signColMp {
+    text-align: center;
+    padding-bottom: 18px;
+}
+
+.signColImages {
     display: flex;
     flex-direction: column;
-    gap: 4px;
     align-items: center;
+    gap: 2px;
+}
+
+.signFooterText {
+    font-size: 6.5px;
+    line-height: 1.2;
 }
 
 .signCanvas {
     position: relative;
-    min-height: 80px;
+    min-height: 52px;
     width: 100%;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
 }
 
 .signatureImg {
+    position: relative;
+    z-index: 2;
     max-width: 100%;
     object-fit: contain;
 }
 
 .stampImg {
     position: absolute;
-    right: 8%;
+    left: 50%;
     bottom: 0;
+    margin-left: -20%;
     object-fit: contain;
     opacity: 0.95;
+    z-index: 1;
+    pointer-events: none;
 }
 
 @media (max-width: 900px) {

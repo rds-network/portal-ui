@@ -33,6 +33,9 @@ export const PotvrdaSignSection = ({ draft, onChange }: Props) => {
             <Text size="xs" c="dimmed">
                 <FormattedMessage id="pages.documents.official.sign.hint" />
             </Text>
+            <Text size="xs" c="dimmed">
+                <FormattedMessage id="pages.documents.official.sign.docxSizeHint" />
+            </Text>
             <Switch
                 label={<FormattedMessage id="pages.zahvalnica.showSignature" />}
                 checked={draft.showSignature}

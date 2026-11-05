@@ -4,7 +4,7 @@ import { saveAs } from "file-saver"
 import templateUrl from "src/assets/doc_templates/potvrda_official_shell.docx?url"
 import {
     addImageToDocx,
-    inlineDrawing,
+    anchoredDrawing,
     loadImageDataUrl,
     measureDataUrl,
     mmToEmu,
@@ -12,9 +12,9 @@ import {
 import { potvrdaCategoriesFromProfile } from "src/shared/docs/potvrdaOfficialCategories"
 import {
     defaultPotvrdaSignDraft,
+    docxSignatureWidthMm,
+    docxStampSizeMm,
     PotvrdaSignDraft,
-    signatureWidthMm,
-    stampSizeMm,
 } from "src/shared/docs/potvrdaSignDraft"
 import { DEFAULT_SIGNATURE, DEFAULT_STAMP } from "src/shared/docs/zahvalnicaDraft"
 
@@ -52,16 +52,28 @@ const run = (text: string, bold = false, sizeHalfPoints = 24): string =>
         text
     )}</w:t></w:r>`
 
-const paragraph = (parts: string, opts?: { center?: boolean; justify?: boolean; spacingLine?: number }): string => {
+const paragraph = (
+    parts: string,
+    opts?: {
+        center?: boolean
+        justify?: boolean
+        spacingLine?: number
+        keepNext?: boolean
+        tight?: boolean
+    }
+): string => {
     const jc = opts?.center
         ? "<w:jc w:val=\"center\"/>"
         : opts?.justify
           ? "<w:jc w:val=\"both\"/>"
           : ""
-    const spacing = opts?.spacingLine
-        ? `<w:spacing w:line="${opts.spacingLine}" w:lineRule="auto"/>`
-        : ""
-    return `<w:p><w:pPr><w:pStyle w:val="NoSpacing"/>${jc}${spacing}</w:pPr>${parts}</w:p>`
+    const spacing = opts?.tight
+        ? '<w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="exact"/>'
+        : opts?.spacingLine
+          ? `<w:spacing w:line="${opts.spacingLine}" w:lineRule="auto"/>`
+          : ""
+    const keepNext = opts?.keepNext ? "<w:keepNext/>" : ""
+    return `<w:p><w:pPr><w:pStyle w:val="NoSpacing"/>${jc}${spacing}${keepNext}</w:pPr>${parts}</w:p>`
 }
 
 export const genderWords = (gender: OfficialPotvrdaInput["gender"]) => ({
@@ -71,14 +83,68 @@ export const genderWords = (gender: OfficialPotvrdaInput["gender"]) => ({
         gender === "FEMALE" ? "обавила" : gender === "MALE" ? "обавио" : "обавио/ла",
 })
 
+export type OfficialPotvrdaPreviewBlock = {
+    text: string
+    align: "center" | "justify" | "start"
+    muted?: boolean
+    bold?: boolean
+}
+
+const formatHoursLabel = (totalHours: number) =>
+    Number.isInteger(totalHours) ? String(totalHours) : totalHours.toFixed(1).replace(/\.0$/, "")
+
+/** Plain-text blocks for the editor mini-preview (same wording as DOCX body). */
+export function getOfficialPotvrdaPreviewBlocks(input: OfficialPotvrdaInput): OfficialPotvrdaPreviewBlock[] {
+    const g = genderWords(input.gender)
+    const hoursLabel = formatHoursLabel(input.totalHours)
+
+    return [
+        { text: "Удружење грађана «РУСКА ДИЈАСПОРА У СРБИJИ»,", align: "center", bold: true },
+        { text: "(назив и седиште организатора волонтирања)", align: "center", muted: true },
+        { text: `Број потврде ${input.confirmNumber || "—"}`, align: "start" },
+        { text: input.issueDate || "—", align: "center" },
+        { text: "(дан, месец и година издавања)", align: "center", muted: true },
+        {
+            text: "На основу члана 25. став 1. тачка 2) Закона о волонтирању („Службени гласник РС”, број 36/10), издајем",
+            align: "center",
+        },
+        { text: "ПОТВРДУ О ВОЛОНТИРАЊУ", align: "center", bold: true },
+        {
+            text:
+                `Потврђујем да је ${input.fullName || "—"}, ` +
+                `${input.jmbg ? `${input.jmbg} ` : ""}(ЈМБГ)/${g.born} ` +
+                `дана ${input.birthDate || "—"}. ` +
+                `- ${g.citizen} ${input.citizenship || "—"}, ` +
+                `са пребивалиштем / боравиштем у ${input.addressCity || "—"}, ` +
+                `у периоду од ${input.periodFrom || "—"} до ${input.periodTo || "—"} године ${g.performed} ` +
+                `следеће волонтерске услуге: ${input.servicesDescription || "—"}.`,
+            align: "justify",
+        },
+        {
+            text: "(кратак опис волонтерских услуга и крајњи корисник волонтирања…)",
+            align: "center",
+            muted: true,
+        },
+        {
+            text: `Укупно трајање волонтирања у часовима износи ${hoursLabel} часова. Волонтирање је обављено у ${input.volunteerCity || "—"} (град/општина).`,
+            align: "justify",
+        },
+        {
+            text:
+                `За време волонтирања извршено је оспособљавање волонтера ${input.trainingType || "—"} (врста оспособљавања), ` +
+                `од стране ${input.trainingProvider || "—"} (извођач оспособљавања), ` +
+                `у периоду од ${input.trainingFrom || "—"} до ${input.trainingTo || "—"}.`,
+            align: "justify",
+        },
+    ]
+}
+
 export function buildOfficialPotvrdaDocumentXml(
     input: OfficialPotvrdaInput,
     signatureCellInner: string = run("________________________")
 ): string {
     const g = genderWords(input.gender)
-    const hoursLabel = Number.isInteger(input.totalHours)
-        ? String(input.totalHours)
-        : input.totalHours.toFixed(1).replace(/\.0$/, "")
+    const hoursLabel = formatHoursLabel(input.totalHours)
 
     const body = [
         paragraph(
@@ -131,14 +197,16 @@ export function buildOfficialPotvrdaDocumentXml(
             run(
                 `За време волонтирања извршено је оспособљавање волонтера ${input.trainingType} (врста оспособљавања), од стране ${input.trainingProvider} (извођач оспособљавања), у периоду од ${input.trainingFrom} до ${input.trainingTo}. `
             ),
-            { justify: true, spacingLine: 360 }
+            { justify: true, spacingLine: 360, keepNext: true }
         ),
-        paragraph(""),
-        `<w:tbl><w:tblPr><w:tblW w:w="10075" w:type="dxa"/></w:tblPr><w:tblGrid><w:gridCol w:w="3775"/><w:gridCol w:w="1895"/><w:gridCol w:w="4405"/></w:tblGrid><w:tr><w:tc><w:tcPr><w:tcW w:w="3775" w:type="dxa"/><w:vMerge w:val="restart"/></w:tcPr>${paragraph(
+        `<w:tbl><w:tblPr><w:tblW w:w="10075" w:type="dxa"/><w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid><w:gridCol w:w="3775"/><w:gridCol w:w="1895"/><w:gridCol w:w="4405"/></w:tblGrid><w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:tcW w:w="3775" w:type="dxa"/><w:vMerge w:val="restart"/></w:tcPr>${paragraph(
             run("Председник Руске дијаспоре у Србији", false, 26)
         )}</w:tc><w:tc><w:tcPr><w:tcW w:w="1895" w:type="dxa"/><w:vMerge w:val="restart"/></w:tcPr>${paragraph(
             run("M. П.")
-        )}</w:tc><w:tc>${paragraph(signatureCellInner, { center: true })}</w:tc></w:tr><w:tr><w:tc><w:tcPr><w:vMerge/></w:tcPr>${paragraph(
+        )}</w:tc><w:tc><w:tcPr><w:tcW w:w="4405" w:type="dxa"/><w:vAlign w:val="bottom"/></w:tcPr>${paragraph(
+            signatureCellInner,
+            { center: true, tight: true }
+        )}</w:tc></w:tr><w:tr><w:trPr><w:cantSplit/></w:trPr><w:tc><w:tcPr><w:vMerge/></w:tcPr>${paragraph(
             ""
         )}</w:tc><w:tc><w:tcPr><w:vMerge/></w:tcPr>${paragraph("")}</w:tc><w:tc>${paragraph(
             run("(потпис овлашћеног лица)", false, 20),
@@ -171,22 +239,37 @@ const potvrdaFileName = (fullName: string) => {
 const buildSignatureCellInner = async (zip: PizZip, sign: PotvrdaSignDraft): Promise<string> => {
     const parts: string[] = []
     let docPrId = 100
-    const stamp = Date.now()
-
-    if (sign.showSignature) {
-        const dataUrl = await loadImageDataUrl(sign.signatureSrc || DEFAULT_SIGNATURE)
-        const rel = addImageToDocx(zip, `potvrda_sig_${stamp}.png`, dataUrl)
-        const { width, height } = await measureDataUrl(dataUrl)
-        const wMm = signatureWidthMm(sign)
-        const hMm = Math.max(8, wMm * (height / Math.max(width, 1)))
-        parts.push(inlineDrawing(rel, mmToEmu(wMm), mmToEmu(hMm), docPrId++))
-    }
+    const stampKey = Date.now()
 
     if (sign.showStamp) {
         const dataUrl = await loadImageDataUrl(sign.stampSrc || DEFAULT_STAMP)
-        const rel = addImageToDocx(zip, `potvrda_stamp_${stamp}.png`, dataUrl)
-        const sizeMm = stampSizeMm(sign)
-        parts.push(inlineDrawing(rel, mmToEmu(sizeMm), mmToEmu(sizeMm), docPrId++))
+        const rel = addImageToDocx(zip, `potvrda_stamp_${stampKey}.png`, dataUrl)
+        const sizeMm = docxStampSizeMm(sign)
+        const xMm = 8 + sign.stampOffsetX
+        const yMm = 0 + sign.stampOffsetY
+        parts.push(
+            anchoredDrawing(
+                rel,
+                mmToEmu(sizeMm),
+                mmToEmu(sizeMm),
+                docPrId++,
+                mmToEmu(xMm),
+                mmToEmu(yMm)
+            )
+        )
+    }
+
+    if (sign.showSignature) {
+        const dataUrl = await loadImageDataUrl(sign.signatureSrc || DEFAULT_SIGNATURE)
+        const rel = addImageToDocx(zip, `potvrda_sig_${stampKey}.png`, dataUrl)
+        const { width, height } = await measureDataUrl(dataUrl)
+        const wMm = docxSignatureWidthMm(sign)
+        const hMm = Math.min(16, Math.max(8, wMm * (height / Math.max(width, 1))))
+        const xMm = -2 + sign.signatureOffsetX
+        const yMm = 6 + sign.signatureOffsetY
+        parts.push(
+            anchoredDrawing(rel, mmToEmu(wMm), mmToEmu(hMm), docPrId++, mmToEmu(xMm), mmToEmu(yMm))
+        )
     }
 
     return parts.length > 0 ? parts.join("") : run("________________________")
