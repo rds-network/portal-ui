@@ -1200,6 +1200,19 @@
                 "revertError": "Не удалось откатить передачу"
             },
             "title": "Заявки на вступление",
+            "followUp": {
+                "title": "Долго без движения",
+                "hint": "Пауза или уточнение дольше выбранного срока (по дате последнего изменения). Письмо уходит на email из заявки.",
+                "staleDays": "Дней без изменений",
+                "selectAll": "Выбрать всех",
+                "clear": "Снять выбор",
+                "count": "В списке: {count}",
+                "empty": "Таких заявок нет",
+                "subject": "Тема письма",
+                "body": "Текст письма",
+                "send": "Отправить ({count})",
+                "sent": "Отправлено писем: {count}"
+            },
             "empty": "Заявок не найдено",
             "total": "Всего: {count}",
             "search": "Поиск по имени или email",
@@ -1606,6 +1619,74 @@
                 "CANCELLED": "Отменён"
             }
         },
+        "documents": {
+            "title": "Документы",
+            "subtitle": "Подтверждающие справки и отчёты для банка и других учреждений.",
+            "generatePdf": "Скачать PDF",
+            "subjectLabel": "Волонтёр",
+            "subjectHint": "Оставьте пустым, чтобы оформить документ на себя.",
+            "membership": {
+                "title": "Potvrda o volontiranju",
+                "description": "Подтверждение, что договор о волонтёрстве в UDS действует (на сербском, для банка).",
+                "modalTitle": "Potvrda — данные для справки",
+                "fullName": "Ime i prezime",
+                "passport": "Broj pasoša / lične karte",
+                "contractNumber": "Broj ugovora o volontiranju",
+                "contractNumberHint": "Как в договоре; в системе номер не хранится — введите вручную.",
+                "contractDate": "Datum zaključenja ugovora",
+                "indefinite": "Ugovor na neodređeno vreme",
+                "validUntil": "Ugovor važi do",
+                "footerNote": "Текст справки фиксирован; перед скачиванием проверьте поля.",
+                "missingData": "Не найдены паспортные данные из заявки — заполните поля вручную или откройте карточку волонтёра."
+            },
+            "hours": {
+                "title": "Izveštaj o volonterskom radu",
+                "description": "Сводка принятых недельных отчётов за выбранный период (сербский PDF).",
+                "link": "Мои отчёты",
+                "selfOnly": "Отчёт по часам можно сформировать только для своей учётной записи."
+            },
+            "zahvalnica": {
+                "description": "Благодарственное письмо с QR-проверкой (для администраторов).",
+                "open": "Открыть редактор"
+            },
+            "official": {
+                "title": "ПОТВРДА о волонтёрстве (закон 36/10)",
+                "description": "Официальная форма DOCX с шапкой UDS: программа, период и часы из принятых отчётов.",
+                "generate": "Скачать DOCX",
+                "modalTitle": "Потврda — данные из карточки",
+                "hint": "Проверьте поля перед выдачей. Номер потврде и описание услуг при необходимости правятся вручную.",
+                "confirmNumber": "Броj potvrde",
+                "issueDate": "Datum izdavanja",
+                "birthDate": "Datum rođenja",
+                "citizenship": "Državljanstvo (tekst u formi)",
+                "addressCity": "Prebivalište (npr. gradu …)",
+                "periodFrom": "Period od",
+                "periodTo": "Period do",
+                "services": "Opis volonterskih usluga",
+                "volunteerCity": "Mesto volontiranja",
+                "trainingType": "Osposobljavanje (vrsta)",
+                "trainingProvider": "Izvođač osposobljavanja",
+                "trainingFrom": "Osposobljavanje od",
+                "trainingTo": "Osposobljavanje do",
+                "hoursFrom": "Sati izveštaja — od",
+                "hoursTo": "Sati izveštaja — do",
+                "totalHours": "Ukupno sati",
+                "hoursLoading": "Računamo iz prihvaćenih izveštaja…"
+            },
+            "registry": {
+                "title": "Реестр выданных potvrda",
+                "subtitle": "Номера NNN/YYYY выделяются автоматически при скачивании официальной potvrde (и при выдаче bank potvrde админом).",
+                "search": "Поиск по ФИО, логину или номеру",
+                "number": "Номер",
+                "volunteer": "Волонтёр",
+                "kind": "Тип",
+                "hours": "Часы",
+                "issued": "Дата / кто выдал",
+                "empty": "Записей пока нет",
+                "badDate": "Некорректная дата издања (ожидается DD.MM.YYYY)"
+            },
+            "cancel": "Отмена"
+        },
         "resources": {
             "title": "Наши ресурсы",
             "description": "Ссылки на сайты, офисы, банки файлов и курсы. Добавлять и убирать карточки могут кураторы.",
@@ -1969,6 +2050,7 @@
         },
         "desktop": "Рабочий стол",
         "volId": "VOL-ID",
+        "documents": "Документы",
         "mobile": {
             "home": "Обзор",
             "tasks": "Задачи",

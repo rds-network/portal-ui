@@ -1200,6 +1200,19 @@
                 "revertError": "Could not revert transfer"
             },
             "title": "Applications for Admission",
+            "followUp": {
+                "title": "Stale applications",
+                "hint": "Paused or clarification longer than the selected period (by last update). Email goes to the address on the application.",
+                "staleDays": "Days without updates",
+                "selectAll": "Select all",
+                "clear": "Clear selection",
+                "count": "In list: {count}",
+                "empty": "No matching applications",
+                "subject": "Email subject",
+                "body": "Email body",
+                "send": "Send ({count})",
+                "sent": "Emails sent: {count}"
+            },
             "empty": "No applications found",
             "total": "Total: {count}",
             "search": "Search by name or email",
@@ -1606,6 +1619,74 @@
                 "CANCELLED": "Cancelled"
             }
         },
+        "documents": {
+            "title": "Documents",
+            "subtitle": "Confirmation letters and volunteer hour reports for banks and institutions.",
+            "generatePdf": "Download PDF",
+            "subjectLabel": "Volunteer",
+            "subjectHint": "Leave empty to issue a document for yourself.",
+            "membership": {
+                "title": "Potvrda o volontiranju",
+                "description": "Confirms an active volunteering contract with UDS (Serbian, for banks).",
+                "modalTitle": "Potvrda — details",
+                "fullName": "Ime i prezime",
+                "passport": "Broj pasoša / lične karte",
+                "contractNumber": "Broj ugovora o volontiranju",
+                "contractNumberHint": "As on the contract; not stored in the portal — enter manually.",
+                "contractDate": "Datum zaključenja ugovora",
+                "indefinite": "Ugovor na neodređeno vreme",
+                "validUntil": "Ugovor važi do",
+                "footerNote": "Wording is fixed; verify fields before downloading.",
+                "missingData": "Passport data from the application was not found — fill in manually or check the volunteer profile."
+            },
+            "hours": {
+                "title": "Izveštaj o volonterskom radu",
+                "description": "Summary of accepted weekly reports for a date range (Serbian PDF).",
+                "link": "My reports",
+                "selfOnly": "Hour reports can only be generated for your own account."
+            },
+            "zahvalnica": {
+                "description": "Thank-you letter with QR verification (admins).",
+                "open": "Open editor"
+            },
+            "official": {
+                "title": "POTVRDA on volunteering (Law 36/10)",
+                "description": "Official DOCX with UDS letterhead; program, period and hours from accepted reports.",
+                "generate": "Download DOCX",
+                "modalTitle": "Potvrda — volunteer card data",
+                "hint": "Review before issuing. Certificate number and service description can be edited manually.",
+                "confirmNumber": "Certificate number",
+                "issueDate": "Issue date",
+                "birthDate": "Date of birth",
+                "citizenship": "Citizenship (form wording)",
+                "addressCity": "Residence (e.g. gradu …)",
+                "periodFrom": "Period from",
+                "periodTo": "Period to",
+                "services": "Description of volunteer services",
+                "volunteerCity": "Place of volunteering",
+                "trainingType": "Training (type)",
+                "trainingProvider": "Training provider",
+                "trainingFrom": "Training from",
+                "trainingTo": "Training to",
+                "hoursFrom": "Report hours — from",
+                "hoursTo": "Report hours — to",
+                "totalHours": "Total hours",
+                "hoursLoading": "Calculating from accepted reports…"
+            },
+            "registry": {
+                "title": "Issued potvrda registry",
+                "subtitle": "NNN/YYYY numbers are assigned automatically when downloading the official potvrda (and when staff issue the bank potvrda).",
+                "search": "Search by name, login or number",
+                "number": "Number",
+                "volunteer": "Volunteer",
+                "kind": "Type",
+                "hours": "Hours",
+                "issued": "Date / issued by",
+                "empty": "No entries yet",
+                "badDate": "Invalid issue date (expected DD.MM.YYYY)"
+            },
+            "cancel": "Cancel"
+        },
         "resources": {
             "title": "Our resources",
             "description": "Links to sites, offices, file banks and courses. Curators can add and remove cards.",
@@ -1969,6 +2050,7 @@
         },
         "desktop": "Desktop",
         "volId": "VOL-ID",
+        "documents": "Documents",
         "mobile": {
             "home": "Home",
             "tasks": "Tasks",

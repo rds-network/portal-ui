@@ -1200,6 +1200,19 @@
                 "revertError": "Nije uspelo poništiti prenos"
             },
             "title": "Prijave za članstvo",
+            "followUp": {
+                "title": "Dugo bez promene",
+                "hint": "Pauza ili pojašnjenje duže od izabranog roka (po datumu poslednje izmene). Pismo ide na email iz prijave.",
+                "staleDays": "Dana bez izmena",
+                "selectAll": "Izaberi sve",
+                "clear": "Poništi izbor",
+                "count": "Na listi: {count}",
+                "empty": "Nema takvih prijava",
+                "subject": "Naslov pisma",
+                "body": "Tekst pisma",
+                "send": "Pošalji ({count})",
+                "sent": "Poslato pisama: {count}"
+            },
             "empty": "Nijedna prijava nije pronađena",
             "total": "Ukupno: {count}",
             "search": "Pretraga po imenu ili e-mailu",
@@ -1606,6 +1619,74 @@
                 "CANCELLED": "Otkazan"
             }
         },
+        "documents": {
+            "title": "Dokumenti",
+            "subtitle": "Potvrde i izveštaji o volonterskom radu za banku i druge institucije.",
+            "generatePdf": "Preuzmi PDF",
+            "subjectLabel": "Volonter",
+            "subjectHint": "Ostavite prazno da izdate dokument za sebe.",
+            "membership": {
+                "title": "Potvrda o volontiranju",
+                "description": "Potvrda da je ugovor o volontiranju u UDS na snazi (za banku).",
+                "modalTitle": "Potvrda — podaci",
+                "fullName": "Ime i prezime",
+                "passport": "Broj pasoša / lične karte",
+                "contractNumber": "Broj ugovora o volontiranju",
+                "contractNumberHint": "Kao na ugovoru; u portalu se ne čuva — unesite ručno.",
+                "contractDate": "Datum zaključenja ugovora",
+                "indefinite": "Ugovor na neodređeno vreme",
+                "validUntil": "Ugovor važi do",
+                "footerNote": "Tekst je fiksiran; proverite polja pre preuzimanja.",
+                "missingData": "Nisu pronađeni podaci iz prijave — popunite ručno ili proverite profil volontera."
+            },
+            "hours": {
+                "title": "Izveštaj o volonterskom radu",
+                "description": "Pregled prihvaćenih nedeljnih izveštaja za period (PDF na srpskom).",
+                "link": "Moji izveštaji",
+                "selfOnly": "Izveštaj o satima možete formirati samo za svoj nalog."
+            },
+            "zahvalnica": {
+                "description": "Zahvalnica sa QR proverom (administratori).",
+                "open": "Otvori editor"
+            },
+            "official": {
+                "title": "POTVRDA o volontiranju (zakon 36/10)",
+                "description": "Zvanični DOCX sa memorandumom UDS; program, period i sati iz prihvaćenih izveštaja.",
+                "generate": "Preuzmi DOCX",
+                "modalTitle": "Potvrda — podaci sa kartice",
+                "hint": "Proverite pre izdavanja. Broj potvrde i opis usluga po potrebi ručno.",
+                "confirmNumber": "Broj potvrde",
+                "issueDate": "Datum izdavanja",
+                "birthDate": "Datum rođenja",
+                "citizenship": "Državljanstvo (tekst u formi)",
+                "addressCity": "Prebivalište (npr. gradu …)",
+                "periodFrom": "Period od",
+                "periodTo": "Period do",
+                "services": "Opis volonterskih usluga",
+                "volunteerCity": "Mesto volontiranja",
+                "trainingType": "Osposobljavanje (vrsta)",
+                "trainingProvider": "Izvođač osposobljavanja",
+                "trainingFrom": "Osposobljavanje od",
+                "trainingTo": "Osposobljavanje do",
+                "hoursFrom": "Sati izveštaja — od",
+                "hoursTo": "Sati izveštaja — do",
+                "totalHours": "Ukupno sati",
+                "hoursLoading": "Računamo iz prihvaćenih izveštaja…"
+            },
+            "registry": {
+                "title": "Registar izdatih potvrda",
+                "subtitle": "Brojevi NNN/YYYY dodeljuju se automatski pri preuzimanju zvanične potvrde (i kad admin izda bank potvrdu).",
+                "search": "Pretraga po imenu, loginu ili broju",
+                "number": "Broj",
+                "volunteer": "Volonter",
+                "kind": "Tip",
+                "hours": "Sati",
+                "issued": "Datum / izdao",
+                "empty": "Još nema zapisa",
+                "badDate": "Neispravan datum izdavanja (očekuje se DD.MM.YYYY)"
+            },
+            "cancel": "Otkaži"
+        },
         "resources": {
             "title": "Naši resursi",
             "description": "Linkovi ka sajtovima, kancelarijama, bankama fajlova i kursevima. Kustosi mogu da dodaju i uklone kartice.",
@@ -1969,6 +2050,7 @@
         },
         "desktop": "Radni sto",
         "volId": "VOL-ID",
+        "documents": "Dokumenti",
         "mobile": {
             "home": "Pregled",
             "tasks": "Zadaci",

@@ -30,6 +30,7 @@ import {
     IconId,
     IconStar,
     IconTargetArrow,
+    IconFiles,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -53,6 +54,12 @@ export const Content: NavSection[] = [
                 icon: IconId,
                 link: "/vol-id",
                 dataTourId: "nav-vol-id",
+            },
+            {
+                label: "navbar.documents",
+                icon: IconFiles,
+                link: "/documents",
+                dataTourId: "nav-documents",
             },
             {
                 label: "navbar.achievements",
