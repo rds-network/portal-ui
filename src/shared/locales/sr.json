@@ -1673,7 +1673,19 @@
                 "hoursFrom": "Sati izveštaja — od",
                 "hoursTo": "Sati izveštaja — do",
                 "totalHours": "Ukupno sati",
-                "hoursLoading": "Računamo iz prihvaćenih izveštaja…"
+                "hoursLoading": "Računamo iz prihvaćenih izveštaja…",
+                "deliveryHint": "Posle preuzimanja možete poslati isti potpisani fajl volonteru.",
+                "sendEmail": "Po email-u",
+                "sendInbox": "U poruke (portal)",
+                "sentInbox": "Potvrda je poslata u „Poruke“ volontera.",
+                "sign": {
+                    "title": "Pečat i potpis",
+                    "hint": "Kao zahvalnica; podešavanja se čuvaju u vašem pregledaču.",
+                    "uploadSignature": "Sopstveni potpis",
+                    "resetSignature": "Podrazumevani potpis",
+                    "uploadStamp": "Sopstveni pečat",
+                    "resetStamp": "Podrazumevani pečat"
+                }
             },
             "registry": {
                 "title": "Registar izdatih potvrda",

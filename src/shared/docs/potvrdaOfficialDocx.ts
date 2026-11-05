@@ -2,7 +2,21 @@ import dayjs from "dayjs"
 import PizZip from "pizzip"
 import { saveAs } from "file-saver"
 import templateUrl from "src/assets/doc_templates/potvrda_official_shell.docx?url"
+import {
+    addImageToDocx,
+    inlineDrawing,
+    loadImageDataUrl,
+    measureDataUrl,
+    mmToEmu,
+} from "src/shared/docs/docxInlineImage"
 import { potvrdaCategoriesFromProfile } from "src/shared/docs/potvrdaOfficialCategories"
+import {
+    defaultPotvrdaSignDraft,
+    PotvrdaSignDraft,
+    signatureWidthMm,
+    stampSizeMm,
+} from "src/shared/docs/potvrdaSignDraft"
+import { DEFAULT_SIGNATURE, DEFAULT_STAMP } from "src/shared/docs/zahvalnicaDraft"
 
 export type OfficialPotvrdaInput = {
     confirmNumber: string
@@ -57,7 +71,10 @@ export const genderWords = (gender: OfficialPotvrdaInput["gender"]) => ({
         gender === "FEMALE" ? "обавила" : gender === "MALE" ? "обавио" : "обавио/ла",
 })
 
-export function buildOfficialPotvrdaDocumentXml(input: OfficialPotvrdaInput): string {
+export function buildOfficialPotvrdaDocumentXml(
+    input: OfficialPotvrdaInput,
+    signatureCellInner: string = run("________________________")
+): string {
     const g = genderWords(input.gender)
     const hoursLabel = Number.isInteger(input.totalHours)
         ? String(input.totalHours)
@@ -121,7 +138,7 @@ export function buildOfficialPotvrdaDocumentXml(input: OfficialPotvrdaInput): st
             run("Председник Руске дијаспоре у Србији", false, 26)
         )}</w:tc><w:tc><w:tcPr><w:tcW w:w="1895" w:type="dxa"/><w:vMerge w:val="restart"/></w:tcPr>${paragraph(
             run("M. П.")
-        )}</w:tc><w:tc>${paragraph(run("________________________"), { center: true })}</w:tc></w:tr><w:tr><w:tc><w:tcPr><w:vMerge/></w:tcPr>${paragraph(
+        )}</w:tc><w:tc>${paragraph(signatureCellInner, { center: true })}</w:tc></w:tr><w:tr><w:tc><w:tcPr><w:vMerge/></w:tcPr>${paragraph(
             ""
         )}</w:tc><w:tc><w:tcPr><w:vMerge/></w:tcPr>${paragraph("")}</w:tc><w:tc>${paragraph(
             run("(потпис овлашћеног лица)", false, 20),
@@ -146,16 +163,64 @@ const loadTemplateBuffer = (): Promise<ArrayBuffer> => {
     return templateBufferPromise
 }
 
-export async function generateOfficialPotvrdaDocx(input: OfficialPotvrdaInput): Promise<void> {
+const potvrdaFileName = (fullName: string) => {
+    const safeName = fullName.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_")
+    return `Potvrda_o_volontiranju_${safeName}.docx`
+}
+
+const buildSignatureCellInner = async (zip: PizZip, sign: PotvrdaSignDraft): Promise<string> => {
+    const parts: string[] = []
+    let docPrId = 100
+    const stamp = Date.now()
+
+    if (sign.showSignature) {
+        const dataUrl = await loadImageDataUrl(sign.signatureSrc || DEFAULT_SIGNATURE)
+        const rel = addImageToDocx(zip, `potvrda_sig_${stamp}.png`, dataUrl)
+        const { width, height } = await measureDataUrl(dataUrl)
+        const wMm = signatureWidthMm(sign)
+        const hMm = Math.max(8, wMm * (height / Math.max(width, 1)))
+        parts.push(inlineDrawing(rel, mmToEmu(wMm), mmToEmu(hMm), docPrId++))
+    }
+
+    if (sign.showStamp) {
+        const dataUrl = await loadImageDataUrl(sign.stampSrc || DEFAULT_STAMP)
+        const rel = addImageToDocx(zip, `potvrda_stamp_${stamp}.png`, dataUrl)
+        const sizeMm = stampSizeMm(sign)
+        parts.push(inlineDrawing(rel, mmToEmu(sizeMm), mmToEmu(sizeMm), docPrId++))
+    }
+
+    return parts.length > 0 ? parts.join("") : run("________________________")
+}
+
+export async function buildOfficialPotvrdaBlob(
+    input: OfficialPotvrdaInput,
+    sign: PotvrdaSignDraft | null,
+    options?: { download?: boolean }
+): Promise<{ blob: Blob; fileName: string }> {
     const buffer = await loadTemplateBuffer()
     const zip = new PizZip(buffer)
-    zip.file("word/document.xml", buildOfficialPotvrdaDocumentXml(input))
-    const out = zip.generate({
+    const signDraft = sign ?? defaultPotvrdaSignDraft()
+    const signatureInner =
+        signDraft.showSignature || signDraft.showStamp
+            ? await buildSignatureCellInner(zip, signDraft)
+            : run("________________________")
+    zip.file("word/document.xml", buildOfficialPotvrdaDocumentXml(input, signatureInner))
+    const blob = zip.generate({
         type: "blob",
         mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    })
-    const safeName = input.fullName.replace(/[^\w\s-]/g, "").replace(/\s+/g, "_")
-    saveAs(out, `Potvrda_o_volontiranju_${safeName}.docx`)
+    }) as Blob
+    const fileName = potvrdaFileName(input.fullName)
+    if (options?.download !== false) {
+        saveAs(blob, fileName)
+    }
+    return { blob, fileName }
+}
+
+export async function generateOfficialPotvrdaDocx(
+    input: OfficialPotvrdaInput,
+    sign?: PotvrdaSignDraft | null
+): Promise<{ blob: Blob; fileName: string }> {
+    return buildOfficialPotvrdaBlob(input, sign ?? null, { download: true })
 }
 
 const formatDate = (value: string) => dayjs(value).format("DD.MM.YYYY")
