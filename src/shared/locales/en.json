@@ -1673,7 +1673,19 @@
                 "hoursFrom": "Report hours — from",
                 "hoursTo": "Report hours — to",
                 "totalHours": "Total hours",
-                "hoursLoading": "Calculating from accepted reports…"
+                "hoursLoading": "Calculating from accepted reports…",
+                "deliveryHint": "After download you can send the same signed file to the volunteer.",
+                "sendEmail": "Send by email",
+                "sendInbox": "To Messages (portal)",
+                "sentInbox": "Potvrda was sent to the volunteer’s Messages.",
+                "sign": {
+                    "title": "Stamp and signature",
+                    "hint": "Same as thank-you letters; settings are saved in your browser.",
+                    "uploadSignature": "Custom signature",
+                    "resetSignature": "Default signature",
+                    "uploadStamp": "Custom stamp",
+                    "resetStamp": "Default stamp"
+                }
             },
             "registry": {
                 "title": "Issued potvrda registry",

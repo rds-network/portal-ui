@@ -1673,7 +1673,19 @@
                 "hoursFrom": "Sati izveštaja — od",
                 "hoursTo": "Sati izveštaja — do",
                 "totalHours": "Ukupno sati",
-                "hoursLoading": "Računamo iz prihvaćenih izveštaja…"
+                "hoursLoading": "Računamo iz prihvaćenih izveštaja…",
+                "deliveryHint": "После скачивания можно отправить тот же файл с печатью и подписью волонтёру.",
+                "sendEmail": "Отправить на email",
+                "sendInbox": "В сообщения (ЛК)",
+                "sentInbox": "Потврda отправлена в раздел «Сообщения» волонтёра.",
+                "sign": {
+                    "title": "Печать и подпись",
+                    "hint": "Как на захвальнице: настройки сохраняются в браузере администратора.",
+                    "uploadSignature": "Своя подпись",
+                    "resetSignature": "Подпись по умолчанию",
+                    "uploadStamp": "Своя печать",
+                    "resetStamp": "Печать по умолчанию"
+                }
             },
             "registry": {
                 "title": "Реестр выданных potvrda",
