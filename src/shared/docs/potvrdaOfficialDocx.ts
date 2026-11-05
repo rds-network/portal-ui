@@ -2,6 +2,7 @@ import dayjs from "dayjs"
 import PizZip from "pizzip"
 import { saveAs } from "file-saver"
 import templateUrl from "src/assets/doc_templates/potvrda_official_shell.docx?url"
+import { potvrdaCategoriesFromProfile } from "src/shared/docs/potvrdaOfficialCategories"
 
 export type OfficialPotvrdaInput = {
     confirmNumber: string
@@ -157,13 +158,28 @@ export async function generateOfficialPotvrdaDocx(input: OfficialPotvrdaInput): 
     saveAs(out, `Potvrda_o_volontiranju_${safeName}.docx`)
 }
 
+const formatDate = (value: string) => dayjs(value).format("DD.MM.YYYY")
+
+/** Бессрочный договор часто хранится далёкой датой — для потврde не тянем её в период. */
+const effectiveContractEnd = (endRaw: string | undefined, issue: dayjs.Dayjs, start: dayjs.Dayjs): string => {
+    if (!endRaw) {
+        return issue.format("DD.MM.YYYY")
+    }
+    const end = dayjs(endRaw)
+    if (!end.isValid() || end.year() >= issue.year() + 10 || end.isBefore(start)) {
+        return issue.format("DD.MM.YYYY")
+    }
+    return end.format("DD.MM.YYYY")
+}
+
 export function defaultOfficialPotvrdaFields(
     user: {
         fullName?: string
         birthDate?: string | null
         gender?: "MALE" | "FEMALE" | null
         city?: string | null
-        program?: { nameSr?: string } | null
+        program?: { code?: string; nameSr?: string | null } | null
+        project?: { code?: string; nameSr?: string | null } | null
         contracts?: Array<{ startDate?: string; endDate?: string }>
         residencePermits?: Array<{ identityNumber?: string; nationality?: string }>
     },
@@ -176,18 +192,23 @@ export function defaultOfficialPotvrdaFields(
     const contracts = user.contracts ?? []
     const starts = contracts.map((c) => c.startDate).filter(Boolean).sort()
     const ends = contracts.map((c) => c.endDate).filter(Boolean).sort()
-    const periodFrom =
-        options?.periodFrom ??
-        (starts[0] ? dayjs(starts[0]).format("DD.MM.YYYY") : dayjs().startOf("year").format("DD.MM.YYYY"))
+    const issue = dayjs()
+    const startRaw = starts[0]
+    const start = startRaw ? dayjs(startRaw) : issue.startOf("year")
+    const periodFrom = options?.periodFrom ?? (startRaw ? formatDate(startRaw) : issue.startOf("year").format("DD.MM.YYYY"))
     const periodTo =
-        options?.periodTo ?? (ends.at(-1) ? dayjs(ends.at(-1)).format("DD.MM.YYYY") : dayjs().format("DD.MM.YYYY"))
+        options?.periodTo ?? effectiveContractEnd(ends.at(-1), issue, start)
     const permit = user.residencePermits?.[0]
     const city = user.city?.trim() || ""
     const addressCity = city ? `граду ${city}` : ""
+    const { servicesDescription } = potvrdaCategoriesFromProfile(user)
+
+    const onboardingYear = start.isValid() ? start.year() : issue.year()
+    const trainingDay = start.isValid() ? start.format("DD.MM.YYYY") : `01.01.${onboardingYear}`
 
     return {
         confirmNumber: "",
-        issueDate: dayjs().format("DD.MM.YYYY"),
+        issueDate: issue.format("DD.MM.YYYY"),
         fullName: user.fullName ?? "",
         jmbg: permit?.identityNumber ?? "",
         birthDate: user.birthDate ? dayjs(user.birthDate).format("DD.MM.YYYY") : "",
@@ -196,14 +217,12 @@ export function defaultOfficialPotvrdaFields(
         addressCity,
         periodFrom,
         periodTo,
-        servicesDescription: user.program?.nameSr
-            ? `програм „${user.program.nameSr}“, јавна површина, заштита животне средине`
-            : "јавна површина, заштита животне средине",
+        servicesDescription,
         totalHours: options?.totalHours ?? 0,
         volunteerCity: city ? `граду ${city}` : "",
-        trainingType: `${dayjs(periodTo, "DD.MM.YYYY").year()}. године`,
+        trainingType: "иницијално оспособљавање",
         trainingProvider: "РУСКА ДИЈАСПОРА У СРБИJИ",
-        trainingFrom: periodFrom,
-        trainingTo: periodTo,
+        trainingFrom: trainingDay,
+        trainingTo: trainingDay,
     }
 }
