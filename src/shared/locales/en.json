@@ -1691,7 +1691,7 @@
                     "resetSignature": "Default signature",
                     "uploadStamp": "Custom stamp",
                     "resetStamp": "Default stamp",
-                    "docxSizeHint": "DOCX caps stamp size (~30 mm) so the signature block stays on one page; the preview shows the full text."
+                    "docxSizeHint": "Preview matches DOCX sizing (stamp up to ~34 mm); higher slider values won't enlarge the file."
                 }
             },
             "registry": {

@@ -1691,7 +1691,7 @@
                     "resetSignature": "Podrazumevani potpis",
                     "uploadStamp": "Sopstveni pečat",
                     "resetStamp": "Podrazumevani pečat",
-                    "docxSizeHint": "U DOCX-u pečat je ograničen (~30 mm) da potpis ne pređe na praznu 2. stranu; pregled desno prikazuje ceo tekst."
+                    "docxSizeHint": "Pregled koristi iste dimenzije kao DOCX (pečat do ~34 mm); veći klizač ne uvećava fajl."
                 }
             },
             "registry": {
