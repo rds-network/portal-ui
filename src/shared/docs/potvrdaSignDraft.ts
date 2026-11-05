@@ -12,6 +12,10 @@ export type PotvrdaSignDraft = {
     stampSrc: string
     signatureScale: number
     stampScale: number
+    signatureOffsetX: number
+    signatureOffsetY: number
+    stampOffsetX: number
+    stampOffsetY: number
 }
 
 export const defaultPotvrdaSignDraft = (): PotvrdaSignDraft => ({
@@ -21,9 +25,13 @@ export const defaultPotvrdaSignDraft = (): PotvrdaSignDraft => ({
     stampSrc: DEFAULT_STAMP,
     signatureScale: 35,
     stampScale: 85,
+    signatureOffsetX: 0,
+    signatureOffsetY: 0,
+    stampOffsetX: 18,
+    stampOffsetY: -8,
 })
 
-const STORAGE_KEY = "potvrda-sign-settings-v1"
+const STORAGE_KEY = "potvrda-sign-settings-v2"
 
 export const loadPotvrdaSignDraft = (): PotvrdaSignDraft => {
     try {
