@@ -259,6 +259,29 @@ const OfficialPotvrdaEditorPage = () => {
         }
     }
 
+    const previewInput = useMemo((): OfficialPotvrdaInput => {
+        const values = form.values
+        return {
+            confirmNumber: values.confirmNumber,
+            issueDate: values.issueDate,
+            fullName: values.fullName,
+            jmbg: values.jmbg,
+            birthDate: values.birthDate,
+            gender: user?.gender ?? null,
+            citizenship: values.citizenship,
+            addressCity: values.addressCity,
+            periodFrom: values.periodFrom,
+            periodTo: values.periodTo,
+            servicesDescription: values.servicesDescription,
+            totalHours: values.totalHours,
+            volunteerCity: values.volunteerCity,
+            trainingType: values.trainingType,
+            trainingProvider: values.trainingProvider,
+            trainingFrom: values.trainingFrom,
+            trainingTo: values.trainingTo,
+        }
+    }, [form.values, user?.gender])
+
     const volunteerEmail = user?.email
 
     const backLink = useMemo(
@@ -441,7 +464,7 @@ const OfficialPotvrdaEditorPage = () => {
                         <Text size="sm" fw={600} mb="xs">
                             <FormattedMessage id="pages.documents.official.previewSign" />
                         </Text>
-                        <PotvrdaSignPreview draft={signDraft} volunteerName={form.values.fullName} />
+                        <PotvrdaSignPreview draft={signDraft} input={previewInput} />
                     </div>
                 </div>
             )}

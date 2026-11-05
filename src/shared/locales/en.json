@@ -1659,7 +1659,7 @@
                 "editorTitle": "Official potvrda editor",
                 "editorDescription": "Review the text, place stamp and signature (like thank-you letters), then download or send to the volunteer.",
                 "editorTeaser": "Stamp, signature, and delivery are in the editor, like zahvalnica.",
-                "previewSign": "Signature and stamp (preview)",
+                "previewSign": "Document preview (matches DOCX)",
                 "back": "Back to documents",
                 "modalTitle": "Potvrda — volunteer card data",
                 "hint": "Review before issuing. Certificate number and service description can be edited manually.",
@@ -1690,7 +1690,8 @@
                     "uploadSignature": "Custom signature",
                     "resetSignature": "Default signature",
                     "uploadStamp": "Custom stamp",
-                    "resetStamp": "Default stamp"
+                    "resetStamp": "Default stamp",
+                    "docxSizeHint": "DOCX caps stamp size (~30 mm) so the signature block stays on one page; the preview shows the full text."
                 }
             },
             "registry": {
