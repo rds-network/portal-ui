@@ -12,11 +12,40 @@ type Props = {
     signDraft: PotvrdaSignDraft
 }
 
+/** Scales the rendered page down (never up) so the full page width fits the pane. */
+const fitToWidth = (host: HTMLDivElement) => {
+    const page = host.querySelector<HTMLElement>("section.docx")
+    if (!page) {
+        return
+    }
+    host.style.setProperty("--docx-scale", "1")
+    const pageWidth = page.getBoundingClientRect().width
+    if (pageWidth > 0) {
+        host.style.setProperty("--docx-scale", String(Math.min(1, host.clientWidth / pageWidth)))
+    }
+}
+
 /** Renders the same DOCX the user downloads via docx-preview (WYSIWYG vs file). */
 export const PotvrdaDocxPreview = ({ input, signDraft }: Props) => {
     const hostRef = useRef<HTMLDivElement | null>(null)
     const [error, setError] = useState<string | null>(null)
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    useEffect(() => {
+        const el = hostRef.current
+        if (!el) {
+            return
+        }
+        let lastWidth = el.clientWidth
+        const observer = new ResizeObserver(() => {
+            if (el.clientWidth !== lastWidth) {
+                lastWidth = el.clientWidth
+                fitToWidth(el)
+            }
+        })
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
 
     useEffect(() => {
         const el = hostRef.current
@@ -38,6 +67,7 @@ export const PotvrdaDocxPreview = ({ input, signDraft }: Props) => {
                     ignoreHeight: false,
                     breakPages: false,
                 })
+                fitToWidth(el)
             } catch (e) {
                 setError(e instanceof Error ? e.message : "preview failed")
             }

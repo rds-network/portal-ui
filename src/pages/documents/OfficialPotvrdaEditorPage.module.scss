@@ -3,7 +3,7 @@
     flex-direction: column;
     gap: 20px;
     padding: 8px 4px 32px;
-    max-width: 1200px;
+    max-width: 1440px;
     margin: 0 auto;
 }
 
@@ -17,7 +17,7 @@
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 1.15fr);
     gap: 24px;
     align-items: start;
 }
@@ -148,8 +148,9 @@
 /* docx-preview output — match file layout */
 .docxPreviewOuter {
     width: 100%;
-    max-height: min(85vh, 720px);
-    overflow: auto;
+    max-height: calc(100vh - 80px);
+    overflow-x: hidden;
+    overflow-y: auto;
     border: 1px solid var(--mantine-color-default-border);
     border-radius: 8px;
     padding: 8px;
@@ -163,9 +164,10 @@
         background: transparent;
         padding: 12px 0;
         align-items: flex-start;
+        zoom: var(--docx-scale, 1);
     }
 
-    /* Keep Word page width (library sets section width from sectPr) — do NOT force 100% or scale breaks */
+    /* Keep Word page width (library sets section width from sectPr) — do NOT force 100%; fit via zoom instead */
     :global(.docx-wrapper > section.docx) {
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
         margin: 0 auto;
