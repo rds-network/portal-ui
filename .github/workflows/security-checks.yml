@@ -112,9 +112,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies (for audit)
-        run: npm ci
-
       - name: Run npm audit
         run: |
           # Run audit and allow it to fail (we'll check the output)
