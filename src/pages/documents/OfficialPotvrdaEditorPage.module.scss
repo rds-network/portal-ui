@@ -161,13 +161,14 @@
 
     :global(.docx-wrapper) {
         background: transparent;
-        padding: 0;
+        padding: 12px 0;
+        align-items: flex-start;
     }
 
+    /* Keep Word page width (library sets section width from sectPr) — do NOT force 100% or scale breaks */
     :global(.docx-wrapper > section.docx) {
-        box-shadow: none;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
         margin: 0 auto;
-        width: 100% !important;
     }
 }
 
