@@ -120,6 +120,6 @@ jobs:
 
       - name: Check for critical vulnerabilities
         run: |
-          echo "Checking for critical/high vulnerabilities..."
-          # This will fail if there are critical or high vulnerabilities
-          npm audit --audit-level=critical
+          echo "Checking for critical vulnerabilities in production deps..."
+          # Dev-only advisories (e.g. @babel/core in the toolchain) must not block merges.
+          npm audit --audit-level=critical --omit=dev

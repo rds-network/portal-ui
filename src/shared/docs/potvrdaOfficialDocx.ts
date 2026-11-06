@@ -83,61 +83,8 @@ export const genderWords = (gender: OfficialPotvrdaInput["gender"]) => ({
         gender === "FEMALE" ? "обавила" : gender === "MALE" ? "обавио" : "обавио/ла",
 })
 
-export type OfficialPotvrdaPreviewBlock = {
-    text: string
-    align: "center" | "justify" | "start"
-    muted?: boolean
-    bold?: boolean
-}
-
 const formatHoursLabel = (totalHours: number) =>
     Number.isInteger(totalHours) ? String(totalHours) : totalHours.toFixed(1).replace(/\.0$/, "")
-
-/** Plain-text blocks for the editor mini-preview (same wording as DOCX body). */
-export function getOfficialPotvrdaPreviewBlocks(input: OfficialPotvrdaInput): OfficialPotvrdaPreviewBlock[] {
-    const g = genderWords(input.gender)
-    const hoursLabel = formatHoursLabel(input.totalHours)
-
-    return [
-        { text: "Удружење грађана «РУСКА ДИЈАСПОРА У СРБИJИ»,", align: "center", bold: true },
-        { text: "(назив и седиште организатора волонтирања)", align: "center", muted: true },
-        { text: `Број потврде ${input.confirmNumber || "—"}`, align: "start" },
-        { text: input.issueDate || "—", align: "center" },
-        { text: "(дан, месец и година издавања)", align: "center", muted: true },
-        {
-            text: "На основу члана 25. став 1. тачка 2) Закона о волонтирању („Службени гласник РС”, број 36/10), издајем",
-            align: "center",
-        },
-        { text: "ПОТВРДУ О ВОЛОНТИРАЊУ", align: "center", bold: true },
-        {
-            text:
-                `Потврђујем да је ${input.fullName || "—"}, ` +
-                `${input.jmbg ? `${input.jmbg} ` : ""}(ЈМБГ)/${g.born} ` +
-                `дана ${input.birthDate || "—"}. ` +
-                `- ${g.citizen} ${input.citizenship || "—"}, ` +
-                `са пребивалиштем / боравиштем у ${input.addressCity || "—"}, ` +
-                `у периоду од ${input.periodFrom || "—"} до ${input.periodTo || "—"} године ${g.performed} ` +
-                `следеће волонтерске услуге: ${input.servicesDescription || "—"}.`,
-            align: "justify",
-        },
-        {
-            text: "(кратак опис волонтерских услуга и крајњи корисник волонтирања…)",
-            align: "center",
-            muted: true,
-        },
-        {
-            text: `Укупно трајање волонтирања у часовима износи ${hoursLabel} часова. Волонтирање је обављено у ${input.volunteerCity || "—"} (град/општина).`,
-            align: "justify",
-        },
-        {
-            text:
-                `За време волонтирања извршено је оспособљавање волонтера ${input.trainingType || "—"} (врста оспособљавања), ` +
-                `од стране ${input.trainingProvider || "—"} (извођач оспособљавања), ` +
-                `у периоду од ${input.trainingFrom || "—"} до ${input.trainingTo || "—"}.`,
-            align: "justify",
-        },
-    ]
-}
 
 export function buildOfficialPotvrdaDocumentXml(
     input: OfficialPotvrdaInput,
@@ -293,7 +240,7 @@ export async function buildOfficialPotvrdaBlob(
         mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     }) as Blob
     const fileName = potvrdaFileName(input.fullName)
-    if (options?.download !== false) {
+    if (options?.download === true) {
         saveAs(blob, fileName)
     }
     return { blob, fileName }

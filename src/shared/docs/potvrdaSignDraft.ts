@@ -57,8 +57,8 @@ export const signatureWidthMm = (draft: PotvrdaSignDraft) =>
 export const stampSizeMm = (draft: PotvrdaSignDraft) =>
     STAMP_BASE_SIZE_MM * (Math.min(140, Math.max(20, draft.stampScale)) / 100)
 
-/** Word footer cell — larger preview scales are capped so the table stays on one page. */
-export const POTVRDA_DOCX_MAX_STAMP_MM = 30
+/** Stamp diameter cap in Word (round seal ≈ 38 mm standard). */
+export const POTVRDA_DOCX_MAX_STAMP_MM = 38
 export const POTVRDA_DOCX_MAX_SIGNATURE_WIDTH_MM = 38
 
 export const docxStampSizeMm = (draft: PotvrdaSignDraft) =>
@@ -66,3 +66,14 @@ export const docxStampSizeMm = (draft: PotvrdaSignDraft) =>
 
 export const docxSignatureWidthMm = (draft: PotvrdaSignDraft) =>
     Math.min(signatureWidthMm(draft), POTVRDA_DOCX_MAX_SIGNATURE_WIDTH_MM)
+
+/** Anchor offsets in the signature table cell (same as potvrdaOfficialDocx build). */
+export const potvrdaDocxStampAnchorMm = (draft: PotvrdaSignDraft) => ({
+    x: 8 + draft.stampOffsetX,
+    y: draft.stampOffsetY,
+})
+
+export const potvrdaDocxSignatureAnchorMm = (draft: PotvrdaSignDraft) => ({
+    x: -2 + draft.signatureOffsetX,
+    y: 6 + draft.signatureOffsetY,
+})

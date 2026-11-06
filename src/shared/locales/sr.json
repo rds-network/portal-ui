@@ -1659,7 +1659,7 @@
                 "editorTitle": "Editor POTVRDE",
                 "editorDescription": "Proverite tekst, pečat i potpis (kao zahvalnica), zatim preuzmite ili pošaljite volonteru.",
                 "editorTeaser": "Pečat, potpis i slanje — u editoru, kao zahvalnica.",
-                "previewSign": "Pregled dokumenta (kao u DOCX)",
+                "previewSign": "Pregled DOCX-a (isti kao preuzeti fajl)",
                 "back": "Nazad na dokumente",
                 "modalTitle": "Potvrda — podaci sa kartice",
                 "hint": "Proverite pre izdavanja. Broj potvrde i opis usluga po potrebi ručno.",
@@ -1691,7 +1691,7 @@
                     "resetSignature": "Podrazumevani potpis",
                     "uploadStamp": "Sopstveni pečat",
                     "resetStamp": "Podrazumevani pečat",
-                    "docxSizeHint": "U DOCX-u pečat je ograničen (~30 mm) da potpis ne pređe na praznu 2. stranu; pregled desno prikazuje ceo tekst."
+                    "docxSizeHint": "Panel prikazuje isti DOCX koji preuzimate. Pečat u fajlu — do 38 mm; veći klizač ga ne uvećava."
                 }
             },
             "registry": {
