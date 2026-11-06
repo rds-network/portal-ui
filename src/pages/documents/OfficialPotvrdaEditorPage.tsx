@@ -29,7 +29,7 @@ import {
     OfficialPotvrdaInput,
 } from "src/shared/docs/potvrdaOfficialDocx"
 import { loadPotvrdaSignDraft, PotvrdaSignDraft } from "src/shared/docs/potvrdaSignDraft"
-import { PotvrdaSignPreview } from "src/pages/documents/PotvrdaSignPreview"
+import { PotvrdaDocxPreview } from "src/pages/documents/PotvrdaDocxPreview"
 import { PotvrdaSignSection } from "src/pages/documents/PotvrdaSignSection"
 import { sendPotvrdaToInbox } from "src/pages/documents/potvrdaDelivery"
 import { issueYearFromFormDate, toApiDate } from "src/pages/documents/potvrdaDates"
@@ -464,7 +464,7 @@ const OfficialPotvrdaEditorPage = () => {
                         <Text size="sm" fw={600} mb="xs">
                             <FormattedMessage id="pages.documents.official.previewSign" />
                         </Text>
-                        <PotvrdaSignPreview draft={signDraft} input={previewInput} />
+                        <PotvrdaDocxPreview input={previewInput} signDraft={signDraft} />
                     </div>
                 </div>
             )}

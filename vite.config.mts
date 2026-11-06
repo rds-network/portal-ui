@@ -28,6 +28,8 @@ export default defineConfig(({ mode }) => {
             alias: {
                 src: resolve(__dirname, "./src"),
                 "@tabler/icons-react": "@tabler/icons-react/dist/esm/icons/index.mjs",
+                /** Vendored for docx-preview (npm install may be unavailable in CI without GitHub token) */
+                jszip: resolve(__dirname, "./src/vendor/jszip-esm.ts"),
             },
         },
         server: {

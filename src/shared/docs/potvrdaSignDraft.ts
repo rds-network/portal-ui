@@ -57,8 +57,8 @@ export const signatureWidthMm = (draft: PotvrdaSignDraft) =>
 export const stampSizeMm = (draft: PotvrdaSignDraft) =>
     STAMP_BASE_SIZE_MM * (Math.min(140, Math.max(20, draft.stampScale)) / 100)
 
-/** Word footer cell — preview uses the same cap so stamp size matches the downloaded DOCX. */
-export const POTVRDA_DOCX_MAX_STAMP_MM = 34
+/** Stamp diameter cap in Word (round seal ≈ 38 mm standard). */
+export const POTVRDA_DOCX_MAX_STAMP_MM = 38
 export const POTVRDA_DOCX_MAX_SIGNATURE_WIDTH_MM = 38
 
 export const docxStampSizeMm = (draft: PotvrdaSignDraft) =>
@@ -77,11 +77,3 @@ export const potvrdaDocxSignatureAnchorMm = (draft: PotvrdaSignDraft) => ({
     x: -2 + draft.signatureOffsetX,
     y: 6 + draft.signatureOffsetY,
 })
-
-/** Word half-points → CSS pt (w:sz val 24 → 12pt body). */
-export const POTVRDA_DOCX_PT = {
-    body: 12,
-    hint: 9,
-    president: 13,
-    caption: 10,
-} as const
