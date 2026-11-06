@@ -1,10 +1,12 @@
 /**
  * ESM-friendly export for docx-preview (`import JSZip from "jszip"`).
- * Vendored jszip uses `module.exports = JSZip`.
+ * Uses the self-contained UMD build: `lib/` is raw CommonJS and Vite does not
+ * transform CJS inside `src/`, which fails in the browser with "require is not defined".
+ * Without `module`/`define` in scope, the UMD wrapper assigns `window.JSZip`.
  */
-import * as JSZipModule from "./jszip/lib/index.js"
+import "./jszip/dist/jszip.min.js"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const JSZip = (JSZipModule as any).default ?? JSZipModule
+const JSZip = (globalThis as any).JSZip
 
 export default JSZip
