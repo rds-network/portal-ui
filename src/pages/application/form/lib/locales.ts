@@ -9,6 +9,9 @@ export const locales = {
     formError: "pages.application.form.form-error",
     captchaError: "pages.application.form.captcha-error",
     applicationSent: "pages.application.form.application-sent",
+    previewBanner: "pages.application.form.preview-banner",
+    previewCheck: "pages.application.form.preview-check",
+    previewValid: "pages.application.form.preview-valid",
 
     email: "pages.application.form.email",
     emailInvalid: "pages.application.form.email-invalid",

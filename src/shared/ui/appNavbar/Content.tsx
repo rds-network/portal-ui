@@ -31,6 +31,7 @@ import {
     IconStar,
     IconTargetArrow,
     IconFiles,
+    IconForms,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -201,6 +202,12 @@ export const Content: NavSection[] = [
                 link: "/applications",
                 roles: ["ADMIN_VOLUNTEER", "INTERVIEWER"],
                 showApplications: true,
+            },
+            {
+                label: "navbar.volunteers.application-form",
+                icon: IconForms,
+                link: "/applications/form-preview",
+                roles: ["ADMIN_VOLUNTEER", "INTERVIEWER"],
             },
             {
                 label: "navbar.volunteers.all-volunteers",
