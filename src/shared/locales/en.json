@@ -1103,6 +1103,10 @@
                 "form-error": "The form is filled out incorrectly",
                 "captcha-error": "Captcha verification failed",
                 "application-sent": "Your application received",
+                "preview-banner": "Preview mode: this is the questionnaire as applicants see it. Nothing is submitted or saved.",
+                "preview-check": "Check the form",
+                "preview-valid": "The form is filled in correctly (not submitted — preview mode)",
+                "preview-forbidden": "Only administrators and interviewers can preview the questionnaire",
                 "email": "Your e-mail",
                 "email-invalid": "Invalid e-mail format",
                 "name": "First Name Last Name",
@@ -2102,6 +2106,7 @@
         "volunteers": {
             "volunteers": "Volunteers",
             "all-volunteers": "All volunteers",
+            "application-form": "Application questionnaire",
             "applications": "Applications",
             "statistics": "Statistics",
             "mintrud-report": "Mintrud report",

@@ -1103,6 +1103,10 @@
                 "form-error": "Prijava nije ispravno popunjena",
                 "captcha-error": "Captcha provera nije prošla",
                 "application-sent": "",
+                "preview-banner": "Režim pregleda: ovako upitnik vidi kandidat. Prijava se ne šalje i ništa se ne čuva.",
+                "preview-check": "Proveri popunjavanje",
+                "preview-valid": "Upitnik je ispravno popunjen (nije poslat — režim pregleda)",
+                "preview-forbidden": "Pregled upitnika je dostupan samo administratorima i intervjuerima",
                 "email": "Vaš e-mail",
                 "email-invalid": "Neispravan format e-maila",
                 "name": "Ime Prezime",
@@ -2102,6 +2106,7 @@
         "volunteers": {
             "volunteers": "Volonteri",
             "all-volunteers": "Svi volonteri",
+            "application-form": "Upitnik za prijem",
             "applications": "Aplikacije",
             "statistics": "Statistika",
             "mintrud-report": "izveštaj o volontiranju",
