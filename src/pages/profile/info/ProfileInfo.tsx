@@ -10,6 +10,7 @@ import {
     IconDeviceFloppy,
     IconGenderMale,
     IconGift,
+    IconClock,
     IconHome,
     IconInfoCircle,
     IconMail,
@@ -17,6 +18,7 @@ import {
     IconMap,
     IconPencil,
     IconPhone,
+    IconUserSearch,
 } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
@@ -28,6 +30,8 @@ import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
 import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
+import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
+import { ImpersonationApiService } from "src/shared/api/ImpersonationApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { CitiesApiService } from "src/shared/api/CitiesApiService"
@@ -35,7 +39,10 @@ import {
     reportBlockOf,
     reportControllerNameOf,
     reportControlOf,
+    lastSeenOf,
     mupLetterOf,
+    dissolutionQueueOf,
+    isAutoDissolution,
     secondaryProgramCodesOf,
     UserAccountApiService,
     UserApiService,
@@ -86,6 +93,42 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         enabled: !!userInfo?.username && !!showSensitiveData,
     })
 
+    const { data: gratitude } = useQuery({
+        queryKey: ["achievements", "gratitude", userInfo?.username],
+        queryFn: () => AchievementsApiService.gratitude(userInfo!.username),
+        enabled: !!userInfo?.username,
+        staleTime: 60_000,
+    })
+
+    const { data: impersonation } = useQuery({
+        queryKey: ["impersonation-status"],
+        queryFn: () => ImpersonationApiService.status(),
+        enabled: !!currentUser,
+        staleTime: 5 * 60 * 1000,
+    })
+
+    const canImpersonateProfile =
+        (!!impersonation?.canImpersonate ||
+            hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])) &&
+        !impersonation?.active &&
+        !!userInfo?.username &&
+        userInfo.username.toLowerCase() !==
+            (impersonation?.realUsername ?? currentUser?.username ?? "").toLowerCase() &&
+        !(userInfo.groups ?? []).includes(UserGroup.ADMIN_SSO)
+
+    const { mutate: startImpersonation, isPending: isStartingImpersonation } = useMutation({
+        mutationFn: async () => {
+            await ImpersonationApiService.start(userInfo!.username)
+            const account = await UserApiService.getCurrentAccount()
+            setUser(account.data)
+            await queryClient.invalidateQueries()
+            return account.data
+        },
+        onSuccess: () => {
+            window.location.assign("/")
+        },
+    })
+
     const { mutate: issueWarning, isPending: issuingWarning } = useMutation({
         mutationFn: () =>
             InboxApiService.issueOverdueWarning(userInfo!.username, {
@@ -102,6 +145,42 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             id="pages.profile.issueWarningDone"
                             values={{ count: result.warningCount }}
                         />
+                    </Text>,
+                    null
+                )
+            )
+        },
+    })
+
+    const { mutate: enqueueDissolution, isPending: enqueueingDissolution } = useMutation({
+        mutationFn: () => UserAccountApiService.enqueueDissolution(userInfo!.id),
+        onSuccess: (updated) => {
+            onUserInfoUpdate?.(updated)
+            queryClient.invalidateQueries({ queryKey: ["getInfo", userInfo?.username] })
+            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.dissolutionQueuedDone" />
+                    </Text>,
+                    null
+                )
+            )
+        },
+    })
+
+    const { mutate: dequeueDissolution, isPending: dequeueingDissolution } = useMutation({
+        mutationFn: () => UserAccountApiService.dequeueDissolution(userInfo!.id),
+        onSuccess: (updated) => {
+            onUserInfoUpdate?.(updated)
+            queryClient.invalidateQueries({ queryKey: ["getInfo", userInfo?.username] })
+            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.profile.dissolutionDequeuedDone" />
                     </Text>,
                     null
                 )
@@ -423,6 +502,11 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const mupLetterSentLabel = mupLetter.mupLetterSentAt
         ? dayjs(mupLetter.mupLetterSentAt).format("DD.MM.YYYY")
         : ""
+    const dissolutionQueue = dissolutionQueueOf(userInfo)
+    const dissolutionQueued = !!dissolutionQueue.dissolutionQueuedAt
+    const dissolutionQueuedLabel = dissolutionQueue.dissolutionQueuedAt
+        ? dayjs(dissolutionQueue.dissolutionQueuedAt).format("DD.MM.YYYY")
+        : ""
     const reportControllerAtLabel = reportControl.reportControllerAt
         ? dayjs(reportControl.reportControllerAt).format("DD.MM.YYYY HH:mm")
         : ""
@@ -431,6 +515,12 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     // Обычные пользователи могут установить программу только если у них ее еще нет
     const isAdmin = hasPermission(currentUser, [UserGroup.ADMIN_SSO, UserGroup.ADMIN_VOLUNTEER])
     const isOwnProfile = userInfo?.id === currentUser?.id
+    const canManageDissolution = hasPermission(currentUser, [
+        UserGroup.ADMIN,
+        UserGroup.ADMIN_SSO,
+        UserGroup.ADMIN_VOLUNTEER,
+        UserGroup.MAIN_VOLUNTEER,
+    ])
     const hasProgram = !!programValue
 
     const canEditProgram = isAdmin || (isOwnProfile && !hasProgram)
@@ -543,6 +633,31 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             />
                         </Badge>
                     )}
+                    {dissolutionQueued && !mupLetterSentLabel && canManageDissolution && (
+                        <Badge
+                            color={isAutoDissolution(dissolutionQueue.dissolutionQueuedBy) ? "blue" : "orange"}
+                            radius="md"
+                            variant="light"
+                        >
+                            <FormattedMessage
+                                id={
+                                    isAutoDissolution(dissolutionQueue.dissolutionQueuedBy)
+                                        ? "pages.profile.absencesOverLimit"
+                                        : "pages.profile.dissolutionQueued"
+                                }
+                                values={{ date: dissolutionQueuedLabel }}
+                            />
+                        </Badge>
+                    )}
+                    {dissolutionQueued &&
+                        !mupLetterSentLabel &&
+                        isOwnProfile &&
+                        !canManageDissolution &&
+                        isAutoDissolution(dissolutionQueue.dissolutionQueuedBy) && (
+                        <Badge color="blue" radius="md" variant="light">
+                            <FormattedMessage id="pages.profile.absencesOverLimit" />
+                        </Badge>
+                    )}
                     {warningCount > 0 && (
                         <Tooltip label={<FormattedMessage id="pages.profile.warningsHint" />}>
                             <Badge color={warningCount >= 3 ? "red" : "orange"} radius="md" variant="light">
@@ -607,6 +722,34 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                 </Flex>
             </Flex>
             <Text className={classes.userName}>{userInfo?.fullName}</Text>
+            {showSensitiveData && (
+                <Flex align="center" gap={6} mt={4}>
+                    <IconClock size={16} />
+                    <Text size="sm" fw={600}>
+                        <FormattedMessage id="pages.profile.props.lastSeen" />
+                        {": "}
+                        {lastSeenOf(userInfo)
+                            ? dayjs(lastSeenOf(userInfo)).format("DD MMM YYYY, HH:mm")
+                            : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })}
+                    </Text>
+                </Flex>
+            )}
+            {((gratitude?.curator ?? 0) > 0 || (gratitude?.manager ?? 0) > 0) && (
+                <Flex gap={6} wrap="wrap" mt={8}>
+                    {(gratitude?.curator ?? 0) > 0 && (
+                        <Badge color="teal" radius="md" variant="light">
+                            <FormattedMessage id="pages.profile.curatorGratitude" />
+                            {(gratitude?.curator ?? 0) > 1 ? ` · ${gratitude?.curator}` : ""}
+                        </Badge>
+                    )}
+                    {(gratitude?.manager ?? 0) > 0 && (
+                        <Badge color="yellow" radius="md" variant="light">
+                            <FormattedMessage id="pages.profile.managerGratitude" />
+                            {(gratitude?.manager ?? 0) > 1 ? ` · ${gratitude?.manager}` : ""}
+                        </Badge>
+                    )}
+                </Flex>
+            )}
             {curatorPrograms.length > 0 && (
                 <Badge color="teal" radius="md" variant="light" mt={6} w="fit-content">
                     <FormattedMessage
@@ -822,6 +965,17 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     <FormattedMessage id={"pages.profile.buttons.edit"} />
                 </Button>
             )}
+            {canImpersonateProfile && (
+                <Button
+                    onClick={() => startImpersonation()}
+                    className={classes.button}
+                    variant="outline"
+                    loading={isStartingImpersonation}
+                    rightSection={<IconUserSearch size={14} />}
+                >
+                    <FormattedMessage id="pages.user-list.menu-impersonate" />
+                </Button>
+            )}
             {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO]) &&
                 userInfo?.username && (
                     <>
@@ -847,6 +1001,36 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         />
                     </>
                 )}
+            {hasPermission(currentUser, [
+                UserGroup.ADMIN_VOLUNTEER,
+                UserGroup.MAIN_VOLUNTEER,
+                UserGroup.ADMIN,
+                UserGroup.ADMIN_SSO,
+            ]) &&
+                userInfo?.id &&
+                !isOwnProfile &&
+                !mupLetterSentLabel &&
+                (dissolutionQueued ? (
+                    <Button
+                        onClick={() => dequeueDissolution()}
+                        className={classes.button}
+                        variant="outline"
+                        color="gray"
+                        loading={dequeueingDissolution}
+                    >
+                        <FormattedMessage id="pages.profile.dissolutionDequeue" />
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={() => enqueueDissolution()}
+                        className={classes.button}
+                        variant="outline"
+                        color="orange"
+                        loading={enqueueingDissolution}
+                    >
+                        <FormattedMessage id="pages.profile.dissolutionEnqueue" />
+                    </Button>
+                ))}
             {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER, UserGroup.ADMIN]) &&
                 userInfo?.username &&
                 !isOwnProfile &&

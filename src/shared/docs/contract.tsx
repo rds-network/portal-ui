@@ -1,4 +1,8 @@
-import { ApplicationDto, OfficialGroupDto } from "@rds-network/portal-api-axios"
+import { ApplicationDto, OfficialGroupDto, ProgramDto, UserInfoDto } from "@rds-network/portal-api-axios"
+import { OfficialGroupApiService } from "src/shared/api/OfficialGroupApiService"
+import { ProgramsApiService } from "src/shared/api/ProgramsApiService"
+import { UserApiService } from "src/shared/api/user/UserApiService"
+import { previousContractEnd } from "src/shared/utils/latestContractEnd"
 import dayjs from "dayjs"
 import { jsPDF as JsPdf } from "jspdf"
 import { MONTSERRAT_BOLD_BOLD } from "src/shared/docs/fonts/Montserrat-Bold-bold"
@@ -9,8 +13,9 @@ import { notifications } from "@mantine/notifications"
 
 export default function generateContractPdf(
     application: ApplicationDto,
-    officialProgramDto: OfficialGroupDto | undefined
-) {
+    officialProgramDto: OfficialGroupDto | undefined,
+    options?: { download?: boolean; volunteeringFrom?: string | null }
+): File {
     const fullName = errorIfEmpty("Name", application.name)
     const birthDate = dayjs(errorIfEmpty("Birth date", application.birthDate)).format("DD.MM.YYYY")
     const passport = errorIfEmpty("Passport", application.passport)
@@ -23,8 +28,14 @@ export default function generateContractPdf(
         errorIfEmpty("City", application.city),
         errorIfEmpty("Address", application.address)
     )
-    const contractFrom = dayjs(errorIfEmpty("Contract start date", application.contract?.startDate))
+    const contractFrom = dayjs(
+        errorIfEmpty(
+            "Contract start date",
+            options?.volunteeringFrom || application.contract?.startDate
+        )
+    )
     const contractUntil = dayjs(errorIfEmpty("Contract end date", application.contract?.endDate))
+    const headerDate = contractHeaderDate(signedOnOf(application), contractFrom)
 
     const pdf = new JsPdf({
         orientation: "p",
@@ -207,7 +218,7 @@ export default function generateContractPdf(
     writeCentered("УГОВОР О ВОЛОНТИРАЊУ", TITLE_PT, 3)
 
     setBody()
-    writeLeftRight(dayjs().format("DD.MM.YYYY"), "град Нови Сад", BODY_PT, 3)
+    writeLeftRight(headerDate.format("DD.MM.YYYY"), "град Нови Сад", BODY_PT, 3)
 
     writeWrapped("На основу Закoнa о волонтирању („Службени гласник РС“, бр. 36/2010), уговорне стране:", BODY_PT, 2)
 
@@ -507,7 +518,100 @@ export default function generateContractPdf(
     setBody()
     pdf.text(`потпис __________________ ${fullName}`, rightX, yRight)
 
-    pdf.save(`Ugovor_${fullName.replaceAll(" ", "_")}.pdf`)
+    const fileName = `Ugovor_${fullName.replaceAll(" ", "_")}.pdf`
+    const file = new File([pdf.output("blob")], fileName, { type: "application/pdf" })
+    if (options?.download !== false) {
+        pdf.save(fileName)
+    }
+    return file
+}
+
+/**
+ * Для продления «волонтирање од» — конец предыдущего договора.
+ * Дата в шапке — день оформления, не позже начала волонтёрства.
+ * knownContracts — договоры с карточки волонтёра, чтобы не искать учётку ещё раз.
+ */
+export async function buildContractPdf(
+    application: ApplicationDto,
+    officialProgramDto: OfficialGroupDto | undefined,
+    options?: { download?: boolean; knownContracts?: UserInfoDto["contracts"] }
+): Promise<File> {
+    const needAccount = application.type === "PROLONGATION" || !officialProgramDto?.nameSr
+    const account =
+        needAccount && application.email ? await accountByEmail(application.email) : undefined
+    let volunteeringFrom: string | null = null
+    if (application.type === "PROLONGATION") {
+        const contracts = options?.knownContracts ?? account?.contracts
+        const previousEnd = previousContractEnd(contracts, {
+            startDate: application.contract?.startDate,
+            endDate: application.contract?.endDate,
+        })
+        const until = application.contract?.endDate
+        if (previousEnd && (!until || previousEnd < until)) {
+            volunteeringFrom = previousEnd
+        }
+    }
+    const officialProgram = officialProgramDto?.nameSr
+        ? officialProgramDto
+        : await officialProgramFromAccount(application, account)
+    return generateContractPdf(application, officialProgram, {
+        download: options?.download,
+        volunteeringFrom,
+    })
+}
+
+/**
+ * Шапка: день, когда договор оформили. Если волонтёрство началось раньше — не позже этой даты.
+ * Если начало ещё впереди, в шапке остаётся день оформления.
+ * Без сохранённой даты (старый ответ API) шапка совпадает с началом, чтобы бланк не прыгал на «сегодня».
+ */
+export function contractHeaderDate(signedOn: dayjs.Dayjs | null, volunteeringFrom: dayjs.Dayjs): dayjs.Dayjs {
+    if (signedOn == null || !signedOn.isValid()) return volunteeringFrom
+    return signedOn.isBefore(volunteeringFrom, "day") ? signedOn : volunteeringFrom
+}
+
+function signedOnOf(application: ApplicationDto): dayjs.Dayjs | null {
+    const raw = (application as { contractDocumentDate?: string | null }).contractDocumentDate
+    if (!raw) return null
+    const signed = dayjs(raw)
+    return signed.isValid() ? signed : null
+}
+
+async function accountByEmail(email: string): Promise<UserInfoDto | undefined> {
+    const response = await UserApiService.searchUsers(email, { pageNumber: 0, pageSize: 5 })
+    return response.data.content?.find(
+        (item) => item.email?.trim().toLowerCase() === email.trim().toLowerCase()
+    )
+}
+
+/** Заявка на продление часто без программы: берём её с карточки волонтёра. */
+async function officialProgramFromAccount(
+    application: ApplicationDto,
+    account: UserInfoDto | undefined
+): Promise<OfficialGroupDto | undefined> {
+    const programCode = application.program || account?.program?.code
+    if (!programCode) return undefined
+
+    let program: ProgramDto | undefined =
+        account?.program?.code === programCode ? account.program : undefined
+    if (!program?.officialGroup || !program.nameSr) {
+        const programs = (await ProgramsApiService.getPrograms()).data
+        program = programs.find((item) => item.code === programCode) ?? program
+    }
+
+    if (program?.officialGroup) {
+        const groups = (await OfficialGroupApiService.getOfficialGroup()).data
+        const group = groups.find((item) => item.code === program?.officialGroup)
+        if (group?.nameSr) return group
+    }
+
+    if (!program?.nameSr) return undefined
+    return {
+        code: program.code,
+        nameRu: program.nameRu,
+        nameEn: program.nameEn,
+        nameSr: program.nameSr,
+    }
 }
 
 function parseBoldMarkdown(input: string): Array<{ text: string; bold: boolean }> {

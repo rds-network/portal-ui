@@ -25,4 +25,7 @@ export const locales = {
     digestTitle: "pages.report-list.digest-title",
     weekShort: "pages.report-list.week-short",
     moderatorShort: "pages.report.moderator-short",
+    sort: "pages.report-list.sort",
+    sortSubmitted: "pages.report-list.sort-submitted",
+    sortAccepted: "pages.report-list.sort-accepted",
 }

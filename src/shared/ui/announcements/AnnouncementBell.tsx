@@ -7,7 +7,10 @@ import parse from "html-react-parser"
 import React, { useRef, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
-import { AnnouncementApiService } from "src/shared/api/AnnouncementApiService"
+import {
+    AnnouncementApiService,
+    getUnreadAnnouncementsCountQuiet,
+} from "src/shared/api/AnnouncementApiService"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { sanitizeHtml } from "src/shared/utils/sanitizeHtml"
 import classes from "./AnnouncementBell.module.scss"
@@ -20,7 +23,7 @@ export const AnnouncementBell: React.FC = () => {
 
     const { data: announcementUnread = 0 } = useQuery({
         queryKey: ["announcements", "unread-count"],
-        queryFn: () => AnnouncementApiService.getUnreadAnnouncementsCount().then((r) => r.data.count),
+        queryFn: () => getUnreadAnnouncementsCountQuiet(),
         refetchInterval: 30_000,
     })
     const { data: inboxUnread = 0 } = useQuery({
@@ -94,6 +97,7 @@ export const AnnouncementBell: React.FC = () => {
                     aria-label="notifications"
                     onClick={() => setOpened(true)}
                     className={classes.button}
+                    data-tour-id="header-bell"
                 >
                     <IconBell size={22} />
                 </Button>
@@ -126,8 +130,18 @@ export const AnnouncementBell: React.FC = () => {
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
                                     setOpened(false)
-                                    if (item.kind === "REPORT_CUSTOMER") {
-                                        navigate(item.reportId ? `/report/${item.reportId}` : "/reports/review")
+                                    if (item.kind === "REPORT_CUSTOMER" || item.kind === "REPORT_DECISION") {
+                                        navigate(
+                                            item.reportId
+                                                ? `/report/${item.reportId}`
+                                                : item.kind === "REPORT_CUSTOMER"
+                                                  ? "/reports/review"
+                                                  : "/messages"
+                                        )
+                                        return
+                                    }
+                                    if (item.kind === "TALENT_RESPONSE" || item.kind === "TALENT_POST") {
+                                        navigate("/ideas")
                                         return
                                     }
                                     const login = item.heatmapUser || item.counterpart

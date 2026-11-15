@@ -7,6 +7,7 @@ import { FormattedMessage, useIntl } from "react-intl"
 import { getReportStatusColor } from "src/shared/report/status"
 import { getSpentTime, getSpentTimeFromReport } from "src/shared/report/timeSpent"
 import { getTaskDisplayDescription, getTaskDisplayName } from "src/shared/taskTranslation/lib/taskTranslation"
+import { shortenUrlsForPreview } from "src/shared/ui/linkifiedText/LinkifiedText"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import classes from "./ReportCard.module.scss"
@@ -50,6 +51,10 @@ export const ReportCard: React.FC<Props> = ({
             : null
     const showModerator =
         hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER]) && !!report.moderator && !!moderator
+    const latestNoteText = [...(report.notes || [])]
+        .sort((a, b) => dayjs(b.createTime).valueOf() - dayjs(a.createTime).valueOf())
+        .find((note) => note.text?.trim())
+        ?.text?.trim()
 
     return (
         <button type="button" className={classes.reportCard} onClick={onOpen}>
@@ -104,15 +109,25 @@ export const ReportCard: React.FC<Props> = ({
                 {(report.tasks || []).map((task, i) => {
                     const name = getTaskDisplayName(task, false) || "—"
                     const hours = getSpentTime(task.timeSpent, intl)
-                    const description = getTaskDisplayDescription(task, false)
+                    const description = shortenUrlsForPreview(getTaskDisplayDescription(task, false), intl)
                     return (
-                        <Text key={task.id || i} className={classes.taskLine}>
+                        <Text key={task.id || i} className={classes.taskLine} lineClamp={2}>
                             {name} — {hours}
                             {description ? ` · ${description}` : ""}
                         </Text>
                     )
                 })}
             </div>
+            {latestNoteText && (
+                <div className={classes.remark} data-tour-id="report-remark">
+                    <Text size="xs" fw={600} className={classes.remarkLabel}>
+                        <FormattedMessage id="pages.report-list.remark" />
+                    </Text>
+                    <Text size="sm" className={classes.remarkText}>
+                        {latestNoteText}
+                    </Text>
+                </div>
+            )}
         </button>
     )
 }

@@ -22,17 +22,9 @@
     flex-shrink: 0;
 }
 
-.eyebrow {
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
-    color: var(--portal-accent);
-}
-
 .title {
     @include s.title;
-    margin: 2px 0 0;
+    margin: 0;
     font-size: clamp(22px, 2.4vw, 28px);
 }
 
@@ -47,7 +39,7 @@
     min-height: 0;
     display: grid;
     grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 0.85fr) minmax(0, 1.15fr) auto;
     gap: 10px;
     align-items: stretch;
 }
@@ -78,6 +70,48 @@
     margin: 0;
 }
 
+.tabs {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    flex-wrap: wrap;
+}
+
+.tab {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--portal-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tabActive {
+    color: inherit;
+}
+
+.tabCount {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--portal-accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+}
+
 .cardLink {
     font-size: 12px;
     color: var(--portal-accent);
@@ -95,23 +129,132 @@
     gap: 8px;
 }
 
-.reportsCard {
+.tasksCard {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+.splitPane {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+.splitHalf {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    overflow: hidden;
+}
+
+.splitDivider {
+    width: 1px;
+    flex-shrink: 0;
+    background: var(--portal-border);
+    align-self: stretch;
+    margin: 10px 0;
+}
+
+.pointsBody {
+    appearance: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-height: 0;
+    border-radius: 10px;
+
+    &:hover .pointsValue {
+        color: var(--portal-accent);
+    }
+}
+
+.pointsBalance {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pointsValue {
+    font-size: clamp(28px, 3.2vw, 36px);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: var(--portal-ink);
+    transition: color 0.15s ease;
+}
+
+.pointsUnit {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--portal-muted);
+}
+
+.pointsMetaRow {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pointsMeta {
+    font-size: 12px;
+    color: var(--portal-muted);
+}
+
+.badgeDots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.badgeDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--portal-accent) 75%, #1a6b5c);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--portal-accent) 18%, transparent);
 }
 
 .messagesCard {
     grid-column: 2;
+    grid-row: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.reportsCard {
+    grid-column: 1;
     grid-row: 2;
     min-height: 0;
     overflow: hidden;
 }
 
-.tasksCard {
+.eventsSlot {
     grid-column: 2;
-    grid-row: 3;
+    grid-row: 2;
     min-height: 0;
-    overflow: hidden;
 }
 
 .listScroll {
@@ -129,7 +272,8 @@
     appearance: none;
     width: 100%;
     margin: 0;
-    padding: 8px 10px;
+    padding: 12px 12px;
+    min-height: 64px;
     text-align: left;
     font: inherit;
     color: inherit;
@@ -139,7 +283,7 @@
     background: var(--portal-solid);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     flex-shrink: 0;
     transition:
         background 0.15s ease,
@@ -149,6 +293,48 @@
         background: var(--portal-subtle);
         border-color: var(--portal-accent);
     }
+}
+
+.messageRow {
+    align-items: flex-start;
+    min-height: 88px;
+    padding: 14px 14px;
+}
+
+.messageHead {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+
+.messageName {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--portal-ink);
+    min-width: 0;
+}
+
+.messageTime {
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--portal-muted);
+}
+
+.messageSubject {
+    font-size: 13px;
+    font-weight: 650;
+    color: var(--portal-ink);
+    margin-top: 2px;
+}
+
+.unreadDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--portal-accent);
+    flex-shrink: 0;
+    margin-top: 6px;
 }
 
 .rowNew {
@@ -192,12 +378,6 @@
 
 .heatmap {
     grid-column: 1 / -1;
-    grid-row: 1;
-    min-height: 0;
-}
-
-.eventsSlot {
-    grid-column: 1;
     grid-row: 3;
     min-height: 0;
 }
@@ -216,10 +396,10 @@
     }
 
     .heatmap,
+    .tasksCard,
     .reportsCard,
-    .messagesCard,
     .eventsSlot,
-    .tasksCard {
+    .messagesCard {
         grid-column: auto;
         grid-row: auto;
     }
@@ -227,5 +407,19 @@
     .messagesCard,
     .tasksCard {
         min-height: 200px;
+    }
+
+    .splitPane {
+        flex-direction: column;
+    }
+
+    .splitDivider {
+        width: auto;
+        height: 1px;
+        margin: 0 12px;
+    }
+
+    .pointsBody {
+        min-height: 96px;
     }
 }

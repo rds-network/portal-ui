@@ -169,10 +169,8 @@ export const ApplicationStatusSelect = (props: ApplicationStatusSelectProps) => 
 }
 
 const isDisabled = (status: ApplicationStatus, application: ApplicationDto): boolean => {
-    if (application.status === ApplicationStatus.DONE) {
-        return true
-    }
-
+    // Allow leaving DONE (reopen stuck applications). Only gate selecting DONE itself
+    // when required fields are missing.
     switch (status) {
         case ApplicationStatus.DONE:
             return !application.contract || !application.program?.trim() || !application.project?.trim()

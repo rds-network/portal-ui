@@ -35,6 +35,17 @@ export type AnnouncementManageDto = {
 
 const alive = (status: number) => status === 200 || status === 204
 
+const bellAlive = (status: number) => status === 200 || status === 204 || status >= 500
+
+/** Navbar poll — backend errors must not toast-spam the whole session. */
+export async function getUnreadAnnouncementsCountQuiet(): Promise<number> {
+    const response = await RequestHttp.get<{ count: number }>("/announcements/unread-count", {
+        validateStatus: bellAlive,
+    })
+    if (response.status !== 200) return 0
+    return response.data?.count ?? 0
+}
+
 export const AnnouncementExtraApi = {
     async getBanner(): Promise<PortalBannerDto | null> {
         const response = await RequestHttp.get<PortalBannerDto>("/announcements/banner", { validateStatus: alive })

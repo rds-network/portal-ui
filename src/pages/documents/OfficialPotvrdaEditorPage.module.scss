@@ -1,0 +1,187 @@
+.root {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 8px 4px 32px;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 1.15fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: 12px;
+}
+
+.previewPane {
+    position: sticky;
+    top: 12px;
+}
+
+.preview {
+    position: relative;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 360px;
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: 8px;
+    padding: 10px 12px 8px;
+    background: var(--mantine-color-body);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    margin-inline: auto;
+    max-height: min(85vh, 640px);
+    overflow-y: auto;
+}
+
+.previewBody {
+    font-family: "Times New Roman", Times, serif;
+}
+
+.previewParagraph {
+    margin: 0 0 3px;
+    color: var(--mantine-color-text);
+}
+
+.previewCenter {
+    text-align: center;
+}
+
+.previewStart {
+    text-align: left;
+}
+
+.previewJustify {
+    text-align: justify;
+}
+
+.previewMuted {
+    color: var(--mantine-color-dimmed);
+}
+
+.previewBold {
+    font-weight: 700;
+}
+
+.signFooter {
+    display: grid;
+    grid-template-columns: 38% 16% 46%;
+    gap: 2px;
+    align-items: end;
+    width: 100%;
+    margin-top: 4px;
+    flex-shrink: 0;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.signColTitle {
+    text-align: left;
+    padding-bottom: 2px;
+}
+
+.signColMp {
+    text-align: center;
+    align-self: end;
+    padding-bottom: 2px;
+}
+
+.signColImages {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.signFooterText {
+    line-height: 1.2;
+}
+
+.signCanvas {
+    position: relative;
+    width: 100%;
+}
+
+.signatureImg {
+    position: absolute;
+    z-index: 2;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.stampImg {
+    position: absolute;
+    object-fit: contain;
+    opacity: 0.95;
+    z-index: 1;
+    pointer-events: none;
+}
+
+@media (max-width: 900px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .previewPane {
+        position: static;
+    }
+}
+
+/* docx-preview output — match file layout */
+.docxPreviewOuter {
+    width: 100%;
+    max-height: calc(100vh - 80px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: 8px;
+    padding: 8px;
+    background: var(--mantine-color-body);
+}
+
+.docxPreviewHost {
+    min-height: 120px;
+
+    :global(.docx-wrapper) {
+        background: transparent;
+        padding: 12px 0;
+        align-items: flex-start;
+        zoom: var(--docx-scale, 1);
+    }
+
+    /* Keep Word page width (library sets section width from sectPr) — do NOT force 100%; fit via zoom instead */
+    :global(.docx-wrapper > section.docx) {
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        margin: 0 auto;
+    }
+}
+
+.docxPreviewFonts {
+    font-family: "Times New Roman", Times, serif;
+
+    :global(.docx-wrapper) {
+        font-family: inherit;
+    }
+
+    :global(section.docx) {
+        font-family: inherit;
+    }
+}

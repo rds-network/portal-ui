@@ -6,6 +6,7 @@ import { useIntl } from "react-intl"
 import { useNavigate, useParams } from "react-router"
 import { useProfileValidation } from "src/app/providers/ProfileValidationProvider"
 import { UserContext } from "src/app/providers/UserContext"
+import { ApplicationDocsCard } from "src/pages/profile/applicationDocs/ApplicationDocsCard"
 import { ContractInfo } from "src/pages/profile/contract/ContractInfo"
 import { ProfileInfo } from "src/pages/profile/info/ProfileInfo"
 import { ResidencePermitInfo } from "src/pages/profile/residencePermit/ResidencePermitInfo"
@@ -25,6 +26,10 @@ export const Profile = () => {
     const { user: currentUser } = useContext(UserContext)
     const intl = useIntl()
     const [showSensitiveData, setShowSensitiveData] = useState(false)
+    const showApplicationDocs = hasPermission(currentUser, [
+        UserGroup.ADMIN_VOLUNTEER,
+        UserGroup.INTERVIEWER,
+    ])
 
     if (!login) {
         navigate("/not-found")
@@ -126,6 +131,7 @@ export const Profile = () => {
                                     onUpdate={handleUserInfoUpdate}
                                 />
                             )}
+                            {showApplicationDocs && userInfo && <ApplicationDocsCard userInfo={userInfo} />}
                         </Flex>
                     </Skeleton>
                 </SimpleGrid>

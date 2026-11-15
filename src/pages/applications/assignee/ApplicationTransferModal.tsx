@@ -1,13 +1,13 @@
 ﻿import { Button, Flex, Modal, Select, Text, TextInput } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { notifications } from "@mantine/notifications"
-import { IconArrowsExchange } from "@tabler/icons-react"
+import { IconArrowsExchange, IconArrowBackUp } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { v4 as uuid } from "uuid"
 import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
+import { RequestHttp } from "src/shared/http/RequestHttp"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
 
@@ -16,6 +16,8 @@ type Props = {
     onClose: () => void
     initialFrom?: string | null
 }
+
+type TransferResponse = { moved: number }
 
 export const ApplicationTransferModal: React.FC<Props> = ({ opened, onClose, initialFrom = null }) => {
     const intl = useIntl()
@@ -46,40 +48,21 @@ export const ApplicationTransferModal: React.FC<Props> = ({ opened, onClose, ini
         }
     }, [opened, initialFrom])
 
-    const { mutate: transfer, isPending } = useMutation({
+    const invalidate = () => {
+        queryClient.invalidateQueries({ queryKey: ["getApplications"] })
+        queryClient.invalidateQueries({ queryKey: ["applications-open-count"] })
+        queryClient.invalidateQueries({ queryKey: ["applications-dashboard"] })
+    }
+
+    const { mutate: transfer, isPending: transferring } = useMutation({
         mutationFn: async () => {
-            if (!from || !to || from === to) {
-                throw new Error("invalid")
-            }
-            const dateLabel = dayjs(transferDate || new Date()).format("DD.MM.YYYY")
-            const noteBody = intl.formatMessage(
-                {
-                    id: "pages.applications.transfer.note",
-                    defaultMessage: "Передача полномочий {date}: {from} → {to}",
-                },
-                { date: dateLabel, from: nameOf(from), to: nameOf(to) }
-            )
-
-            let moved = 0
-            for (let guard = 0; guard < 40; guard += 1) {
-                const response = await PrivateApplicationApiService.getApplications(
-                    { pageNumber: 0, pageSize: 25, sort: ["created;desc"] },
-                    "",
-                    { showCompleted: false, assignee: from }
-                )
-                const batch = response.data.content || []
-                if (batch.length === 0) break
-
-                for (const application of batch) {
-                    await PrivateApplicationApiService.assignApplication(application.id, { assignee: to })
-                    await PrivateApplicationApiService.addNoteToApplication(application.id, {
-                        id: uuid(),
-                        text: noteBody,
-                    })
-                    moved += 1
-                }
-            }
-            return moved
+            if (!from || !to || from === to) throw new Error("invalid")
+            const { data } = await RequestHttp.post<TransferResponse>("/application/transfer", {
+                from,
+                to,
+                date: dayjs(transferDate || new Date()).format("YYYY-MM-DD"),
+            })
+            return data.moved
         },
         onSuccess: (moved) => {
             notifications.show(
@@ -94,9 +77,7 @@ export const ApplicationTransferModal: React.FC<Props> = ({ opened, onClose, ini
                     null
                 )
             )
-            queryClient.invalidateQueries({ queryKey: ["getApplications"] })
-            queryClient.invalidateQueries({ queryKey: ["applications-open-count"] })
-            queryClient.invalidateQueries({ queryKey: ["applications-dashboard"] })
+            invalidate()
             onClose()
         },
         onError: () => {
@@ -111,6 +92,46 @@ export const ApplicationTransferModal: React.FC<Props> = ({ opened, onClose, ini
         },
     })
 
+    const { mutate: revert, isPending: reverting } = useMutation({
+        mutationFn: async () => {
+            if (!from || !to || from === to) throw new Error("invalid")
+            // from = original owner (Sobolevskaya), to = current holder (Fomenko)
+            const { data } = await RequestHttp.post<TransferResponse>("/application/transfer/revert", {
+                from,
+                to,
+            })
+            return data.moved
+        },
+        onSuccess: (moved) => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage
+                            id="pages.applications.transfer.revertDone"
+                            defaultMessage="Возвращено заявок: {count}"
+                            values={{ count: moved }}
+                        />
+                    </Text>,
+                    null
+                )
+            )
+            invalidate()
+            onClose()
+        },
+        onError: () => {
+            notifications.show(
+                ErrorNotification(
+                    <FormattedMessage
+                        id="pages.applications.transfer.revertError"
+                        defaultMessage="Не удалось откатить передачу"
+                    />
+                )
+            )
+        },
+    })
+
+    const busy = transferring || reverting
+
     return (
         <Modal
             opened={opened}
@@ -123,6 +144,12 @@ export const ApplicationTransferModal: React.FC<Props> = ({ opened, onClose, ini
                     <FormattedMessage
                         id="pages.applications.transfer.hint"
                         defaultMessage="Все открытые заявки выбранного ответственного перейдут другому. В каждую заявку добавится комментарий с датой передачи."
+                    />
+                </Text>
+                <Text size="sm" c="dimmed">
+                    <FormattedMessage
+                        id="pages.applications.transfer.revertHint"
+                        defaultMessage="Откат вернёт только заявки, у которых есть комментарий о передаче «От кого → Кому». Остальные заявки «Кому» не трогаются."
                     />
                 </Text>
                 <Select
@@ -162,14 +189,29 @@ export const ApplicationTransferModal: React.FC<Props> = ({ opened, onClose, ini
                     )}
                     readOnly
                 />
-                <Button
-                    leftSection={<IconArrowsExchange size={16} />}
-                    disabled={!from || !to || from === to}
-                    loading={isPending}
-                    onClick={() => transfer()}
-                >
-                    <FormattedMessage id="pages.applications.transfer.submit" defaultMessage="Передать заявки" />
-                </Button>
+                <Flex gap="sm" wrap="wrap">
+                    <Button
+                        leftSection={<IconArrowsExchange size={16} />}
+                        disabled={!from || !to || from === to}
+                        loading={transferring}
+                        onClick={() => transfer()}
+                    >
+                        <FormattedMessage id="pages.applications.transfer.submit" defaultMessage="Передать заявки" />
+                    </Button>
+                    <Button
+                        variant="light"
+                        color="gray"
+                        leftSection={<IconArrowBackUp size={16} />}
+                        disabled={!from || !to || from === to || busy}
+                        loading={reverting}
+                        onClick={() => revert()}
+                    >
+                        <FormattedMessage
+                            id="pages.applications.transfer.revert"
+                            defaultMessage="Откатить передачу"
+                        />
+                    </Button>
+                </Flex>
             </Flex>
         </Modal>
     )

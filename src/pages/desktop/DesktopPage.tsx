@@ -1,18 +1,20 @@
-import { Badge, Button, Flex, Modal, Select, Text, Textarea, TextInput, Title } from "@mantine/core"
+import { Badge, Button, Flex, Modal, Select, Text, Textarea, TextInput, Title, Avatar } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
 import { IconExternalLink, IconPlus } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useContext, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUserHeatmap"
 import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/reportsPersonal/lib/constants"
 import { defaultUser } from "src/pages/reports/lib/defaults"
-import { InboxApiService } from "src/shared/api/InboxApiService"
+import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
+import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
+import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import {
     PortalEventApiService,
     PortalEventDto,
@@ -20,6 +22,7 @@ import {
     PortalEventWriteRequest,
 } from "src/shared/api/PortalEventApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
+import { PrivateApplicationApiService } from "src/shared/api/applications/PrivateApplicationApiService"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
 import { resolveUsers } from "src/shared/api/user/UserApiService"
@@ -27,6 +30,7 @@ import { ekomapaLocationLabel, isEkomapaMapUrl, normalizeEventLocation } from "s
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilter"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
+import { getSpentTimeFromReport } from "src/shared/report/timeSpent"
 import { ReportCard } from "src/shared/ui/reportCard/ReportCard"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
@@ -43,6 +47,21 @@ const STATUS_COLOR: Record<string, string> = {
 
 const ACTIVE_TASK_STATUSES = new Set(["TODO", "DOING", "REVIEW", "REDO"])
 const MANAGER_ROLES = [UserGroup.ADMIN, UserGroup.ADMIN_VOLUNTEER, UserGroup.ADMIN_SSO, UserGroup.MAIN_VOLUNTEER]
+const APPLICATIONS_STAFF_ROLES = [UserGroup.ADMIN_VOLUNTEER, UserGroup.INTERVIEWER]
+
+const isReportInboxKind = (kind?: string | null) =>
+    kind === "REPORT_CUSTOMER" || kind === "REPORT_DECISION"
+
+const reportIdFromBody = (body?: string | null) =>
+    body?.match(/\/report\/([0-9a-fA-F-]{36})/)?.[1] ?? null
+
+const openInboxThread = (item: InboxThreadDto) => {
+    const reportId = item.reportId || reportIdFromBody(item.lastBody)
+    if (isReportInboxKind(item.kind) && reportId) {
+        return `/report/${reportId}`
+    }
+    return `/messages?thread=${encodeURIComponent(item.id)}`
+}
 
 export const DesktopPage: React.FC = () => {
     setDocumentTitleByLocale("pages.desktop.title")
@@ -51,8 +70,10 @@ export const DesktopPage: React.FC = () => {
     const navigate = useNavigate()
     const queryClient = useQueryClient()
     const { programs, projects } = useProgramProjectFilter(null, null)
+    const [reportsTab, setReportsTab] = useState<"new" | "all" | "prolongations">("new")
     const [eventOpen, setEventOpen] = useState(false)
     const [editingEventId, setEditingEventId] = useState<string | null>(null)
+    const [viewingEvent, setViewingEvent] = useState<PortalEventDto | null>(null)
 
     const { data: curatorMe } = useQuery({
         queryKey: ["program-curators", "me"],
@@ -60,38 +81,100 @@ export const DesktopPage: React.FC = () => {
         enabled: !!user,
     })
     const canManageEvents = hasPermission(user, MANAGER_ROLES) || !!curatorMe?.curator
+    const isAdminDesktop = hasPermission(user, MANAGER_ROLES)
+    const canViewApplications = hasPermission(user, APPLICATIONS_STAFF_ROLES)
+
+    useEffect(() => {
+        if (!canViewApplications && reportsTab === "prolongations") {
+            setReportsTab("new")
+        }
+    }, [canViewApplications, reportsTab])
 
     const reportFilter = useMemo(
-        () => ({ ...defaultFilter, login: user?.username || null }),
-        [user?.username]
+        () => ({
+            ...defaultFilter,
+            login: isAdminDesktop ? null : user?.username || null,
+        }),
+        [user?.username, isAdminDesktop]
     )
 
     const { data: reportsResponse } = useQuery({
         enabled: !!user?.username,
-        queryKey: ["desktop-reports", user?.username],
+        queryKey: ["desktop-reports", isAdminDesktop ? "all" : user?.username],
         initialData: { page: defaultPageResponse, content: [] },
         queryFn: () =>
             ReportApiService.getReports({ ...defaultPage, pageSize: 2 }, reportFilter).then((r) => r.data),
     })
 
     const reports = reportsResponse.content
-    const { data: users = {} } = resolveUsers(
-        reports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[])
-    )
+
+    const { data: newReportsResponse } = useQuery({
+        enabled: isAdminDesktop && !!user?.username,
+        queryKey: ["desktop-reports", "new"],
+        initialData: { page: defaultPageResponse, content: [] },
+        queryFn: () =>
+            ReportApiService.getReports(
+                { ...defaultPage, pageSize: 8 },
+                { ...defaultFilter, login: null, status: "CREATED" }
+            ).then((r) => r.data),
+    })
+    const newReports = newReportsResponse.content
+
+    const { data: prolongations = [] } = useQuery({
+        enabled: isAdminDesktop && !!user && canViewApplications,
+        queryKey: ["desktop-prolongations"],
+        queryFn: () =>
+            PrivateApplicationApiService.getApplications(
+                { pageNumber: 0, pageSize: 500, sort: ["created;desc"] },
+                "",
+                { showCompleted: false }
+            ).then((response) =>
+                (response.data.content || []).filter((item) => item.type === "PROLONGATION")
+            ),
+    })
 
     const { data: assignments = [] } = useQuery({
         queryKey: ["work-assignments"],
         queryFn: () => WorkAssignmentApiService.list(),
+        enabled: !isAdminDesktop,
     })
 
+    const { data: reviewReports = [] } = useQuery({
+        queryKey: ["customer-reports", "desktop", "CREATED"],
+        queryFn: () => CustomerReportApiService.list("CREATED", 0, 4).then((page) => page.content),
+        enabled: isAdminDesktop && !!user,
+    })
+
+    const { data: achievements } = useQuery({
+        queryKey: ["achievements", "me"],
+        queryFn: () => AchievementsApiService.me(),
+        staleTime: 60_000,
+        enabled: !!user,
+    })
+
+    const monthEarned = useMemo(() => {
+        if (!achievements?.recent?.length) return 0
+        const start = dayjs().startOf("month")
+        return achievements.recent
+            .filter((ev) => dayjs(ev.createdAt).isAfter(start) || dayjs(ev.createdAt).isSame(start, "day"))
+            .reduce((sum, ev) => sum + (ev.points || 0), 0)
+    }, [achievements?.recent])
+
+    const unlockedBadges = useMemo(
+        () => (achievements?.achievements ?? []).filter((a) => a.unlocked).slice(0, 6),
+        [achievements?.achievements]
+    )
+
     const myTasks = useMemo(() => {
+        if (isAdminDesktop) return []
         return assignments
             .filter(
                 (item) =>
                     item.assignee === user?.username && ACTIVE_TASK_STATUSES.has(String(item.status).toUpperCase())
             )
             .sort((a, b) => dayjs(b.createTime).valueOf() - dayjs(a.createTime).valueOf())
-    }, [assignments, user?.username])
+            .slice(0, 4)
+    }, [assignments, user?.username, isAdminDesktop])
 
     const { data: threads = [] } = useQuery({
         queryKey: ["inbox"],
@@ -106,6 +189,21 @@ export const DesktopPage: React.FC = () => {
         return sorted.slice(0, 8)
     }, [threads])
 
+    const messageLogins = useMemo(
+        () =>
+            recentMessages
+                .flatMap((item) => [item.counterpart, item.createdBy, item.recipient].filter(Boolean) as string[])
+                .filter((login, index, all) => all.indexOf(login) === index),
+        [recentMessages]
+    )
+    const { data: users = {} } = resolveUsers(
+        [
+            ...reports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
+            ...newReports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
+            ...reviewReports.flatMap((report) => [report.user, report.moderator].filter(Boolean) as string[]),
+            ...messageLogins,
+        ].filter((login, index, all) => all.indexOf(login) === index)
+    )
     const { data: events = [] } = useQuery({
         queryKey: ["portal-events", "upcoming"],
         queryFn: () => PortalEventApiService.list(true, 60),
@@ -213,50 +311,396 @@ export const DesktopPage: React.FC = () => {
         },
     })
 
+    const firstName =
+        (user?.fullName || (user as { name?: string } | null)?.name || "")
+            .trim()
+            .split(/\s+/)[0] || ""
+    const todayLabel = dayjs().format("dddd, D MMMM YYYY")
+
     return (
-        <Flex className={classes.root} direction="column">
+        <Flex className={classes.root} direction="column" data-tour-id="desktop-root">
             <div className={classes.header}>
                 <div>
-                    <Text className={classes.eyebrow}>
-                        <FormattedMessage id="design.workspace" />
-                    </Text>
                     <Title order={1} className={classes.title}>
-                        <FormattedMessage id="pages.desktop.title" />
+                        <FormattedMessage
+                            id="pages.desktop.greeting"
+                            values={{ name: firstName || intl.formatMessage({ id: "pages.desktop.title" }) }}
+                        />
                     </Title>
-                    <Text className={classes.subtitle}>
-                        <FormattedMessage id="pages.desktop.subtitle" />
-                    </Text>
+                    <Text className={classes.subtitle}>{todayLabel}</Text>
                 </div>
                 <Button
                     color="ocean.7"
                     leftSection={<IconPlus size={16} />}
                     onClick={() => navigate("/report/create")}
+                    data-tour-id="desktop-new-report"
                 >
                     <FormattedMessage id="pages.my-reports.new-report" />
                 </Button>
             </div>
 
             <div className={classes.grid}>
-                <section className={classes.heatmap}>
-                    <CurrentUserHeatmap compact />
+                <section className={`${classes.card} ${classes.tasksCard}`} data-tour-id="desktop-tasks">
+                    <div className={classes.splitPane}>
+                        <div
+                            className={classes.splitHalf}
+                            data-tour-id={isAdminDesktop ? "desktop-review-half" : "desktop-tasks-half"}
+                        >
+                            <div className={classes.cardHeader}>
+                                <Title order={2} className={classes.cardTitle}>
+                                    <FormattedMessage
+                                        id={
+                                            isAdminDesktop
+                                                ? "pages.desktop.review"
+                                                : "pages.desktop.tasks"
+                                        }
+                                    />
+                                </Title>
+                                <Link
+                                    className={classes.cardLink}
+                                    to={isAdminDesktop ? "/reports/review" : "/tasks"}
+                                >
+                                    <FormattedMessage
+                                        id={
+                                            isAdminDesktop
+                                                ? "pages.desktop.openReview"
+                                                : "pages.desktop.openBoard"
+                                        }
+                                    />
+                                </Link>
+                            </div>
+                            <div className={classes.listScroll}>
+                                {isAdminDesktop ? (
+                                    <>
+                                        {reviewReports.length === 0 && (
+                                            <Text className={classes.empty}>
+                                                <FormattedMessage id="pages.desktop.reviewEmpty" />
+                                            </Text>
+                                        )}
+                                        {reviewReports.map((report) => {
+                                            const volunteer =
+                                                (report.user && users[report.user]) ||
+                                                defaultUser(report.user || "")
+                                            const program = programs.find((p) => p.code === report.program)
+                                            return (
+                                                <button
+                                                    key={report.id}
+                                                    type="button"
+                                                    className={`${classes.row} ${classes.rowNew}`}
+                                                    onClick={() => navigate(`/report/${report.id}`)}
+                                                >
+                                                    <div className={classes.rowBody}>
+                                                        <Text fw={600} lineClamp={1}>
+                                                            {volunteer.fullName || report.user || "—"}
+                                                        </Text>
+                                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                                            {program
+                                                                ? getLocalizedName(program, intl.locale)
+                                                                : report.program || "—"}
+                                                            {" · "}
+                                                            {getSpentTimeFromReport(report, intl)}
+                                                        </Text>
+                                                    </div>
+                                                    <Badge color="blue" variant="light" radius="md" size="sm">
+                                                        <FormattedMessage id="common.report-status.CREATED" />
+                                                    </Badge>
+                                                </button>
+                                            )
+                                        })}
+                                    </>
+                                ) : (
+                                    <>
+                                        {myTasks.length === 0 && (
+                                            <Text className={classes.empty}>
+                                                <FormattedMessage id="pages.desktop.tasksEmpty" />
+                                            </Text>
+                                        )}
+                                        {myTasks.map((task) => {
+                                            const status = String(task.status).toUpperCase()
+                                            const isNew =
+                                                status === "TODO" ||
+                                                dayjs().diff(dayjs(task.createTime), "hour") < 48
+                                            return (
+                                                <button
+                                                    key={task.id}
+                                                    type="button"
+                                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
+                                                    onClick={() => navigate("/tasks")}
+                                                >
+                                                    <div className={classes.rowBody}>
+                                                        <Text fw={600} lineClamp={1}>
+                                                            {task.title}
+                                                        </Text>
+                                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                                            {task.customerName || task.customer || "—"}
+                                                            {task.dueDate
+                                                                ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
+                                                                : ""}
+                                                        </Text>
+                                                    </div>
+                                                    <Badge
+                                                        color={STATUS_COLOR[status] || "gray"}
+                                                        variant="light"
+                                                        radius="md"
+                                                        size="sm"
+                                                    >
+                                                        <FormattedMessage
+                                                            id={`pages.tasks.status.${status}`}
+                                                            defaultMessage={String(task.status)}
+                                                        />
+                                                    </Badge>
+                                                </button>
+                                            )
+                                        })}
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className={classes.splitDivider} aria-hidden />
+
+                        <div className={classes.splitHalf} data-tour-id="desktop-points-half">
+                            <div className={classes.cardHeader}>
+                                <Title order={2} className={classes.cardTitle}>
+                                    <FormattedMessage id="pages.desktop.points" />
+                                </Title>
+                                <Link className={classes.cardLink} to="/achievements">
+                                    <FormattedMessage id="pages.desktop.openPoints" />
+                                </Link>
+                            </div>
+                            <button
+                                type="button"
+                                className={classes.pointsBody}
+                                onClick={() => navigate("/achievements")}
+                            >
+                                <div className={classes.pointsBalance}>
+                                    <Text className={classes.pointsValue}>
+                                        {achievements?.balance ?? "—"}
+                                    </Text>
+                                    <Text className={classes.pointsUnit}>
+                                        <FormattedMessage id="pages.desktop.pointsUnit" />
+                                    </Text>
+                                </div>
+                                <div className={classes.pointsMetaRow}>
+                                    <Text className={classes.pointsMeta}>
+                                        <FormattedMessage
+                                            id="pages.desktop.pointsMonth"
+                                            values={{ points: monthEarned }}
+                                        />
+                                    </Text>
+                                    <Text className={classes.pointsMeta}>
+                                        <FormattedMessage
+                                            id="pages.desktop.pointsBadges"
+                                            values={{
+                                                unlocked: achievements?.unlockedCount ?? 0,
+                                                total: achievements?.totalCount ?? 0,
+                                            }}
+                                        />
+                                    </Text>
+                                </div>
+                                {unlockedBadges.length > 0 ? (
+                                    <div className={classes.badgeDots} aria-hidden>
+                                        {unlockedBadges.map((badge) => (
+                                            <span
+                                                key={badge.id}
+                                                className={classes.badgeDot}
+                                                title={badge.title}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <Text className={classes.empty}>
+                                        <FormattedMessage id="pages.desktop.pointsEmpty" />
+                                    </Text>
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 </section>
 
-                <section className={`${classes.card} ${classes.reportsCard}`}>
+                <section className={`${classes.card} ${classes.messagesCard}`} data-tour-id="desktop-messages">
                     <div className={classes.cardHeader}>
                         <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.reports" />
+                            <FormattedMessage id="pages.desktop.messages" />
                         </Title>
-                        <Link className={classes.cardLink} to="/reports/personal">
-                            <FormattedMessage id="pages.desktop.allReports" />
+                        <Link className={classes.cardLink} to="/messages">
+                            <FormattedMessage id="pages.desktop.allMessages" />
                         </Link>
                     </div>
                     <div className={classes.listScroll}>
-                        {reports.length === 0 && (
+                        {recentMessages.length === 0 && (
                             <Text className={classes.empty}>
-                                <FormattedMessage id="pages.my-reports.empty-reports" />
+                                <FormattedMessage id="pages.messages.empty" />
                             </Text>
                         )}
-                        {reports.map((report) => {
+                        {recentMessages.map((item) => {
+                            const login =
+                                item.counterpart || item.createdBy || item.recipient || ""
+                            const person = login ? users[login] : undefined
+                            const name =
+                                item.counterpartName ||
+                                item.recipientName ||
+                                person?.fullName ||
+                                item.counterpart ||
+                                item.recipient ||
+                                item.createdBy ||
+                                "—"
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    className={`${classes.row} ${classes.messageRow}`}
+                                    onClick={() => navigate(openInboxThread(item))}
+                                >
+                                    <Avatar
+                                        radius="xl"
+                                        size={42}
+                                        color="initials"
+                                        name={name}
+                                        src={person?.avatar?.link}
+                                    />
+                                    <div className={classes.rowBody}>
+                                        <div className={classes.messageHead}>
+                                            <Text className={classes.messageName} lineClamp={1}>
+                                                {name}
+                                            </Text>
+                                            <Text className={classes.messageTime}>
+                                                {dayjs(item.createTime).format("DD.MM HH:mm")}
+                                            </Text>
+                                        </div>
+                                        <Text className={classes.messageSubject} lineClamp={1}>
+                                            {item.subject}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={2}>
+                                            {item.lastBody || "—"}
+                                        </Text>
+                                    </div>
+                                    {item.unread ? <span className={classes.unreadDot} /> : null}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </section>
+
+                <section className={`${classes.card} ${classes.reportsCard}`} data-tour-id="desktop-reports">
+                    <div className={classes.cardHeader}>
+                        {isAdminDesktop ? (
+                            <div className={classes.tabs}>
+                                <button
+                                    type="button"
+                                    className={`${classes.tab} ${reportsTab === "new" ? classes.tabActive : ""}`}
+                                    onClick={() => setReportsTab("new")}
+                                >
+                                    <FormattedMessage id="pages.desktop.reportsNew" />
+                                    {(newReportsResponse.page?.totalElements ?? 0) > 0 && (
+                                        <span className={classes.tabCount}>{newReportsResponse.page.totalElements}</span>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`${classes.tab} ${reportsTab === "all" ? classes.tabActive : ""}`}
+                                    onClick={() => setReportsTab("all")}
+                                >
+                                    <FormattedMessage id="pages.desktop.reportsAdmin" />
+                                </button>
+                                {canViewApplications && (
+                                    <button
+                                        type="button"
+                                        className={`${classes.tab} ${reportsTab === "prolongations" ? classes.tabActive : ""}`}
+                                        onClick={() => setReportsTab("prolongations")}
+                                    >
+                                        <FormattedMessage id="pages.desktop.prolongations" />
+                                        {prolongations.length > 0 && (
+                                            <span className={classes.tabCount}>{prolongations.length}</span>
+                                        )}
+                                    </button>
+                                )}
+                            </div>
+                        ) : (
+                            <Title order={2} className={classes.cardTitle}>
+                                <FormattedMessage id="pages.desktop.reports" />
+                            </Title>
+                        )}
+                        <Link
+                            className={classes.cardLink}
+                            to={
+                                reportsTab === "prolongations"
+                                    ? "/applications"
+                                    : isAdminDesktop
+                                      ? reportsTab === "new"
+                                          ? "/reports/review"
+                                          : "/reports"
+                                      : "/reports/personal"
+                            }
+                        >
+                            <FormattedMessage
+                                id={
+                                    reportsTab === "prolongations"
+                                        ? "pages.desktop.allApplications"
+                                        : isAdminDesktop
+                                          ? reportsTab === "new"
+                                              ? "pages.desktop.openReview"
+                                              : "pages.desktop.allReportsAdmin"
+                                          : "pages.desktop.allReports"
+                                }
+                            />
+                        </Link>
+                    </div>
+                    <div className={classes.listScroll}>
+                        {isAdminDesktop && reportsTab === "prolongations" && prolongations.length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage id="pages.desktop.prolongationsEmpty" />
+                            </Text>
+                        )}
+                        {isAdminDesktop &&
+                            reportsTab === "prolongations" &&
+                            prolongations.map((application) => (
+                                <div
+                                    key={application.id}
+                                    className={classes.row}
+                                    role="link"
+                                    onClick={() => navigate(`/application/${application.id}`)}
+                                >
+                                    <div className={classes.rowBody}>
+                                        <Text className={classes.messageName} lineClamp={1}>
+                                            {application.name}
+                                        </Text>
+                                        <Text className={classes.rowMeta} lineClamp={1}>
+                                            {application.email}
+                                            {" · "}
+                                            <FormattedMessage
+                                                id={`common.application-status.${application.status}`}
+                                            />
+                                            {application.created
+                                                ? ` · ${dayjs(application.created).format("DD MMM YYYY")}`
+                                                : ""}
+                                        </Text>
+                                    </div>
+                                    {application.email && (
+                                        <Link
+                                            className={classes.cardLink}
+                                            to={`/volunteers/heatmap?search=${encodeURIComponent(application.email)}`}
+                                            onClick={(event) => event.stopPropagation()}
+                                        >
+                                            <FormattedMessage id="pages.profile.openHeatmap" />
+                                        </Link>
+                                    )}
+                                </div>
+                            ))}
+                        {reportsTab !== "prolongations" &&
+                            (isAdminDesktop && reportsTab === "new" ? newReports : reports).length === 0 && (
+                            <Text className={classes.empty}>
+                                <FormattedMessage
+                                    id={
+                                        isAdminDesktop && reportsTab === "new"
+                                            ? "pages.desktop.reportsNewEmpty"
+                                            : "pages.my-reports.empty-reports"
+                                    }
+                                />
+                            </Text>
+                        )}
+                        {reportsTab !== "prolongations" &&
+                            (isAdminDesktop && reportsTab === "new" ? newReports : reports).map((report) => {
                             const creator =
                                 (report.user && users[report.user]) || user || defaultUser(report.user || "")
                             const program = programs.find((p) => p.code === report.program)
@@ -282,7 +726,7 @@ export const DesktopPage: React.FC = () => {
                                             : intl.formatMessage({ id: "pages.user-list.no-project" })
                                     }
                                     currentUser={user}
-                                    hideVolunteer
+                                    hideVolunteer={!isAdminDesktop}
                                     onOpen={() => navigate(`/report/${report.id}`)}
                                 />
                             )
@@ -290,109 +734,103 @@ export const DesktopPage: React.FC = () => {
                     </div>
                 </section>
 
-                <section className={`${classes.card} ${classes.messagesCard}`}>
-                    <div className={classes.cardHeader}>
-                        <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.messages" />
-                        </Title>
-                        <Link className={classes.cardLink} to="/messages">
-                            <FormattedMessage id="pages.desktop.allMessages" />
-                        </Link>
-                    </div>
-                    <div className={classes.listScroll}>
-                        {recentMessages.length === 0 && (
-                            <Text className={classes.empty}>
-                                <FormattedMessage id="pages.messages.empty" />
-                            </Text>
-                        )}
-                        {recentMessages.map((item) => (
-                            <button
-                                key={item.id}
-                                type="button"
-                                className={classes.row}
-                                onClick={() => navigate("/messages")}
-                            >
-                                <div className={classes.rowBody}>
-                                    <Text fw={item.unread ? 700 : 500} lineClamp={1}>
-                                        {item.subject}
-                                    </Text>
-                                    <Text className={classes.rowMeta} lineClamp={1}>
-                                        {item.lastBody || item.counterpartName || item.counterpart || "—"}
-                                    </Text>
-                                </div>
-                                {item.unread && (
-                                    <Badge color="ocean" variant="filled" radius="md" size="sm">
-                                        <FormattedMessage id="pages.messages.new" />
-                                    </Badge>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                </section>
-
-                <div className={classes.eventsSlot}>
+                <div className={classes.eventsSlot} data-tour-id="desktop-events">
                     <DesktopEventsPanel
                         events={events}
                         canManage={canManageEvents}
                         onAdd={openCreateEvent}
                         onEdit={openEditEvent}
+                        onView={setViewingEvent}
                     />
                 </div>
 
-                <section className={`${classes.card} ${classes.tasksCard}`}>
-                    <div className={classes.cardHeader}>
-                        <Title order={2} className={classes.cardTitle}>
-                            <FormattedMessage id="pages.desktop.tasks" />
-                        </Title>
-                        <Link className={classes.cardLink} to="/tasks">
-                            <FormattedMessage id="pages.desktop.openBoard" />
-                        </Link>
-                    </div>
-                    <div className={classes.listScroll}>
-                        {myTasks.length === 0 && (
-                            <Text className={classes.empty}>
-                                <FormattedMessage id="pages.desktop.tasksEmpty" />
-                            </Text>
-                        )}
-                        {myTasks.map((task) => {
-                            const status = String(task.status).toUpperCase()
-                            const isNew =
-                                status === "TODO" || dayjs().diff(dayjs(task.createTime), "hour") < 48
-                            return (
-                                <button
-                                    key={task.id}
-                                    type="button"
-                                    className={`${classes.row} ${isNew ? classes.rowNew : ""}`}
-                                    onClick={() => navigate("/tasks")}
-                                >
-                                    <div className={classes.rowBody}>
-                                        <Text fw={600} lineClamp={1}>
-                                            {task.title}
-                                        </Text>
-                                        <Text className={classes.rowMeta} lineClamp={1}>
-                                            {task.customerName || task.customer || "—"}
-                                            {task.dueDate
-                                                ? ` · ${dayjs(task.dueDate).format("DD MMM")}`
-                                                : ""}
-                                        </Text>
-                                    </div>
-                                    <Badge
-                                        color={STATUS_COLOR[status] || "gray"}
-                                        variant="light"
-                                        radius="md"
-                                        size="sm"
-                                    >
-                                        <FormattedMessage
-                                            id={`pages.tasks.status.${status}`}
-                                            defaultMessage={String(task.status)}
-                                        />
-                                    </Badge>
-                                </button>
-                            )
-                        })}
-                    </div>
+                <section className={classes.heatmap}>
+                    <CurrentUserHeatmap compact />
                 </section>
             </div>
+
+            <Modal
+                opened={!!viewingEvent}
+                onClose={() => setViewingEvent(null)}
+                title={viewingEvent?.title || ""}
+            >
+                {viewingEvent && (
+                    <Flex direction="column" gap="sm">
+                        <Badge
+                            color={
+                                viewingEvent.type === "SUBBOTNIK"
+                                    ? "teal"
+                                    : viewingEvent.type === "CALL"
+                                      ? "blue"
+                                      : viewingEvent.type === "MEETING"
+                                        ? "violet"
+                                        : viewingEvent.type === "LECTURE"
+                                          ? "cyan"
+                                          : "gray"
+                            }
+                            variant="light"
+                            w="fit-content"
+                        >
+                            <FormattedMessage
+                                id={`pages.desktop.eventType.${viewingEvent.type}`}
+                                defaultMessage={viewingEvent.type}
+                            />
+                        </Badge>
+                        <Text size="sm" fw={600}>
+                            {dayjs(viewingEvent.startsAt).format("D MMMM YYYY, HH:mm")}
+                        </Text>
+                        {(ekomapaLocationLabel(viewingEvent.location) || viewingEvent.location) && (
+                            <div>
+                                <Text size="xs" c="dimmed">
+                                    <FormattedMessage id="pages.desktop.eventWhere" />
+                                </Text>
+                                {viewingEvent.location &&
+                                (/^https?:\/\//i.test(viewingEvent.location) ||
+                                    isEkomapaMapUrl(viewingEvent.location)) ? (
+                                    <a
+                                        href={
+                                            viewingEvent.location.startsWith("http")
+                                                ? viewingEvent.location
+                                                : `https://${viewingEvent.location}`
+                                        }
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        {ekomapaLocationLabel(viewingEvent.location) ||
+                                            viewingEvent.location}
+                                    </a>
+                                ) : (
+                                    <Text size="sm">
+                                        {ekomapaLocationLabel(viewingEvent.location) ||
+                                            viewingEvent.location}
+                                    </Text>
+                                )}
+                            </div>
+                        )}
+                        {viewingEvent.description ? (
+                            <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
+                                {viewingEvent.description}
+                            </Text>
+                        ) : (
+                            <Text size="sm" c="dimmed">
+                                <FormattedMessage id="pages.desktop.eventNoDescription" />
+                            </Text>
+                        )}
+                        {canManageEvents && (
+                            <Button
+                                variant="light"
+                                onClick={() => {
+                                    const event = viewingEvent
+                                    setViewingEvent(null)
+                                    openEditEvent(event)
+                                }}
+                            >
+                                <FormattedMessage id="pages.desktop.editEvent" />
+                            </Button>
+                        )}
+                    </Flex>
+                )}
+            </Modal>
 
             <Modal
                 opened={eventOpen}

@@ -1,6 +1,8 @@
 .rootGroup {
     position: fixed;
-    inset: 0 0 auto;
+    top: 0;
+    right: 0;
+    left: var(--portal-navbar-width, 292px);
     z-index: 200;
     height: 80px;
     padding: 0 32px;
@@ -40,6 +42,7 @@
 }
 @media (max-width: 64em) {
     .rootGroup {
+        left: 0;
         height: 72px;
         padding: 0 18px;
     }
@@ -65,3 +68,4 @@
         gap: 4px;
     }
 }
+

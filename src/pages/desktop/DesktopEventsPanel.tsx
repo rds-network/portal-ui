@@ -16,14 +16,23 @@ const EVENT_COLOR: Record<string, string> = {
     OTHER: "gray",
 }
 
+const EVENT_DATE_TONE: Record<string, string> = {
+    CALL: "eventWhenBlue",
+    SUBBOTNIK: "eventWhenTeal",
+    MEETING: "eventWhenViolet",
+    LECTURE: "eventWhenCyan",
+    OTHER: "eventWhenGray",
+}
+
 type Props = {
     events: PortalEventDto[]
     canManage: boolean
     onAdd: () => void
     onEdit: (event: PortalEventDto) => void
+    onView: (event: PortalEventDto) => void
 }
 
-export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, onEdit }) => {
+export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, onEdit, onView }) => {
     const intl = useIntl()
     const [month, setMonth] = useState<Date>(dayjs().startOf("month").toDate())
     const [selectedDay, setSelectedDay] = useState<Date | null>(null)
@@ -192,16 +201,29 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                     <article
                                         key={event.id}
                                         className={`${classes.eventCard} ${isNew ? classes.eventNew : ""}`}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => onView(event)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault()
+                                                onView(event)
+                                            }
+                                        }}
                                     >
-                                        <div className={classes.eventWhen}>
+                                        <div
+                                            className={`${classes.eventWhen} ${
+                                                classes[
+                                                    (EVENT_DATE_TONE[event.type] ||
+                                                        "eventWhenGray") as keyof typeof classes
+                                                ]
+                                            }`}
+                                        >
                                             <span className={classes.eventDay}>
                                                 {dayjs(event.startsAt).format("D")}
                                             </span>
                                             <span className={classes.eventMonth}>
                                                 {dayjs(event.startsAt).format("MMM")}
-                                            </span>
-                                            <span className={classes.eventTime}>
-                                                {dayjs(event.startsAt).format("HH:mm")}
                                             </span>
                                         </div>
                                         <div className={classes.eventBody}>
@@ -226,7 +248,10 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                                         aria-label={intl.formatMessage({
                                                             id: "pages.desktop.editEvent",
                                                         })}
-                                                        onClick={() => onEdit(event)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            onEdit(event)
+                                                        }}
                                                     >
                                                         <IconPencil size={12} />
                                                     </ActionIcon>
@@ -235,11 +260,12 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                             <Text className={classes.eventTitle} lineClamp={1}>
                                                 {event.title}
                                             </Text>
-                                            {(mapLabel || event.location) && (
-                                                <Text className={classes.eventMeta} lineClamp={1}>
-                                                    {mapLabel || event.location}
-                                                </Text>
-                                            )}
+                                            <Text className={classes.eventMeta} lineClamp={1}>
+                                                {dayjs(event.startsAt).format("HH:mm")}
+                                                {(mapLabel || event.location)
+                                                    ? ` · ${mapLabel || event.location}`
+                                                    : ""}
+                                            </Text>
                                             {locationIsLink && (
                                                 <a
                                                     className={classes.mapLink}
@@ -250,6 +276,7 @@ export const DesktopEventsPanel: React.FC<Props> = ({ events, canManage, onAdd, 
                                                     }
                                                     target="_blank"
                                                     rel="noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <FormattedMessage id="pages.desktop.openMap" />
                                                 </a>

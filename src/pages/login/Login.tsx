@@ -1,3 +1,4 @@
+import { AxiosError } from "axios"
 import { useContext, useEffect } from "react"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
@@ -9,11 +10,17 @@ export const Login = () => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        UserApiService.getCurrentAccount().then((res) => {
-            setUser(res.data)
-            navigate("/")
-        })
-    }, [setUser])
+        UserApiService.getCurrentAccount()
+            .then((res) => {
+                setUser(res.data)
+                navigate("/")
+            })
+            .catch((error: AxiosError) => {
+                if (error.response?.status === 403) {
+                    navigate("/unauthorized", { replace: true })
+                }
+            })
+    }, [navigate, setUser])
 
     return <LoadingScreen />
 }

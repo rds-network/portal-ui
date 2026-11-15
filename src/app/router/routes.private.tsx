@@ -11,6 +11,7 @@ const ReportList = lazy(() => import("src/pages/reports/ReportList"))
 const UserList = lazy(() => import("src/pages/users/UserList"))
 const Application = lazy(() => import("src/pages/application/Application"))
 const ApplicationForm = lazy(() => import("src/pages/application/form/Form"))
+const ApplicationFormPreview = lazy(() => import("src/pages/application/form/FormPreview"))
 const ApplicationStatusView = lazy(() => import("src/pages/application/view/ViewStatus"))
 const ApplicationList = lazy(() => import("src/pages/applications/Applications"))
 const ApplicationView = lazy(() => import("src/pages/applications/view/ApplicationView"))
@@ -21,9 +22,12 @@ const SupportPage = lazy(() => import("src/pages/support/SupportPage"))
 const AnnouncementsAdminPage = lazy(() => import("src/pages/announcements/AnnouncementsAdminPage"))
 const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
 const MessagesPage = lazy(() => import("src/pages/inbox/MessagesPage"))
+const ChatPage = lazy(() => import("src/pages/chat/ChatPage"))
+const IdeasPage = lazy(() => import("src/pages/ideas/IdeasPage"))
 const OverdueReportsPage = lazy(() => import("src/pages/overdue/OverdueReportsPage"))
 const DissolutionPage = lazy(() => import("src/pages/dissolution/DissolutionPage"))
 const ResourcesPage = lazy(() => import("src/pages/resources/ResourcesPage"))
+const MupDirectoryPage = lazy(() => import("src/pages/resources/mup/MupDirectoryPage"))
 const ActivityPage = lazy(() => import("src/pages/activity/ActivityPage"))
 const CuratorsPage = lazy(() => import("src/pages/curators/CuratorsPage"))
 const CuratorReportsPage = lazy(() => import("src/pages/reportsReview/CuratorReportsPage"))
@@ -31,6 +35,16 @@ const LeavePage = lazy(() => import("src/pages/leave/LeavePage"))
 const DissolutionRequestsPage = lazy(() => import("src/pages/dissolution/DissolutionRequestsPage"))
 const ControlledVolunteersPage = lazy(() => import("src/pages/controlled/ControlledVolunteersPage"))
 const AccountStatusPage = lazy(() => import("src/pages/accountStatus/AccountStatusPage"))
+const MaintenanceSettingsPage = lazy(() => import("src/pages/maintenance/MaintenanceSettingsPage"))
+const ApplicationJoinSettingsPage = lazy(
+    () => import("src/pages/application/joinSettings/ApplicationJoinSettingsPage")
+)
+const ZahvalnicaPage = lazy(() => import("src/pages/zahvalnica/ZahvalnicaPage"))
+const VolIdPage = lazy(() => import("src/pages/volId/VolIdPage"))
+const DocumentsPage = lazy(() => import("src/pages/documents/DocumentsPage"))
+const OfficialPotvrdaEditorPage = lazy(() => import("src/pages/documents/OfficialPotvrdaEditorPage"))
+const AchievementsPage = lazy(() => import("src/pages/achievements/AchievementsPage"))
+const PointMissionsAdminPage = lazy(() => import("src/pages/missions/PointMissionsAdminPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -78,6 +92,10 @@ export const routes: RouteProps[] = [
         element: <ApplicationList />,
     },
     {
+        path: "/applications/form-preview",
+        element: <ApplicationFormPreview />,
+    },
+    {
         path: "/application",
         element: <Application />,
     },
@@ -122,6 +140,14 @@ export const routes: RouteProps[] = [
         element: <MessagesPage />,
     },
     {
+        path: "/chat",
+        element: <ChatPage />,
+    },
+    {
+        path: "/ideas",
+        element: <IdeasPage />,
+    },
+    {
         path: "/reports/overdue",
         element: <OverdueReportsPage />,
     },
@@ -142,8 +168,44 @@ export const routes: RouteProps[] = [
         element: <ResourcesPage />,
     },
     {
+        path: "/resources/mup",
+        element: <MupDirectoryPage />,
+    },
+    {
         path: "/activity",
         element: <ActivityPage />,
+    },
+    {
+        path: "/settings/maintenance",
+        element: <MaintenanceSettingsPage />,
+    },
+    {
+        path: "/settings/application-join",
+        element: <ApplicationJoinSettingsPage />,
+    },
+    {
+        path: "/zahvalnica",
+        element: <ZahvalnicaPage />,
+    },
+    {
+        path: "/vol-id",
+        element: <VolIdPage />,
+    },
+    {
+        path: "/documents",
+        element: <DocumentsPage />,
+    },
+    {
+        path: "/documents/official-potvrda",
+        element: <OfficialPotvrdaEditorPage />,
+    },
+    {
+        path: "/achievements",
+        element: <AchievementsPage />,
+    },
+    {
+        path: "/achievements/missions",
+        element: <PointMissionsAdminPage />,
     },
     {
         path: "/curators",

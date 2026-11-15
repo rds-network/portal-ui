@@ -1,4 +1,5 @@
 import {
+    Alert,
     Button,
     Checkbox,
     Flex,
@@ -22,6 +23,7 @@ import {
     IconCake,
     IconCheck,
     IconEPassport,
+    IconEye,
     IconLanguageHiragana,
     IconLogin2,
     IconMailPin,
@@ -46,7 +48,12 @@ import { CitySelect } from "src/shared/ui/citySelect/CitySelect"
 import { z } from "zod"
 import classes from "./Form.module.scss"
 
-export const Form = () => {
+type FormProps = {
+    /** Staff view of the questionnaire: nothing is submitted, no captcha, no prefill. */
+    preview?: boolean
+}
+
+export const Form = ({ preview = false }: FormProps) => {
     const intl = useIntl()
     const navigate = useNavigate()
     const [captchaToken, setCaptchaToken] = useState<string | null>(null)
@@ -155,25 +162,28 @@ export const Form = () => {
 
     const { data: currentUser } = useQuery({
         queryKey: ["checkUser"],
+        enabled: !preview,
+        retry: false,
         queryFn: () =>
-            checkUserForApplication().then((res) => {
-                return res.data
-            }),
+            checkUserForApplication()
+                .then((res) => res.data)
+                .catch(() => null),
     })
 
     useEffect(() => {
-        if (currentUser) {
-            form.setFieldValue("email", currentUser.email)
-            form.setFieldValue("name", currentUser.fullName)
+        if (!currentUser) return
+        form.setFieldValue("email", currentUser.email)
+        form.setFieldValue("name", currentUser.fullName)
+        if (currentUser.birthDate) {
             form.setFieldValue("birthDate", dayjs(currentUser.birthDate).toDate())
-            form.setFieldValue("telegram", currentUser.telegram)
-            form.setFieldValue("address", currentUser.address)
-            form.setFieldValue("phone", currentUser.phone)
-            if (currentUser.gender) {
-                form.setFieldValue("gender", currentUser.gender)
-            }
         }
-    }, [currentUser])
+        if (currentUser.telegram) form.setFieldValue("telegram", currentUser.telegram)
+        if (currentUser.address) form.setFieldValue("address", currentUser.address)
+        if (currentUser.phone) form.setFieldValue("phone", currentUser.phone)
+        if (currentUser.gender) form.setFieldValue("gender", currentUser.gender)
+        // Prefill once; keep email/name editable (do not lock fields).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser?.email, currentUser?.fullName])
 
     const { isFetching, refetch } = useQuery({
         enabled: false,
@@ -193,6 +203,21 @@ export const Form = () => {
     })
 
     const onSend = () => {
+        if (preview) {
+            if (form.validate().hasErrors) {
+                setFormError(intl.formatMessage({ id: locales.formError }))
+            } else {
+                notifications.show(
+                    SuccessNotification(
+                        <Text size="sm">
+                            <FormattedMessage id={locales.previewValid} />
+                        </Text>,
+                        null
+                    )
+                )
+            }
+            return
+        }
         if (captchaToken) {
             if (form.validate().hasErrors) {
                 setFormError(intl.formatMessage({ id: locales.formError }))
@@ -213,7 +238,7 @@ export const Form = () => {
     }, [location, residence, experience])
 
     useEffect(() => {
-        if (captchaToken) {
+        if (preview || captchaToken) {
             setFormError(null)
         } else {
             setFormError(intl.formatMessage({ id: locales.captchaError }))
@@ -329,6 +354,11 @@ export const Form = () => {
             <Text className={classes.title}>
                 <FormattedMessage id={locales.title} />
             </Text>
+            {preview && (
+                <Alert variant="light" color="blue" icon={<IconEye size={16} />}>
+                    <FormattedMessage id={locales.previewBanner} />
+                </Alert>
+            )}
             <TextInput
                 label={<FormattedMessage id={locales.email} />}
                 radius="md"
@@ -337,7 +367,7 @@ export const Form = () => {
                 leftSection={<IconAt size={16} />}
                 key={form.key("email")}
                 {...form.getInputProps("email")}
-                disabled={isFetching || currentUser !== undefined}
+                disabled={isFetching}
             />
             <TextInput
                 label={<FormattedMessage id={locales.name} />}
@@ -348,7 +378,7 @@ export const Form = () => {
                 leftSection={<IconSignature size={16} />}
                 key={form.key("name")}
                 {...form.getInputProps("name")}
-                disabled={isFetching || currentUser !== undefined}
+                disabled={isFetching}
             />
             <TextInput
                 label={<FormattedMessage id={locales.patronymic} />}
@@ -546,11 +576,13 @@ export const Form = () => {
                 {...form.getInputProps("bio")}
                 disabled={isFetching}
             />
-            <CaptchaSolver
-                className={classes.captcha}
-                onSuccess={setCaptchaToken}
-                onError={() => setCaptchaToken(null)}
-            />
+            {!preview && (
+                <CaptchaSolver
+                    className={classes.captcha}
+                    onSuccess={setCaptchaToken}
+                    onError={() => setCaptchaToken(null)}
+                />
+            )}
             <Flex columnGap="md" rowGap="sm" align="center" justify="end" wrap="wrap">
                 {formError && (
                     <Flex align="center" justify="end" columnGap={4}>
@@ -565,7 +597,7 @@ export const Form = () => {
                     disabled={isFetching}
                     leftSection={isFetching ? <Loader size={16} /> : <IconCheck size={16} />}
                 >
-                    <FormattedMessage id={locales.buttonSend} />
+                    <FormattedMessage id={preview ? locales.previewCheck : locales.buttonSend} />
                 </Button>
             </Flex>
         </Flex>

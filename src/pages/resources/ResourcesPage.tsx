@@ -1,12 +1,13 @@
 import { Anchor, Button, Card, Flex, Modal, Text, TextInput, Textarea, Title } from "@mantine/core"
 import { useForm } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
-import { IconExternalLink, IconPlus, IconTrash } from "@tabler/icons-react"
+import { IconChevronRight, IconExternalLink, IconIdBadge, IconPlus, IconTrash } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { Link } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
-import { OrgLinkApiService, OrgLinkDto, OrgLinkWriteRequest } from "src/shared/api/OrgLinkApiService"
+import { OrgLinkApiService, OrgLinkDto, OrgLinkWriteRequest, ResourcesBadge } from "src/shared/api/OrgLinkApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -29,6 +30,11 @@ export const ResourcesPage: React.FC = () => {
     const [edit, setEdit] = useState<OrgLinkDto | null>(null)
 
     setDocumentTitleByLocale("pages.resources.title")
+
+    useEffect(() => {
+        ResourcesBadge.markSeen()
+        queryClient.invalidateQueries({ queryKey: ["resources-new-count"] })
+    }, [queryClient])
 
     const form = useForm({
         initialValues: {
@@ -108,6 +114,28 @@ export const ResourcesPage: React.FC = () => {
                     <FormattedMessage id="pages.resources.add" />
                 </Button>
             )}
+
+            <Card
+                component={Link}
+                to="/resources/mup"
+                withBorder
+                p="lg"
+                radius="lg"
+                className={`${classes.card} ${classes.mupCard}`}
+            >
+                <Flex align="flex-start" gap="md">
+                    <IconIdBadge size={28} stroke={1.5} />
+                    <div>
+                        <Text fw={650} className={classes.title}>
+                            <FormattedMessage id="pages.resources.mupCardTitle" />
+                            <IconChevronRight size={16} />
+                        </Text>
+                        <Text size="sm" c="dimmed" mt={8}>
+                            <FormattedMessage id="pages.resources.mupCardDescription" />
+                        </Text>
+                    </div>
+                </Flex>
+            </Card>
 
             {links.length === 0 && !isFetching ? (
                 <Text c="dimmed">

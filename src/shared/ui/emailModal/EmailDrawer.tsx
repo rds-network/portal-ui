@@ -1,9 +1,9 @@
-import { Button, Drawer, Flex, Loader, Pill, Text, Textarea, TextInput } from "@mantine/core"
+import { Anchor, Button, Drawer, Flex, Loader, Pill, Text, Textarea, TextInput } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
 import { FileInfoDto } from "@rds-network/portal-api-axios"
 import { IconMailForward } from "@tabler/icons-react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import Highlight from "@tiptap/extension-highlight"
 import SubScript from "@tiptap/extension-subscript"
 import Superscript from "@tiptap/extension-superscript"
@@ -11,12 +11,15 @@ import TextAlign from "@tiptap/extension-text-align"
 import Underline from "@tiptap/extension-underline"
 import { useEditor } from "@tiptap/react"
 import { StarterKit } from "@tiptap/starter-kit"
-import React, { createRef, useState } from "react"
+import React, { createRef, useEffect, useRef, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
+import { Link as RouterLink } from "react-router"
+import { FilesApiService } from "src/shared/api/FilesApiService"
 import { MailApiService } from "src/shared/api/MailApiService"
 import EmailTemplate from "src/shared/email/EmailTemplate"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { FileUploader, FileUploaderInterface } from "src/shared/ui/fileUploader/FileUploader"
+import { AttachmentPreview } from "./AttachmentPreview"
 import classes from "./EmailDrawer.module.scss"
 import { locales } from "./lib/locales"
 
@@ -26,6 +29,16 @@ interface EmailModalProps {
     recipients: { name: string; email: string }[]
     templates?: EmailTemplate[] | undefined
     from?: string
+    /** Файлы, которые нужно загрузить и приложить при открытии окна. */
+    prepareAttachments?: () => Promise<File[]>
+    /** Смена этого значения заново собирает вложения, не закрывая письмо. */
+    attachmentRevision?: string | number
+    /** Кнопки над вложениями, например сумма уплатницы. */
+    attachmentTools?: React.ReactNode
+    /** Текст, если файлы приложились. По умолчанию — про договор и анкету. */
+    attachedMessageId?: string
+    /** Куда перейти, если договор и анкета не приложились из‑за пустых дат. */
+    datesHref?: string
 }
 
 export const EmailDrawer = (props: EmailModalProps) => {
@@ -39,11 +52,15 @@ export const EmailDrawer = (props: EmailModalProps) => {
     const fileUploaderRef = createRef<FileUploaderInterface>()
     const [uploadedFiles, setUploadedFiles] = useState<FileInfoDto[]>([])
     const [loadingFiles, setLoadingFiles] = useState<String[]>([])
+    const [autoDocsNote, setAutoDocsNote] = useState<"attached" | "missing" | null>(null)
+    const [attaching, setAttaching] = useState(false)
+    const [previewId, setPreviewId] = useState<string | null>(null)
+    const localFiles = useRef<Map<string, File>>(new Map())
+    const prepareRef = useRef(props.prepareAttachments)
+    prepareRef.current = props.prepareAttachments
 
-    const { isFetching: sending, refetch: send } = useQuery({
-        enabled: false,
-        queryKey: ["sendEmail", topic, content],
-        queryFn: () =>
+    const { mutate: send, isPending: sending } = useMutation({
+        mutationFn: () =>
             MailApiService.sendMail(
                 topic,
                 content,
@@ -51,20 +68,21 @@ export const EmailDrawer = (props: EmailModalProps) => {
                 props.recipients[0].email,
                 undefined,
                 uploadedFiles.map((f) => f.id)
-            ).then((_) => {
-                notifications.show(
-                    SuccessNotification(
-                        <Text size="sm">
-                            <FormattedMessage id={locales.success} />
-                        </Text>,
-                        null
-                    )
+            ),
+        onSuccess: () => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id={locales.success} />
+                    </Text>,
+                    null
                 )
-                props.close()
-                setTopic("")
-                setContent("")
-                setTemplate("")
-            }),
+            )
+            props.close()
+            setTopic("")
+            setContent("")
+            setTemplate("")
+        },
     })
 
     const editor = useEditor(
@@ -87,6 +105,57 @@ export const EmailDrawer = (props: EmailModalProps) => {
         [sending, template]
     )
 
+    useEffect(() => {
+        if (!props.opened) {
+            setUploadedFiles([])
+            setLoadingFiles([])
+            setAutoDocsNote(null)
+            setAttaching(false)
+            setPreviewId(null)
+            localFiles.current.clear()
+            return
+        }
+        const prepare = prepareRef.current
+        if (!prepare) return
+        let cancelled = false
+        ;(async () => {
+            setAttaching(true)
+            try {
+                const files = await prepare()
+                if (cancelled) return
+                if (files.length === 0) {
+                    setAutoDocsNote("missing")
+                    return
+                }
+                const uploaded: FileInfoDto[] = []
+                for (const file of files) {
+                    const resp = await FilesApiService.uploadFile(file)
+                    localFiles.current.set(resp.data.id, file)
+                    uploaded.push(resp.data)
+                }
+                if (!cancelled) {
+                    setUploadedFiles(uploaded)
+                    setAutoDocsNote("attached")
+                }
+            } catch {
+                // Генераторы PDF уже показывают, какого поля не хватает.
+            } finally {
+                if (!cancelled) setAttaching(false)
+            }
+        })()
+        return () => {
+            cancelled = true
+        }
+    }, [props.opened, props.attachmentRevision])
+
+    useEffect(() => {
+        if (previewId && uploadedFiles.some((file) => file.id === previewId)) return
+        const next = uploadedFiles.find((file) => file.name.toLowerCase().endsWith(".pdf")) ?? uploadedFiles[0]
+        setPreviewId(next?.id ?? null)
+    }, [uploadedFiles, previewId])
+
+    const previewFile = uploadedFiles.find((file) => file.id === previewId) ?? null
+
     const onSend = () => {
         if (topic === "") {
             alert(intl.formatMessage({ id: locales.emptySubject }))
@@ -106,8 +175,9 @@ export const EmailDrawer = (props: EmailModalProps) => {
             title={<FormattedMessage id={locales.title} />}
             offset={16}
             radius="md"
-            size="xl"
+            size={previewFile ? "min(76rem, 96vw)" : "xl"}
         >
+            <div className={previewFile ? `${classes.shell} ${classes.shellSplit}` : classes.shell}>
             <Flex direction="column" className={classes.drawer}>
                 <Textarea
                     label={<FormattedMessage id={locales.recipients} />}
@@ -184,13 +254,41 @@ export const EmailDrawer = (props: EmailModalProps) => {
                         ))}
                     </Flex>
                 )}
+                {props.attachmentTools}
                 <FileUploader
                     ref={fileUploaderRef}
                     maxFiles={10}
                     maxSize={10}
+                    files={uploadedFiles}
+                    onLocalFile={(id, file) => {
+                        localFiles.current.set(id, file)
+                    }}
                     onFilesUploaded={(files) => setUploadedFiles(files)}
                     onFilesLoading={(files) => setLoadingFiles(files)}
                 />
+                {attaching && (
+                    <Flex align="center" gap={8}>
+                        <Loader size={14} />
+                        <Text size="sm" c="dimmed">
+                            <FormattedMessage id={locales.attaching} />
+                        </Text>
+                    </Flex>
+                )}
+                {autoDocsNote === "attached" && (
+                    <Text size="sm" c="dimmed">
+                        <FormattedMessage id={props.attachedMessageId || locales.autoDocs} />
+                    </Text>
+                )}
+                {autoDocsNote === "missing" && (
+                    <Text size="sm" c="red">
+                        <FormattedMessage id={locales.autoDocsMissing} />{" "}
+                        {props.datesHref && (
+                            <Anchor component={RouterLink} to={props.datesHref} inherit onClick={props.close}>
+                                <FormattedMessage id={locales.autoDocsSetDates} />
+                            </Anchor>
+                        )}
+                    </Text>
+                )}
                 {(uploadedFiles.length !== 0 || loadingFiles.length !== 0) && (
                     <Flex className={classes.filesContainer} wrap="wrap">
                         {uploadedFiles.map((file) => {
@@ -198,7 +296,13 @@ export const EmailDrawer = (props: EmailModalProps) => {
                                 <Pill
                                     key={file.id}
                                     withRemoveButton
-                                    className={classes.filePill}
+                                    className={
+                                        file.id === previewId
+                                            ? `${classes.filePill} ${classes.filePillActive}`
+                                            : classes.filePill
+                                    }
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => setPreviewId(file.id)}
                                     onRemove={() => fileUploaderRef.current?.delete(file.id)}
                                 >
                                     <Text className={classes.filePillText} truncate="end">
@@ -226,12 +330,16 @@ export const EmailDrawer = (props: EmailModalProps) => {
                         onClick={onSend}
                         className={classes.sendButton}
                         leftSection={sending ? <Loader size={16} /> : <IconMailForward size={16} />}
-                        disabled={sending || loadingFiles.length !== 0}
+                        disabled={sending || attaching || loadingFiles.length !== 0}
                     >
                         <FormattedMessage id={locales.send} />
                     </Button>
                 </Flex>
             </Flex>
+            {previewFile && (
+                <AttachmentPreview file={previewFile} source={localFiles.current.get(previewFile.id)} />
+            )}
+            </div>
         </Drawer>
     )
 }

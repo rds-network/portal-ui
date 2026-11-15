@@ -75,22 +75,22 @@ export const MupLetterModal: React.FC<Props> = ({
     })
 
     useEffect(() => {
-        if (!opened) {
-            setReason(initialReason)
+        if (!opened) return
+        setReason(initialReason)
+    }, [opened, initialReason])
+
+    useEffect(() => {
+        if (!opened) return
+        if (draft?.subject && draft.body) {
+            setTo(draft.to || MUP_TO)
+            setSubject(draft.subject)
+            setBody(draft.body)
             return
         }
-        setReason(initialReason)
         setTo(fallback.to)
         setSubject(fallback.subject)
         setBody(fallback.body)
-    }, [fallback, opened, initialReason])
-
-    useEffect(() => {
-        if (!draft?.subject || !draft.body) return
-        setTo(draft.to || MUP_TO)
-        setSubject(draft.subject)
-        setBody(draft.body)
-    }, [draft])
+    }, [opened, draft, fallback])
 
     const { mutate, isPending } = useMutation({
         mutationFn: () =>
@@ -101,19 +101,19 @@ export const MupLetterModal: React.FC<Props> = ({
                 body: body.trim(),
                 reason,
             }),
-        onSuccess: (result) => {
-            notifications.show(
-                SuccessNotification(
-                    <Text size="sm">
-                        <FormattedMessage
-                            id={result.deactivated ? "pages.mup.sent" : "pages.mup.sentKeepAccess"}
-                        />
-                    </Text>,
-                    null
-                )
-            )
-            queryClient.invalidateQueries({ queryKey: ["mup-letters"] })
-            queryClient.invalidateQueries({ queryKey: ["getInfo"] })
+        onSuccess: async (result) => {
+            const message = intl.formatMessage({
+                id: result.deactivated ? "pages.mup.sent" : "pages.mup.sentKeepAccess",
+            })
+            notifications.show(SuccessNotification(message, null))
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: ["mup-letters"] }),
+                queryClient.invalidateQueries({ queryKey: ["getInfo"] }),
+                queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] }),
+                queryClient.invalidateQueries({ queryKey: ["report-overdue-deactivated"] }),
+                queryClient.invalidateQueries({ queryKey: ["dissolution-requests"] }),
+                queryClient.invalidateQueries({ queryKey: ["report-overdue"] }),
+            ])
             close()
         },
     })

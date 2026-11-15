@@ -27,9 +27,22 @@ export type DissolutionRequestRejectRequest = {
     reason?: string | null
 }
 
+export type DissolutionRequestMetaDto = {
+    approverUsername: string
+    isDissolutionApprover: boolean
+}
+
 const alive = (status: number) => status === 200 || status === 201 || status === 404 || status >= 500
 
 export const DissolutionRequestApiService = {
+    async meta(): Promise<DissolutionRequestMetaDto | null> {
+        const response = await RequestHttp.get<DissolutionRequestMetaDto>("/dissolution-requests/meta", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return null
+        return response.data ?? null
+    },
+
     async create(payload: DissolutionRequestCreateRequest): Promise<DissolutionRequestDto> {
         const response = await RequestHttp.post<DissolutionRequestDto>("/dissolution-requests", payload, {
             validateStatus: (status) => status === 200 || status === 201 || status === 404,
@@ -52,6 +65,14 @@ export const DissolutionRequestApiService = {
         })
         if (response.status !== 200) return []
         return response.data ?? []
+    },
+
+    async pendingCount(): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/dissolution-requests/pending-count", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
     },
 
     async history(): Promise<DissolutionRequestDto[]> {

@@ -111,9 +111,19 @@ export const AccountStatusPage: React.FC = () => {
                     </Text>
                 </Text>
                 <Text size="sm" c="dimmed">
-                    <FormattedMessage
-                        id={item.requestedActive ? "pages.account-status.activate" : "pages.account-status.deactivate"}
-                    />
+                    <Text
+                        span
+                        fw={700}
+                        c={item.requestedActive ? "green.7" : "red.7"}
+                    >
+                        <FormattedMessage
+                            id={
+                                item.requestedActive
+                                    ? "pages.account-status.activate"
+                                    : "pages.account-status.deactivate"
+                            }
+                        />
+                    </Text>
                     {" · "}
                     <FormattedMessage id="pages.account-status.requestedBy" values={{ name: item.createdBy }} />
                     {" · "}
@@ -195,9 +205,15 @@ export const AccountStatusPage: React.FC = () => {
                     </Text>
                 </Text>
                 <Text size="sm" c="dimmed">
-                    <FormattedMessage
-                        id={item.activeTo ? "pages.account-status.becameActive" : "pages.account-status.becameInactive"}
-                    />
+                    <Text span fw={700} c={item.activeTo ? "green.7" : "red.7"}>
+                        <FormattedMessage
+                            id={
+                                item.activeTo
+                                    ? "pages.account-status.becameActive"
+                                    : "pages.account-status.becameInactive"
+                            }
+                        />
+                    </Text>
                     {" · "}
                     <FormattedMessage id={`pages.account-status.source.${item.source}`} />
                     {item.actorUsername ? ` · ${item.actorUsername}` : ""}
@@ -225,6 +241,26 @@ export const AccountStatusPage: React.FC = () => {
                 <Text c="dimmed" mt={6}>
                     <FormattedMessage id="pages.account-status.description" />
                 </Text>
+                {meta?.approverUsername && (
+                    <Text c="dimmed" size="sm" mt={4}>
+                        <FormattedMessage
+                            id="pages.account-status.waitingForDecision"
+                            values={{
+                                name: canDecide
+                                    ? intl.formatMessage({ id: "pages.account-status.waitingYou" })
+                                    : meta.approverUsername,
+                            }}
+                        />
+                    </Text>
+                )}
+                {!canDecide && canAccess && meta?.approverUsername && (
+                    <Text c="dimmed" size="sm" mt={2}>
+                        <FormattedMessage
+                            id="pages.account-status.decisionByApprover"
+                            values={{ name: meta.approverUsername }}
+                        />
+                    </Text>
+                )}
             </div>
 
             <div className={classes.section}>

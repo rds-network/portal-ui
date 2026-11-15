@@ -1,16 +1,18 @@
-import { Badge, Button, Card, Checkbox, Flex, Group, Loader, Modal, Text, Title } from "@mantine/core"
+import { Badge, Button, Card, Flex, Group, Loader, Text, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo } from "react"
 import { FormattedMessage } from "react-intl"
 import { useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService, OverdueNoticePersonDto, OverdueWeekDto, ReportOverdueDto } from "src/shared/api/InboxApiService"
+import { isAutoDissolution, UserAccountApiService } from "src/shared/api/user/UserApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { hasPermission, UserGroup } from "src/shared/user/roles"
 import { downloadCsv } from "src/shared/utils/downloadCsv"
+import { weekFullyOnLeave } from "src/shared/utils/leaveWeek"
 import { formatContractEnd } from "src/shared/utils/latestContractEnd"
 import classes from "./OverdueReportsPage.module.scss"
 
@@ -20,7 +22,7 @@ const thisMonday = () => dayjs().startOf("isoWeek").format("YYYY-MM-DD")
 
 const weekTone = (week: OverdueWeekDto) => {
     const current = week.weekStart === thisMonday()
-    if ((week.leaveDays ?? 0) > 0 && !week.hoursRequired) return "leave"
+    if (weekFullyOnLeave(week.weekStart, week.weekEnd, week.leaveDays)) return "leave"
     if (current && week.hoursWorked === 0) return "waiting"
     if (!week.hoursRequired) return "na"
     if (week.hoursWorked === 0) return "noReports"
@@ -60,9 +62,6 @@ export const OverdueReportsPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const navigate = useNavigate()
     const queryClient = useQueryClient()
-    const [previewOpen, setPreviewOpen] = useState(false)
-    const [letter, setLetter] = useState<ReportOverdueDto | null>(null)
-    const [excluded, setExcluded] = useState<Set<string>>(new Set())
 
     setDocumentTitleByLocale("pages.overdue.title")
 
@@ -75,21 +74,6 @@ export const OverdueReportsPage: React.FC = () => {
     const { data: items = [], isFetching, isLoading } = useQuery({
         queryKey: ["report-overdue"],
         queryFn: () => InboxApiService.overdue(),
-    })
-
-    useEffect(() => {
-        const known = new Set(items.map((item) => item.username))
-        setExcluded((prev) => new Set([...prev].filter((username) => known.has(username))))
-    }, [items])
-
-    const sendCount = items.length - excluded.size
-    const allIncluded = items.length > 0 && excluded.size === 0
-    const someExcluded = excluded.size > 0 && excluded.size < items.length
-
-    const { data: preview } = useQuery({
-        queryKey: ["report-overdue-preview"],
-        queryFn: () => InboxApiService.overduePreview(),
-        enabled: previewOpen,
     })
 
     const exportNotices = (people: OverdueNoticePersonDto[], filename: string) => {
@@ -107,30 +91,6 @@ export const OverdueReportsPage: React.FC = () => {
             ]),
         ])
     }
-
-    const { mutate: notify, isPending } = useMutation({
-        mutationFn: () => InboxApiService.notifyOverdue([...excluded]),
-        onSuccess: (result) => {
-            notifications.show(
-                SuccessNotification(
-                    <Text size="sm">
-                        <FormattedMessage id="pages.overdue.sent" values={{ count: result.sent }} />
-                    </Text>,
-                    null
-                )
-            )
-            if (result.recipients.length > 0) {
-                exportNotices(result.recipients, `overdue-notices-${dayjs().format("YYYY-MM-DD")}.csv`)
-            }
-            setPreviewOpen(false)
-            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
-            queryClient.invalidateQueries({ queryKey: ["report-overdue-notices"] })
-            queryClient.invalidateQueries({ queryKey: ["overdue-counts"] })
-            queryClient.invalidateQueries({ queryKey: ["overdue-warnings"] })
-            queryClient.invalidateQueries({ queryKey: ["inbox"] })
-            queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
-        },
-    })
 
     const { mutate: cancelWarning, isPending: cancelling } = useMutation({
         mutationFn: (username: string) =>
@@ -158,6 +118,19 @@ export const OverdueReportsPage: React.FC = () => {
         },
     })
 
+    const { mutate: toggleDissolutionQueue, isPending: togglingQueue } = useMutation({
+        mutationFn: (item: ReportOverdueDto) => {
+            if (!item.accountId) throw new Error("accountId missing")
+            return item.dissolutionQueuedAt
+                ? UserAccountApiService.dequeueDissolution(item.accountId)
+                : UserAccountApiService.enqueueDissolution(item.accountId)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
+            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
+        },
+    })
+
     const { data: ledger = [] } = useQuery({
         queryKey: ["report-overdue-notices"],
         queryFn: () => InboxApiService.overdueNotices(),
@@ -165,23 +138,6 @@ export const OverdueReportsPage: React.FC = () => {
 
     const openHeatmap = (username: string) => {
         navigate(`/volunteers/heatmap?search=${encodeURIComponent(username)}`)
-    }
-
-    const toggleExclude = (username: string) => {
-        setExcluded((prev) => {
-            const next = new Set(prev)
-            if (next.has(username)) next.delete(username)
-            else next.add(username)
-            return next
-        })
-    }
-
-    const toggleAll = () => {
-        if (allIncluded) {
-            setExcluded(new Set(items.map((item) => item.username)))
-            return
-        }
-        setExcluded(new Set())
     }
 
     const sortedItems = useMemo(() => [...items].sort(compareOverdue), [items])
@@ -200,14 +156,6 @@ export const OverdueReportsPage: React.FC = () => {
                 ? { gridTemplateColumns: `repeat(${axisWeeks.length}, 20px)` }
                 : undefined,
         [axisWeeks.length]
-    )
-
-    const samples = useMemo(
-        () =>
-            (preview?.samples ?? sortedItems.slice(0, 5))
-                .filter((item) => !excluded.has(item.username))
-                .sort(compareOverdue),
-        [preview?.samples, sortedItems, excluded]
     )
 
     return (
@@ -232,11 +180,6 @@ export const OverdueReportsPage: React.FC = () => {
                         <Text>
                             <FormattedMessage id="pages.overdue.total" values={{ count: items.length }} />
                         </Text>
-                        {excluded.size > 0 && (
-                            <Text size="sm" c="dimmed">
-                                <FormattedMessage id="pages.overdue.excluded" values={{ count: excluded.size }} />
-                            </Text>
-                        )}
                     </div>
                     <Group gap="sm">
                         <Button
@@ -248,23 +191,15 @@ export const OverdueReportsPage: React.FC = () => {
                         >
                             <FormattedMessage id="pages.overdue.export" />
                         </Button>
-                        <Button onClick={() => setPreviewOpen(true)} disabled={isLoading || sendCount === 0}>
-                            <FormattedMessage id="pages.overdue.notify" />
-                        </Button>
                     </Group>
                 </Flex>
-                {items.length > 0 && (
-                    <Text size="sm" c="dimmed" mb="sm">
-                        <FormattedMessage id="pages.overdue.skipHint" />
-                    </Text>
-                )}
                 <Flex justify="center" mb="md">
                     <Group gap="xs" justify="center" wrap="wrap">
                         <Legend color="noReports" label="pages.heat-map.no-reports" />
                         <Legend color="partialReports" label="pages.heat-map.partial-reports" />
                         <Legend color="fullReports" label="pages.heat-map.full-reports" />
                         <Legend color="overtimeReports" label="pages.heat-map.overtime-reports" />
-                        <Legend color="leave" label="pages.heat-map.leave" />
+                        <Legend color="leave" label="pages.heat-map.leave" mark="О" />
                         <Legend color="na" label="pages.heat-map.na" />
                         <Legend color="waiting" label="pages.heat-map.pending" />
                     </Group>
@@ -282,14 +217,6 @@ export const OverdueReportsPage: React.FC = () => {
                     </Text>
                 ) : (
                     <div>
-                        <Flex align="center" gap="sm" mb="sm">
-                            <Checkbox
-                                checked={allIncluded}
-                                indeterminate={someExcluded}
-                                onChange={toggleAll}
-                                label={<FormattedMessage id="pages.overdue.skip" />}
-                            />
-                        </Flex>
                         {axisWeeks.length > 0 && (
                             <div className={classes.weekHeader} style={weekGridStyle}>
                                 {axisWeeks.map((week, index) => (
@@ -303,24 +230,10 @@ export const OverdueReportsPage: React.FC = () => {
                             <div
                                 key={item.username}
                                 className={classes.row}
-                                style={{
-                                    cursor: "pointer",
-                                    opacity: excluded.has(item.username) ? 0.45 : 1,
-                                }}
+                                style={{ cursor: "pointer" }}
                                 onClick={() => openHeatmap(item.username)}
                             >
                                 <div className={classes.meta}>
-                                    <div
-                                        onClick={(event) => {
-                                            event.stopPropagation()
-                                        }}
-                                    >
-                                        <Checkbox
-                                            checked={!excluded.has(item.username)}
-                                            onChange={() => toggleExclude(item.username)}
-                                            aria-label={item.fullName}
-                                        />
-                                    </div>
                                     <div className={classes.person}>
                                         <Text fw={600}>{item.fullName}</Text>
                                         <Group gap={6} mt={4}>
@@ -339,6 +252,21 @@ export const OverdueReportsPage: React.FC = () => {
                                             {(item.watchlist || (item.warningCount ?? 0) >= 2) && (
                                                 <Badge size="sm" color="dark">
                                                     <FormattedMessage id="pages.overdue.watchlist" />
+                                                </Badge>
+                                            )}
+                                            {item.dissolutionQueuedAt && (
+                                                <Badge
+                                                    size="sm"
+                                                    color={isAutoDissolution(item.dissolutionQueuedBy) ? "blue" : "orange"}
+                                                    variant="light"
+                                                >
+                                                    <FormattedMessage
+                                                        id={
+                                                            isAutoDissolution(item.dissolutionQueuedBy)
+                                                                ? "pages.overdue.queuedAuto"
+                                                                : "pages.overdue.dissolutionQueued"
+                                                        }
+                                                    />
                                                 </Badge>
                                             )}
                                         </Group>
@@ -396,95 +324,91 @@ export const OverdueReportsPage: React.FC = () => {
                                                 : "—"}
                                         </div>
                                         <div className={classes.statAction}>
-                                            {(item.warningCount ?? 0) > 0 ? (
-                                                <Button
-                                                    size="compact-xs"
-                                                    variant="light"
-                                                    color="orange"
-                                                    loading={cancelling}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation()
-                                                        cancelWarning(item.username)
-                                                    }}
-                                                >
-                                                    <FormattedMessage id="pages.overdue.cancelWarning" />
-                                                </Button>
-                                            ) : null}
+                                            <Group gap={4} justify="flex-end" wrap="nowrap">
+                                                {item.accountId ? (
+                                                    <Button
+                                                        size="compact-xs"
+                                                        variant={item.dissolutionQueuedAt ? "subtle" : "outline"}
+                                                        color={
+                                                            item.dissolutionQueuedAt &&
+                                                            isAutoDissolution(item.dissolutionQueuedBy)
+                                                                ? "blue"
+                                                                : "orange"
+                                                        }
+                                                        loading={togglingQueue}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            toggleDissolutionQueue(item)
+                                                        }}
+                                                    >
+                                                        <FormattedMessage
+                                                            id={
+                                                                item.dissolutionQueuedAt
+                                                                    ? "pages.overdue.dissolutionDequeue"
+                                                                    : "pages.overdue.dissolutionEnqueue"
+                                                            }
+                                                        />
+                                                    </Button>
+                                                ) : null}
+                                                {(item.warningCount ?? 0) > 0 ? (
+                                                    <Button
+                                                        size="compact-xs"
+                                                        variant="light"
+                                                        color="orange"
+                                                        loading={cancelling}
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            cancelWarning(item.username)
+                                                        }}
+                                                    >
+                                                        <FormattedMessage id="pages.overdue.cancelWarning" />
+                                                    </Button>
+                                                ) : null}
+                                            </Group>
                                         </div>
                                     </div>
                                 </div>
                                 <div className={classes.weekSquares} style={weekGridStyle}>
-                                    {(item.recentWeeks ?? []).map((week) => (
+                                    {(item.recentWeeks ?? []).map((week) => {
+                                        const tone = weekTone(week)
+                                        const hours = week.hoursWorked ?? 0
+                                        const mark =
+                                            tone === "leave"
+                                                ? "О"
+                                                : hours > 0
+                                                  ? Number.isInteger(hours)
+                                                      ? String(hours)
+                                                      : String(Math.round(hours * 10) / 10)
+                                                  : ""
+                                        return (
                                         <span
                                             key={week.weekStart}
-                                            className={`${classes.weekSquare} ${classes[weekTone(week)]}`}
+                                            className={`${classes.weekSquare} ${classes[tone]}`}
                                             title={`${dayjs(week.weekStart).format("DD.MM.YYYY")}: ${week.hoursWorked}/${week.hoursRequired}`}
-                                        />
-                                    ))}
+                                        >
+                                            {mark ? <span className={classes.squareMark}>{mark}</span> : null}
+                                        </span>
+                                        )
+                                    })}
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
             </Card>
-
-            <Modal
-                opened={previewOpen}
-                onClose={() => setPreviewOpen(false)}
-                title={<FormattedMessage id="pages.overdue.previewTitle" />}
-                size="lg"
-                centered
-            >
-                <Text size="sm" c="dimmed" mb="md">
-                    <FormattedMessage id="pages.overdue.previewHint" values={{ count: sendCount }} />
-                </Text>
-                {(preview?.templates ?? []).map((item) => (
-                    <Card key={item.level} withBorder p="sm" mb="sm" radius="md">
-                        <Text fw={650}>{item.subject}</Text>
-                        <Text size="sm" style={{ whiteSpace: "pre-wrap" }} mt={6}>
-                            {item.body}
-                        </Text>
-                    </Card>
-                ))}
-                <Text fw={650} mt="md" mb={6}>
-                    <FormattedMessage id="pages.overdue.samples" />
-                </Text>
-                {samples.map((item) => (
-                    <Button
-                        key={item.username}
-                        variant="subtle"
-                        justify="flex-start"
-                        fullWidth
-                        onClick={() => setLetter(item)}
-                    >
-                        {item.fullName}
-                    </Button>
-                ))}
-                <Button mt="md" fullWidth loading={isPending} disabled={sendCount === 0} onClick={() => notify()}>
-                    <FormattedMessage id="pages.overdue.notifyConfirm" values={{ count: sendCount }} />
-                </Button>
-            </Modal>
-
-            <Modal
-                opened={!!letter}
-                onClose={() => setLetter(null)}
-                title={letter?.subject || letter?.fullName}
-                centered
-            >
-                <Text size="sm" style={{ whiteSpace: "pre-wrap" }}>
-                    {letter?.body}
-                </Text>
-                <Button mt="md" variant="light" onClick={() => letter && openHeatmap(letter.username)}>
-                    <FormattedMessage id="pages.overdue.openHeatmap" />
-                </Button>
-            </Modal>
         </Flex>
     )
 }
 
-const Legend: React.FC<{ color: keyof typeof classes; label: string }> = ({ color, label }) => (
+const Legend: React.FC<{ color: keyof typeof classes; label: string; mark?: string }> = ({
+    color,
+    label,
+    mark,
+}) => (
     <Flex align="center" gap={6}>
-        <span className={`${classes.legendSquare} ${classes[color]}`} />
+        <span className={`${classes.legendSquare} ${classes[color]}`}>
+            {mark ? <span className={classes.legendLeaveMark}>{mark}</span> : null}
+        </span>
         <Text size="xs">
             <FormattedMessage id={label} />
         </Text>

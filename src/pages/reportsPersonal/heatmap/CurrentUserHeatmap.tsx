@@ -6,6 +6,7 @@ import dayjs from "dayjs"
 import React from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { ReportHeatMapApiService } from "src/shared/api/ReportHeatMapApiService"
+import { weekFullyOnLeave } from "src/shared/utils/leaveWeek"
 import { locales } from "../lib/constants"
 import classes from "./CurrentUserHeatmap.module.scss"
 
@@ -48,7 +49,7 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
         const hasReports = weekData.hoursWorked > 0
         const leaveDays = Number((weekData as HeatMapItem & { leaveDays?: number }).leaveDays ?? 0)
 
-        if (leaveDays > 0 && weekData.hoursRequired === 0) return "leave"
+        if (weekFullyOnLeave(weekData.weekStart, weekData.weekEnd, leaveDays)) return "leave"
         if (weekData.hoursRequired === 0) return "na"
         if (isCurrentWeek && isCurrentYear && !hasReports) return "waiting"
         if (weekData.hoursWorked === 0) return "noReports"
@@ -85,7 +86,10 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
         }
 
         if (color === "leave") {
-            return intl.formatMessage({ id: "pages.heat-map.tooltip.leave" }, params)
+            return intl.formatMessage(
+                { id: "pages.heat-map.tooltip.leave" },
+                { ...params, hoursRequired: weekInfo.hoursRequired }
+            )
         }
         if (color === "na") {
             return intl.formatMessage({ id: locales.tooltipNA }, params)
@@ -172,7 +176,9 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                         </Text>
                     </Flex>
                     <Flex align="center" gap={4}>
-                        <Box className={`${classes.legendSquare} ${classes.leave}`} />
+                        <Box className={`${classes.legendSquare} ${classes.leave}`}>
+                            <span className={classes.leaveMark}>О</span>
+                        </Box>
                         <Text size="xs">
                             <FormattedMessage id="pages.heat-map.leave" />
                         </Text>
@@ -207,7 +213,18 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                         className={classes.compactWeekSquares}
                         style={{ gridTemplateColumns: `repeat(${weeks.length || 1}, minmax(9px, 1fr))` }}
                     >
-                        {weeks.map((weekItem) => (
+                        {weeks.map((weekItem) => {
+                            const tone = getSquareColor(weekItem)
+                            const hours = weekItem.hoursWorked ?? 0
+                            const mark =
+                                tone === "leave"
+                                    ? "О"
+                                    : hours > 0
+                                      ? Number.isInteger(hours)
+                                          ? String(hours)
+                                          : String(Math.round(hours * 10) / 10)
+                                      : ""
+                            return (
                             <HoverCard
                                 key={weekItem.week}
                                 position="top"
@@ -222,14 +239,19 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                                         tabIndex={0}
                                         aria-label={getSquareInfoLabel(weekItem)}
                                         title={getSquareInfoLabel(weekItem)}
-                                        className={`${classes.compactSquare} ${classes[getSquareColor(weekItem)]}`}
-                                    />
+                                        className={`${classes.compactSquare} ${classes[tone]}`}
+                                    >
+                                        {mark ? (
+                                            <span className={classes.compactMark}>{mark}</span>
+                                        ) : null}
+                                    </Box>
                                 </HoverCard.Target>
                                 <HoverCard.Dropdown>
                                     <Text size="xs">{getSquareInfoLabel(weekItem)}</Text>
                                 </HoverCard.Dropdown>
                             </HoverCard>
-                        ))}
+                            )
+                        })}
                     </div>
                 </div>
             </div>
@@ -277,7 +299,9 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                 </Flex>
 
                 <Flex align="center" gap={4}>
-                    <Box className={`${classes.legendSquare} ${classes.leave}`} />
+                    <Box className={`${classes.legendSquare} ${classes.leave}`}>
+                        <span className={classes.leaveMark}>О</span>
+                    </Box>
                     <Text size="xs">
                         <FormattedMessage id="pages.heat-map.leave" />
                     </Text>
@@ -346,7 +370,13 @@ export const CurrentUserHeatmap = ({ className, compact = false }: Props) => {
                                             className={`${classes.weekSquare} ${classes[getSquareColor(weekItem)]}`}
                                         >
                                             <Text size="xs" fw={500} className={classes.weekNumber}>
-                                                {weekItem.week}
+                                                {getSquareColor(weekItem) === "leave"
+                                                    ? "О"
+                                                    : weekItem.hoursWorked > 0
+                                                      ? Number.isInteger(weekItem.hoursWorked)
+                                                          ? weekItem.hoursWorked
+                                                          : Math.round(weekItem.hoursWorked * 10) / 10
+                                                      : weekItem.week}
                                             </Text>
                                         </Box>
                                     </HoverCard.Target>

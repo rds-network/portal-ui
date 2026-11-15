@@ -1,4 +1,4 @@
-import { Avatar, Badge, Flex, Text, Tooltip, UnstyledButton } from "@mantine/core"
+import { Anchor, Avatar, Badge, Flex, Text, Tooltip, UnstyledButton } from "@mantine/core"
 import { ApplicationDto, ContractDto, UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconCalendar, IconMail, IconMessageCircle } from "@tabler/icons-react"
 import dayjs from "dayjs"
@@ -10,6 +10,7 @@ import { ApplicationMenu } from "src/pages/applications/menu/ApplicationMenu"
 import { useApplicationUpdate } from "src/shared/api/applications/useApplicationUpdate"
 import { ApplicationAssigneeAvatar } from "../assignee/ApplicationAssigneeAvatar"
 import { ApplicationAssigneeSelect } from "../assignee/ApplicationAssigneeSelect"
+import { AskAssigneeButton } from "../assignee/AskAssigneeButton"
 import { CopyText } from "src/shared/ui/copyText/CopyText"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { ApplicationStatusSelect } from "src/shared/ui/select/ApplicationStatusSelect"
@@ -118,10 +119,20 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
             role="link"
             tabIndex={0}
             onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault()
-                    navigate(applicationPath)
+                if (event.key !== "Enter" && event.key !== " ") return
+                const target = event.target as HTMLElement | null
+                if (
+                    target &&
+                    (target !== event.currentTarget ||
+                        target.isContentEditable ||
+                        target.closest(
+                            'input, textarea, select, [contenteditable="true"], [role="textbox"], [data-row-action]'
+                        ))
+                ) {
+                    return
                 }
+                event.preventDefault()
+                navigate(applicationPath)
             }}
         >
             <Flex className={classes.cardTop}>
@@ -129,13 +140,25 @@ export const ApplicationRow = ({ applicationDto: application, assigneeUser }: Ap
                     <FormattedMessage id={`common.application-status.${application.status}`} />
                 </Badge>
                 {typeBadge(application.type)}
+                {application.type === "PROLONGATION" && application.email && (
+                    <Anchor
+                        component={Link}
+                        to={`/volunteers/heatmap?search=${encodeURIComponent(application.email)}`}
+                        size="sm"
+                        data-row-action
+                        onClick={(event) => event.stopPropagation()}
+                    >
+                        <FormattedMessage id="pages.profile.openHeatmap" />
+                    </Anchor>
+                )}
                 <Text size="sm" c="dimmed">
                     {created}
                 </Text>
                 <Flex className={classes.rowActions} ml="auto" data-row-action>
                     {notesCounter}
                     <ApplicationAssigneeAvatar login={application.assignee} user={assigneeUser} />
-                    <ApplicationMenu applicationDto={application} />
+                    <AskAssigneeButton application={application} assigneeUser={assigneeUser} />
+                    <ApplicationMenu applicationDto={application} assigneeUser={assigneeUser} />
                 </Flex>
             </Flex>
 

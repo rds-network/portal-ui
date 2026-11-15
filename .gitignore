@@ -11,6 +11,12 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Vendored npm packages ship their own dist/ (global `dist` rule would hide it)
+!src/vendor/docx-preview/dist/
+!src/vendor/docx-preview/dist/**
+!src/vendor/jszip/dist/
+!src/vendor/jszip/dist/**
 *.local
 tsconfig.tsbuildinfo
 

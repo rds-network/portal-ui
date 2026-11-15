@@ -1,7 +1,7 @@
 import { Button, Flex, Modal, Text, Textarea, TextInput } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { FormattedMessage } from "react-intl"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -10,12 +10,26 @@ type Props = {
     opened: boolean
     close: () => void
     recipients: { username: string; name: string }[]
+    initialSubject?: string
+    initialBody?: string
 }
 
-export const InboxNotifyModal: React.FC<Props> = ({ opened, close, recipients }) => {
+export const InboxNotifyModal: React.FC<Props> = ({
+    opened,
+    close,
+    recipients,
+    initialSubject = "Уведомление по отчётности",
+    initialBody = "",
+}) => {
     const queryClient = useQueryClient()
-    const [subject, setSubject] = useState("Уведомление по отчётности")
-    const [body, setBody] = useState("")
+    const [subject, setSubject] = useState(initialSubject)
+    const [body, setBody] = useState(initialBody)
+
+    useEffect(() => {
+        if (!opened) return
+        setSubject(initialSubject)
+        setBody(initialBody)
+    }, [opened, initialSubject, initialBody])
 
     const { mutate, isPending } = useMutation({
         mutationFn: () =>
@@ -35,7 +49,6 @@ export const InboxNotifyModal: React.FC<Props> = ({ opened, close, recipients })
             )
             queryClient.invalidateQueries({ queryKey: ["inbox"] })
             queryClient.invalidateQueries({ queryKey: ["inbox-unread"] })
-            setBody("")
             close()
         },
     })

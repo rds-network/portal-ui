@@ -46,6 +46,14 @@ export const WorkAssignmentApiService = {
         return response.data ?? []
     },
 
+    async myOpenCount(): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/work-assignments/my-open-count", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
+    },
+
     async create(payload: WorkAssignmentCreateRequest): Promise<WorkAssignmentDto> {
         const response = await RequestHttp.post<WorkAssignmentDto>("/work-assignments", payload, {
             validateStatus: (status) => status === 200 || status === 201 || status === 404,

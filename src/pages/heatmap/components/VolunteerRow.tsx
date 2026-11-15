@@ -15,6 +15,7 @@ import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
 import TicketModal from "src/shared/ui/ticketModal/TicketModal"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import { weekFullyOnLeave } from "src/shared/utils/leaveWeek"
 import { formatContractEnd, hasActiveAssociatedContract, latestContractEnd } from "src/shared/utils/latestContractEnd"
 import { locales } from "../lib/locales"
 import classes from "./VolunteerReportHeatmap.module.scss"
@@ -137,7 +138,7 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         const hasReports = weekData.hoursWorked > 0
         const leaveDays = Number((weekData as { leaveDays?: number }).leaveDays ?? 0)
 
-        if (leaveDays > 0 && weekData.hoursRequired === 0) return "leave"
+        if (weekFullyOnLeave(weekData.weekStart, weekData.weekEnd, leaveDays)) return "leave"
         if (weekData.hoursRequired === 0) return "na"
         if (isCurrentWeek && isCurrentYear && !hasReports) return "waiting"
         if (weekData.hoursWorked === 0) return "noReports"
@@ -177,7 +178,12 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
             week: intl.formatMessage({ id: locales.tooltipWeek }, { num: weekNumber }),
         }
 
-        if (color === "leave") return intl.formatMessage({ id: locales.tooltipLeave }, params)
+        if (color === "leave") {
+            return intl.formatMessage(
+                { id: locales.tooltipLeave },
+                { ...params, hoursRequired: weekData.hoursRequired }
+            )
+        }
         if (color === "na") return intl.formatMessage({ id: locales.tooltipNA }, params)
         if (color === "waiting") return intl.formatMessage({ id: locales.tooltipWaiting }, params)
 
@@ -393,11 +399,23 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
             </div>
 
             <div className={classes.weekSquares}>
-                {weeks.map((week) => (
+                {weeks.map((week) => {
+                    const tone = getSquareColor(week.weekNumber)
+                    const weekData = weekByNumber.get(week.weekNumber)
+                    const hours = weekData?.hoursWorked ?? 0
+                    const mark =
+                        tone === "leave"
+                            ? "О"
+                            : hours > 0
+                              ? Number.isInteger(hours)
+                                  ? String(hours)
+                                  : String(Math.round(hours * 10) / 10)
+                              : ""
+                    return (
                     <HoverCard key={week.weekNumber} position="top" withArrow shadow="md" withinPortal>
                         <HoverCard.Target>
                             <Box
-                                className={`${classes.weekSquare} ${classes[getSquareColor(week.weekNumber)]}`}
+                                className={`${classes.weekSquare} ${classes[tone]}`}
                                 style={{ cursor: canOpenReports ? "pointer" : "default" }}
                                 title={
                                     canOpenReports
@@ -412,7 +430,9 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                     e.stopPropagation()
                                     openWeekReports(week.weekNumber)
                                 }}
-                            />
+                            >
+                                {mark ? <span className={classes.squareMark}>{mark}</span> : null}
+                            </Box>
                         </HoverCard.Target>
 
                         <HoverCard.Dropdown>
@@ -429,7 +449,8 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                             )}
                         </HoverCard.Dropdown>
                     </HoverCard>
-                ))}
+                    )
+                })}
             </div>
         </div>
     )

@@ -27,6 +27,7 @@ import { allowedRoles } from "src/pages/users/lib/roles"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { VolunteersDashboard } from "src/pages/users/VolunteersDashboard"
 import {
+    lastSeenOf,
     reportBlockOf,
     reportControllerNameOf,
     UserAccountApiService,
@@ -424,6 +425,13 @@ export const UserList = () => {
                         <Text size="sm" c="dimmed" truncate="end" title={user.email}>
                             {user.email}
                         </Text>
+                        <Text size="xs" c="dimmed">
+                            <FormattedMessage id="pages.profile.props.lastSeen" />
+                            {": "}
+                            {lastSeenOf(user)
+                                ? dayjs(lastSeenOf(user)).format("DD MMM YYYY, HH:mm")
+                                : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })}
+                        </Text>
                     </Flex>
                     {!user.active && (
                         <Badge color="red" radius="md" variant="light">
@@ -672,6 +680,9 @@ export const UserList = () => {
                                 <Table.Th className={classes.columnProject}>
                                     <FormattedMessage id={locales.project} />
                                 </Table.Th>
+                                <Table.Th>
+                                    <FormattedMessage id="pages.profile.props.lastSeen" />
+                                </Table.Th>
                                 <Table.Th className={classes.columnContractDue}>
                                     <FormattedMessage id={locales.contractDue} />
                                 </Table.Th>
@@ -687,6 +698,14 @@ export const UserList = () => {
                         <Text>
                             <FormattedMessage id={locales.empty} />
                         </Text>
+                        {/^\s*(EVO[-#\s]?\d+|https?:\/\/\S*\/v\/EVO[-#\s]?\d+)\s*$/i.test(debouncedSearch) && (
+                            <Text size="sm" c="dimmed" maw={420} ta="center">
+                                <FormattedMessage
+                                    id="pages.user-list.empty-evo"
+                                    defaultMessage="Код EVO ещё не привязан к аккаунту на портале. После синхронизации с Экомапой (portal:sync-ekomapa-ids) поиск по EVO заработает. Пока ищите по имени или email."
+                                />
+                            </Text>
+                        )}
                     </Flex>
                 )}
             </Flex>

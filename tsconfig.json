@@ -17,7 +17,8 @@
         "jsx": "react-jsx",
         "baseUrl": "./",
         "paths": {
-            "src/*": ["src/*"]
+            "src/*": ["src/*"],
+            "jszip": ["src/vendor/jszip"]
         },
         "types": ["vite/client"],
         "typeRoots": ["src/app/types", "src/shared/typings", "./node_modules/@types", "./node_modules"]

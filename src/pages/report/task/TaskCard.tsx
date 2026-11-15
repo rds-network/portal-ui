@@ -12,6 +12,7 @@ import {
 } from "src/shared/taskTranslation/lib/taskTranslation"
 import { FileButton } from "src/shared/ui/fileButton/FileButton"
 import { ImagePreview } from "src/shared/ui/imagePreview/ImagePreview"
+import { LinkifiedText } from "src/shared/ui/linkifiedText/LinkifiedText"
 import { TextPropertyBox } from "src/shared/ui/propertyBox/TextPropertyBox"
 import { locales } from "./constants"
 import classes from "./TaskCard.module.scss"
@@ -19,9 +20,11 @@ import classes from "./TaskCard.module.scss"
 interface TaskCardProps {
     task: TaskDto
     users: Record<string, UserInfoDto>
+    highlightMine?: boolean
+    mineLabel?: string
 }
 
-export const TaskCard = ({ task, users }: TaskCardProps) => {
+export const TaskCard = ({ task, users, highlightMine, mineLabel }: TaskCardProps) => {
     const intl = useIntl()
     const hasSerbianTranslation = hasTaskTranslation(task)
     const defaultName = getTaskDisplayName(task, false)
@@ -30,19 +33,24 @@ export const TaskCard = ({ task, users }: TaskCardProps) => {
     const serbianDescription = getTaskDisplayDescription(task, true)
 
     return (
-        <Flex className={classes.task}>
+        <Flex className={`${classes.task} ${highlightMine ? classes.taskMine : ""}`}>
             <Flex className={classes.topArea}>
                 <Text fw="bold" className={classes.name}>
                     {defaultName}
+                    {highlightMine && mineLabel ? (
+                        <Text span size="sm" c="teal" ml="sm" fw={600}>
+                            · {mineLabel}
+                        </Text>
+                    ) : null}
                 </Text>
                 <Flex className={classes.clock}>
                     <IconClock size={14} />
                     <Text size="sm">{getSpentTime(task.timeSpent, intl)}</Text>
                 </Flex>
             </Flex>
-            <Text c="dimmed" className={classes.taskDescription}>
+            <LinkifiedText c="dimmed" className={classes.taskDescription}>
                 {defaultDescription}
-            </Text>
+            </LinkifiedText>
             {hasSerbianTranslation && (
                 <Flex className={classes.serbianTaskView}>
                     <Flex className={classes.serbianTaskViewLabelContainer}>
@@ -55,9 +63,9 @@ export const TaskCard = ({ task, users }: TaskCardProps) => {
                     <Text fw="bold" className={classes.name}>
                         {serbianName}
                     </Text>
-                    <Text c="dimmed" className={classes.taskDescription}>
+                    <LinkifiedText c="dimmed" className={classes.taskDescription}>
                         {serbianDescription}
-                    </Text>
+                    </LinkifiedText>
                 </Flex>
             )}
             <Flex className={classes.taskProperties}>

@@ -1,0 +1,44 @@
+.panel {
+    flex: 0 0 min(360px, 100%);
+    max-width: 360px;
+    padding: 14px;
+    border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+    border-radius: var(--mantine-radius-md);
+    background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+    align-self: flex-start;
+    position: sticky;
+    top: 12px;
+
+    @media (max-width: $mantine-breakpoint-lg) {
+        max-width: 100%;
+        flex: 1 1 auto;
+        position: static;
+    }
+}
+
+.title {
+    font-weight: 600;
+    font-size: var(--mantine-font-size-sm);
+    margin-bottom: 4px;
+}
+
+.list {
+    border: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+    border-radius: var(--mantine-radius-sm);
+    padding: 4px 6px;
+    background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-7));
+}
+
+.row {
+    padding: 4px 2px;
+    border-bottom: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+
+    &:last-child {
+        border-bottom: none;
+    }
+}
+
+.rowBody {
+    min-width: 0;
+    flex: 1;
+}

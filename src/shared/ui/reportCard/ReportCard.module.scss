@@ -50,3 +50,27 @@
     color: light-dark(#374151, inherit);
     white-space: pre-wrap;
 }
+
+.remark {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid light-dark(#fcd34d, color-mix(in srgb, #f59e0b 35%, var(--portal-border)));
+    background: light-dark(#fffbeb, color-mix(in srgb, #f59e0b 12%, var(--portal-surface)));
+}
+
+.remarkLabel {
+    margin-bottom: 4px;
+    color: light-dark(#92400e, #fbbf24);
+}
+
+.remarkText {
+    color: light-dark(#78350f, #fde68a);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

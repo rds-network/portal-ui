@@ -6,4 +6,11 @@ export const locales = {
     emptySubject: "common.email-drawer.emptySubject",
     emptyContent: "common.email-drawer.emptyContent",
     success: "common.email-drawer.success",
+    autoDocs: "common.email-drawer.autoDocs",
+    autoDocsMissing: "common.email-drawer.autoDocsMissing",
+    autoDocsSetDates: "common.email-drawer.autoDocsSetDates",
+    attaching: "common.email-drawer.attaching",
+    preview: "common.email-drawer.preview",
+    previewFail: "common.email-drawer.previewFail",
+    previewOther: "common.email-drawer.previewOther",
 }

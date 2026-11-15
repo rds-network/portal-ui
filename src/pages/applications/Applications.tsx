@@ -8,6 +8,7 @@ import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { ApplicationAssigneeFilter } from "src/pages/applications/assignee/ApplicationAssigneeFilter"
 import { ApplicationTransferModal } from "src/pages/applications/assignee/ApplicationTransferModal"
+import { ApplicationStaleFollowUpPanel } from "src/pages/applications/followUp/ApplicationStaleFollowUpPanel"
 import { ApplicationsDashboard } from "src/pages/applications/ApplicationsDashboard"
 import { allowedRoles } from "src/pages/applications/lib/roles"
 import { ApplicationRow } from "src/pages/applications/row/ApplicationRow"
@@ -140,6 +141,8 @@ export const Applications = () => {
     const {
         data: { content, page },
         isFetching,
+        isError,
+        refetch,
     } = useQuery({
         initialData: { content: [], page: defaultPageResponse },
         queryKey: ["getApplications", debouncedSearch, listPageRequest, filter, statusFilter],
@@ -186,7 +189,7 @@ export const Applications = () => {
 
     return (
         <Flex className={classes.root}>
-            <Flex direction="column" gap={24} miw={0}>
+            <Flex direction="column" gap={24} miw={0} className={classes.mainColumn}>
                 <Text className={classes.title} variant="gradient">
                     <FormattedMessage id={locales.title} />
                 </Text>
@@ -318,38 +321,58 @@ export const Applications = () => {
                     )}
                 </Flex>
 
-                {totalElements === 0 && !isFetching && (
+                {isError && !isFetching && (
+                    <Flex className={classes.emptyState}>
+                        <Text>
+                            <FormattedMessage id="errors.request" defaultMessage="Не удалось загрузить данные" />
+                        </Text>
+                        <Button variant="light" size="sm" onClick={() => refetch()}>
+                            <FormattedMessage id="common.retry" defaultMessage="Повторить" />
+                        </Button>
+                    </Flex>
+                )}
+
+                {totalElements === 0 && !isFetching && !isError && (
                     <Flex className={classes.emptyState}>
                         <IconUfo size={48} />
                         <Text>
                             <FormattedMessage id={locales.empty} />
                         </Text>
+                        {activeFiltersCount > 0 && (
+                            <Button variant="light" size="sm" leftSection={<IconFilterOff size={16} />} onClick={resetFilters}>
+                                <FormattedMessage id={locales.resetFilters} />
+                            </Button>
+                        )}
+                    </Flex>
+                )}
+
+                {totalPages > 1 && (
+                    <Flex className={classes.pagination}>
+                        <Pagination
+                            total={totalPages}
+                            value={currentPage}
+                            disabled={isFetching}
+                            onChange={(newPage) => {
+                                updateUrlParams(debouncedSearch, filter, newPage - 1, statusFilter)
+                            }}
+                            siblings={isMobile ? 0 : 1}
+                        />
+                        <Text c="dimmed">
+                            <FormattedMessage id={locales.total} values={{ count: totalElements }} />
+                        </Text>
                     </Flex>
                 )}
             </Flex>
 
-            {totalPages > 1 && (
-                <Flex className={classes.pagination}>
-                    <Pagination
-                        total={totalPages}
-                        value={currentPage}
-                        disabled={isFetching}
-                        onChange={(newPage) => {
-                            updateUrlParams(debouncedSearch, filter, newPage - 1, statusFilter)
-                        }}
-                        siblings={isMobile ? 0 : 1}
-                    />
-                    <Text c="dimmed">
-                        <FormattedMessage id={locales.total} values={{ count: totalElements }} />
-                    </Text>
-                </Flex>
-            )}
+            {isMobile && <ApplicationStaleFollowUpPanel />}
 
             <ApplicationTransferModal
                 opened={transferOpen}
                 onClose={() => setTransferOpen(false)}
                 initialFrom={filter.assignee || null}
             />
+
+            {!isMobile && <ApplicationStaleFollowUpPanel className={classes.followUpPanel} />}
         </Flex>
     )
 }

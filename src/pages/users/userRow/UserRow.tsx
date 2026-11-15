@@ -12,7 +12,7 @@ import { useProgramProjectFilter } from "src/shared/hooks/useProgramProjectFilte
 import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { NavigateFunction } from "react-router"
 import { IDBadge } from "src/shared/ui/badges/IDBadge"
-import { reportBlockOf, reportControllerNameOf } from "src/shared/api/user/UserApiService"
+import { lastSeenOf, reportBlockOf, reportControllerNameOf } from "src/shared/api/user/UserApiService"
 
 type Props = {
     user: UserInfoDto
@@ -153,6 +153,13 @@ export const UserRow = ({
                     onChange={handleProjectChange}
                     projectsOverride={visibleProjects}
                 />
+            </Table.Td>
+            <Table.Td>
+                <Text size="sm">
+                    {lastSeenOf(user)
+                        ? dayjs(lastSeenOf(user)).format("DD MMM YYYY")
+                        : intl.formatMessage({ id: "pages.profile.props.lastSeenNever" })}
+                </Text>
             </Table.Td>
             <Table.Td>
                 <Button

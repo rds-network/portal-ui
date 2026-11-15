@@ -1,10 +1,11 @@
-import { Alert, Badge, Flex, Text, Textarea, Title, Button } from "@mantine/core"
+import { Alert, Badge, Flex, Text, Textarea, TextInput, Title, Button } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
+import { IconSearch } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
-import { useNavigate } from "react-router"
+import { useNavigate, useSearchParams } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -22,6 +23,7 @@ const isMandatoryKind = (kind?: string | null) => {
         kind === "TASK" ||
         kind === "LEAVE_REQUEST" ||
         kind === "LEAVE_DECISION" ||
+        kind === "REPORT_DECISION" ||
         kind === "ACCOUNT_STATUS_REQUEST" ||
         kind === "ACCOUNT_STATUS_DECISION" ||
         kind === "ACCOUNT_STATUS_CHANGED" ||
@@ -29,10 +31,22 @@ const isMandatoryKind = (kind?: string | null) => {
     )
 }
 
+const isReportInboxKind = (kind?: string | null) =>
+    kind === "REPORT_CUSTOMER" || kind === "REPORT_DECISION"
+
+const isTalentInboxKind = (kind?: string | null) =>
+    kind === "TALENT_RESPONSE" || kind === "TALENT_POST"
+
 const formatSeen = (value?: string | null) => (value ? dayjs(value).format("DD.MM HH:mm") : null)
 
 const personOf = (item: InboxThreadDto) => {
-    if (item.kind === "REPORT_CUSTOMER") {
+    if (isReportInboxKind(item.kind)) {
+        return {
+            name: item.counterpartName || item.createdBy || item.recipientName || item.recipient || "портал",
+            login: item.counterpart || item.createdBy || item.recipient || null,
+        }
+    }
+    if (isTalentInboxKind(item.kind)) {
         return {
             name: item.counterpartName || item.createdBy || item.recipientName || item.recipient || "портал",
             login: item.counterpart || item.createdBy || item.recipient || null,
@@ -47,9 +61,11 @@ const personOf = (item: InboxThreadDto) => {
 const threadRank = (item: InboxThreadDto) => {
     if (item.needsAck) return 0
     if (isMandatoryKind(item.kind) && !item.receivedAt) return 1
-    if (item.unread) return 2
-    if (item.hasReply) return 4
-    return 3
+    if (isTalentInboxKind(item.kind) && item.unread) return 2
+    if (item.unread) return 3
+    if (isTalentInboxKind(item.kind)) return 4
+    if (item.hasReply) return 6
+    return 5
 }
 
 const sortThreads = (threads: InboxThreadDto[]) =>
@@ -65,10 +81,13 @@ export const MessagesPage: React.FC = () => {
     const { user } = useContext(UserContext)
     const intl = useIntl()
     const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
     const queryClient = useQueryClient()
     const { isMobile } = useScreenSize()
-    const [selectedId, setSelectedId] = useState<string | null>(null)
+    const threadFromUrl = searchParams.get("thread")
+    const [selectedId, setSelectedId] = useState<string | null>(threadFromUrl)
     const [reply, setReply] = useState("")
+    const [search, setSearch] = useState("")
     const showList = !isMobile || !selectedId
     const showThread = !isMobile || !!selectedId
     const canDelete = hasPermission(user, MANAGERS)
@@ -84,12 +103,49 @@ export const MessagesPage: React.FC = () => {
         queryFn: () => InboxApiService.pendingAckCount(),
     })
 
-    const sortedThreads = useMemo(() => sortThreads(threads), [threads])
+    const filteredThreads = useMemo(() => {
+        const needle = search.trim().toLowerCase()
+        if (!needle) return threads
+        return threads.filter((item) => {
+            const person = personOf(item)
+            const hay = [
+                item.subject,
+                item.lastBody,
+                item.kind,
+                person.name,
+                person.login,
+                item.createdBy,
+                item.recipientName,
+                item.counterpartName,
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase()
+            return hay.includes(needle)
+        })
+    }, [threads, search])
+
+    const sortedThreads = useMemo(() => sortThreads(filteredThreads), [filteredThreads])
     const mandatoryThreads = useMemo(() => sortedThreads.filter((item) => item.needsAck), [sortedThreads])
     const otherThreads = useMemo(() => sortedThreads.filter((item) => !item.needsAck), [sortedThreads])
 
     useEffect(() => {
+        if (!threadFromUrl) return
+        if (selectedId !== threadFromUrl) {
+            setSelectedId(threadFromUrl)
+            setReply("")
+        }
+    }, [threadFromUrl, selectedId])
+
+    useEffect(() => {
         if (sortedThreads.length === 0) return
+        // Deep-link from desktop / notifications: prefer the requested thread when it exists.
+        if (threadFromUrl && sortedThreads.some((item) => item.id === threadFromUrl)) {
+            if (selectedId !== threadFromUrl) {
+                setSelectedId(threadFromUrl)
+            }
+            return
+        }
         const firstMandatory = sortedThreads.find((item) => item.needsAck)
         if (firstMandatory) {
             const selectedIsMandatory = sortedThreads.some((item) => item.id === selectedId && item.needsAck)
@@ -101,7 +157,7 @@ export const MessagesPage: React.FC = () => {
         if (!isMobile && !selectedId) {
             setSelectedId(sortedThreads[0].id)
         }
-    }, [isMobile, selectedId, sortedThreads])
+    }, [isMobile, selectedId, sortedThreads, threadFromUrl])
 
     const { data: thread } = useQuery({
         queryKey: ["inbox", selectedId],
@@ -153,6 +209,9 @@ export const MessagesPage: React.FC = () => {
     const openThread = (item: InboxThreadDto) => {
         setSelectedId(item.id)
         setReply("")
+        if (searchParams.get("thread") !== item.id) {
+            setSearchParams({ thread: item.id }, { replace: true })
+        }
     }
 
     const heatmapUser = (item?: { kind: string; heatmapUser?: string | null; counterpart?: string | null } | null) => {
@@ -175,6 +234,7 @@ export const MessagesPage: React.FC = () => {
                     item.unread ? classes.itemUnread : "",
                     item.hasReply ? classes.itemReplied : "",
                     mustAck ? classes.itemNeedsAck : "",
+                    isTalentInboxKind(item.kind) ? classes.itemTalent : "",
                 ]
                     .filter(Boolean)
                     .join(" ")}
@@ -192,6 +252,11 @@ export const MessagesPage: React.FC = () => {
                     {item.subject}
                 </Text>
                 <Flex gap={6} wrap="wrap" mt={8}>
+                    {isTalentInboxKind(item.kind) && (
+                        <Badge size="xs" color="yellow" variant="filled">
+                            <FormattedMessage id="pages.messages.kindTalent" />
+                        </Badge>
+                    )}
                     {item.kind === "ACCOUNT_DEACTIVATED" && (
                         <Badge size="xs" color="gray" variant="light">
                             <FormattedMessage id="pages.messages.kindAccountDeactivated" />
@@ -263,6 +328,13 @@ export const MessagesPage: React.FC = () => {
                         <Text size="xs" c="dimmed" mt={4}>
                             <FormattedMessage id="pages.messages.sortHint" />
                         </Text>
+                        <TextInput
+                            mt="sm"
+                            leftSection={<IconSearch size={16} />}
+                            placeholder={intl.formatMessage({ id: "pages.messages.searchPlaceholder" })}
+                            value={search}
+                            onChange={(e) => setSearch(e.currentTarget.value)}
+                        />
                         {pendingAck > 0 && (
                             <Alert color="orange" mt="md">
                                 <FormattedMessage id="pages.messages.ackBlock" values={{ count: pendingAck }} />
@@ -272,7 +344,9 @@ export const MessagesPage: React.FC = () => {
                     <div className={classes.listScroll}>
                         {sortedThreads.length === 0 && (
                             <Text c="dimmed">
-                                <FormattedMessage id="pages.messages.empty" />
+                                <FormattedMessage
+                                    id={search.trim() ? "pages.messages.searchEmpty" : "pages.messages.empty"}
+                                />
                             </Text>
                         )}
                         {mandatoryThreads.length > 0 && (
@@ -306,18 +380,29 @@ export const MessagesPage: React.FC = () => {
                                         {thread.subject}
                                     </Title>
                                     <Flex gap="sm" wrap="wrap">
-                                        {thread.kind === "REPORT_CUSTOMER" && (
+                                        {isReportInboxKind(thread.kind) && (
                                             <Button
                                                 variant="light"
-                                                onClick={() =>
+                                                onClick={() => {
+                                                    const fromBody = thread.messages
+                                                        .map((m) => m.body.match(/\/report\/([0-9a-fA-F-]{36})/)?.[1])
+                                                        .find(Boolean)
+                                                    const reportId = thread.reportId || fromBody
                                                     navigate(
-                                                        thread.reportId
-                                                            ? `/report/${thread.reportId}`
-                                                            : "/reports/review"
+                                                        reportId
+                                                            ? `/report/${reportId}`
+                                                            : thread.kind === "REPORT_CUSTOMER"
+                                                              ? "/reports/review"
+                                                              : "/messages"
                                                     )
-                                                }
+                                                }}
                                             >
                                                 <FormattedMessage id="pages.review-reports.open" />
+                                            </Button>
+                                        )}
+                                        {isTalentInboxKind(thread.kind) && (
+                                            <Button variant="light" onClick={() => navigate("/ideas")}>
+                                                <FormattedMessage id="pages.ideas.openBoard" />
                                             </Button>
                                         )}
                                         {heatmapUser(thread) && (

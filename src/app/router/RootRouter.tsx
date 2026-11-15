@@ -8,6 +8,8 @@ const PublicApp = lazy(() => import("src/app/PublicApp"))
 const Login = lazy(() => import("src/pages/login/Login"))
 const NotFound = lazy(() => import("src/pages/notFound/NotFound"))
 const Unauthorized = lazy(() => import("src/pages/unauthorized/UnauthorizedPage"))
+const ZahvalnicaVerifyPage = lazy(() => import("src/pages/zahvalnica/ZahvalnicaVerifyPage"))
+const VolIdVerifyPage = lazy(() => import("src/pages/volId/VolIdVerifyPage"))
 
 const RootRouter = () => {
     const { user } = useContext(UserContext)
@@ -18,6 +20,8 @@ const RootRouter = () => {
                     <Route path="/login" element={<Login />} />
                     <Route path="/not-found" element={<NotFound />} />
                     <Route path="/unauthorized" element={<Unauthorized />} />
+                    <Route path="/zahvalnica/verify" element={<ZahvalnicaVerifyPage />} />
+                    <Route path="/vol-id/verify" element={<VolIdVerifyPage />} />
                     {user && <Route path="*" element={<PrivateApp />} />}
                     <Route path="*" element={<PublicApp />} />
                 </Routes>

@@ -52,6 +52,7 @@ export type InboxThreadDetailDto = {
 
 export type OverdueWeekDto = {
     weekStart: string
+    weekEnd?: string | null
     hoursWorked: number
     hoursRequired: number
     leaveDays?: number
@@ -74,6 +75,9 @@ export type ReportOverdueDto = {
     watchlist?: boolean
     subject?: string | null
     body?: string | null
+    accountId?: number | null
+    dissolutionQueuedAt?: string | null
+    dissolutionQueuedBy?: string | null
 }
 
 export type DeactivatedActiveContractDto = {
@@ -85,6 +89,21 @@ export type DeactivatedActiveContractDto = {
     contractType?: string | null
     deactivatedReason?: string | null
     mupLetterSentAt?: string | null
+    /** Seat city of the MUP office that was notified (e.g. Novi Sad). */
+    mupLetterOffice?: string | null
+}
+
+export type DissolutionQueueDto = {
+    accountId: number
+    username: string
+    fullName: string
+    program?: string | null
+    contractEnd?: string | null
+    contractType?: string | null
+    active: boolean
+    dissolutionQueuedAt?: string | null
+    dissolutionQueuedBy?: string | null
+    dissolutionQueueReason?: string | null
 }
 
 export type OverdueNoticePersonDto = {
@@ -170,6 +189,15 @@ export const InboxApiService = {
         return response.data ?? []
     },
 
+    async dissolutionQueue(): Promise<DissolutionQueueDto[]> {
+        const response = await RequestHttp.get<DissolutionQueueDto[]>(
+            "/report-overdue/dissolution-queue",
+            { validateStatus: alive }
+        )
+        if (response.status !== 200) return []
+        return response.data ?? []
+    },
+
     async overduePreview(): Promise<OverduePreviewDto> {
         const response = await RequestHttp.get<OverduePreviewDto>("/report-overdue/preview", { validateStatus: alive })
         if (response.status !== 200) return { count: 0, templates: [], samples: [] }
@@ -198,16 +226,6 @@ export const InboxApiService = {
         })
         if (response.status !== 200) return {}
         return response.data ?? {}
-    },
-
-    async notifyOverdue(exclude: string[] = []): Promise<OverdueNotifyResultDto> {
-        const response = await RequestHttp.post<OverdueNotifyResultDto>(
-            "/report-overdue/notify",
-            { exclude },
-            { validateStatus: alive }
-        )
-        if (response.status !== 200) return { sent: 0, recipients: [] }
-        return response.data ?? { sent: 0, recipients: [] }
     },
 
     async overdueNotices(): Promise<OverdueNoticePersonDto[]> {

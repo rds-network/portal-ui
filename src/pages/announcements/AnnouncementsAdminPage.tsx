@@ -1,4 +1,4 @@
-import { Badge, Button, Card, Flex, Select, Text, TextInput, Title } from "@mantine/core"
+import { Badge, Button, Card, Checkbox, Flex, Select, Text, TextInput, Title } from "@mantine/core"
 import { useForm, zodResolver } from "@mantine/form"
 import { notifications } from "@mantine/notifications"
 import { Link, RichTextEditor } from "@mantine/tiptap"
@@ -38,7 +38,7 @@ type AnnouncementFormValues = {
     audience: AudienceChoice
     programCode: string | null
     username: string | null
-    placement: "bell" | "banner"
+    alsoBanner: boolean
 }
 
 export const AnnouncementsAdminPage: React.FC = () => {
@@ -65,10 +65,10 @@ export const AnnouncementsAdminPage: React.FC = () => {
                     ),
                     programCode: z.string().nullable(),
                     username: z.string().nullable(),
-                    placement: z.enum(["bell", "banner"]),
+                    alsoBanner: z.boolean(),
                 })
                 .superRefine((values, ctx) => {
-                    if (values.placement === "banner" && values.audience === "USER") {
+                    if (values.alsoBanner && values.audience === "USER") {
                         ctx.addIssue({
                             code: z.ZodIssueCode.custom,
                             path: ["audience"],
@@ -100,7 +100,7 @@ export const AnnouncementsAdminPage: React.FC = () => {
             audience: AnnouncementAudience.All,
             programCode: null,
             username: null,
-            placement: "bell",
+            alsoBanner: false,
         },
         validate: zodResolver(validationSchema),
     })
@@ -193,7 +193,7 @@ export const AnnouncementsAdminPage: React.FC = () => {
                 audience: values.audience,
                 programCode: values.audience === AnnouncementAudience.Program ? values.programCode : null,
                 username: values.audience === "USER" ? values.username : null,
-                banner: values.placement === "banner",
+                banner: values.alsoBanner,
             })
         },
     })
@@ -311,22 +311,14 @@ export const AnnouncementsAdminPage: React.FC = () => {
                             )}
                         </Flex>
 
-                        <Select
-                            label={<FormattedMessage id="pages.announcements.admin.fields.placement" />}
-                            data={[
-                                {
-                                    value: "bell",
-                                    label: intl.formatMessage({ id: "pages.announcements.admin.placement.bell" }),
-                                },
-                                {
-                                    value: "banner",
-                                    label: intl.formatMessage({ id: "pages.announcements.admin.placement.banner" }),
-                                },
-                            ]}
-                            {...form.getInputProps("placement")}
-                            onChange={(value) => {
-                                form.setFieldValue("placement", value === "banner" ? "banner" : "bell")
-                                if (value === "banner" && form.values.audience === "USER") {
+                        <Checkbox
+                            label={<FormattedMessage id="pages.announcements.admin.placement.bannerExtra" />}
+                            description={<FormattedMessage id="pages.announcements.admin.placement.bannerExtraHint" />}
+                            {...form.getInputProps("alsoBanner", { type: "checkbox" })}
+                            onChange={(e) => {
+                                const checked = e.currentTarget.checked
+                                form.setFieldValue("alsoBanner", checked)
+                                if (checked && form.values.audience === "USER") {
                                     form.setFieldValue("audience", AnnouncementAudience.All)
                                     form.setFieldValue("username", null)
                                     setPerson(null)
@@ -350,7 +342,7 @@ export const AnnouncementsAdminPage: React.FC = () => {
                                     value: AnnouncementAudience.Program,
                                     label: intl.formatMessage({ id: "pages.announcements.admin.audience.program" }),
                                 },
-                                ...(!isCuratorOnly && form.values.placement !== "banner"
+                                ...(!isCuratorOnly && !form.values.alsoBanner
                                     ? [
                                           {
                                               value: "USER",
@@ -433,7 +425,7 @@ export const AnnouncementsAdminPage: React.FC = () => {
                                             <Badge variant="light" radius="sm">
                                                 {intl.formatMessage({
                                                     id: item.banner
-                                                        ? "pages.announcements.admin.placement.banner"
+                                                        ? "pages.announcements.admin.placement.bellAndBanner"
                                                         : "pages.announcements.admin.placement.bell",
                                                 })}
                                             </Badge>

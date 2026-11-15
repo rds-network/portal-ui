@@ -2,8 +2,22 @@
 
 .root {
     @include s.page;
-    flex-direction: column;
-    gap: 24px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+
+    @media (max-width: $mantine-breakpoint-lg) {
+        flex-direction: column;
+    }
+}
+
+.mainColumn {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.followUpPanel {
+    flex-shrink: 0;
 }
 
 .loader {

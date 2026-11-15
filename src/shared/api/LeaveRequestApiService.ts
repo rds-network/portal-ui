@@ -27,9 +27,22 @@ export type LeaveRequestRejectRequest = {
     reason?: string | null
 }
 
+export type LeaveRequestMetaDto = {
+    approverUsername: string
+    isLeaveApprover: boolean
+}
+
 const alive = (status: number) => status === 200 || status === 201 || status === 404 || status >= 500
 
 export const LeaveRequestApiService = {
+    async meta(): Promise<LeaveRequestMetaDto | null> {
+        const response = await RequestHttp.get<LeaveRequestMetaDto>("/leave-requests/meta", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return null
+        return response.data ?? null
+    },
+
     async create(payload: LeaveRequestCreateRequest): Promise<LeaveRequestDto> {
         const response = await RequestHttp.post<LeaveRequestDto>("/leave-requests", payload, {
             validateStatus: (status) => status === 200 || status === 201 || status === 404,
@@ -52,6 +65,14 @@ export const LeaveRequestApiService = {
         })
         if (response.status !== 200) return []
         return response.data ?? []
+    },
+
+    async pendingCount(): Promise<number> {
+        const response = await RequestHttp.get<{ count: number }>("/leave-requests/pending-count", {
+            validateStatus: alive,
+        })
+        if (response.status !== 200) return 0
+        return response.data?.count ?? 0
     },
 
     /** Решённые заявки: после согласования отпуск уходит из [pending], но согласующему нужно его помнить. */
