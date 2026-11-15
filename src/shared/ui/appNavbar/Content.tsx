@@ -34,6 +34,7 @@ import {
     IconForms,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
+import { ANNOUNCEMENTS_ADMIN_ROLES } from "src/shared/user/roles"
 
 export type NavSection = {
     label: string
@@ -231,7 +232,7 @@ export const Content: NavSection[] = [
                 label: "navbar.reports.announcements",
                 icon: IconSpeakerphone,
                 link: "/announcements/admin",
-                roles: ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"],
+                roles: ANNOUNCEMENTS_ADMIN_ROLES,
                 showIfCurator: true,
             },
             {
