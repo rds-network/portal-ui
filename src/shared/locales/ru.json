@@ -642,6 +642,18 @@
             "absencesOverLimit": "Более 6 пропусков",
             "dissolutionQueuedDone": "Добавлен в очередь на расторжение",
             "dissolutionDequeuedDone": "Снят с очереди на расторжение",
+            "deactivateModal": {
+                "title": "Деактивация волонтёра",
+                "city": "Населённый пункт",
+                "mupName": "Название МУП",
+                "mupEmail": "Email МУП",
+                "mupNamePlaceholder": "Введите название МУП",
+                "mupEmailPlaceholder": "Email для уведомления МУП",
+                "deactivateOnly": "Деактивировать без уведомления",
+                "deactivateAndDownload": "Деактивировать и скачать уведомление",
+                "deactivateAndSend": "Деактивировать и отправить уведомление",
+                "sentSuccess": "Уведомление отправлено в МУП"
+            },
             "watchlist": "чёрный список",
             "curator": "Куратор: {programs}",
             "curatorGratitude": "Благодарность куратора",

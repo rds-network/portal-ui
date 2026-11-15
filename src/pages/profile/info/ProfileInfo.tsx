@@ -28,6 +28,7 @@ import { Link } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
+import { DeactivateModal } from "src/pages/profile/DeactivateModal"
 import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
@@ -74,6 +75,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const queryClient = useQueryClient()
     const [opened, { open, close }] = useDisclosure(false)
     const [mupOpened, { open: openMup, close: closeMup }] = useDisclosure(false)
+    const [deactivateOpened, { open: openDeactivate, close: closeDeactivate }] = useDisclosure(false)
     const [controlModalOpen, setControlModalOpen] = useState(false)
     const [controllerLogin, setControllerLogin] = useState<string | null>(null)
     const [controlReason, setControlReason] = useState("")
@@ -152,23 +154,6 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
         },
     })
 
-    const { mutate: enqueueDissolution, isPending: enqueueingDissolution } = useMutation({
-        mutationFn: () => UserAccountApiService.enqueueDissolution(userInfo!.id),
-        onSuccess: (updated) => {
-            onUserInfoUpdate?.(updated)
-            queryClient.invalidateQueries({ queryKey: ["getInfo", userInfo?.username] })
-            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
-            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
-            notifications.show(
-                SuccessNotification(
-                    <Text size="sm">
-                        <FormattedMessage id="pages.profile.dissolutionQueuedDone" />
-                    </Text>,
-                    null
-                )
-            )
-        },
-    })
 
     const { mutate: dequeueDissolution, isPending: dequeueingDissolution } = useMutation({
         mutationFn: () => UserAccountApiService.dequeueDissolution(userInfo!.id),
@@ -1022,15 +1007,22 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     </Button>
                 ) : (
                     <Button
-                        onClick={() => enqueueDissolution()}
+                        onClick={openDeactivate}
                         className={classes.button}
                         variant="outline"
                         color="orange"
-                        loading={enqueueingDissolution}
                     >
                         <FormattedMessage id="pages.profile.dissolutionEnqueue" />
                     </Button>
                 ))}
+            <DeactivateModal
+                opened={deactivateOpened}
+                close={closeDeactivate}
+                userInfo={userInfo}
+                onSuccess={(updated) => {
+                    onUserInfoUpdate?.(updated)
+                }}
+            />
             {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER, UserGroup.ADMIN]) &&
                 userInfo?.username &&
                 !isOwnProfile &&
