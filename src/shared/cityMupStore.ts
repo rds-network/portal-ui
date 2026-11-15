@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'city-mup-data-v1'
+const STORAGE_KEY = "city-mup-data-v1"
 
 export type CityMupEntry = {
     mupName: string
@@ -33,7 +33,7 @@ export function setCityMupEntry(
         const raw = localStorage.getItem(STORAGE_KEY)
         const data: CityMupData = raw ? JSON.parse(raw) : {}
         const key = normalizeCity(city)
-        const existing = data[key] ?? { mupName: '', mupEmail: '', updatedAt: '', updatedBy: '' }
+        const existing = data[key] ?? { mupName: "", mupEmail: "", updatedAt: "", updatedBy: "" }
         data[key] = {
             ...existing,
             ...patch,
@@ -41,7 +41,5 @@ export function setCityMupEntry(
             updatedBy: editorUsername,
         }
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    } catch {
-        // localStorage unavailable — ignore silently
-    }
+    } catch {}
 }
