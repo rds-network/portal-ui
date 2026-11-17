@@ -32,6 +32,7 @@ import {
     IconTargetArrow,
     IconFiles,
     IconForms,
+    IconIdBadge,
 } from "@tabler/icons-react"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
@@ -87,6 +88,11 @@ export const Content: NavSection[] = [
                 link: "/resources",
                 showResourcesNew: true,
                 dataTourId: "nav-resources",
+            },
+            {
+                label: "navbar.mupDirectory",
+                icon: IconIdBadge,
+                link: "/resources/mup",
             },
             {
                 label: "navbar.reports.messages",
