@@ -290,6 +290,7 @@ const TerminationPotvrdaEditorPage = () => {
                 description={<FormattedMessage id="pages.documents.subjectHint" />}
                 onUserChange={setSubject}
                 initialSearch={initialUsername}
+                includeInactive
             />
 
             {!user?.username && (

@@ -72,6 +72,7 @@ const DocumentsPage: React.FC = () => {
                         label={<FormattedMessage id="pages.documents.subjectLabel" />}
                         description={<FormattedMessage id="pages.documents.subjectHint" />}
                         onUserChange={setSubject}
+                        includeInactive
                     />
                     {volunteerPickRequired && (
                         <Alert color="blue" variant="light" icon={<IconUser size={18} />}>
