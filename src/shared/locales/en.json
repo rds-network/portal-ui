@@ -1698,6 +1698,25 @@
                     "docxSizeHint": "The panel renders the same DOCX you download. Stamp in the file is capped at 38 mm; higher slider values won't enlarge it."
                 }
             },
+            "termination": {
+                "title": "Contract termination POTVRDA",
+                "description": "Confirmation that the volunteer contract has ended (to change the residence permit basis at MUP). DOCX with UDS header, signature and stamp, e-mailed to the volunteer.",
+                "editorTitle": "Potvrda o prestanku ugovora o volontiranju",
+                "editorDescription": "Check the data — on the right is the same DOCX that will be downloaded. The number is issued from the shared registry on download.",
+                "hint": "Data is prefilled from the profile and application. The contract number is not stored in the portal — type it in or leave empty (a blank line will be printed).",
+                "fullNameHint": "You can add the Cyrillic name in brackets, e.g. Petr Fedin (Федин Пётр Сергеевич)",
+                "passport": "Passport number",
+                "citizenship": "Citizenship (in Serbian)",
+                "contractNumber": "Contract number",
+                "contractNumberHint": "If empty, a blank line is printed",
+                "contractDate": "Contract date",
+                "terminationDate": "Termination date",
+                "basis": "Termination basis (in Serbian)",
+                "basisHint": "Inserted after the date: \"…престао да важи дана DD.MM.YYYY. године, <basis>, у складу са чланом 19…\"",
+                "mupNotified": "State that MUP was notified of the termination (Art. 8(1) Law on Foreigners)",
+                "emailTemplate": "Termination potvrda",
+                "emailBody": "<p>Hello, {name}!</p><p>Attached is the confirmation of termination of the volunteer contract, signed and stamped by the organization. You can present it at MUP to change the basis of your temporary residence.</p><p>Best regards,<br/>Удружење „Руска дијаспора у Србији“</p>"
+            },
             "registry": {
                 "title": "Issued potvrda registry",
                 "subtitle": "NNN/YYYY numbers are assigned automatically when downloading the official potvrda (and when staff issue the bank potvrda).",
