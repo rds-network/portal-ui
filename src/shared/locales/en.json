@@ -1711,9 +1711,11 @@
                 "contractNumberHint": "If empty, a blank line is printed",
                 "contractDate": "Contract date",
                 "terminationDate": "Termination date",
-                "basis": "Termination basis (in Serbian)",
-                "basisHint": "Inserted after the date: \"…престао да важи дана DD.MM.YYYY. године, <basis>, у складу са чланом 19…\"",
+                "reason": "Termination reason",
+                "reasonHint": "Volunteer request — \"престао да важи … споразумом, на захтев волонтера\". Missed reports — \"раскинут … на основу члана 5.2 тачка 3) уговора\" with the MUP notification date.",
                 "mupNotified": "State that MUP was notified of the termination (Art. 8(1) Law on Foreigners)",
+                "mupNotifiedDate": "MUP notification date",
+                "mupNotifiedDateRequired": "Enter the MUP notification date",
                 "emailTemplate": "Termination potvrda",
                 "emailBody": "<p>Hello, {name}!</p><p>Attached is the confirmation of termination of the volunteer contract, signed and stamped by the organization. You can present it at MUP to change the basis of your temporary residence.</p><p>Best regards,<br/>Удружење „Руска дијаспора у Србији“</p>"
             },

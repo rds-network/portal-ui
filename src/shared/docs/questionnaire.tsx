@@ -4,6 +4,7 @@ import { ApplicationDto, GenderEnumDto } from "@rds-network/portal-api-axios"
 import dayjs from "dayjs"
 import { saveAs } from "file-saver"
 import { PDFDocument, rgb } from "pdf-lib"
+import { contractDocumentDate } from "src/shared/docs/contract"
 import { DEJAVU_SANS } from "src/shared/docs/fonts/DejaVuSans"
 import { MONTSERRAT_MEDIUM_NORMAL } from "src/shared/docs/fonts/Montserrat-Medium-normal"
 import { ErrorNotification } from "src/shared/notifications/ErrorNotification"
@@ -27,7 +28,7 @@ export default async function generateQuestionnairePdf(
     )
     const city = must(application.city, "City")
     const gender = must(application.gender, "Gender") ?? null
-    const currentDate = dayjs().format("DD.MM.YYYY")
+    const currentDate = ((await contractDocumentDate(application)) ?? dayjs()).format("DD.MM.YYYY")
     const templateBytes = await fetch("/resources/template.pdf").then((r) => r.arrayBuffer())
     const pdf = await PDFDocument.load(templateBytes)
 
