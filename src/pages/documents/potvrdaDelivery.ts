@@ -7,14 +7,17 @@ export async function sendPotvrdaToInbox(params: {
     volunteerUsername: string
     confirmNumber: string
     volunteerFullName: string
+    /** Document name used in the message subject and first line. */
+    docTitle?: string
 }): Promise<void> {
+    const docTitle = params.docTitle ?? "Potvrda o volontiranju"
     const file = new File([params.blob], params.fileName, {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     })
     const uploaded = await FilesApiService.uploadFile(file)
     const link = uploaded.data.link
     const body = [
-        `Потврда о volontiranju број ${params.confirmNumber} для ${params.volunteerFullName}.`,
+        `${docTitle} број ${params.confirmNumber} для ${params.volunteerFullName}.`,
         "",
         `Preuzmite dokument: ${link}`,
         "",
@@ -22,7 +25,7 @@ export async function sendPotvrdaToInbox(params: {
     ].join("\n")
 
     await InboxApiService.create({
-        subject: `Potvrda o volontiranju ${params.confirmNumber}`,
+        subject: `${docTitle} ${params.confirmNumber}`,
         body,
         recipients: [params.volunteerUsername],
     })

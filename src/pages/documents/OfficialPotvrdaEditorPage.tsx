@@ -17,7 +17,7 @@ import { PageRequest, ReportFilter, UserInfoDto } from "@rds-network/portal-api-
 import { IconArrowLeft, IconFileTypeDoc, IconMail, IconMessage } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useSearchParams } from "react-router"
 import { ReportApiService } from "src/shared/api/ReportApiService"
@@ -282,6 +282,11 @@ const OfficialPotvrdaEditorPage = () => {
         }
     }, [form.values, user?.gender])
 
+    const buildPreview = useCallback(
+        () => buildOfficialPotvrdaBlob(previewInput, signDraft, { download: false }).then((r) => r.blob),
+        [previewInput, signDraft]
+    )
+
     const volunteerEmail = user?.email
 
     const backLink = useMemo(
@@ -464,7 +469,7 @@ const OfficialPotvrdaEditorPage = () => {
                         <Text size="sm" fw={600} mb="xs">
                             <FormattedMessage id="pages.documents.official.previewSign" />
                         </Text>
-                        <PotvrdaDocxPreview input={previewInput} signDraft={signDraft} />
+                        <PotvrdaDocxPreview buildBlob={buildPreview} />
                     </div>
                 </div>
             )}

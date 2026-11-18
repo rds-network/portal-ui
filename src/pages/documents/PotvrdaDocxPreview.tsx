@@ -1,15 +1,10 @@
 import { Alert, Text } from "@mantine/core"
 import { useEffect, useRef, useState } from "react"
-import {
-    buildOfficialPotvrdaBlob,
-    OfficialPotvrdaInput,
-} from "src/shared/docs/potvrdaOfficialDocx"
-import { PotvrdaSignDraft } from "src/shared/docs/potvrdaSignDraft"
 import classes from "./OfficialPotvrdaEditorPage.module.scss"
 
 type Props = {
-    input: OfficialPotvrdaInput
-    signDraft: PotvrdaSignDraft
+    /** Builds the DOCX to show; must be memoized — a new function triggers a re-render. */
+    buildBlob: () => Promise<Blob>
 }
 
 /** Scales the rendered page down (never up) so the full page width fits the pane. */
@@ -26,7 +21,7 @@ const fitToWidth = (host: HTMLDivElement) => {
 }
 
 /** Renders the same DOCX the user downloads via docx-preview (WYSIWYG vs file). */
-export const PotvrdaDocxPreview = ({ input, signDraft }: Props) => {
+export const PotvrdaDocxPreview = ({ buildBlob }: Props) => {
     const hostRef = useRef<HTMLDivElement | null>(null)
     const [error, setError] = useState<string | null>(null)
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -58,7 +53,7 @@ export const PotvrdaDocxPreview = ({ input, signDraft }: Props) => {
             el.innerHTML = ""
             try {
                 const { renderAsync } = await import("src/vendor/docx-preview/dist/docx-preview.mjs")
-                const { blob } = await buildOfficialPotvrdaBlob(input, signDraft, { download: false })
+                const blob = await buildBlob()
                 const buffer = await blob.arrayBuffer()
                 await renderAsync(buffer, el, undefined, {
                     className: "docx",
@@ -85,7 +80,7 @@ export const PotvrdaDocxPreview = ({ input, signDraft }: Props) => {
                 clearTimeout(timerRef.current)
             }
         }
-    }, [input, signDraft])
+    }, [buildBlob])
 
     return (
         <div className={classes.docxPreviewOuter}>
