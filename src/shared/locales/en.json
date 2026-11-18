@@ -1657,13 +1657,13 @@
             },
             "official": {
                 "title": "POTVRDA on volunteering (Law 36/10)",
-                "description": "Official DOCX with UDS letterhead; program, period and hours from accepted reports.",
-                "generate": "Download DOCX",
+                "description": "Official PDF with UDS letterhead; program, period and hours from accepted reports.",
+                "generate": "Download PDF",
                 "openEditor": "Open editor",
                 "editorTitle": "Official potvrda editor",
                 "editorDescription": "Review the text, place stamp and signature (like thank-you letters), then download or send to the volunteer.",
                 "editorTeaser": "Stamp, signature, and delivery are in the editor, like zahvalnica.",
-                "previewSign": "DOCX preview (same as downloaded file)",
+                "previewSign": "PDF preview (same as downloaded file)",
                 "back": "Back to documents",
                 "modalTitle": "Potvrda — volunteer card data",
                 "hint": "Review before issuing. Certificate number and service description can be edited manually.",
@@ -1695,14 +1695,14 @@
                     "resetSignature": "Default signature",
                     "uploadStamp": "Custom stamp",
                     "resetStamp": "Default stamp",
-                    "docxSizeHint": "The panel renders the same DOCX you download. Stamp in the file is capped at 38 mm; higher slider values won't enlarge it."
+                    "docxSizeHint": "The panel renders the same PDF you download. Stamp in the file is capped at 38 mm; higher slider values won't enlarge it."
                 }
             },
             "termination": {
                 "title": "Contract termination POTVRDA",
-                "description": "Confirmation that the volunteer contract has ended (to change the residence permit basis at MUP). DOCX with UDS header, signature and stamp, e-mailed to the volunteer.",
+                "description": "Confirmation that the volunteer contract has ended (to change the residence permit basis at MUP). PDF with UDS header, signature and stamp, e-mailed to the volunteer.",
                 "editorTitle": "Potvrda o prestanku ugovora o volontiranju",
-                "editorDescription": "Check the data — on the right is the same DOCX that will be downloaded. The number is issued from the shared registry on download.",
+                "editorDescription": "Check the data — on the right is the same PDF that will be downloaded. The number is issued from the shared registry on download.",
                 "hint": "Data is prefilled from the profile and application. The contract number is not stored in the portal — type it in or leave empty (a blank line will be printed).",
                 "fullNameHint": "You can add the Cyrillic name in brackets, e.g. Petr Fedin (Федин Пётр Сергеевич)",
                 "passport": "Passport number",
