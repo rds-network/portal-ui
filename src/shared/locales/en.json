@@ -642,6 +642,18 @@
             "absencesOverLimit": "More than 6 missed weeks",
             "dissolutionQueuedDone": "Added to the termination queue",
             "dissolutionDequeuedDone": "Removed from the termination queue",
+            "deactivateModal": {
+                "title": "Deactivate volunteer",
+                "city": "Settlement",
+                "mupName": "MUP name",
+                "mupEmail": "MUP email",
+                "mupNamePlaceholder": "Enter MUP name",
+                "mupEmailPlaceholder": "MUP notification email",
+                "deactivateOnly": "Deactivate without notification",
+                "deactivateAndDownload": "Deactivate and download notification",
+                "deactivateAndSend": "Deactivate and send notification",
+                "sentSuccess": "Notification sent to MUP"
+            },
             "watchlist": "blacklist",
             "curator": "Curator: {programs}",
             "curatorGratitude": "Curator gratitude",

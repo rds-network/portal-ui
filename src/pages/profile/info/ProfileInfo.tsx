@@ -1,4 +1,18 @@
-import { Anchor, Badge, Button, Container, Drawer, Flex, Modal, MultiSelect, Select, Text, Textarea, TextInput, Tooltip } from "@mantine/core"
+import {
+    Anchor,
+    Badge,
+    Button,
+    Container,
+    Drawer,
+    Flex,
+    Modal,
+    MultiSelect,
+    Select,
+    Text,
+    Textarea,
+    TextInput,
+    Tooltip,
+} from "@mantine/core"
 import { DateInput } from "@mantine/dates"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
@@ -28,6 +42,7 @@ import { Link } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import commonClasses from "src/app/styles/private.module.scss"
 import { ProfileAvatar } from "src/pages/profile/avatar/ProfileAvatar"
+import { DeactivateModal } from "src/pages/profile/DeactivateModal"
 import { MupLetterModal } from "src/pages/profile/MupLetterModal"
 import { UserMenu } from "src/pages/users/userMenu/UserMenu"
 import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
@@ -74,6 +89,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const queryClient = useQueryClient()
     const [opened, { open, close }] = useDisclosure(false)
     const [mupOpened, { open: openMup, close: closeMup }] = useDisclosure(false)
+    const [deactivateOpened, { open: openDeactivate, close: closeDeactivate }] = useDisclosure(false)
     const [controlModalOpen, setControlModalOpen] = useState(false)
     const [controllerLogin, setControllerLogin] = useState<string | null>(null)
     const [controlReason, setControlReason] = useState("")
@@ -141,28 +157,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
             notifications.show(
                 SuccessNotification(
                     <Text size="sm">
-                        <FormattedMessage
-                            id="pages.profile.issueWarningDone"
-                            values={{ count: result.warningCount }}
-                        />
-                    </Text>,
-                    null
-                )
-            )
-        },
-    })
-
-    const { mutate: enqueueDissolution, isPending: enqueueingDissolution } = useMutation({
-        mutationFn: () => UserAccountApiService.enqueueDissolution(userInfo!.id),
-        onSuccess: (updated) => {
-            onUserInfoUpdate?.(updated)
-            queryClient.invalidateQueries({ queryKey: ["getInfo", userInfo?.username] })
-            queryClient.invalidateQueries({ queryKey: ["dissolution-queue"] })
-            queryClient.invalidateQueries({ queryKey: ["report-overdue"] })
-            notifications.show(
-                SuccessNotification(
-                    <Text size="sm">
-                        <FormattedMessage id="pages.profile.dissolutionQueuedDone" />
+                        <FormattedMessage id="pages.profile.issueWarningDone" values={{ count: result.warningCount }} />
                     </Text>,
                     null
                 )
@@ -195,7 +190,12 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     })
     const curatorPrograms = curatorRows
         .filter((row) => row.username.toLowerCase() === (userInfo?.username || "").toLowerCase())
-        .map((row) => getLocalizedName({ nameRu: row.programNameRu, nameEn: row.programNameEn, nameSr: row.programNameSr }, locale))
+        .map((row) =>
+            getLocalizedName(
+                { nameRu: row.programNameRu, nameEn: row.programNameEn, nameSr: row.programNameSr },
+                locale
+            )
+        )
 
     const validationSchema = z.object({
         city: z
@@ -499,9 +499,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
     const reportControllerName = reportControllerNameOf(userInfo)
     const reportControl = reportControlOf(userInfo)
     const mupLetter = mupLetterOf(userInfo)
-    const mupLetterSentLabel = mupLetter.mupLetterSentAt
-        ? dayjs(mupLetter.mupLetterSentAt).format("DD.MM.YYYY")
-        : ""
+    const mupLetterSentLabel = mupLetter.mupLetterSentAt ? dayjs(mupLetter.mupLetterSentAt).format("DD.MM.YYYY") : ""
     const dissolutionQueue = dissolutionQueueOf(userInfo)
     const dissolutionQueued = !!dissolutionQueue.dissolutionQueuedAt
     const dissolutionQueuedLabel = dissolutionQueue.dissolutionQueuedAt
@@ -531,7 +529,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
             UserGroup.ADMIN_SSO,
             UserGroup.ADMIN_VOLUNTEER,
             UserGroup.MAIN_VOLUNTEER,
-        ]) || !!curatorRows.some((row) => row.username.toLowerCase() === (currentUser?.username || "").toLowerCase())
+        ]) || curatorRows.some((row) => row.username.toLowerCase() === (currentUser?.username || "").toLowerCase())
 
     // Пользователи могут редактировать только свой проект или админы
     const canEditProject = isOwnProfile || isAdmin
@@ -627,10 +625,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     )}
                     {mupLetterSentLabel && (
                         <Badge color="grape" radius="md" variant="light">
-                            <FormattedMessage
-                                id="pages.profile.mupNotified"
-                                values={{ date: mupLetterSentLabel }}
-                            />
+                            <FormattedMessage id="pages.profile.mupNotified" values={{ date: mupLetterSentLabel }} />
                         </Badge>
                     )}
                     {dissolutionQueued && !mupLetterSentLabel && canManageDissolution && (
@@ -654,10 +649,10 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         isOwnProfile &&
                         !canManageDissolution &&
                         isAutoDissolution(dissolutionQueue.dissolutionQueuedBy) && (
-                        <Badge color="blue" radius="md" variant="light">
-                            <FormattedMessage id="pages.profile.absencesOverLimit" />
-                        </Badge>
-                    )}
+                            <Badge color="blue" radius="md" variant="light">
+                                <FormattedMessage id="pages.profile.absencesOverLimit" />
+                            </Badge>
+                        )}
                     {warningCount > 0 && (
                         <Tooltip label={<FormattedMessage id="pages.profile.warningsHint" />}>
                             <Badge color={warningCount >= 3 ? "red" : "orange"} radius="md" variant="light">
@@ -752,10 +747,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
             )}
             {curatorPrograms.length > 0 && (
                 <Badge color="teal" radius="md" variant="light" mt={6} w="fit-content">
-                    <FormattedMessage
-                        id="pages.profile.curator"
-                        values={{ programs: curatorPrograms.join(", ") }}
-                    />
+                    <FormattedMessage id="pages.profile.curator" values={{ programs: curatorPrograms.join(", ") }} />
                 </Badge>
             )}
             <IDBadge id={userInfo.id} />
@@ -976,31 +968,30 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                     <FormattedMessage id="pages.user-list.menu-impersonate" />
                 </Button>
             )}
-            {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO]) &&
-                userInfo?.username && (
-                    <>
-                        <Button
-                            onClick={openMup}
-                            className={classes.button}
-                            variant="outline"
-                            rightSection={<IconMail size={14} />}
-                        >
-                            <FormattedMessage id="pages.mup.open" />
-                        </Button>
-                        <MupLetterModal
-                            opened={mupOpened}
-                            close={closeMup}
-                            username={userInfo.username}
-                            fullName={userInfo.fullName || ""}
-                            birthDate={userInfo.birthDate ? dayjs(userInfo.birthDate).format("DD.MM.YYYY") : ""}
-                            citizenship={mupCitizenship}
-                            address={getFullAddress(userInfo.postalCode, userInfo.city, userInfo.address)}
-                            phone={userInfo.phone || ""}
-                            email={userInfo.email || ""}
-                            periodFrom={mupPeriodFrom}
-                        />
-                    </>
-                )}
+            {hasPermission(currentUser, [UserGroup.ADMIN, UserGroup.ADMIN_SSO]) && userInfo?.username && (
+                <>
+                    <Button
+                        onClick={openMup}
+                        className={classes.button}
+                        variant="outline"
+                        rightSection={<IconMail size={14} />}
+                    >
+                        <FormattedMessage id="pages.mup.open" />
+                    </Button>
+                    <MupLetterModal
+                        opened={mupOpened}
+                        close={closeMup}
+                        username={userInfo.username}
+                        fullName={userInfo.fullName || ""}
+                        birthDate={userInfo.birthDate ? dayjs(userInfo.birthDate).format("DD.MM.YYYY") : ""}
+                        citizenship={mupCitizenship}
+                        address={getFullAddress(userInfo.postalCode, userInfo.city, userInfo.address)}
+                        phone={userInfo.phone || ""}
+                        email={userInfo.email || ""}
+                        periodFrom={mupPeriodFrom}
+                    />
+                </>
+            )}
             {hasPermission(currentUser, [
                 UserGroup.ADMIN_VOLUNTEER,
                 UserGroup.MAIN_VOLUNTEER,
@@ -1021,16 +1012,18 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                         <FormattedMessage id="pages.profile.dissolutionDequeue" />
                     </Button>
                 ) : (
-                    <Button
-                        onClick={() => enqueueDissolution()}
-                        className={classes.button}
-                        variant="outline"
-                        color="orange"
-                        loading={enqueueingDissolution}
-                    >
+                    <Button onClick={openDeactivate} className={classes.button} variant="outline" color="orange">
                         <FormattedMessage id="pages.profile.dissolutionEnqueue" />
                     </Button>
                 ))}
+            <DeactivateModal
+                opened={deactivateOpened}
+                close={closeDeactivate}
+                userInfo={userInfo}
+                onSuccess={(updated) => {
+                    onUserInfoUpdate?.(updated)
+                }}
+            />
             {hasPermission(currentUser, [UserGroup.ADMIN_VOLUNTEER, UserGroup.MAIN_VOLUNTEER, UserGroup.ADMIN]) &&
                 userInfo?.username &&
                 !isOwnProfile &&
@@ -1042,10 +1035,7 @@ export const ProfileInfo = ({ userInfo, onUserInfoUpdate, showSensitiveData }: P
                             variant="outline"
                             color="orange"
                         >
-                            <FormattedMessage
-                                id="pages.profile.issueWarning"
-                                values={{ count: warningCount }}
-                            />
+                            <FormattedMessage id="pages.profile.issueWarning" values={{ count: warningCount }} />
                         </Button>
                         <Modal
                             opened={warningModalOpen}
