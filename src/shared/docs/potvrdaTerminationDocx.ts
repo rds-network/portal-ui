@@ -16,6 +16,7 @@ import {
     PotvrdaSignDraft,
 } from "src/shared/docs/potvrdaSignDraft"
 import { DEFAULT_SIGNATURE, DEFAULT_STAMP } from "src/shared/docs/zahvalnicaDraft"
+import { contractHeaderDate } from "src/shared/docs/contract"
 
 export type TerminationPotvrdaInput = {
     confirmNumber: string
@@ -27,11 +28,28 @@ export type TerminationPotvrdaInput = {
     contractNumber: string
     contractDate: string
     terminationDate: string
-    basis: string
+    reason: TerminationReason
+    /** VOLUNTEER_REQUEST only: whether to mention the MUP notification. */
     mupNotified: boolean
+    /** NON_COMPLIANCE only: date the MUP was notified. */
+    mupNotifiedDate: string
 }
 
-export const DEFAULT_TERMINATION_BASIS = "споразумом уговорних страна, на захтев волонтера"
+/** Same values as the MUP letter reasons. */
+export type TerminationReason = "VOLUNTEER_REQUEST" | "NON_COMPLIANCE"
+
+const TERMINATION_CLAUSE: Record<TerminationReason, (date: string) => string> = {
+    VOLUNTEER_REQUEST: (date) =>
+        `престао да важи дана ${date} године, споразумом уговорних страна, на захтев волонтера, у складу са чланом 19. Закона о волонтирању.`,
+    NON_COMPLIANCE: (date) =>
+        `раскинут дана ${date} године, на основу члана 5.2 тачка 3) уговора, у вези са чланом 19. тачка 3) и чланом 20. став 2. тачка 3) Закона о волонтирању.`,
+}
+
+/** Registry summary of the termination reason. */
+export const terminationReasonSummary = (reason: TerminationReason) =>
+    reason === "NON_COMPLIANCE"
+        ? "Раскид: чл. 5.2 т. 3) уговора (несдача отчётов)"
+        : "Престанак споразумом, на захтев волонтера"
 
 const ORG = "Удружење „Руска дијаспора у Србији“"
 const BLANK = "________"
@@ -66,6 +84,7 @@ export function buildTerminationPotvrdaDocumentXml(
     input: TerminationPotvrdaInput,
     images: SignImages = { stamp: "", signature: "" }
 ): string {
+    const nonCompliance = input.reason === "NON_COMPLIANCE"
     const body = [
         paragraph(run(ORG, true), { center: true }),
         paragraph(""),
@@ -88,28 +107,33 @@ export function buildTerminationPotvrdaDocumentXml(
         field("Држављанство", input.citizenship),
         field("Број пасоша", input.passport),
         paragraph(""),
+        paragraph(run(TERMINATION_CLAUSE[input.reason](srDate(input.terminationDate))), {
+            justify: true,
+            spacingLine: 360,
+        }),
         paragraph(
             run(
-                `престао да важи дана ${srDate(input.terminationDate)} године, ${
-                    input.basis.trim() || DEFAULT_TERMINATION_BASIS
-                }, у складу са чланом 19. Закона о волонтирању.`
+                nonCompliance
+                    ? "Од наведеног датума именовано лице није ангажовано као волонтер код Организатора."
+                    : "Од наведеног датума именовано лице није ангажовано као волонтер код Организатора. Организатор нема потраживања према волонтеру."
             ),
             { justify: true, spacingLine: 360 }
         ),
-        paragraph(
-            run(
-                "Од наведеног датума именовано лице није ангажовано као волонтер код Организатора. Организатор нема потраживања према волонтеру."
-            ),
-            { justify: true, spacingLine: 360 }
-        ),
-        input.mupNotified
+        nonCompliance
             ? paragraph(
                   run(
-                      "О престанку уговора Организатор је обавестио надлежни орган МУП-а у складу са чланом 8. став 1. Закона о странцима."
+                      `Организатор је ${srDate(input.mupNotifiedDate)} године, обавестио Министарство унутрашњих послова о престанку уговора, у складу са чланом 8. став 1. Закона о странцима.`
                   ),
                   { justify: true, spacingLine: 360 }
               )
-            : "",
+            : input.mupNotified
+              ? paragraph(
+                    run(
+                        "О престанку уговора Организатор је обавестио надлежни орган МУП-а у складу са чланом 8. став 1. Закона о странцима."
+                    ),
+                    { justify: true, spacingLine: 360 }
+                )
+              : "",
         paragraph(
             run(
                 "Потврда се издаје на захтев лица ради промене основа привременог боравка у Републици Србији и у друге сврхе се не може користити."
@@ -176,11 +200,21 @@ const realisticEnd = (endRaw: string | undefined) => {
     return end.isValid() && end.year() < dayjs().year() + 2 ? end : null
 }
 
+/** Same date as the contract PDF header: signing day, but not later than the volunteering start. */
+const contractDateOf = (signedRaw?: string | null, startRaw?: string | null): string => {
+    if (startRaw) {
+        return contractHeaderDate(signedRaw ? dayjs(signedRaw) : null, dayjs(startRaw)).format("DD.MM.YYYY")
+    }
+    return formatDate(signedRaw)
+}
+
 export function defaultTerminationPotvrdaFields(
     user: {
         fullName?: string
         birthDate?: string | null
         contracts?: Array<{ startDate?: string; endDate?: string }>
+        mupLetterSentAt?: string | null
+        mupLetterReason?: string | null
     },
     application?: {
         passport?: string | null
@@ -192,8 +226,8 @@ export function defaultTerminationPotvrdaFields(
     const contracts = user.contracts ?? []
     const firstStart = contracts.map((c) => c.startDate).filter(Boolean).sort()[0]
     const lastEnd = realisticEnd(contracts.map((c) => c.endDate).filter(Boolean).sort().at(-1))
-    const contractDate =
-        application?.contractDocumentDate ?? application?.contract?.startDate ?? firstStart ?? null
+    const mupSent = user.mupLetterSentAt ? dayjs(user.mupLetterSentAt) : null
+    const terminationDay = mupSent?.isValid() ? mupSent : (lastEnd ?? dayjs())
 
     return {
         issueDate: dayjs().format("DD.MM.YYYY"),
@@ -202,9 +236,13 @@ export function defaultTerminationPotvrdaFields(
         citizenship: "Руска Федерација",
         passport: application?.passport ?? "",
         contractNumber: "",
-        contractDate: formatDate(contractDate),
-        terminationDate: (lastEnd ?? dayjs()).format("DD.MM.YYYY"),
-        basis: DEFAULT_TERMINATION_BASIS,
+        contractDate: contractDateOf(
+            application?.contractDocumentDate,
+            application?.contract?.startDate ?? firstStart
+        ),
+        terminationDate: terminationDay.format("DD.MM.YYYY"),
+        reason: user.mupLetterReason === "NON_COMPLIANCE" ? "NON_COMPLIANCE" : "VOLUNTEER_REQUEST",
         mupNotified: true,
+        mupNotifiedDate: mupSent?.isValid() ? mupSent.format("DD.MM.YYYY") : "",
     }
 }

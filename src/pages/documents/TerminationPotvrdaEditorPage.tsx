@@ -1,4 +1,4 @@
-import { Alert, Button, Checkbox, Divider, Flex, Text, TextInput, Textarea, Title } from "@mantine/core"
+import { Alert, Button, Checkbox, Divider, Flex, Input, SegmentedControl, Text, TextInput, Title } from "@mantine/core"
 import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
@@ -15,11 +15,12 @@ import { PotvrdaDocxPreview } from "src/pages/documents/PotvrdaDocxPreview"
 import { PotvrdaSignSection } from "src/pages/documents/PotvrdaSignSection"
 import { ApplicationLookupApiService } from "src/shared/api/applications/ApplicationLookupApiService"
 import { PotvrdaApiService } from "src/shared/api/PotvrdaApiService"
-import { UserApiService } from "src/shared/api/user/UserApiService"
+import { mupLetterOf, UserApiService } from "src/shared/api/user/UserApiService"
 import {
     buildTerminationPotvrdaBlob,
     defaultTerminationPotvrdaFields,
     TerminationPotvrdaInput,
+    terminationReasonSummary,
 } from "src/shared/docs/potvrdaTerminationDocx"
 import { loadPotvrdaSignDraft, PotvrdaSignDraft } from "src/shared/docs/potvrdaSignDraft"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
@@ -32,21 +33,28 @@ import classes from "./OfficialPotvrdaEditorPage.module.scss"
 const ADMIN = ["ADMIN", "ADMIN_VOLUNTEER", "ADMIN_SSO", "MAIN_VOLUNTEER"]
 const DOC_TITLE = "Potvrda o prestanku ugovora o volontiranju"
 
-const schema = z.object({
-    confirmNumber: z.string().trim().min(1),
-    issueDate: z.string().trim().min(8),
-    fullName: z.string().trim().min(2),
-    birthDate: z.string().trim().min(8),
-    citizenship: z.string().trim().min(3),
-    passport: z.string().trim().min(5),
-    contractNumber: z.string().trim(),
-    contractDate: z.string().trim().min(8),
-    terminationDate: z.string().trim().min(8),
-    basis: z.string().trim().min(5),
-    mupNotified: z.boolean(),
-})
+const makeSchema = (mupDateRequired: string) =>
+    z
+    .object({
+        confirmNumber: z.string().trim().min(1),
+        issueDate: z.string().trim().min(8),
+        fullName: z.string().trim().min(2),
+        birthDate: z.string().trim().min(8),
+        citizenship: z.string().trim().min(3),
+        passport: z.string().trim().min(5),
+        contractNumber: z.string().trim(),
+        contractDate: z.string().trim().min(8),
+        terminationDate: z.string().trim().min(8),
+        reason: z.enum(["VOLUNTEER_REQUEST", "NON_COMPLIANCE"]),
+        mupNotified: z.boolean(),
+        mupNotifiedDate: z.string().trim(),
+    })
+    .refine((v) => v.reason !== "NON_COMPLIANCE" || v.mupNotifiedDate.length >= 8, {
+        path: ["mupNotifiedDate"],
+        message: mupDateRequired,
+    })
 
-type FormValues = z.infer<typeof schema>
+type FormValues = z.infer<ReturnType<typeof makeSchema>>
 
 const emptyValues: FormValues = {
     confirmNumber: "",
@@ -58,8 +66,9 @@ const emptyValues: FormValues = {
     contractNumber: "",
     contractDate: "",
     terminationDate: "",
-    basis: "",
+    reason: "VOLUNTEER_REQUEST",
     mupNotified: true,
+    mupNotifiedDate: "",
 }
 
 const TerminationPotvrdaEditorPage = () => {
@@ -98,7 +107,9 @@ const TerminationPotvrdaEditorPage = () => {
 
     const form = useForm<FormValues>({
         initialValues: emptyValues,
-        validate: zodResolver(schema),
+        validate: zodResolver(
+            makeSchema(intl.formatMessage({ id: "pages.documents.termination.mupNotifiedDateRequired" }))
+        ),
     })
 
     const refreshNumber = async (issueDate: string) => {
@@ -114,7 +125,7 @@ const TerminationPotvrdaEditorPage = () => {
         if (!user?.username || !applicationFetched) {
             return
         }
-        const defaults = defaultTerminationPotvrdaFields(user, application)
+        const defaults = defaultTerminationPotvrdaFields({ ...user, ...mupLetterOf(user) }, application)
         form.setValues({ ...defaults, confirmNumber: "" })
         form.clearErrors()
         setLastDoc(null)
@@ -139,7 +150,7 @@ const TerminationPotvrdaEditorPage = () => {
                 periodFrom: toApiDate(values.contractDate),
                 periodTo: toApiDate(values.terminationDate),
                 programCode: user.program?.code ?? null,
-                servicesDescription: values.basis,
+                servicesDescription: terminationReasonSummary(values.reason),
             })
             const payload: TerminationPotvrdaInput = { ...values, confirmNumber: registered.confirmNumber }
             const { blob, fileName } = await buildTerminationPotvrdaBlob(payload, signDraft, { download: true })
@@ -358,17 +369,40 @@ const TerminationPotvrdaEditorPage = () => {
                             label={<FormattedMessage id="pages.documents.termination.terminationDate" />}
                             {...form.getInputProps("terminationDate")}
                         />
-                        <Textarea
-                            label={<FormattedMessage id="pages.documents.termination.basis" />}
-                            description={<FormattedMessage id="pages.documents.termination.basisHint" />}
-                            autosize
-                            minRows={2}
-                            {...form.getInputProps("basis")}
-                        />
-                        <Checkbox
-                            label={<FormattedMessage id="pages.documents.termination.mupNotified" />}
-                            {...form.getInputProps("mupNotified", { type: "checkbox" })}
-                        />
+                        <Input.Wrapper
+                            label={<FormattedMessage id="pages.documents.termination.reason" />}
+                            description={<FormattedMessage id="pages.documents.termination.reasonHint" />}
+                        >
+                            <SegmentedControl
+                                fullWidth
+                                mt={4}
+                                value={form.values.reason}
+                                onChange={(value) =>
+                                    form.setFieldValue("reason", value as FormValues["reason"])
+                                }
+                                data={[
+                                    {
+                                        value: "VOLUNTEER_REQUEST",
+                                        label: intl.formatMessage({ id: "pages.mup.reasonVolunteerRequest" }),
+                                    },
+                                    {
+                                        value: "NON_COMPLIANCE",
+                                        label: intl.formatMessage({ id: "pages.mup.reasonNonCompliance" }),
+                                    },
+                                ]}
+                            />
+                        </Input.Wrapper>
+                        {form.values.reason === "NON_COMPLIANCE" ? (
+                            <TextInput
+                                label={<FormattedMessage id="pages.documents.termination.mupNotifiedDate" />}
+                                {...form.getInputProps("mupNotifiedDate")}
+                            />
+                        ) : (
+                            <Checkbox
+                                label={<FormattedMessage id="pages.documents.termination.mupNotified" />}
+                                {...form.getInputProps("mupNotified", { type: "checkbox" })}
+                            />
+                        )}
                         <Divider my="xs" />
                         <PotvrdaSignSection draft={signDraft} onChange={setSignDraft} />
                     </form>

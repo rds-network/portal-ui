@@ -1711,9 +1711,11 @@
                 "contractNumberHint": "Ako je prazno, biće crta",
                 "contractDate": "Datum ugovora",
                 "terminationDate": "Datum prestanka ugovora",
-                "basis": "Osnov prestanka",
-                "basisHint": "Ubacuje se posle datuma: „…престао да важи дана DD.MM.YYYY. године, <osnov>, у складу са чланом 19…“",
+                "reason": "Razlog prestanka",
+                "reasonHint": "Na zahtev — „престао да важи … споразумом, на захтев волонтера“. Nedostavljeni izveštaji — „раскинут … на основу члана 5.2 тачка 3) уговора“ sa datumom obaveštenja MUP-a.",
                 "mupNotified": "Navesti da je MUP obavešten o prestanku ugovora (čl. 8 st. 1 Zakona o strancima)",
+                "mupNotifiedDate": "Datum obaveštenja MUP-a",
+                "mupNotifiedDateRequired": "Unesite datum obaveštenja MUP-a",
                 "emailTemplate": "Potvrda o prestanku",
                 "emailBody": "<p>Poštovani/a {name},</p><p>U prilogu je potvrda o prestanku ugovora o volontiranju sa potpisom i pečatom organizacije. Možete je predati MUP-u radi promene osnova privremenog boravka.</p><p>Srdačan pozdrav,<br/>Удружење „Руска дијаспора у Србији“</p>"
             },
