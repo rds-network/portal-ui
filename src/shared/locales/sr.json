@@ -1657,13 +1657,13 @@
             },
             "official": {
                 "title": "POTVRDA o volontiranju (zakon 36/10)",
-                "description": "Zvanični DOCX sa memorandumom UDS; program, period i sati iz prihvaćenih izveštaja.",
-                "generate": "Preuzmi DOCX",
+                "description": "Zvanični PDF sa memorandumom UDS; program, period i sati iz prihvaćenih izveštaja.",
+                "generate": "Preuzmi PDF",
                 "openEditor": "Otvori editor",
                 "editorTitle": "Editor POTVRDE",
                 "editorDescription": "Proverite tekst, pečat i potpis (kao zahvalnica), zatim preuzmite ili pošaljite volonteru.",
                 "editorTeaser": "Pečat, potpis i slanje — u editoru, kao zahvalnica.",
-                "previewSign": "Pregled DOCX-a (isti kao preuzeti fajl)",
+                "previewSign": "Pregled PDF-a (isti kao preuzeti fajl)",
                 "back": "Nazad na dokumente",
                 "modalTitle": "Potvrda — podaci sa kartice",
                 "hint": "Proverite pre izdavanja. Broj potvrde i opis usluga po potrebi ručno.",
@@ -1695,14 +1695,14 @@
                     "resetSignature": "Podrazumevani potpis",
                     "uploadStamp": "Sopstveni pečat",
                     "resetStamp": "Podrazumevani pečat",
-                    "docxSizeHint": "Panel prikazuje isti DOCX koji preuzimate. Pečat u fajlu — do 38 mm; veći klizač ga ne uvećava."
+                    "docxSizeHint": "Panel prikazuje isti PDF koji preuzimate. Pečat u fajlu — do 38 mm; veći klizač ga ne uvećava."
                 }
             },
             "termination": {
                 "title": "POTVRDA o prestanku ugovora",
-                "description": "Potvrda o prestanku ugovora o volontiranju (za promenu osnova boravka u MUP-u). DOCX sa zaglavljem UDS, potpisom i pečatom, slanje volonteru na e-mail.",
+                "description": "Potvrda o prestanku ugovora o volontiranju (za promenu osnova boravka u MUP-u). PDF sa zaglavljem UDS, potpisom i pečatom, slanje volonteru na e-mail.",
                 "editorTitle": "Potvrda o prestanku ugovora o volontiranju",
-                "editorDescription": "Proverite podatke — desno je isti DOCX koji će biti preuzet. Broj se dodeljuje iz zajedničkog registra pri preuzimanju.",
+                "editorDescription": "Proverite podatke — desno je isti PDF koji će biti preuzet. Broj se dodeljuje iz zajedničkog registra pri preuzimanju.",
                 "hint": "Podaci su preuzeti iz profila i prijave. Broj ugovora se ne čuva u portalu — upišite ga ili ostavite prazno (biće crta).",
                 "fullNameHint": "Možete dodati ime ćirilicom u zagradi, npr. Petr Fedin (Федин Пётр Сергеевич)",
                 "passport": "Broj pasoša",

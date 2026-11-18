@@ -3,7 +3,7 @@ import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
 import { UserInfoDto } from "@rds-network/portal-api-axios"
-import { IconArrowLeft, IconFileTypeDoc, IconMail, IconMessage } from "@tabler/icons-react"
+import { IconArrowLeft, IconFileTypePdf, IconMail, IconMessage } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
@@ -22,6 +22,7 @@ import {
     TerminationPotvrdaInput,
     terminationReasonSummary,
 } from "src/shared/docs/potvrdaTerminationDocx"
+import { docxResultToPdf } from "src/shared/docs/docxToPdf"
 import { loadPotvrdaSignDraft, PotvrdaSignDraft } from "src/shared/docs/potvrdaSignDraft"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { EmailDrawer } from "src/shared/ui/emailModal/EmailDrawer"
@@ -153,7 +154,10 @@ const TerminationPotvrdaEditorPage = () => {
                 servicesDescription: terminationReasonSummary(values.reason),
             })
             const payload: TerminationPotvrdaInput = { ...values, confirmNumber: registered.confirmNumber }
-            const { blob, fileName } = await buildTerminationPotvrdaBlob(payload, signDraft, { download: true })
+            const { blob, fileName } = await docxResultToPdf(
+                await buildTerminationPotvrdaBlob(payload, signDraft, { download: false }),
+                { download: true }
+            )
             return { blob, fileName, confirmNumber: registered.confirmNumber }
         },
         onSuccess: (doc) => {
@@ -255,7 +259,7 @@ const TerminationPotvrdaEditorPage = () => {
                 </div>
                 <Flex gap="sm" wrap="wrap">
                     <Button
-                        leftSection={<IconFileTypeDoc size={16} />}
+                        leftSection={<IconFileTypePdf size={16} />}
                         loading={generateMutation.isPending}
                         disabled={!user?.username}
                         onClick={onGenerate}
@@ -428,7 +432,7 @@ const TerminationPotvrdaEditorPage = () => {
                     lastDoc
                         ? [
                               new File([lastDoc.blob], lastDoc.fileName, {
-                                  type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                  type: "application/pdf",
                               }),
                           ]
                         : []

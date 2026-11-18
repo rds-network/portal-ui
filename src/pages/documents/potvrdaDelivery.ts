@@ -12,7 +12,7 @@ export async function sendPotvrdaToInbox(params: {
 }): Promise<void> {
     const docTitle = params.docTitle ?? "Potvrda o volontiranju"
     const file = new File([params.blob], params.fileName, {
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        type: params.blob.type || "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     })
     const uploaded = await FilesApiService.uploadFile(file)
     const link = uploaded.data.link
