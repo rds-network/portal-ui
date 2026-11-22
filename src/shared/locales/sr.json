@@ -131,22 +131,6 @@
             "dismiss": "Zatvori",
             "dismissHint": "Da nastavite, pritisnite „Zatvori“ ispod ili krstić desno"
         },
-        "ticket-modal": {
-            "modalTitle": "Kreirati tiket",
-            "titleLabel": "Tema obraćanja",
-            "create": "Kreirati tiket",
-            "toUser": "Komе poslati",
-            "toUserDescription": "Volonter će dobiti obaveštenje na email i moći će da odgovori na njega",
-            "internalDescription": "Tiket će biti kreiran u sistemu <a href='https://help.russian.rs' target='_blank'>Help Desk</a>, volonter će dobiti obaveštenje i moći će da odgovori na email, a njegov odgovor će biti dodat u tiket. U zavisnosti od grupe, tiket će biti dodeljen odgovarajućoj osobi, koja će takođe imati pristup svim informacijama.",
-            "publicDescription": "Tiket će biti kreiran u sistemu <a href='https://help.russian.rs' target='_blank'>Help Desk</a>. U zavisnosti od grupe, tiket će biti prosleđen odgovarajućim ljudima. Odgovor ili dodatno pojašnjenje takođe ćete dobiti na svoj email.",
-            "group": "Grupa za dodelu",
-            "group-placeholder": "Izaberite grupu",
-            "group-description": "Od ovoga zavisi ko će razmatrati obraćanje",
-            "success": "<a href=\"{link}\" target=\"_blank\">Tiket br. {number}</a> je uspešno kreiran",
-            "error": "Došlo je do greške prilikom kreiranja tiketa, pišite na <a href='mailto:help@russian.rs'>help@russian.rs</a>",
-            "attachmentsRequired": "Za ovaj zahtev je potrebno priložiti fajl(ove).",
-            "required": "Obavezno"
-        },
         "confirm-modal": {
             "confirmDefaultButton": "Potvrdi",
             "cancelDefaultButton": "Otkaži",
@@ -985,8 +969,7 @@
             },
             "profile": "Profil",
             "reports": "Izveštaji",
-            "open-week": "Otvori izveštaje nedelje",
-            "ticket": "Kreirajte tiket"
+            "open-week": "Otvori izveštaje nedelje"
         },
         "user-list": {
             "title": "Svi volonteri",
@@ -1762,66 +1745,6 @@
             "copyEmail": "Kopiraj email",
             "copied": "Kopirano",
             "source": "Prema podacima MUP RS (poslovi stranaca). Ako se razlikuje, proverite mup.gov.rs."
-        },
-        "support": {
-            "title": "Kontakt podrške",
-            "documentTitle": "Kontakt podrške",
-            "description": "Izaberite temu zahteva i popunite polja.",
-            "createButton": "Kreiraj tiket",
-            "caseLabel": "Tema zahteva",
-            "casePlaceholder": "Izaberite temu",
-            "formTitle": "Detalji zahteva",
-            "attachmentsRequiredHint": "Za ovaj slučaj je potrebno priložiti fajl(ove).",
-            "cases": {
-                "bug": "Greška na sajtu",
-                "bug.title": "Greška na sajtu",
-                "auth": "Problem sa pristupom/prijavom",
-                "auth.title": "Problem sa pristupom/prijavom",
-                "addressChange": "Promena adrese",
-                "addressChange.title": "Zahtev kuratoru: promena adrese",
-                "nameChange": "Promena imena",
-                "nameChange.title": "Zahtev kuratoru: promena imena",
-                "programChange": "Promena programa/projekta",
-                "programChange.title": "Zahtev kuratoru: promena programa/projekta",
-                "residencePermit": "Boravak: pitanje/produženje",
-                "residencePermit.title": "Boravak: zahtev",
-                "other": "Drugo",
-                "other.title": "Drugi zahtev"
-            },
-            "fields": {
-                "page": "Stranica/odeljak",
-                "steps": "Koraci reprodukcije",
-                "expected": "Očekivano ponašanje",
-                "actual": "Stvarno ponašanje",
-                "environment": "Okruženje (pregledač/OS)",
-                "loginOrEmail": "Login ili email",
-                "problem": "Opis problema",
-                "when": "Kada se dešava",
-                "oldAddress": "Stara adresa",
-                "newAddress": "Nova adresa",
-                "effectiveDate": "Datum promene",
-                "reason": "Komentar/razlog",
-                "oldName": "Staro puno ime",
-                "newName": "Novo puno ime",
-                "programOrProject": "Program ili projekat",
-                "programOrProject.options.PROGRAM": "Program",
-                "programOrProject.options.PROJECT": "Projekat",
-                "currentProgram": "Trenutni program",
-                "desiredProgram": "Željeni program",
-                "currentProject": "Trenutni projekat",
-                "desiredProject": "Željeni projekat",
-                "permitCase": "Tip zahteva",
-                "permitCase.options.EXTEND": "Produženje",
-                "permitCase.options.QUESTION": "Pitanje/pojašnjenje",
-                "city": "Grad",
-                "desiredDate": "Željeni datum",
-                "question": "Pitanje",
-                "topic": "Tema",
-                "message": "Poruka"
-            },
-            "body": {
-                "case": "Slučaj"
-            }
         },
         "volunteers-reports": {
             "title": "Izveštaji o volonterima"

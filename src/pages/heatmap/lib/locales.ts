@@ -47,6 +47,5 @@ export const locales = {
     warnings: "pages.heat-map.warnings",
     profile: "pages.heat-map.profile",
     reports: "pages.heat-map.reports",
-    ticket: "pages.heat-map.ticket",
     openWeek: "pages.heat-map.open-week",
 }

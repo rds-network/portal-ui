@@ -131,22 +131,6 @@
             "dismiss": "Закрыть",
             "dismissHint": "Чтобы продолжить — нажмите «Закрыть» ниже или крестик справа"
         },
-        "ticket-modal": {
-            "modalTitle": "Создать тикет",
-            "titleLabel": "Тема обращения",
-            "create": "Создать тикет",
-            "toUser": "Кому направить",
-            "toUserDescription": "Волонтер получит уведомление на почту и сможет отправить на него ответ",
-            "internalDescription": "Тикет будет заведен в системе <a href='https://help.russian.rs' target='_blank'>Help Desk</a>, волонтер получит уведомление, он сможет ответить на письмо и его ответ добавится в тикет. В зависимости от группы тикет будет назначен на нужного человека, который также будет иметь доступ ко всей информации.",
-            "publicDescription": "Тикет будет заведен в системе <a href='https://help.russian.rs' target='_blank'>Help Desk</a>. В зависимости от группы тикет будет доставлен нужным людям. Ответ или уточнении вы также получите на свою почту.",
-            "group": "Группа назначения",
-            "group-placeholder": "Выберите группу",
-            "group-description": "От этого зависит кто будет рассматривать обращение",
-            "success": "<a href=\"{link}\" target=\"_blank\">Тикет №{number}</a> успешно создан",
-            "error": "При создании тикета произошла ошибка, напишите на <a href='mailto:help@russian.rs'>help@russian.rs</a>",
-            "attachmentsRequired": "Для этого обращения нужно приложить файл(ы).",
-            "required": "Обязательно"
-        },
         "confirm-modal": {
             "confirmDefaultButton": "Подтвердить",
             "cancelDefaultButton": "Отмена",
@@ -985,8 +969,7 @@
             },
             "profile": "Профиль",
             "reports": "Отчеты",
-            "open-week": "Открыть отчёты недели",
-            "ticket": "Создать тикет"
+            "open-week": "Открыть отчёты недели"
         },
         "user-list": {
             "title": "Все волонтеры",
@@ -1762,66 +1745,6 @@
             "copyEmail": "Скопировать email",
             "copied": "Скопировано",
             "source": "По данным МУП РС (послови странаца). При расхождении уточняйте на сайте mup.gov.rs."
-        },
-        "support": {
-            "title": "Обращение в поддержку",
-            "documentTitle": "Обращение в поддержку",
-            "description": "Выберите тему запроса и заполните поля.",
-            "createButton": "Создать тикет",
-            "caseLabel": "Тема обращения",
-            "casePlaceholder": "Выберите тему",
-            "formTitle": "Детали запроса",
-            "attachmentsRequiredHint": "Для данного запроса потребуется приложить файл(ы).",
-            "cases": {
-                "bug": "Ошибка на сайте",
-                "bug.title": "Ошибка на сайте",
-                "auth": "Проблема с доступом/авторизацией",
-                "auth.title": "Проблема с доступом/авторизацией",
-                "addressChange": "Смена адреса проживания",
-                "addressChange.title": "Запрос куратору: смена адреса проживания",
-                "nameChange": "Смена ФИО",
-                "nameChange.title": "Запрос куратору: смена ФИО",
-                "programChange": "Смена программы/проекта",
-                "programChange.title": "Запрос куратору: смена программы/проекта",
-                "residencePermit": "ВНЖ: вопрос/продление",
-                "residencePermit.title": "ВНЖ: вопрос/запрос",
-                "other": "Другое",
-                "other.title": "Другое обращение"
-            },
-            "fields": {
-                "page": "Страница/раздел",
-                "steps": "Шаги воспроизведения",
-                "expected": "Ожидаемое поведение",
-                "actual": "Фактическое поведение",
-                "environment": "Окружение (браузер/ОС)",
-                "loginOrEmail": "Логин или Email",
-                "problem": "Описание проблемы",
-                "when": "Когда проявляется",
-                "oldAddress": "Старый адрес",
-                "newAddress": "Новый адрес",
-                "effectiveDate": "Дата изменения",
-                "reason": "Комментарий/причина",
-                "oldName": "Старое ФИО",
-                "newName": "Новое ФИО",
-                "programOrProject": "Программа или проект",
-                "programOrProject.options.PROGRAM": "Программа",
-                "programOrProject.options.PROJECT": "Проект",
-                "currentProgram": "Текущая программа",
-                "desiredProgram": "Желаемая программа",
-                "currentProject": "Текущий проект",
-                "desiredProject": "Желаемый проект",
-                "permitCase": "Тип запроса",
-                "permitCase.options.EXTEND": "Продление",
-                "permitCase.options.QUESTION": "Вопрос/уточнение",
-                "city": "Город",
-                "desiredDate": "Желаемая дата",
-                "question": "Вопрос",
-                "topic": "Тема",
-                "message": "Сообщение"
-            },
-            "body": {
-                "case": "Кейс"
-            }
         },
         "volunteers-reports": {
             "title": "Отчеты по волонтерам"

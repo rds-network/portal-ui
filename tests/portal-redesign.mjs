@@ -126,7 +126,6 @@ try {
                 }
             else if (path === "/application/assignees") result = [user]
             else if (path === "/applications") result = { content: [], page: { totalPages: 0, totalElements: 0 } }
-            else if (path === "/ticket/groups") result = ["Поддержка"]
             await route.fulfill({ json: result })
         })
         await page.goto(`${base}/login`)
@@ -168,7 +167,6 @@ try {
             "/application/example",
             "/application-status/example",
             "/volunteers/heatmap",
-            "/support",
             "/applications",
             "/volunteers",
             "/profile/elena",

@@ -113,7 +113,6 @@ try {
                 ["activity", "/volunteers/heatmap"],
                 ["statistics", "/volunteers/reports"],
                 ["announcements", "/announcements/admin"],
-                ["support", "/support"],
                 ["guide", "/reporting-guide"],
                 ["cleaning", "/cleaning-how-to"],
                 ["terms", "/application"],

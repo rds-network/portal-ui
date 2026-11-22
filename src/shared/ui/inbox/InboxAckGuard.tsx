@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router"
 import { UserContext } from "src/app/providers/UserContext"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 
-const ALLOWED = ["/messages", "/logout", "/support", "/login"]
+const ALLOWED = ["/messages", "/logout", "/login"]
 
 export const InboxAckGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user } = useContext(UserContext)

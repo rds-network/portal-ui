@@ -131,22 +131,6 @@
             "dismiss": "Dismiss",
             "dismissHint": "To continue, tap “Dismiss” below or the X on the right"
         },
-        "ticket-modal": {
-            "modalTitle": "Create Ticket",
-            "titleLabel": "Subject",
-            "create": "Create Ticket",
-            "toUser": "Send To",
-            "toUserDescription": "The volunteer will receive an email notification and will be able to reply to it",
-            "internalDescription": "The ticket will be created in the <a href='https://help.russian.rs' target='_blank'>Help Desk</a> system. The volunteer will receive a notification and will be able to reply to the email, and their reply will be added to the ticket. Depending on the group, the ticket will be assigned to the appropriate person, who will also have access to all information.",
-            "publicDescription": "The ticket will be created in the <a href='https://help.russian.rs' target='_blank'>Help Desk</a> system. Depending on the group, the ticket will be delivered to the right people. You will also receive any reply or clarification by email.",
-            "group": "Assignment Group",
-            "group-placeholder": "Select a group",
-            "group-description": "This determines who will review the request",
-            "success": "<a href=\"{link}\" target=\"_blank\">Ticket #{number}</a> has been successfully created",
-            "error": "An error occurred while creating the ticket, please write to <a href='mailto:help@russian.rs'>help@russian.rs</a>",
-            "attachmentsRequired": "This request requires attaching file(s).",
-            "required": "Required"
-        },
         "confirm-modal": {
             "confirmDefaultButton": "Confirm",
             "cancelDefaultButton": "Cancel",
@@ -985,8 +969,7 @@
             },
             "profile": "Profile",
             "reports": "Reports",
-            "open-week": "Open reports for this week",
-            "ticket": "Create ticket"
+            "open-week": "Open reports for this week"
         },
         "user-list": {
             "title": "All volunteers",
@@ -1762,66 +1745,6 @@
             "copyEmail": "Copy email",
             "copied": "Copied",
             "source": "Based on MUP RS (foreigners affairs). If details differ, check mup.gov.rs."
-        },
-        "support": {
-            "title": "Contact support",
-            "documentTitle": "Contact support",
-            "description": "Choose a request topic and fill in the fields.",
-            "createButton": "Create ticket",
-            "caseLabel": "Request topic",
-            "casePlaceholder": "Choose a topic",
-            "formTitle": "Request details",
-            "attachmentsRequiredHint": "This request requires attaching file(s).",
-            "cases": {
-                "bug": "Website bug",
-                "bug.title": "Website bug",
-                "auth": "Access/auth issue",
-                "auth.title": "Access/auth issue",
-                "addressChange": "Address change",
-                "addressChange.title": "Curator request: address change",
-                "nameChange": "Name change",
-                "nameChange.title": "Curator request: name change",
-                "programChange": "Program/project change",
-                "programChange.title": "Curator request: program/project change",
-                "residencePermit": "Residence permit: question/extension",
-                "residencePermit.title": "Residence permit: request",
-                "other": "Other",
-                "other.title": "Other request"
-            },
-            "fields": {
-                "page": "Page/section",
-                "steps": "Steps to reproduce",
-                "expected": "Expected behavior",
-                "actual": "Actual behavior",
-                "environment": "Environment (browser/OS)",
-                "loginOrEmail": "Login or email",
-                "problem": "Problem description",
-                "when": "When it happens",
-                "oldAddress": "Old address",
-                "newAddress": "New address",
-                "effectiveDate": "Effective date",
-                "reason": "Comment/reason",
-                "oldName": "Old full name",
-                "newName": "New full name",
-                "programOrProject": "Program or project",
-                "programOrProject.options.PROGRAM": "Program",
-                "programOrProject.options.PROJECT": "Project",
-                "currentProgram": "Current program",
-                "desiredProgram": "Desired program",
-                "currentProject": "Current project",
-                "desiredProject": "Desired project",
-                "permitCase": "Request type",
-                "permitCase.options.EXTEND": "Extension",
-                "permitCase.options.QUESTION": "Question/clarification",
-                "city": "City",
-                "desiredDate": "Desired date",
-                "question": "Question",
-                "topic": "Topic",
-                "message": "Message"
-            },
-            "body": {
-                "case": "Case"
-            }
         },
         "volunteers-reports": {
             "title": "Volunteers reports"
