@@ -1038,7 +1038,14 @@
                 "reportBlocked": "Sa stopom na predaju: {count}",
                 "programs": "Po programima",
                 "projects": "Po projektima"
-            }
+            },
+            "export-button": "Izvoz",
+            "export-col-full-name": "Ime i prezime",
+            "export-col-contract-start": "Datum početka ugovora",
+            "export-col-contract-end": "Datum završetka ugovora",
+            "export-col-address": "Adresa",
+            "export-col-email": "Email",
+            "export-error": "Nije moguće izvesti listu volontera"
         },
         "playgrounds": {
             "title": "Izveštaj o igralištu",
