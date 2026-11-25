@@ -1,4 +1,4 @@
-import { Avatar, CloseButton, Combobox, Flex, InputBase, Loader, Text, useCombobox } from "@mantine/core"
+import { Avatar, Badge, CloseButton, Combobox, Flex, InputBase, Loader, Text, useCombobox } from "@mantine/core"
 import { UseFormReturnType } from "@mantine/form"
 import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { IconUser } from "@tabler/icons-react"
@@ -17,6 +17,7 @@ interface UserSearchProps {
     onUserChange?: (user: UserInfoDto | null) => void
     initialSearch?: string
     program?: string | null
+    includeInactive?: boolean
 }
 
 export const UserSearch = ({
@@ -28,6 +29,7 @@ export const UserSearch = ({
     onUserChange,
     initialSearch,
     program,
+    includeInactive = false,
 }: UserSearchProps) => {
     const intl = useIntl()
 
@@ -57,12 +59,12 @@ export const UserSearch = ({
     }, [selectedUser])
 
     const searchFilter = {
-        onlyActive: true as const,
+        ...(includeInactive ? {} : { onlyActive: true as const }),
         ...(program == null ? {} : { program }),
     }
 
     const { data: users = [], isFetching } = useQuery({
-        queryKey: ["searchUsers", debouncedSearch, program, "onlyActive"],
+        queryKey: ["searchUsers", debouncedSearch, program, includeInactive ? "all" : "onlyActive"],
         queryFn: () =>
             UserApiService.searchUsers(debouncedSearch, { pageNumber: 0, pageSize: 50 }, searchFilter).then(
                 (response) => response.data.content
@@ -91,6 +93,11 @@ export const UserSearch = ({
                     <Flex wrap="wrap" align="center" columnGap={8}>
                         <Text className={classes.name}>{userDto.fullName}</Text>
                         <Text className={classes.email}>{userDto.email}</Text>
+                        {!userDto.active && (
+                            <Badge size="xs" color="gray" variant="light">
+                                {intl.formatMessage({ id: "pages.user-list.deactivated" })}
+                            </Badge>
+                        )}
                     </Flex>
                 </Flex>
             </Combobox.Option>

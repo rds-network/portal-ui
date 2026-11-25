@@ -1,6 +1,6 @@
 import { RequestHttp } from "src/shared/http/RequestHttp"
 
-export type PotvrdaKind = "OFFICIAL" | "MEMBERSHIP"
+export type PotvrdaKind = "OFFICIAL" | "MEMBERSHIP" | "TERMINATION"
 
 export type PotvrdaIssueDto = {
     id: string

@@ -14,15 +14,16 @@ import { useForm, zodResolver } from "@mantine/form"
 import { useDisclosure } from "@mantine/hooks"
 import { notifications } from "@mantine/notifications"
 import { PageRequest, ReportFilter, UserInfoDto } from "@rds-network/portal-api-axios"
-import { IconArrowLeft, IconFileTypeDoc, IconMail, IconMessage } from "@tabler/icons-react"
+import { IconArrowLeft, IconFileTypePdf, IconMail, IconMessage } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useSearchParams } from "react-router"
 import { ReportApiService } from "src/shared/api/ReportApiService"
 import { UserApiService } from "src/shared/api/user/UserApiService"
 import { DEFAULT_DATE_FORMAT } from "src/shared/datetime/formats"
+import { docxResultToPdf } from "src/shared/docs/docxToPdf"
 import {
     buildOfficialPotvrdaBlob,
     defaultOfficialPotvrdaFields,
@@ -214,7 +215,10 @@ const OfficialPotvrdaEditorPage = () => {
                 confirmNumber: registered.confirmNumber,
                 gender: user.gender ?? null,
             }
-            const { blob, fileName } = await buildOfficialPotvrdaBlob(payload, signDraft, { download: true })
+            const { blob, fileName } = await docxResultToPdf(
+                await buildOfficialPotvrdaBlob(payload, signDraft, { download: false }),
+                { download: true }
+            )
             return {
                 delivery: { blob, fileName, confirmNumber: registered.confirmNumber },
             }
@@ -282,6 +286,11 @@ const OfficialPotvrdaEditorPage = () => {
         }
     }, [form.values, user?.gender])
 
+    const buildPreview = useCallback(
+        () => buildOfficialPotvrdaBlob(previewInput, signDraft, { download: false }).then((r) => r.blob),
+        [previewInput, signDraft]
+    )
+
     const volunteerEmail = user?.email
 
     const backLink = useMemo(
@@ -315,7 +324,7 @@ const OfficialPotvrdaEditorPage = () => {
                 </div>
                 <Flex gap="sm" wrap="wrap">
                     <Button
-                        leftSection={<IconFileTypeDoc size={16} />}
+                        leftSection={<IconFileTypePdf size={16} />}
                         loading={generateMutation.isPending}
                         disabled={!user?.username}
                         onClick={() => generateMutation.mutate(form.values)}
@@ -350,6 +359,7 @@ const OfficialPotvrdaEditorPage = () => {
                 description={<FormattedMessage id="pages.documents.subjectHint" />}
                 onUserChange={setSubject}
                 initialSearch={initialUsername}
+                includeInactive
             />
 
             {!user?.username && (
@@ -464,7 +474,7 @@ const OfficialPotvrdaEditorPage = () => {
                         <Text size="sm" fw={600} mb="xs">
                             <FormattedMessage id="pages.documents.official.previewSign" />
                         </Text>
-                        <PotvrdaDocxPreview input={previewInput} signDraft={signDraft} />
+                        <PotvrdaDocxPreview buildBlob={buildPreview} />
                     </div>
                 </div>
             )}
@@ -483,7 +493,7 @@ const OfficialPotvrdaEditorPage = () => {
                     }
                     return [
                         new File([lastDoc.blob], lastDoc.fileName, {
-                            type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                            type: "application/pdf",
                         }),
                     ]
                 }}

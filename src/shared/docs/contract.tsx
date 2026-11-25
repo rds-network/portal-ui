@@ -539,18 +539,7 @@ export async function buildContractPdf(
     const needAccount = application.type === "PROLONGATION" || !officialProgramDto?.nameSr
     const account =
         needAccount && application.email ? await accountByEmail(application.email) : undefined
-    let volunteeringFrom: string | null = null
-    if (application.type === "PROLONGATION") {
-        const contracts = options?.knownContracts ?? account?.contracts
-        const previousEnd = previousContractEnd(contracts, {
-            startDate: application.contract?.startDate,
-            endDate: application.contract?.endDate,
-        })
-        const until = application.contract?.endDate
-        if (previousEnd && (!until || previousEnd < until)) {
-            volunteeringFrom = previousEnd
-        }
-    }
+    const volunteeringFrom = volunteeringFromFor(application, options?.knownContracts ?? account?.contracts)
     const officialProgram = officialProgramDto?.nameSr
         ? officialProgramDto
         : await officialProgramFromAccount(application, account)
@@ -568,6 +557,36 @@ export async function buildContractPdf(
 export function contractHeaderDate(signedOn: dayjs.Dayjs | null, volunteeringFrom: dayjs.Dayjs): dayjs.Dayjs {
     if (signedOn == null || !signedOn.isValid()) return volunteeringFrom
     return signedOn.isBefore(volunteeringFrom, "day") ? signedOn : volunteeringFrom
+}
+
+/** Для продления «волонтирање од» — конец предыдущего договора, если он раньше конца нового. */
+function volunteeringFromFor(application: ApplicationDto, contracts: UserInfoDto["contracts"]): string | null {
+    if (application.type !== "PROLONGATION") return null
+    const previousEnd = previousContractEnd(contracts, {
+        startDate: application.contract?.startDate,
+        endDate: application.contract?.endDate,
+    })
+    const until = application.contract?.endDate
+    return previousEnd && (!until || previousEnd < until) ? previousEnd : null
+}
+
+/**
+ * Та же дата, что в шапке договора, — чтобы анкета и договор из одного комплекта не расходились.
+ * Без договора в заявке — null.
+ */
+export async function contractDocumentDate(
+    application: ApplicationDto,
+    knownContracts?: UserInfoDto["contracts"]
+): Promise<dayjs.Dayjs | null> {
+    const start = application.contract?.startDate
+    if (!start) return null
+    const contracts =
+        knownContracts ??
+        (application.type === "PROLONGATION" && application.email
+            ? (await accountByEmail(application.email).catch(() => undefined))?.contracts
+            : undefined)
+    const from = dayjs(volunteeringFromFor(application, contracts) || start)
+    return contractHeaderDate(signedOnOf(application), from)
 }
 
 function signedOnOf(application: ApplicationDto): dayjs.Dayjs | null {

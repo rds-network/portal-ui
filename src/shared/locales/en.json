@@ -131,22 +131,6 @@
             "dismiss": "Dismiss",
             "dismissHint": "To continue, tap “Dismiss” below or the X on the right"
         },
-        "ticket-modal": {
-            "modalTitle": "Create Ticket",
-            "titleLabel": "Subject",
-            "create": "Create Ticket",
-            "toUser": "Send To",
-            "toUserDescription": "The volunteer will receive an email notification and will be able to reply to it",
-            "internalDescription": "The ticket will be created in the <a href='https://help.russian.rs' target='_blank'>Help Desk</a> system. The volunteer will receive a notification and will be able to reply to the email, and their reply will be added to the ticket. Depending on the group, the ticket will be assigned to the appropriate person, who will also have access to all information.",
-            "publicDescription": "The ticket will be created in the <a href='https://help.russian.rs' target='_blank'>Help Desk</a> system. Depending on the group, the ticket will be delivered to the right people. You will also receive any reply or clarification by email.",
-            "group": "Assignment Group",
-            "group-placeholder": "Select a group",
-            "group-description": "This determines who will review the request",
-            "success": "<a href=\"{link}\" target=\"_blank\">Ticket #{number}</a> has been successfully created",
-            "error": "An error occurred while creating the ticket, please write to <a href='mailto:help@russian.rs'>help@russian.rs</a>",
-            "attachmentsRequired": "This request requires attaching file(s).",
-            "required": "Required"
-        },
         "confirm-modal": {
             "confirmDefaultButton": "Confirm",
             "cancelDefaultButton": "Cancel",
@@ -985,8 +969,7 @@
             },
             "profile": "Profile",
             "reports": "Reports",
-            "open-week": "Open reports for this week",
-            "ticket": "Create ticket"
+            "open-week": "Open reports for this week"
         },
         "user-list": {
             "title": "All volunteers",
@@ -1657,13 +1640,13 @@
             },
             "official": {
                 "title": "POTVRDA on volunteering (Law 36/10)",
-                "description": "Official DOCX with UDS letterhead; program, period and hours from accepted reports.",
-                "generate": "Download DOCX",
+                "description": "Official PDF with UDS letterhead; program, period and hours from accepted reports.",
+                "generate": "Download PDF",
                 "openEditor": "Open editor",
                 "editorTitle": "Official potvrda editor",
                 "editorDescription": "Review the text, place stamp and signature (like thank-you letters), then download or send to the volunteer.",
                 "editorTeaser": "Stamp, signature, and delivery are in the editor, like zahvalnica.",
-                "previewSign": "DOCX preview (same as downloaded file)",
+                "previewSign": "PDF preview (same as downloaded file)",
                 "back": "Back to documents",
                 "modalTitle": "Potvrda — volunteer card data",
                 "hint": "Review before issuing. Certificate number and service description can be edited manually.",
@@ -1695,8 +1678,29 @@
                     "resetSignature": "Default signature",
                     "uploadStamp": "Custom stamp",
                     "resetStamp": "Default stamp",
-                    "docxSizeHint": "The panel renders the same DOCX you download. Stamp in the file is capped at 38 mm; higher slider values won't enlarge it."
+                    "docxSizeHint": "The panel renders the same PDF you download. Stamp in the file is capped at 38 mm; higher slider values won't enlarge it."
                 }
+            },
+            "termination": {
+                "title": "Contract termination POTVRDA",
+                "description": "Confirmation that the volunteer contract has ended (to change the residence permit basis at MUP). PDF with UDS header, signature and stamp, e-mailed to the volunteer.",
+                "editorTitle": "Potvrda o prestanku ugovora o volontiranju",
+                "editorDescription": "Check the data — on the right is the same PDF that will be downloaded. The number is issued from the shared registry on download.",
+                "hint": "Data is prefilled from the profile and application. The contract number is not stored in the portal — type it in or leave empty (a blank line will be printed).",
+                "fullNameHint": "You can add the Cyrillic name in brackets, e.g. Petr Fedin (Федин Пётр Сергеевич)",
+                "passport": "Passport number",
+                "citizenship": "Citizenship (in Serbian)",
+                "contractNumber": "Contract number",
+                "contractNumberHint": "If empty, a blank line is printed",
+                "contractDate": "Contract date",
+                "terminationDate": "Termination date",
+                "reason": "Termination reason",
+                "reasonHint": "Volunteer request — \"престао да важи … споразумом, на захтев волонтера\". Missed reports — \"раскинут … на основу члана 5.2 тачка 3) уговора\" with the MUP notification date.",
+                "mupNotified": "State that MUP was notified of the termination (Art. 8(1) Law on Foreigners)",
+                "mupNotifiedDate": "MUP notification date",
+                "mupNotifiedDateRequired": "Enter the MUP notification date",
+                "emailTemplate": "Termination potvrda",
+                "emailBody": "<p>Hello, {name}!</p><p>Attached is the confirmation of termination of the volunteer contract, signed and stamped by the organization. You can present it at MUP to change the basis of your temporary residence.</p><p>Best regards,<br/>Удружење „Руска дијаспора у Србији“</p>"
             },
             "registry": {
                 "title": "Issued potvrda registry",
@@ -1741,66 +1745,6 @@
             "copyEmail": "Copy email",
             "copied": "Copied",
             "source": "Based on MUP RS (foreigners affairs). If details differ, check mup.gov.rs."
-        },
-        "support": {
-            "title": "Contact support",
-            "documentTitle": "Contact support",
-            "description": "Choose a request topic and fill in the fields.",
-            "createButton": "Create ticket",
-            "caseLabel": "Request topic",
-            "casePlaceholder": "Choose a topic",
-            "formTitle": "Request details",
-            "attachmentsRequiredHint": "This request requires attaching file(s).",
-            "cases": {
-                "bug": "Website bug",
-                "bug.title": "Website bug",
-                "auth": "Access/auth issue",
-                "auth.title": "Access/auth issue",
-                "addressChange": "Address change",
-                "addressChange.title": "Curator request: address change",
-                "nameChange": "Name change",
-                "nameChange.title": "Curator request: name change",
-                "programChange": "Program/project change",
-                "programChange.title": "Curator request: program/project change",
-                "residencePermit": "Residence permit: question/extension",
-                "residencePermit.title": "Residence permit: request",
-                "other": "Other",
-                "other.title": "Other request"
-            },
-            "fields": {
-                "page": "Page/section",
-                "steps": "Steps to reproduce",
-                "expected": "Expected behavior",
-                "actual": "Actual behavior",
-                "environment": "Environment (browser/OS)",
-                "loginOrEmail": "Login or email",
-                "problem": "Problem description",
-                "when": "When it happens",
-                "oldAddress": "Old address",
-                "newAddress": "New address",
-                "effectiveDate": "Effective date",
-                "reason": "Comment/reason",
-                "oldName": "Old full name",
-                "newName": "New full name",
-                "programOrProject": "Program or project",
-                "programOrProject.options.PROGRAM": "Program",
-                "programOrProject.options.PROJECT": "Project",
-                "currentProgram": "Current program",
-                "desiredProgram": "Desired program",
-                "currentProject": "Current project",
-                "desiredProject": "Desired project",
-                "permitCase": "Request type",
-                "permitCase.options.EXTEND": "Extension",
-                "permitCase.options.QUESTION": "Question/clarification",
-                "city": "City",
-                "desiredDate": "Desired date",
-                "question": "Question",
-                "topic": "Topic",
-                "message": "Message"
-            },
-            "body": {
-                "case": "Case"
-            }
         },
         "volunteers-reports": {
             "title": "Volunteers reports"
@@ -2119,6 +2063,7 @@
         "maintenance": "Portal closure",
         "applicationJoin": "Join page text",
         "resources": "Our resources",
+        "mupDirectory": "MUP directory",
         "support": "Contact support",
         "leave": "Leave",
         "dissolutionRequests": "Termination request",

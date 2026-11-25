@@ -1,5 +1,7 @@
 import { lazy } from "react"
 import { Navigate, RouteProps } from "react-router"
+import { ExternalRedirect } from "src/app/router/ExternalRedirect"
+import { HELPDESK_URL } from "src/shared/constants/externalLinks"
 
 const DesktopPage = lazy(() => import("src/pages/desktop/DesktopPage"))
 const Logout = lazy(() => import("src/pages/logout/Logout"))
@@ -18,7 +20,6 @@ const ApplicationView = lazy(() => import("src/pages/applications/view/Applicati
 const ReportingGuide = lazy(() => import("src/pages/reporting/ReportingGuide"))
 const VolunteerReports = lazy(() => import("src/pages/volunteers/reports/VolunteerReports"))
 const VolunteerHeatmapPage = lazy(() => import("src/pages/heatmap/VolunteerHeatmapPage"))
-const SupportPage = lazy(() => import("src/pages/support/SupportPage"))
 const AnnouncementsAdminPage = lazy(() => import("src/pages/announcements/AnnouncementsAdminPage"))
 const WorkTasksPage = lazy(() => import("src/pages/tasks/WorkTasksPage"))
 const MessagesPage = lazy(() => import("src/pages/inbox/MessagesPage"))
@@ -36,13 +37,12 @@ const DissolutionRequestsPage = lazy(() => import("src/pages/dissolution/Dissolu
 const ControlledVolunteersPage = lazy(() => import("src/pages/controlled/ControlledVolunteersPage"))
 const AccountStatusPage = lazy(() => import("src/pages/accountStatus/AccountStatusPage"))
 const MaintenanceSettingsPage = lazy(() => import("src/pages/maintenance/MaintenanceSettingsPage"))
-const ApplicationJoinSettingsPage = lazy(
-    () => import("src/pages/application/joinSettings/ApplicationJoinSettingsPage")
-)
+const ApplicationJoinSettingsPage = lazy(() => import("src/pages/application/joinSettings/ApplicationJoinSettingsPage"))
 const ZahvalnicaPage = lazy(() => import("src/pages/zahvalnica/ZahvalnicaPage"))
 const VolIdPage = lazy(() => import("src/pages/volId/VolIdPage"))
 const DocumentsPage = lazy(() => import("src/pages/documents/DocumentsPage"))
 const OfficialPotvrdaEditorPage = lazy(() => import("src/pages/documents/OfficialPotvrdaEditorPage"))
+const TerminationPotvrdaEditorPage = lazy(() => import("src/pages/documents/TerminationPotvrdaEditorPage"))
 const AchievementsPage = lazy(() => import("src/pages/achievements/AchievementsPage"))
 const PointMissionsAdminPage = lazy(() => import("src/pages/missions/PointMissionsAdminPage"))
 
@@ -125,7 +125,7 @@ export const routes: RouteProps[] = [
     },
     {
         path: "/support",
-        element: <SupportPage />,
+        element: <ExternalRedirect to={HELPDESK_URL} />,
     },
     {
         path: "/announcements/admin",
@@ -198,6 +198,10 @@ export const routes: RouteProps[] = [
     {
         path: "/documents/official-potvrda",
         element: <OfficialPotvrdaEditorPage />,
+    },
+    {
+        path: "/documents/termination-potvrda",
+        element: <TerminationPotvrdaEditorPage />,
     },
     {
         path: "/achievements",

@@ -32,7 +32,9 @@ import {
     IconTargetArrow,
     IconFiles,
     IconForms,
+    IconIdBadge,
 } from "@tabler/icons-react"
+import { HELPDESK_URL } from "src/shared/constants/externalLinks"
 import { ItemGroupProps } from "src/shared/ui/appNavbar/AppNavbar"
 
 export type NavSection = {
@@ -87,6 +89,11 @@ export const Content: NavSection[] = [
                 link: "/resources",
                 showResourcesNew: true,
                 dataTourId: "nav-resources",
+            },
+            {
+                label: "navbar.mupDirectory",
+                icon: IconIdBadge,
+                link: "/resources/mup",
             },
             {
                 label: "navbar.reports.messages",
@@ -273,9 +280,8 @@ export const Content: NavSection[] = [
             {
                 label: "navbar.support",
                 icon: IconLifebuoy,
-                link: "/support",
+                link: HELPDESK_URL,
             },
         ],
     },
 ]
-

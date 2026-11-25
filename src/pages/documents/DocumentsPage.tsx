@@ -13,6 +13,7 @@ import { UserApiService } from "src/shared/api/user/UserApiService"
 import { UserInfoDto } from "@rds-network/portal-api-axios"
 import { MembershipPotvrdaCard } from "src/pages/documents/MembershipPotvrdaCard"
 import { OfficialPotvrdaCard } from "src/pages/documents/OfficialPotvrdaCard"
+import { TerminationPotvrdaCard } from "src/pages/documents/TerminationPotvrdaCard"
 import { PotvrdaRegistryPanel } from "src/pages/documents/PotvrdaRegistryPanel"
 import classes from "./DocumentsPage.module.scss"
 
@@ -71,6 +72,7 @@ const DocumentsPage: React.FC = () => {
                         label={<FormattedMessage id="pages.documents.subjectLabel" />}
                         description={<FormattedMessage id="pages.documents.subjectHint" />}
                         onUserChange={setSubject}
+                        includeInactive
                     />
                     {volunteerPickRequired && (
                         <Alert color="blue" variant="light" icon={<IconUser size={18} />}>
@@ -98,6 +100,13 @@ const DocumentsPage: React.FC = () => {
                 {canPickUser && (
                     <OfficialPotvrdaCard
                         key={targetUser?.username ?? "official"}
+                        user={targetUser!}
+                        volunteerPickRequired={volunteerPickRequired}
+                    />
+                )}
+                {canPickUser && (
+                    <TerminationPotvrdaCard
+                        key={`${targetUser?.username ?? "termination"}-termination`}
                         user={targetUser!}
                         volunteerPickRequired={volunteerPickRequired}
                     />

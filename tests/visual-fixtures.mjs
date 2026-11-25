@@ -184,7 +184,6 @@ export const routeData = (path, data) => {
                 read: false,
             },
         ]
-    if (path === "/ticket/groups") return ["Поддержка", "Волонтёры"]
     if (path === "/cities" || path === "/cities/search")
         return [{ code: "BEOGRAD", name: "Belgrade", nameRu: "Белград", nameEn: "Belgrade", nameSr: "Beograd" }]
     if (path.startsWith("/statistics/"))

@@ -45,14 +45,14 @@ const escapeXml = (value: string): string =>
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
 
-const run = (text: string, bold = false, sizeHalfPoints = 24): string =>
+export const run = (text: string, bold = false, sizeHalfPoints = 24): string =>
     `<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/>${
         bold ? "<w:b/><w:bCs/>" : ""
     }<w:sz w:val="${sizeHalfPoints}"/><w:szCs w:val="${sizeHalfPoints}"/></w:rPr><w:t xml:space="preserve">${escapeXml(
         text
     )}</w:t></w:r>`
 
-const paragraph = (
+export const paragraph = (
     parts: string,
     opts?: {
         center?: boolean
@@ -161,14 +161,18 @@ export function buildOfficialPotvrdaDocumentXml(
         )}</w:tc></w:tr></w:tbl>`,
     ].join("")
 
-    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    return wrapShellDocument(body)
+}
+
+/** Wraps body XML into a document that keeps the shell's UDS header (logo, address, PIB, MB). */
+export const wrapShellDocument = (body: string): string =>
+    `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 <w:body>${body}<w:sectPr w:rsidR="003C62C6" w:rsidRPr="00D04DB4" w:rsidSect="00B11333"><w:headerReference w:type="default" r:id="rId9"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1464" w:right="850" w:bottom="568" w:left="1134" w:header="708" w:footer="708" w:gutter="0"/><w:cols w:space="708"/><w:docGrid w:linePitch="360"/></w:sectPr></w:body></w:document>`
-}
 
 let templateBufferPromise: Promise<ArrayBuffer> | null = null
 
-const loadTemplateBuffer = (): Promise<ArrayBuffer> => {
+export const loadTemplateBuffer = (): Promise<ArrayBuffer> => {
     if (!templateBufferPromise) {
         templateBufferPromise = fetch(templateUrl).then((r) => {
             if (!r.ok) throw new Error("Template not found")

@@ -1,7 +1,7 @@
 import { Avatar, Badge, Box, Button, Checkbox, Flex, HoverCard, Text } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import { VolunteerHeatMapItem } from "@rds-network/portal-api-axios"
-import { IconBell, IconCheckupList, IconMessage2Exclamation, IconUser, IconUserOff } from "@tabler/icons-react"
+import { IconBell, IconCheckupList, IconUser, IconUserOff } from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs, { Dayjs } from "dayjs"
 import React, { useMemo, useState } from "react"
@@ -10,9 +10,6 @@ import { useNavigate } from "react-router"
 import { heatmapReportsPath, rememberHeatmapReturn } from "src/pages/heatmap/lib/openWeekReports"
 import { InboxApiService } from "src/shared/api/InboxApiService"
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
-import { getTicketBody } from "src/pages/heatmap/lib/ticket"
-import { TicketGroupTarget } from "src/shared/ui/ticketModal/lib/groupTarget"
-import TicketModal from "src/shared/ui/ticketModal/TicketModal"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
 import { weekFullyOnLeave } from "src/shared/utils/leaveWeek"
@@ -53,7 +50,6 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
     const intl = useIntl()
     const navigate = useNavigate()
     const queryClient = useQueryClient()
-    const [ticketDrawerOpen, setTicketDrawerOpen] = useState(false)
 
     // Map weekNumber -> weekInfo
     const weekByNumber = useMemo(() => {
@@ -211,27 +207,8 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
         else navigate(url)
     }
 
-    const ticketBodyHtml = useMemo(() => {
-        return getTicketBody({
-            startDate,
-            required: volunteer.totalRequired ?? 0,
-            worked: volunteer.totalWorked ?? 0,
-        })
-    }, [volunteer.volunteerInfo.fullName, volunteer.totalRequired, volunteer.totalWorked, startDate])
-
     return (
         <div className={classes.volunteerRow}>
-            {canManageActions && (
-                <TicketModal
-                    opened={ticketDrawerOpen}
-                    close={() => setTicketDrawerOpen(false)}
-                    toUser={volunteer.volunteerInfo}
-                    title="Запрос информации по отчётным часам"
-                    body={ticketBodyHtml}
-                    groupTarget={TicketGroupTarget.CURATOR} // по умолчанию назначаем на куратора
-                />
-            )}
-
             <div className={classes.volunteerInfo}>
                 <div className={classes.volunteerHeader}>
                     <Flex align="center" gap="sm" style={{ minWidth: 0 }}>
@@ -376,14 +353,6 @@ const VolunteerRowComponent: React.FC<VolunteerRowProps> = ({
                                                 onClick={() => cancelWarning()}
                                             >
                                                 <FormattedMessage id={locales.cancelWarning} />
-                                            </Button>
-                                        )}
-                                        {canManageActions && (
-                                            <Button
-                                                leftSection={<IconMessage2Exclamation size={16} />}
-                                                onClick={() => setTicketDrawerOpen(true)}
-                                            >
-                                                <FormattedMessage id={locales.ticket} />
                                             </Button>
                                         )}
                                     </Flex>
