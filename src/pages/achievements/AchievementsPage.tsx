@@ -1,7 +1,9 @@
-import { Anchor, Button, Loader, Tabs, Text, TextInput, Title } from "@mantine/core"
+import { Anchor, Button, Group, Loader, Tabs, Text, TextInput, Title } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
 import {
     IconCheck,
+    IconFileSpreadsheet,
+    IconFileTypePdf,
     IconGift,
     IconLock,
     IconMedal,
@@ -19,6 +21,11 @@ import {
     PointLeaderDto,
 } from "src/shared/api/AchievementsApiService"
 import { PointMissionApiService, PointMissionDto } from "src/shared/api/PointMissionApiService"
+import {
+    exportLeaderboardCsv,
+    exportLeaderboardPdf,
+    LEADERBOARD_EXPORT_LIMIT,
+} from "src/shared/docs/leaderboardExport"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { MissionVisualCover, MissionVisualMark } from "src/shared/missions/missionVisuals"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
@@ -245,6 +252,50 @@ const AchievementsPage: React.FC = () => {
         [board?.fullList, board?.leaders]
     )
     const showMeBar = Boolean(board?.me && !board.leaders.some((l) => l.isMe))
+    const canExport = Boolean(board?.fullList)
+
+    const exportMutation = useMutation({
+        mutationFn: async (format: "csv" | "pdf") => {
+            const full = await AchievementsApiService.leaderboard(LEADERBOARD_EXPORT_LIMIT)
+            const leaders = full?.leaders ?? []
+            if (leaders.length === 0) {
+                throw new Error(intl.formatMessage({ id: "pages.achievements.leaderboardEmpty" }))
+            }
+            const labels = {
+                title: intl.formatMessage({ id: "pages.achievements.exportTitle" }),
+                place: intl.formatMessage({ id: "pages.achievements.leaderboardPlace" }),
+                name: intl.formatMessage({ id: "pages.achievements.leaderboardName" }),
+                username: intl.formatMessage({ id: "pages.achievements.exportUsername" }),
+                points: intl.formatMessage({ id: "pages.achievements.leaderboardPoints" }),
+                total: intl.formatMessage({ id: "pages.achievements.exportTotal" }),
+            }
+            if (format === "csv") {
+                exportLeaderboardCsv(leaders, labels)
+            } else {
+                exportLeaderboardPdf(leaders, labels)
+            }
+            return leaders.length
+        },
+        onSuccess: (count) => {
+            notifications.show(
+                SuccessNotification(
+                    <Text size="sm">
+                        <FormattedMessage id="pages.achievements.exportDone" values={{ count }} />
+                    </Text>,
+                    null
+                )
+            )
+        },
+        onError: (err) => {
+            notifications.show({
+                color: "red",
+                message:
+                    err instanceof Error
+                        ? err.message
+                        : intl.formatMessage({ id: "pages.achievements.exportFailed" }),
+            })
+        },
+    })
 
     const { mutate: claimMission, isPending: claiming } = useMutation({
         mutationFn: (id: string) => PointMissionApiService.claim(id),
@@ -625,9 +676,35 @@ const AchievementsPage: React.FC = () => {
                 </Tabs.Panel>
 
                 <Tabs.Panel value="leaderboard" pt="md">
-                    <Text className={classes.leaderboardHint}>
-                        <FormattedMessage id="pages.achievements.leaderboardHint" />
-                    </Text>
+                    <div className={classes.leaderboardToolbar}>
+                        <Text className={classes.leaderboardHint}>
+                            <FormattedMessage id="pages.achievements.leaderboardHint" />
+                        </Text>
+                        {canExport && (
+                            <Group gap="xs" wrap="wrap">
+                                <Button
+                                    size="compact-sm"
+                                    variant="light"
+                                    leftSection={<IconFileSpreadsheet size={14} />}
+                                    loading={exportMutation.isPending && exportMutation.variables === "csv"}
+                                    disabled={exportMutation.isPending}
+                                    onClick={() => exportMutation.mutate("csv")}
+                                >
+                                    <FormattedMessage id="pages.achievements.exportCsv" />
+                                </Button>
+                                <Button
+                                    size="compact-sm"
+                                    variant="light"
+                                    leftSection={<IconFileTypePdf size={14} />}
+                                    loading={exportMutation.isPending && exportMutation.variables === "pdf"}
+                                    disabled={exportMutation.isPending}
+                                    onClick={() => exportMutation.mutate("pdf")}
+                                >
+                                    <FormattedMessage id="pages.achievements.exportPdf" />
+                                </Button>
+                            </Group>
+                        )}
+                    </div>
                     {boardLoading && !board ? (
                         <Loader size="sm" />
                     ) : !board || board.leaders.length === 0 ? (

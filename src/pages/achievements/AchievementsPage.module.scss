@@ -536,10 +536,20 @@
     color: light-dark(#64748b, var(--mantine-color-dark-2));
 }
 
+.leaderboardToolbar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
 .leaderboardHint {
     font-size: 0.9rem;
     color: light-dark(#64748b, var(--mantine-color-dark-2));
-    margin-bottom: 12px;
+    margin: 0;
+    flex: 1 1 220px;
 }
 
 .podium {
