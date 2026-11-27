@@ -82,7 +82,16 @@ export async function generateAnnualZahvalnicaPdf(params: {
     const lines = pdf.splitTextToSize(bodySr(certificate.year), w - 48) as string[]
     pdf.text(lines, w / 2, 92, { align: "center" })
 
-    const reasons = certificate.qualificationReasons.join(" · ")
+    const hours = stats.hoursWorked ?? 0
+    const reasonParts = [...certificate.qualificationReasons]
+    if (hours > 0) reasonParts.push(`${hours} sati za godinu`)
+    if (stats.acceptedReports > 0) {
+        const reportsLine = `${stats.acceptedReports} prihvaćenih izveštaja`
+        if (!reasonParts.some((r) => r.includes("отчёт") || r.toLowerCase().includes("izveštaj"))) {
+            reasonParts.unshift(reportsLine)
+        }
+    }
+    const reasons = reasonParts.join(" · ")
     if (reasons) {
         pdf.setFontSize(9)
         pdf.setTextColor(64, 179, 162)

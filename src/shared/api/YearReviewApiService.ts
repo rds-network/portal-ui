@@ -8,10 +8,15 @@ export type YearReviewStatsDto = {
     programNameRu?: string | null
     programNameEn?: string | null
     programNameSr?: string | null
+    projectCode?: string | null
+    projectNameRu?: string | null
+    projectNameEn?: string | null
+    projectNameSr?: string | null
     activeWeeks: number
     longestStreak: number
     earnedPoints: number
     acceptedReports: number
+    hoursWorked?: number
     completedTasks: number
     badgesEarned: number
     currentRank: number | null
@@ -20,6 +25,8 @@ export type YearReviewStatsDto = {
     curatorGratitudes: number
     managerGratitudes: number
     isPodium: boolean
+    isCurator?: boolean
+    isModerator?: boolean
     isTeamBuilder?: boolean
     directionsCount?: number
     delegatesCount?: number
