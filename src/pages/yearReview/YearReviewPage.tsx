@@ -232,10 +232,17 @@ function programLabel(stats: YearReviewDto["stats"], locale: string): string {
     return localized || PROGRAM_FALLBACK
 }
 
+/** Keep given name only — drop surname / middle parts. */
+function firstName(displayName: string): string {
+    const token = displayName.trim().split(/\s+/)[0] ?? ""
+    return token || displayName.trim()
+}
+
 function buildSlides(data: YearReviewDto | null | undefined, year: number, locale: string): Slide[] {
     if (!data) return []
     const s = data.stats
     const program = programLabel(s, locale)
+    const name = firstName(s.displayName)
     const thanks = s.curatorGratitudes + s.managerGratitudes
     const metrics = [
         s.acceptedReports > 0
@@ -284,18 +291,14 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                     <h2 className={classes.title}>
                         <FormattedMessage
                             id="pages.yearReview.yourYearInProgram"
-                            values={{ program }}
+                            values={{
+                                name: <span className={classes.displayName}>{name}</span>,
+                                program,
+                            }}
                         />
                     </h2>
                     <p className={classes.lead}>
-                        <FormattedMessage
-                            id="pages.yearReview.lookWhatHappened"
-                            values={{
-                                name: (
-                                    <span className={classes.displayName}>{s.displayName}</span>
-                                ),
-                            }}
-                        />
+                        <FormattedMessage id="pages.yearReview.lookWhatHappened" />
                     </p>
                 </>
             ),
@@ -386,6 +389,16 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                         <p className={classes.lead}>
                             <FormattedMessage id="pages.yearReview.rankThanks" />
                         </p>
+                        {s.bestRank > 50 && s.irregularReporting && (
+                            <p className={classes.lead}>
+                                <FormattedMessage id="pages.yearReview.rankLateReports" />
+                            </p>
+                        )}
+                        {s.bestRank > 50 && (
+                            <p className={classes.lead}>
+                                <FormattedMessage id="pages.yearReview.rankHopeBetter" />
+                            </p>
+                        )}
                     </>
                 ) : (
                     <>
