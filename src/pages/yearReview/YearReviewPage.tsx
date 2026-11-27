@@ -220,7 +220,11 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number): Slid
                     <p className={classes.lead}>
                         <FormattedMessage
                             id="pages.yearReview.lookWhatHappened"
-                            values={{ name: s.displayName }}
+                            values={{
+                                name: (
+                                    <span className={classes.displayName}>{s.displayName}</span>
+                                ),
+                            }}
                         />
                     </p>
                 </>
@@ -301,7 +305,7 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number): Slid
                             <FormattedMessage id="pages.yearReview.bestResult" />
                         </div>
                         <p className={classes.big}>
-                            #<span className={classes.bigAccent}>{s.bestRank}</span>
+                            #<span className={classes.rankAccent}>{s.bestRank}</span>
                         </p>
                         <h2 className={classes.title}>
                             <FormattedMessage id="pages.yearReview.rankPlace" />
