@@ -20,6 +20,15 @@ export type YearReviewStatsDto = {
     curatorGratitudes: number
     managerGratitudes: number
     isPodium: boolean
+    isTeamBuilder?: boolean
+    directionsCount?: number
+    delegatesCount?: number
+    reportsReviewed?: number
+    peopleHelped?: number
+    ideasCreated?: number
+    responsesReceived?: number
+    responsesSent?: number
+    teamsJoined?: number
 }
 
 export type YearReviewCriterionProgressDto = {
