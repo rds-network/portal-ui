@@ -18,6 +18,10 @@ import { OrgLinkApiService, ResourcesBadge } from "src/shared/api/OrgLinkApiServ
 import { ProgramCuratorApiService } from "src/shared/api/ProgramCuratorApiService"
 import { UserAccountApiService } from "src/shared/api/user/UserApiService"
 import { WorkAssignmentApiService } from "src/shared/api/WorkAssignmentApiService"
+import {
+    yearReviewDefaultYear,
+    YearReviewApiService,
+} from "src/shared/api/YearReviewApiService"
 
 type NavItemProps = ItemGroupProps & { flat?: boolean }
 
@@ -36,6 +40,7 @@ export function NavItem({
     showDissolutionPending,
     showApplications,
     showControlled,
+    showYearReviewReady,
     curatorInbox,
     dataTourId,
     flat,
@@ -115,6 +120,14 @@ export function NavItem({
         refetchInterval: 60_000,
     })
     const controlledCount = controlled.length
+    const reviewYear = yearReviewDefaultYear()
+    const { data: yearReview } = useQuery({
+        queryKey: ["year-review", reviewYear],
+        queryFn: () => YearReviewApiService.get(reviewYear),
+        enabled: !!showYearReviewReady && !!user,
+        staleTime: 60_000,
+    })
+    const yearReviewReady = !!yearReview?.ready
 
     if (curatorInbox) {
         const ok =
@@ -175,6 +188,11 @@ export function NavItem({
         (showControlled && controlledCount > 0 && (
             <Badge size="xs" color="teal" className={classes.badge}>
                 {formatBadge(controlledCount)}
+            </Badge>
+        )) ||
+        (showYearReviewReady && yearReviewReady && (
+            <Badge size="xs" color="yellow" className={`${classes.badge} ${classes.badgePulse}`}>
+                <FormattedMessage id="pages.yearReview.navBadge" />
             </Badge>
         )) ||
         null

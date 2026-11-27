@@ -69,6 +69,7 @@ export const Content: NavSection[] = [
                 icon: IconStar,
                 link: "/achievements",
                 dataTourId: "nav-achievements",
+                showYearReviewReady: true,
             },
             {
                 label: "navbar.myDocuments",
