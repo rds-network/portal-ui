@@ -6,14 +6,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 12px;
 }
 
 .stage {
-    width: min(420px, 100%);
-    height: min(760px, calc(100vh - 32px));
+    width: min(430px, 100%);
+    height: min(780px, calc(100dvh - 24px));
+    max-height: calc(100vh - 24px);
     border-radius: 24px;
-    background: linear-gradient(165deg, #eef6fb 0%, #f7fbff 45%, #e8f4f1 100%);
+    background: #eaf7f5;
     box-shadow: 0 24px 64px rgba(18, 36, 58, 0.28);
     position: relative;
     overflow: hidden;
@@ -23,18 +24,64 @@
 
 .close {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 2;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
 }
 
-.card {
+.slide {
+    position: relative;
     flex: 1;
-    padding: 28px 22px 18px;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    background: #eaf7f5;
+}
+
+.background {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center bottom;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 0;
+    padding: 28px 22px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     overflow: auto;
+}
+
+.contentTop {
+    justify-content: flex-start;
+}
+
+.readable {
+    /* very light wash for text only — not a solid white plate over the art */
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.fadeTop {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 42%;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        180deg,
+        rgba(234, 247, 245, 0.55) 0%,
+        rgba(234, 247, 245, 0.18) 55%,
+        rgba(234, 247, 245, 0) 100%
+    );
 }
 
 .badge {
@@ -62,17 +109,17 @@
 }
 
 .lead {
-    color: #4a6078;
+    color: #33485f;
     font-size: 0.98rem;
     margin: 0;
 }
 
 .big {
     color: #1a2b48;
-    font-size: 2.6rem;
+    font-size: 2.8rem;
     font-weight: 800;
     line-height: 1;
-    margin: 8px 0 0;
+    margin: 4px 0 0;
 }
 
 .bigAccent {
@@ -83,13 +130,24 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
+    margin-top: 8px;
+    max-width: 100%;
+}
+
+.metricGridOne {
+    grid-template-columns: 1fr;
+}
+
+.metricGridThree {
+    grid-template-columns: 1fr 1fr;
 }
 
 .metric {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(4px);
     border-radius: 16px;
     padding: 12px 14px;
-    border: 1px solid rgba(32, 106, 134, 0.12);
+    border: 1px solid rgba(32, 106, 134, 0.1);
 }
 
 .metricValue {
@@ -99,17 +157,57 @@
 }
 
 .metricLabel {
-    color: #6b7f94;
+    color: #5a7088;
     font-size: 0.78rem;
     margin-top: 2px;
 }
 
-.nav {
+.reasons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.reasonChip {
+    background: rgba(255, 255, 255, 0.88);
+    color: #147a6d;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1px solid rgba(64, 179, 162, 0.35);
+}
+
+.preview {
+    margin-top: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 14px;
+    border: 1px solid rgba(32, 106, 134, 0.14);
+    padding: 12px 14px;
+    color: #1a2b48;
+}
+
+.previewTitle {
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.previewMeta {
+    font-size: 0.8rem;
+    color: #5a7088;
+    margin-top: 4px;
+}
+
+.navigation {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 12px 16px 16px;
+    padding: 12px 14px 16px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(8px);
     border-top: 1px solid rgba(26, 43, 72, 0.08);
 }
 
@@ -158,19 +256,4 @@
 .bannerHint {
     opacity: 0.85;
     font-size: 0.85rem;
-}
-
-.reasons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.reasonChip {
-    background: rgba(64, 179, 162, 0.15);
-    color: #147a6d;
-    border-radius: 999px;
-    padding: 4px 10px;
-    font-size: 0.78rem;
-    font-weight: 600;
 }
