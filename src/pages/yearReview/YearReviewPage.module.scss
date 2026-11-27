@@ -139,6 +139,37 @@
     color: #1a2b48;
 }
 
+.crown {
+    width: 72px;
+    height: 72px;
+    object-fit: contain;
+    align-self: flex-start;
+    margin: 2px 0 4px;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.18));
+}
+
+.roleChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 2px 0 6px;
+}
+
+.roleChip {
+    background: rgba(255, 255, 255, 0.92);
+    color: #147a6d;
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    border: 1px solid rgba(64, 179, 162, 0.4);
+}
+
+.roleChipModerator {
+    color: #1a2b48;
+    border-color: rgba(227, 107, 44, 0.45);
+}
+
 .title {
     color: #1a2b48;
     font-size: clamp(1.75rem, 7vw, 2.15rem);

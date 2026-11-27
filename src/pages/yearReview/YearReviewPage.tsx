@@ -232,6 +232,17 @@ function programLabel(stats: YearReviewDto["stats"], locale: string): string {
     return localized || PROGRAM_FALLBACK
 }
 
+function projectLabel(stats: YearReviewDto["stats"], locale: string): string {
+    return getLocalizedName(
+        {
+            nameRu: stats.projectNameRu ?? undefined,
+            nameEn: stats.projectNameEn ?? undefined,
+            nameSr: stats.projectNameSr ?? undefined,
+        },
+        locale
+    ).trim()
+}
+
 /** Keep given name only — drop surname / middle parts. */
 function firstName(displayName: string): string {
     const token = displayName.trim().split(/\s+/)[0] ?? ""
@@ -242,7 +253,11 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
     if (!data) return []
     const s = data.stats
     const program = programLabel(s, locale)
+    const project = projectLabel(s, locale)
     const name = firstName(s.displayName)
+    const hours = s.hoursWorked ?? 0
+    const isCurator = !!s.isCurator
+    const isModerator = !!s.isModerator
     const thanks = s.curatorGratitudes + s.managerGratitudes
     const metrics = [
         s.acceptedReports > 0
@@ -290,10 +305,15 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                     </div>
                     <h2 className={classes.title}>
                         <FormattedMessage
-                            id="pages.yearReview.yourYearInProgram"
+                            id={
+                                project
+                                    ? "pages.yearReview.yourYearInProgramProject"
+                                    : "pages.yearReview.yourYearInProgram"
+                            }
                             values={{
                                 name: <span className={classes.displayName}>{name}</span>,
                                 program,
+                                project,
                             }}
                         />
                     </h2>
@@ -417,7 +437,15 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
     const delegates = s.delegatesCount ?? 0
     const reviewed = s.reportsReviewed ?? 0
     const helped = s.peopleHelped ?? 0
-    if (s.isTeamBuilder || directions > 0 || delegates > 0 || reviewed > 0 || helped > 0) {
+    if (s.isTeamBuilder || isCurator || isModerator || directions > 0 || delegates > 0 || reviewed > 0 || helped > 0) {
+        const roleHintId =
+            isCurator && isModerator
+                ? "pages.yearReview.teamBuilderRolesBoth"
+                : isModerator
+                  ? "pages.yearReview.teamBuilderRolesModerator"
+                  : isCurator
+                    ? "pages.yearReview.teamBuilderRolesCurator"
+                    : "pages.yearReview.teamBuilderHint"
         slides.push({
             key: "team",
             background: BG.curator,
@@ -427,6 +455,20 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                     <h2 className={`${classes.title} ${classes.heroOnDark}`}>
                         <FormattedMessage id="pages.yearReview.teamBuilderTitle" />
                     </h2>
+                    {(isCurator || isModerator) && (
+                        <div className={classes.roleChips}>
+                            {isCurator && (
+                                <span className={classes.roleChip}>
+                                    <FormattedMessage id="pages.yearReview.roleCurator" />
+                                </span>
+                            )}
+                            {isModerator && (
+                                <span className={`${classes.roleChip} ${classes.roleChipModerator}`}>
+                                    <FormattedMessage id="pages.yearReview.roleModerator" />
+                                </span>
+                            )}
+                        </div>
+                    )}
                     <div className={classes.roleGrid}>
                         {(
                             [
@@ -447,7 +489,7 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                             ))}
                     </div>
                     <p className={`${classes.lead} ${classes.hintOnDark}`}>
-                        <FormattedMessage id="pages.yearReview.teamBuilderHint" />
+                        <FormattedMessage id={roleHintId} />
                     </p>
                 </>
             ),
@@ -506,6 +548,12 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
             showDownload: true,
             content: (
                 <>
+                    <img
+                        className={classes.crown}
+                        src="/assets/year-review/super-crown.png"
+                        alt=""
+                        draggable={false}
+                    />
                     <div className={`${classes.badge} ${classes.goldBadge}`}>
                         <FormattedMessage id="pages.yearReview.superBadge" />
                     </div>
@@ -519,6 +567,24 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                                     {r}
                                 </span>
                             ))}
+                            {hours > 0 && (
+                                <span className={classes.reasonChip}>
+                                    <FormattedMessage
+                                        id="pages.yearReview.hoursInCertificate"
+                                        values={{ hours }}
+                                    />
+                                </span>
+                            )}
+                        </div>
+                    )}
+                    {reasons.length === 0 && hours > 0 && (
+                        <div className={classes.reasons}>
+                            <span className={classes.reasonChip}>
+                                <FormattedMessage
+                                    id="pages.yearReview.hoursInCertificate"
+                                    values={{ hours }}
+                                />
+                            </span>
                         </div>
                     )}
                     <div className={classes.preview}>
@@ -536,6 +602,17 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                             </>
                         ) : (
                             <div className={classes.previewMeta}>{s.displayName}</div>
+                        )}
+                        {hours > 0 && (
+                            <div className={classes.previewMeta}>
+                                <FormattedMessage
+                                    id="pages.yearReview.hoursWorked"
+                                    values={{ hours }}
+                                />
+                                {s.acceptedReports > 0
+                                    ? ` · ${s.acceptedReports} 📋`
+                                    : ""}
+                            </div>
                         )}
                     </div>
                     <p className={classes.lead}>
