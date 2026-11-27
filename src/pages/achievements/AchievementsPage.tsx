@@ -265,7 +265,8 @@ const AchievementsPage: React.FC = () => {
                 title: intl.formatMessage({ id: "pages.achievements.exportTitle" }),
                 place: intl.formatMessage({ id: "pages.achievements.leaderboardPlace" }),
                 name: intl.formatMessage({ id: "pages.achievements.leaderboardName" }),
-                username: intl.formatMessage({ id: "pages.achievements.exportUsername" }),
+                email: intl.formatMessage({ id: "pages.achievements.exportEmail" }),
+                telegram: intl.formatMessage({ id: "pages.achievements.exportTelegram" }),
                 points: intl.formatMessage({ id: "pages.achievements.leaderboardPoints" }),
                 total: intl.formatMessage({ id: "pages.achievements.exportTotal" }),
             }

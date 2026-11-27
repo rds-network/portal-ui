@@ -44,6 +44,8 @@ export type PointLeaderDto = {
     rank: number
     username: string
     fullName: string
+    email?: string | null
+    telegram?: string | null
     points: number
     isMe?: boolean
 }
