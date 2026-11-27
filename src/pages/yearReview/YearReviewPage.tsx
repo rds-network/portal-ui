@@ -1,8 +1,17 @@
 import { Button, Loader, Text } from "@mantine/core"
 import { notifications } from "@mantine/notifications"
-import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from "@tabler/icons-react"
+import {
+    IconChevronLeft,
+    IconChevronRight,
+    IconDownload,
+    IconFileText,
+    IconFlag,
+    IconHeart,
+    IconMedal,
+    IconX,
+} from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ReactNode, useMemo, useState } from "react"
+import { ReactNode, useEffect, useMemo, useState } from "react"
 import { FormattedMessage, useIntl } from "react-intl"
 import { Link, useNavigate, useParams } from "react-router"
 import { FilesApiService } from "src/shared/api/FilesApiService"
@@ -15,6 +24,7 @@ import { generateAnnualZahvalnicaPdf } from "src/shared/docs/annualZahvalnicaPdf
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
 import { getLocalizedName } from "src/shared/utils/getLocalName"
+import YearReviewConfetti from "./YearReviewConfetti"
 import classes from "./YearReviewPage.module.scss"
 
 const PROGRAM_FALLBACK = "RADIMO"
@@ -25,6 +35,13 @@ const BG = {
     points: "/assets/year-review/earned-points-coins.png",
     rank: "/assets/year-review/ranking-podium.png",
     super: "/assets/year-review/super-participant-award.png",
+} as const
+
+const METRIC_ICON = {
+    reports: { Icon: IconFileText, className: classes.metricIconReports },
+    badges: { Icon: IconMedal, className: classes.metricIconBadges },
+    missions: { Icon: IconFlag, className: classes.metricIconMissions },
+    thanks: { Icon: IconHeart, className: classes.metricIconThanks },
 } as const
 
 type Slide = {
@@ -48,7 +65,16 @@ const YearReviewPage = () => {
     })
 
     const [index, setIndex] = useState(0)
+    const [burstKey, setBurstKey] = useState(1)
     const slides = useMemo(() => buildSlides(data, year, intl.locale), [data, year, intl.locale])
+
+    useEffect(() => {
+        setBurstKey((v) => v + 1)
+    }, [index])
+
+    const go = (next: number) => {
+        setIndex(next)
+    }
 
     const issueMutation = useMutation({
         mutationFn: async () => {
@@ -85,6 +111,7 @@ const YearReviewPage = () => {
                     null
                 )
             )
+            setBurstKey((v) => v + 1)
         },
         onError: (err) => {
             notifications.show({
@@ -140,12 +167,13 @@ const YearReviewPage = () => {
                     <div className={`${classes.content} ${classes.contentTop} ${classes.readable}`}>
                         {slide.content}
                     </div>
+                    <YearReviewConfetti burstKey={burstKey} />
                     <div className={classes.navigation}>
                         <Button
                             variant="light"
                             color="teal"
                             disabled={safeIndex === 0}
-                            onClick={() => setIndex((v) => Math.max(0, v - 1))}
+                            onClick={() => go(Math.max(0, safeIndex - 1))}
                             leftSection={<IconChevronLeft size={16} />}
                         >
                             <FormattedMessage id="pages.yearReview.prev" />
@@ -161,7 +189,7 @@ const YearReviewPage = () => {
                         {safeIndex < slides.length - 1 ? (
                             <Button
                                 color="teal"
-                                onClick={() => setIndex((v) => Math.min(slides.length - 1, v + 1))}
+                                onClick={() => go(Math.min(slides.length - 1, safeIndex + 1))}
                                 rightSection={<IconChevronRight size={16} />}
                             >
                                 <FormattedMessage id="pages.yearReview.next" />
@@ -207,19 +235,37 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
     const metrics = [
         s.acceptedReports > 0
             ? {
-                  key: "reports",
+                  key: "reports" as const,
                   value: s.acceptedReports,
                   labelId: "pages.yearReview.acceptedReports",
               }
             : null,
         s.badgesEarned > 0
-            ? { key: "badges", value: s.badgesEarned, labelId: "pages.yearReview.badges" }
+            ? {
+                  key: "badges" as const,
+                  value: s.badgesEarned,
+                  labelId: "pages.yearReview.badges",
+              }
             : null,
         s.completedTasks > 0
-            ? { key: "missions", value: s.completedTasks, labelId: "pages.yearReview.missions" }
+            ? {
+                  key: "missions" as const,
+                  value: s.completedTasks,
+                  labelId: "pages.yearReview.missions",
+              }
             : null,
-        thanks > 0 ? { key: "thanks", value: thanks, labelId: "pages.yearReview.gratitudes" } : null,
-    ].filter(Boolean) as Array<{ key: string; value: number; labelId: string }>
+        thanks > 0
+            ? {
+                  key: "thanks" as const,
+                  value: thanks,
+                  labelId: "pages.yearReview.gratitudes",
+              }
+            : null,
+    ].filter(Boolean) as Array<{
+        key: keyof typeof METRIC_ICON
+        value: number
+        labelId: string
+    }>
 
     const slides: Slide[] = [
         {
@@ -292,23 +338,24 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                         <FormattedMessage id="pages.yearReview.pointsTitle" />
                     </h2>
                     {metrics.length > 0 && (
-                        <div
-                            className={`${classes.metricGrid} ${
-                                metrics.length === 1
-                                    ? classes.metricGridOne
-                                    : metrics.length === 3
-                                      ? classes.metricGridThree
-                                      : ""
-                            }`}
-                        >
-                            {metrics.map((m) => (
-                                <div key={m.key} className={classes.metric}>
-                                    <div className={classes.metricValue}>{m.value}</div>
-                                    <div className={classes.metricLabel}>
-                                        <FormattedMessage id={m.labelId} />
+                        <div className={classes.metricList}>
+                            {metrics.map((m) => {
+                                const meta = METRIC_ICON[m.key]
+                                const Icon = meta.Icon
+                                return (
+                                    <div key={m.key} className={classes.metric}>
+                                        <span className={`${classes.metricIcon} ${meta.className}`}>
+                                            <Icon size={20} stroke={2.2} />
+                                        </span>
+                                        <div className={classes.metricText}>
+                                            <span className={classes.metricValue}>{m.value}</span>
+                                            <span className={classes.metricLabel}>
+                                                <FormattedMessage id={m.labelId} />
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     )}
                 </>
@@ -349,7 +396,6 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
         },
     ]
 
-    // Slide 5 only for super-participants (eligible or already issued).
     if (data.eligibility.eligible || data.certificate) {
         const reasons =
             data.certificate?.qualificationReasons?.length
@@ -365,10 +411,7 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                         <FormattedMessage id="pages.yearReview.superBadge" />
                     </div>
                     <h2 className={classes.title}>
-                        <FormattedMessage
-                            id="pages.yearReview.superTitle"
-                            values={{ program }}
-                        />
+                        <FormattedMessage id="pages.yearReview.superTitle" values={{ program }} />
                     </h2>
                     {reasons.length > 0 && (
                         <div className={classes.reasons}>

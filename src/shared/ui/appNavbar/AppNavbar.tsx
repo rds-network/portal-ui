@@ -43,6 +43,7 @@ export interface ItemGroupProps {
     showDissolutionPending?: boolean
     showApplications?: boolean
     showControlled?: boolean
+    showYearReviewReady?: boolean
     showIfCurator?: boolean
     showIfAccountStatusApprover?: boolean
     showIfPrivilegedOps?: boolean

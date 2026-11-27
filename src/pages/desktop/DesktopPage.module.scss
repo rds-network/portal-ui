@@ -165,6 +165,83 @@
     margin: 10px 0;
 }
 
+.pointsHalfFestive {
+    position: relative;
+    border-radius: 14px;
+    box-shadow: 0 0 0 2px color-mix(in srgb, #20a090 35%, transparent);
+}
+
+.yearReviewStrip {
+    appearance: none;
+    width: 100%;
+    margin: 0 0 8px;
+    border: 0;
+    cursor: pointer;
+    text-align: left;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background:
+        linear-gradient(100deg, rgba(21, 42, 78, 0.88) 0%, rgba(18, 130, 146, 0.55) 60%, rgba(18, 130, 146, 0.25) 100%),
+        url("/assets/year-review/ny-banner.png") right center / cover no-repeat,
+        linear-gradient(120deg, #152a4e, #128292);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.yearReviewStrip::after {
+    content: "";
+    position: absolute;
+    right: -4px;
+    top: -8px;
+    bottom: -8px;
+    width: 88px;
+    background: url("/assets/year-review/ny-branch.png") right center / contain no-repeat;
+    pointer-events: none;
+    opacity: 0.95;
+    z-index: 0;
+}
+
+.yearReviewStripText {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    padding-right: 36px;
+}
+
+.yearReviewStripTitle {
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.yearReviewStripHint {
+    font-size: 11px;
+    opacity: 0.9;
+    line-height: 1.25;
+}
+
+.yearReviewStripCta {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    padding: 5px 10px;
+    white-space: nowrap;
+}
+
 .pointsBody {
     appearance: none;
     width: 100%;
@@ -196,8 +273,8 @@
 }
 
 .pointsValue {
-    font-size: clamp(28px, 3.2vw, 36px);
-    font-weight: 750;
+    font-size: clamp(34px, 4vw, 44px);
+    font-weight: 800;
     letter-spacing: -0.03em;
     line-height: 1;
     color: var(--portal-ink);
@@ -205,8 +282,8 @@
 }
 
 .pointsUnit {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 650;
     color: var(--portal-muted);
 }
 
@@ -217,7 +294,7 @@
 }
 
 .pointsMeta {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--portal-muted);
 }
 

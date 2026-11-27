@@ -13,6 +13,10 @@ import { CurrentUserHeatmap } from "src/pages/reportsPersonal/heatmap/CurrentUse
 import { defaultFilter, defaultPage, defaultPageResponse } from "src/pages/reportsPersonal/lib/constants"
 import { defaultUser } from "src/pages/reports/lib/defaults"
 import { AchievementsApiService } from "src/shared/api/AchievementsApiService"
+import {
+    yearReviewDefaultYear,
+    YearReviewApiService,
+} from "src/shared/api/YearReviewApiService"
 import { CustomerReportApiService } from "src/shared/api/CustomerReportApiService"
 import { InboxApiService, InboxThreadDto } from "src/shared/api/InboxApiService"
 import {
@@ -151,6 +155,15 @@ export const DesktopPage: React.FC = () => {
         staleTime: 60_000,
         enabled: !!user,
     })
+
+    const reviewYear = yearReviewDefaultYear()
+    const { data: yearReview } = useQuery({
+        queryKey: ["year-review", reviewYear],
+        queryFn: () => YearReviewApiService.get(reviewYear),
+        staleTime: 60_000,
+        enabled: !!user,
+    })
+    const yearReviewReady = !!yearReview?.ready
 
     const monthEarned = useMemo(() => {
         if (!achievements?.recent?.length) return 0
@@ -459,7 +472,10 @@ export const DesktopPage: React.FC = () => {
 
                         <div className={classes.splitDivider} aria-hidden />
 
-                        <div className={classes.splitHalf} data-tour-id="desktop-points-half">
+                        <div
+                            className={`${classes.splitHalf} ${yearReviewReady ? classes.pointsHalfFestive : ""}`}
+                            data-tour-id="desktop-points-half"
+                        >
                             <div className={classes.cardHeader}>
                                 <Title order={2} className={classes.cardTitle}>
                                     <FormattedMessage id="pages.desktop.points" />
@@ -468,6 +484,28 @@ export const DesktopPage: React.FC = () => {
                                     <FormattedMessage id="pages.desktop.openPoints" />
                                 </Link>
                             </div>
+                            {yearReviewReady && (
+                                <button
+                                    type="button"
+                                    className={classes.yearReviewStrip}
+                                    onClick={() => navigate(`/my/year-review/${reviewYear}`)}
+                                >
+                                    <span className={classes.yearReviewStripText}>
+                                        <span className={classes.yearReviewStripTitle}>
+                                            <FormattedMessage
+                                                id="pages.desktop.yearReviewTitle"
+                                                values={{ year: reviewYear }}
+                                            />
+                                        </span>
+                                        <span className={classes.yearReviewStripHint}>
+                                            <FormattedMessage id="pages.desktop.yearReviewHint" />
+                                        </span>
+                                    </span>
+                                    <span className={classes.yearReviewStripCta}>
+                                        <FormattedMessage id="pages.desktop.yearReviewOpen" />
+                                    </span>
+                                </button>
+                            )}
                             <button
                                 type="button"
                                 className={classes.pointsBody}
