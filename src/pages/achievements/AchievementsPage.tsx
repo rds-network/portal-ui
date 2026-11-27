@@ -20,6 +20,9 @@ import {
     PointEventDto,
     PointLeaderDto,
 } from "src/shared/api/AchievementsApiService"
+import { yearReviewDefaultYear, YearReviewApiService } from "src/shared/api/YearReviewApiService"
+import { Link } from "react-router"
+import yearReviewClasses from "src/pages/yearReview/YearReviewPage.module.scss"
 import { PointMissionApiService, PointMissionDto } from "src/shared/api/PointMissionApiService"
 import {
     exportLeaderboardCsv,
@@ -239,6 +242,14 @@ const AchievementsPage: React.FC = () => {
         enabled: !!data,
     })
 
+    const reviewYear = yearReviewDefaultYear()
+    const { data: yearReview } = useQuery({
+        queryKey: ["year-review", reviewYear],
+        queryFn: () => YearReviewApiService.get(reviewYear),
+        staleTime: 60_000,
+        enabled: !!data,
+    })
+
     const { data: board, isFetching: boardLoading } = useQuery({
         queryKey: ["achievements", "leaderboard"],
         queryFn: () => AchievementsApiService.leaderboard(100),
@@ -405,6 +416,29 @@ const AchievementsPage: React.FC = () => {
                     <FormattedMessage id="pages.achievements.description" />
                 </Text>
             </div>
+
+            {yearReview?.ready && (
+                <div className={yearReviewClasses.banner}>
+                    <div className={yearReviewClasses.bannerText}>
+                        <div className={yearReviewClasses.bannerTitle}>
+                            <FormattedMessage
+                                id="pages.yearReview.bannerTitle"
+                                values={{ year: reviewYear }}
+                            />
+                        </div>
+                        <div className={yearReviewClasses.bannerHint}>
+                            {yearReview.eligibility.eligible ? (
+                                <FormattedMessage id="pages.yearReview.bannerCertificate" />
+                            ) : (
+                                <FormattedMessage id="pages.yearReview.bannerHint" />
+                            )}
+                        </div>
+                    </div>
+                    <Button component={Link} to={`/my/year-review/${reviewYear}`} color="teal">
+                        <FormattedMessage id="pages.yearReview.open" />
+                    </Button>
+                </div>
+            )}
 
             <div className={classes.heroRow}>
                 <div className={`${classes.heroCard} ${classes.heroBalance}`}>
