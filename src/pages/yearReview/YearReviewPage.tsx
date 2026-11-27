@@ -14,7 +14,10 @@ import {
 import { generateAnnualZahvalnicaPdf } from "src/shared/docs/annualZahvalnicaPdf"
 import { setDocumentTitleByLocale } from "src/shared/hooks/useDocumentTitle"
 import { SuccessNotification } from "src/shared/notifications/SuccessNotification"
+import { getLocalizedName } from "src/shared/utils/getLocalName"
 import classes from "./YearReviewPage.module.scss"
+
+const PROGRAM_FALLBACK = "RADIMO"
 
 const BG = {
     intro: "/assets/year-review/intro-path.png",
@@ -45,7 +48,7 @@ const YearReviewPage = () => {
     })
 
     const [index, setIndex] = useState(0)
-    const slides = useMemo(() => buildSlides(data, year), [data, year])
+    const slides = useMemo(() => buildSlides(data, year, intl.locale), [data, year, intl.locale])
 
     const issueMutation = useMutation({
         mutationFn: async () => {
@@ -184,9 +187,22 @@ const YearReviewPage = () => {
     )
 }
 
-function buildSlides(data: YearReviewDto | null | undefined, year: number): Slide[] {
+function programLabel(stats: YearReviewDto["stats"], locale: string): string {
+    const localized = getLocalizedName(
+        {
+            nameRu: stats.programNameRu ?? undefined,
+            nameEn: stats.programNameEn ?? undefined,
+            nameSr: stats.programNameSr ?? undefined,
+        },
+        locale
+    ).trim()
+    return localized || PROGRAM_FALLBACK
+}
+
+function buildSlides(data: YearReviewDto | null | undefined, year: number, locale: string): Slide[] {
     if (!data) return []
     const s = data.stats
+    const program = programLabel(s, locale)
     const thanks = s.curatorGratitudes + s.managerGratitudes
     const metrics = [
         s.acceptedReports > 0
@@ -215,7 +231,10 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number): Slid
                         {year} / <FormattedMessage id="pages.yearReview.yourResults" />
                     </div>
                     <h2 className={classes.title}>
-                        <FormattedMessage id="pages.yearReview.yourYearInRadimo" />
+                        <FormattedMessage
+                            id="pages.yearReview.yourYearInProgram"
+                            values={{ program }}
+                        />
                     </h2>
                     <p className={classes.lead}>
                         <FormattedMessage
@@ -346,7 +365,10 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number): Slid
                         <FormattedMessage id="pages.yearReview.superBadge" />
                     </div>
                     <h2 className={classes.title}>
-                        <FormattedMessage id="pages.yearReview.superTitle" />
+                        <FormattedMessage
+                            id="pages.yearReview.superTitle"
+                            values={{ program }}
+                        />
                     </h2>
                     {reasons.length > 0 && (
                         <div className={classes.reasons}>

@@ -4,6 +4,10 @@ export type YearReviewStatsDto = {
     year: number
     displayName: string
     username: string
+    programCode?: string | null
+    programNameRu?: string | null
+    programNameEn?: string | null
+    programNameSr?: string | null
     activeWeeks: number
     longestStreak: number
     earnedPoints: number

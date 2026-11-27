@@ -65,7 +65,12 @@ export async function generateAnnualZahvalnicaPdf(params: {
     pdf.setFont("Montserrat-Medium", "normal")
     pdf.setTextColor(26, 43, 72)
     pdf.setFontSize(11)
-    pdf.text("Super-učesnik platforme RADIMO", w / 2, 58, { align: "center" })
+    const programName =
+        stats.programNameSr?.trim() ||
+        stats.programNameRu?.trim() ||
+        stats.programNameEn?.trim() ||
+        "RADIMO"
+    pdf.text(`Super-učesnik programa ${programName}`, w / 2, 58, { align: "center" })
 
     pdf.setFont("Montserrat-Bold", "bold")
     pdf.setFontSize(18)
