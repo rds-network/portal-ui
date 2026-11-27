@@ -45,6 +45,8 @@ const OfficialPotvrdaEditorPage = lazy(() => import("src/pages/documents/Officia
 const TerminationPotvrdaEditorPage = lazy(() => import("src/pages/documents/TerminationPotvrdaEditorPage"))
 const AchievementsPage = lazy(() => import("src/pages/achievements/AchievementsPage"))
 const PointMissionsAdminPage = lazy(() => import("src/pages/missions/PointMissionsAdminPage"))
+const YearReviewPage = lazy(() => import("src/pages/yearReview/YearReviewPage"))
+const MyDocumentsPage = lazy(() => import("src/pages/yearReview/MyDocumentsPage"))
 
 export const routes: RouteProps[] = [
     {
@@ -210,6 +212,14 @@ export const routes: RouteProps[] = [
     {
         path: "/achievements/missions",
         element: <PointMissionsAdminPage />,
+    },
+    {
+        path: "/my/year-review/:year",
+        element: <YearReviewPage />,
+    },
+    {
+        path: "/my/documents",
+        element: <MyDocumentsPage />,
     },
     {
         path: "/curators",

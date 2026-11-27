@@ -10,6 +10,7 @@ const NotFound = lazy(() => import("src/pages/notFound/NotFound"))
 const Unauthorized = lazy(() => import("src/pages/unauthorized/UnauthorizedPage"))
 const ZahvalnicaVerifyPage = lazy(() => import("src/pages/zahvalnica/ZahvalnicaVerifyPage"))
 const VolIdVerifyPage = lazy(() => import("src/pages/volId/VolIdVerifyPage"))
+const YearReviewVerifyPage = lazy(() => import("src/pages/yearReview/YearReviewVerifyPage"))
 
 const RootRouter = () => {
     const { user } = useContext(UserContext)
@@ -22,6 +23,8 @@ const RootRouter = () => {
                     <Route path="/unauthorized" element={<Unauthorized />} />
                     <Route path="/zahvalnica/verify" element={<ZahvalnicaVerifyPage />} />
                     <Route path="/vol-id/verify" element={<VolIdVerifyPage />} />
+                    <Route path="/verify/certificate/:token" element={<YearReviewVerifyPage />} />
+                    <Route path="/verify/certificate" element={<YearReviewVerifyPage />} />
                     {user && <Route path="*" element={<PrivateApp />} />}
                     <Route path="*" element={<PublicApp />} />
                 </Routes>

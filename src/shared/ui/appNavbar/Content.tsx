@@ -71,6 +71,11 @@ export const Content: NavSection[] = [
                 dataTourId: "nav-achievements",
             },
             {
+                label: "navbar.myDocuments",
+                icon: IconFiles,
+                link: "/my/documents",
+            },
+            {
                 label: "navbar.pointMissions",
                 icon: IconTargetArrow,
                 link: "/achievements/missions",
