@@ -29,6 +29,8 @@ export type YearReviewStatsDto = {
     responsesReceived?: number
     responsesSent?: number
     teamsJoined?: number
+    missedWeeks?: number
+    irregularReporting?: boolean
 }
 
 export type YearReviewCriterionProgressDto = {
