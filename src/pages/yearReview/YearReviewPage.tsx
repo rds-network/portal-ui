@@ -34,6 +34,8 @@ const BG = {
     weeks: "/assets/year-review/active-weeks-calendar.png",
     points: "/assets/year-review/earned-points-coins.png",
     rank: "/assets/year-review/ranking-podium.png",
+    curator: "/assets/year-review/curator-team.png",
+    opportunities: "/assets/year-review/opportunities.png",
     super: "/assets/year-review/super-participant-award.png",
 } as const
 
@@ -48,6 +50,7 @@ type Slide = {
     key: string
     background: string
     content: ReactNode
+    contentClassName?: string
     showDownload?: boolean
 }
 
@@ -164,7 +167,9 @@ const YearReviewPage = () => {
                         draggable={false}
                     />
                     <div className={classes.fadeTop} />
-                    <div className={`${classes.content} ${classes.contentTop} ${classes.readable}`}>
+                    <div
+                        className={`${classes.content} ${classes.contentTop} ${classes.readable} ${slide.contentClassName ?? ""}`}
+                    >
                         {slide.content}
                     </div>
                     <YearReviewConfetti burstKey={burstKey} />
@@ -364,6 +369,8 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
         {
             key: "rank",
             background: BG.rank,
+            contentClassName:
+                s.bestRank != null && s.bestRank > 0 ? undefined : classes.contentCenter,
             content:
                 s.bestRank != null && s.bestRank > 0 ? (
                     <>
@@ -382,19 +389,98 @@ function buildSlides(data: YearReviewDto | null | undefined, year: number, local
                     </>
                 ) : (
                     <>
-                        <div className={classes.badge}>
-                            <FormattedMessage id="pages.yearReview.bestResult" />
-                        </div>
-                        <h2 className={classes.title}>
+                        <h2 className={classes.title} style={{ fontSize: "clamp(2rem, 8vw, 2.6rem)" }}>
                             <FormattedMessage id="pages.yearReview.rankMissingTitle" />
                         </h2>
-                        <p className={classes.lead}>
+                        <p className={classes.lead} style={{ fontSize: "1.2rem" }}>
                             <FormattedMessage id="pages.yearReview.rankMissingBody" />
                         </p>
                     </>
                 ),
         },
     ]
+
+    const directions = s.directionsCount ?? 0
+    const delegates = s.delegatesCount ?? 0
+    const reviewed = s.reportsReviewed ?? 0
+    const helped = s.peopleHelped ?? 0
+    if (s.isTeamBuilder || directions > 0 || delegates > 0 || reviewed > 0 || helped > 0) {
+        slides.push({
+            key: "team",
+            background: BG.curator,
+            contentClassName: classes.contentDark,
+            content: (
+                <>
+                    <h2 className={`${classes.title} ${classes.heroOnDark}`}>
+                        <FormattedMessage id="pages.yearReview.teamBuilderTitle" />
+                    </h2>
+                    <div className={classes.roleGrid}>
+                        {(
+                            [
+                                [directions, "pages.yearReview.directions"],
+                                [delegates, "pages.yearReview.delegates"],
+                                [reviewed, "pages.yearReview.reportsReviewed"],
+                                [helped, "pages.yearReview.peopleHelped"],
+                            ] as const
+                        )
+                            .filter(([value]) => value > 0)
+                            .map(([value, labelId]) => (
+                                <div key={labelId} className={classes.roleCard}>
+                                    <div className={classes.roleValue}>{value}</div>
+                                    <div className={classes.roleLabel}>
+                                        <FormattedMessage id={labelId} />
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
+                    <p className={`${classes.lead} ${classes.hintOnDark}`}>
+                        <FormattedMessage id="pages.yearReview.teamBuilderHint" />
+                    </p>
+                </>
+            ),
+        })
+    }
+
+    const ideas = s.ideasCreated ?? 0
+    const respIn = s.responsesReceived ?? 0
+    const respOut = s.responsesSent ?? 0
+    const teams = s.teamsJoined ?? 0
+    if (ideas > 0 || respIn > 0 || respOut > 0 || teams > 0) {
+        slides.push({
+            key: "opportunities",
+            background: BG.opportunities,
+            contentClassName: classes.contentDark,
+            content: (
+                <>
+                    <h2 className={`${classes.title} ${classes.heroOnDark}`}>
+                        <FormattedMessage id="pages.yearReview.opportunitiesTitle" />
+                    </h2>
+                    <div className={classes.roleGrid}>
+                        {(
+                            [
+                                [ideas, "pages.yearReview.ideasCreated"],
+                                [respIn, "pages.yearReview.responsesReceived"],
+                                [respOut, "pages.yearReview.responsesSent"],
+                                [teams, "pages.yearReview.teamsJoined"],
+                            ] as const
+                        )
+                            .filter(([value]) => value > 0)
+                            .map(([value, labelId]) => (
+                                <div key={labelId} className={classes.roleCard}>
+                                    <div className={classes.roleValue}>{value}</div>
+                                    <div className={classes.roleLabel}>
+                                        <FormattedMessage id={labelId} />
+                                    </div>
+                                </div>
+                            ))}
+                    </div>
+                    <p className={`${classes.lead} ${classes.hintOnDark}`}>
+                        <FormattedMessage id="pages.yearReview.opportunitiesHint" />
+                    </p>
+                </>
+            ),
+        })
+    }
 
     if (data.eligibility.eligible || data.certificate) {
         const reasons =
