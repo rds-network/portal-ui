@@ -49,6 +49,23 @@ import { locales } from "./lib/locales"
 import classes from "./UserList.module.scss"
 import { UserRow } from "src/pages/users/userRow/UserRow"
 
+const FILTER_KEY = "userListFilterState"
+
+type SavedUserListFilter = {
+    search?: string
+    program?: string | null
+    project?: string | null
+}
+
+function readSavedFilters(): SavedUserListFilter | null {
+    try {
+        const raw = localStorage.getItem(FILTER_KEY)
+        return raw ? (JSON.parse(raw) as SavedUserListFilter) : null
+    } catch {
+        return null
+    }
+}
+
 export const UserList = () => {
     setDocumentTitleByLocale(locales.title)
 
@@ -57,12 +74,19 @@ export const UserList = () => {
     const queryClient = useQueryClient()
     const [searchParams, setSearchParams] = useSearchParams()
 
-    const [search, setSearch] = useState(searchParams.get("search") || "")
+    const hasReturnState = !!localStorage.getItem("userListState")
+    const saved = !searchParams.toString() && !hasReturnState ? readSavedFilters() : null
+
+    const [search, setSearch] = useState(searchParams.get("search") || saved?.search || "")
     const [debouncedSearch, setDebouncedSearch] = useState(search)
     const [drawerOpened, setDrawerOpened] = useState(false)
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
-    const [selectedProgram, setSelectedProgram] = useState<string | null>(searchParams.get("program") || null)
-    const [selectedProject, setSelectedProject] = useState<string | null>(searchParams.get("project") || null)
+    const [selectedProgram, setSelectedProgram] = useState<string | null>(
+        searchParams.get("program") || saved?.program || null
+    )
+    const [selectedProject, setSelectedProject] = useState<string | null>(
+        searchParams.get("project") || saved?.project || null
+    )
     const showDeactivated = searchParams.get("deactivated") === "1"
     const onlyReportBlocked = searchParams.get("reportBlocked") === "1"
 
@@ -327,6 +351,35 @@ export const UserList = () => {
         }
     }, [isMobile])
 
+    useEffect(() => {
+        localStorage.setItem(
+            FILTER_KEY,
+            JSON.stringify({
+                search: debouncedSearch,
+                program: selectedProgram,
+                project: selectedProject,
+            })
+        )
+    }, [debouncedSearch, selectedProgram, selectedProject])
+
+    useEffect(() => {
+        if (!programs.length && !projects.length) return
+        if (selectedProgram && selectedProgram !== NO_PROGRAM_CODE) {
+            const exists = programs.some((p) => p.code.toUpperCase() === selectedProgram.toUpperCase())
+            if (!exists) {
+                setSelectedProgram(null)
+                setSelectedProject(null)
+                updateUrlParams(debouncedSearch, null, null, 0, showDeactivated)
+            }
+        } else if (selectedProject && selectedProject !== NO_PROJECT_CODE) {
+            const exists = projects.some((p) => p.code === selectedProject)
+            if (!exists) {
+                setSelectedProject(null)
+                updateUrlParams(debouncedSearch, selectedProgram, null, 0, showDeactivated)
+            }
+        }
+    }, [programs, projects])
+
     // Эффект для скролла при смене страницы в мобильной версии
     useEffect(() => {
         if (isMobile && pageRequest.pageNumber !== undefined) {
@@ -518,6 +571,7 @@ export const UserList = () => {
     }, [debouncedSearch, selectedProgram, selectedProject, showDeactivated, onlyReportBlocked])
 
     const resetFilters = () => {
+        localStorage.removeItem(FILTER_KEY)
         setSearch("")
         setDebouncedSearch("")
         setSelectedProgram(null)
