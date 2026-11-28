@@ -629,6 +629,18 @@
             "absencesOverLimit": "Više od 6 izostanaka",
             "dissolutionQueuedDone": "Dodat u red za raskid",
             "dissolutionDequeuedDone": "Skinut sa reda za raskid",
+            "deactivateModal": {
+                "title": "Deaktivacija volontera",
+                "city": "Naseljeno mesto",
+                "mupName": "Naziv MUP",
+                "mupEmail": "Email MUP",
+                "mupNamePlaceholder": "Unesite naziv MUP",
+                "mupEmailPlaceholder": "Email za obaveštenje MUP-a",
+                "deactivateOnly": "Deaktiviraj bez obaveštenja",
+                "deactivateAndDownload": "Deaktiviraj i preuzmi obaveštenje",
+                "deactivateAndSend": "Deaktiviraj i pošalji obaveštenje",
+                "sentSuccess": "Obaveštenje poslato MUP-u"
+            },
             "watchlist": "crna lista",
             "curator": "Kustos: {programs}",
             "curatorGratitude": "Zahvalnica kuratora",
