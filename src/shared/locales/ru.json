@@ -1041,7 +1041,14 @@
                 "reportBlocked": "Со стопом на сдачу: {count}",
                 "programs": "По программам",
                 "projects": "По проектам"
-            }
+            },
+            "export-button": "Экспорт",
+            "export-col-full-name": "ФИО",
+            "export-col-contract-start": "Дата начала договора",
+            "export-col-contract-end": "Дата окончания договора",
+            "export-col-address": "Адрес",
+            "export-col-email": "Email",
+            "export-error": "Не удалось выгрузить список волонтёров"
         },
         "playgrounds": {
             "title": "Отчет по площадке",

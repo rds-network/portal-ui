@@ -1041,7 +1041,14 @@
                 "reportBlocked": "Reporting on hold: {count}",
                 "programs": "By programs",
                 "projects": "By projects"
-            }
+            },
+            "export-button": "Export",
+            "export-col-full-name": "Full name",
+            "export-col-contract-start": "Contract start date",
+            "export-col-contract-end": "Contract end date",
+            "export-col-address": "Address",
+            "export-col-email": "Email",
+            "export-error": "Failed to export volunteers list"
         },
         "playgrounds": {
             "title": "Playgrounds report",

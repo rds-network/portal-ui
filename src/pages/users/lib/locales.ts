@@ -64,4 +64,11 @@ export const locales = {
     dashboardReportBlocked: "pages.user-list.dashboard.reportBlocked",
     dashboardPrograms: "pages.user-list.dashboard.programs",
     dashboardProjects: "pages.user-list.dashboard.projects",
+    exportButton: "pages.user-list.export-button",
+    exportColFullName: "pages.user-list.export-col-full-name",
+    exportColContractStart: "pages.user-list.export-col-contract-start",
+    exportColContractEnd: "pages.user-list.export-col-contract-end",
+    exportColAddress: "pages.user-list.export-col-address",
+    exportColEmail: "pages.user-list.export-col-email",
+    exportError: "pages.user-list.export-error",
 }

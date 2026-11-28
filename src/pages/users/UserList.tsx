@@ -15,7 +15,15 @@ import {
 } from "@mantine/core"
 import { useMediaQuery } from "@mantine/hooks"
 import { ContractDto, PageRequest, UserSearchFilter } from "@rds-network/portal-api-axios"
-import { IconFilterEdit, IconFilterOff, IconPencil, IconPlus, IconSearch, IconUfo } from "@tabler/icons-react"
+import {
+    IconDownload,
+    IconFilterEdit,
+    IconFilterOff,
+    IconPencil,
+    IconPlus,
+    IconSearch,
+    IconUfo,
+} from "@tabler/icons-react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import dayjs from "dayjs"
 import React, { useContext, useEffect, useState } from "react"
@@ -59,6 +67,7 @@ export const UserList = () => {
 
     const [search, setSearch] = useState(searchParams.get("search") || "")
     const [debouncedSearch, setDebouncedSearch] = useState(search)
+    const [exportLoading, setExportLoading] = useState(false)
     const [drawerOpened, setDrawerOpened] = useState(false)
     const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
     const [selectedProgram, setSelectedProgram] = useState<string | null>(searchParams.get("program") || null)
@@ -286,6 +295,70 @@ export const UserList = () => {
         },
     })
 
+    const handleExport = async () => {
+        setExportLoading(true)
+        try {
+            let project: string | undefined = undefined
+            if (selectedProject) {
+                project = selectedProject === NO_PROJECT_CODE ? "" : selectedProject
+            }
+            const exportFilter = {
+                ...filter,
+                program: selectedProgram === NO_PROGRAM_CODE ? "" : selectedProgram,
+                project,
+            }
+            const response = await UserApiService.searchUsers(
+                debouncedSearch,
+                { pageNumber: 0, pageSize: 10000, sort: defaultPage.sort },
+                exportFilter
+            )
+            const users = response.data.content || []
+
+            const headers = [
+                intl.formatMessage({ id: locales.exportColFullName }),
+                intl.formatMessage({ id: locales.exportColContractStart }),
+                intl.formatMessage({ id: locales.exportColContractEnd }),
+                intl.formatMessage({ id: locales.exportColAddress }),
+                intl.formatMessage({ id: locales.exportColEmail }),
+            ]
+            const escape = (val: string) => `"${val.replace(/"/g, '""')}"`
+            const fmtDate = (d?: string) => (d ? dayjs(d).format("DD.MM.YYYY") : "")
+            const csvLines = [
+                headers.map(escape).join(","),
+                ...users.map((u) => {
+                    const contract = getLastContract(u.contracts)
+                    return [
+                        u.fullName,
+                        fmtDate(contract?.startDate),
+                        fmtDate(contract?.endDate),
+                        u.address ?? "",
+                        u.email,
+                    ]
+                        .map(escape)
+                        .join(",")
+                }),
+            ]
+            const csv = "﻿" + csvLines.join("\r\n")
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = `volunteers_${dayjs().format("DD-MM-YYYY")}.csv`
+            a.click()
+            URL.revokeObjectURL(url)
+        } catch {
+            notifications.show(
+                ErrorNotification(
+                    <Text size="sm">
+                        <FormattedMessage id={locales.exportError} />
+                    </Text>
+                )
+            )
+        } finally {
+            setExportLoading(false)
+        }
+    }
+
     const { mutate: updateContracts } = useMutation({
         mutationFn: async ({ userId, contracts }: { userId: number; contracts: ContractDto[] }) => {
             return UserApiService.updateContracts(userId, contracts)
@@ -397,13 +470,7 @@ export const UserList = () => {
 
     // Карточки для мобильной версии
     const cards = content.map((user) => {
-        const lastContract =
-            Array.isArray(user.contracts) && user.contracts.length > 0
-                ? user.contracts.reduce(
-                      (max, c) => (new Date(c.endDate) > new Date(max.endDate) ? c : max),
-                      user.contracts[0]
-                  )
-                : undefined
+        const lastContract = getLastContract(user.contracts)
         return (
             <Paper
                 key={user.id}
@@ -578,6 +645,17 @@ export const UserList = () => {
                 className={classes.deactivatedSwitch}
             />
             <Button
+                variant="light"
+                size="compact-sm"
+                radius="md"
+                leftSection={<IconDownload size={16} aria-hidden="true" />}
+                loading={exportLoading}
+                onClick={handleExport}
+                className={classes.exportButton}
+            >
+                <FormattedMessage id={locales.exportButton} />
+            </Button>
+            <Button
                 variant="subtle"
                 size="compact-sm"
                 radius="md"
@@ -747,14 +825,14 @@ export const UserList = () => {
     )
 }
 
+const getLastContract = (contracts: ContractDto[] | undefined): ContractDto | undefined => {
+    if (!contracts || contracts.length < 1) return undefined
+    return contracts.reduce((max, c) => (new Date(c.endDate) > new Date(max.endDate) ? c : max), contracts[0])
+}
+
 const getLastContractDate = (contracts: ContractDto[] | undefined): string => {
-    if (!contracts || contracts.length < 1) {
-        return ""
-    }
-    const lastContract = contracts.reduce((max, current) => {
-        return new Date(current.endDate) > new Date(max.endDate) ? current : max
-    }, contracts[0])
-    return dayjs(lastContract.endDate).format("DD MMM YYYY")
+    const last = getLastContract(contracts)
+    return last ? dayjs(last.endDate).format("DD MMM YYYY") : ""
 }
 
 export default UserList
